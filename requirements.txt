@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-dotenv
+soundfile
+numpy
+python-multipart
+pydub
+torch
+torchaudio
+# huggingface_hub is required for download_models logic if used, but we use pre-downloaded

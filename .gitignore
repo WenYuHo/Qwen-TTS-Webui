@@ -1,0 +1,28 @@
+# Environment
+.venv/
+venv/
+env/
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Studio Data
+uploads/
+/src/bgm/
+*.wav
+*.mp3
+
+# IDEs
+.idea/
+.vscode/
+
+# System
+desktop.ini
+.DS_Store

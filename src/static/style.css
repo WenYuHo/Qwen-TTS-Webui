@@ -1,0 +1,291 @@
+:root {
+    --bg-dark: #0f0f12;
+    --bg-card: #1a1a1f;
+    --border: #2e2e38;
+    --accent: #6366f1;
+    --accent-hover: #4f46e5;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --hover: #26262e;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    overflow: hidden;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: 280px 1fr 300px;
+    width: 100%;
+    height: 100vh;
+}
+
+/* Common Column Styles */
+.column {
+    background: var(--bg-dark);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+}
+
+.column:last-child {
+    border-right: none;
+    border-left: 1px solid var(--border);
+}
+
+.column-main {
+    background: #09090b;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+/* Header Styles */
+.header,
+.canvas-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.canvas-header {
+    background: var(--bg-dark);
+}
+
+h1,
+h2,
+h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Story Canvas Header */
+.header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Scroll Area */
+.scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+/* Speaker Cards */
+.speaker-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.speaker-card:hover {
+    border-color: var(--accent);
+    background: var(--hover);
+}
+
+.speaker-role {
+    display: block;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+}
+
+/* Buttons */
+.btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+    text-align: center;
+}
+
+.btn:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--border);
+}
+
+.btn-sm {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+}
+
+.btn-danger {
+    color: #f55 !important;
+    border-color: #522 !important;
+}
+
+/* Editor */
+#script-editor {
+    width: 100%;
+    height: calc(100vh - 250px);
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-family: 'Fira Code', monospace;
+    font-size: 1rem;
+    line-height: 1.6;
+    padding: 24px;
+    resize: none;
+    outline: none;
+}
+
+/* Story Blocks */
+#blocks-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+}
+
+.story-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.story-block:hover {
+    border-color: var(--accent);
+}
+
+.story-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.story-block-role {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--accent);
+}
+
+.story-block-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.story-block-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.waveform-placeholder {
+    height: 30px;
+    background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: wave-slide 2s linear infinite;
+    opacity: 0.2;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+@keyframes wave-slide {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+
+/* Status Indicators */
+.status-indicator {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+}
+
+.status-idle {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.status-generating {
+    background: var(--hover);
+    color: var(--accent);
+    animation: pulse 1.5s infinite;
+}
+
+.status-ready {
+    background: rgba(0, 255, 100, 0.2);
+    color: #0f6;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.6;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}

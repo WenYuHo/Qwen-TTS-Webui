@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qwen-TTS Podcast Studio</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="dashboard">
+        <!-- Column 1: Speaker Library -->
+        <div class="column">
+            <div class="header">
+                <h2>Speaker Library</h2>
+            </div>
+            <div class="scroll-area" id="speakers-list">
+                <!-- Dynamic cards -->
+            </div>
+            <div style="padding: 16px;">
+                <button class="btn btn-secondary" onclick="addSpeaker()">+ Add Speaker</button>
+            </div>
+        </div>
+
+        <!-- Column 2: Story Canvas -->
+        <div class="column-main">
+            <div class="canvas-header">
+                <h1>Story Canvas</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="toggleView('draft')">Draft</button>
+                    <button class="btn btn-secondary" onclick="toggleView('prod')">Production</button>
+                    <button class="btn btn-primary" onclick="promoteToProduction()">Promote</button>
+                    <button class="btn btn-secondary" id="batch-btn" onclick="batchSynthesize()">Batch Synth</button>
+                </div>
+            </div>
+
+            <div id="draft-view">
+                <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 8px;">Format:
+                    <code>[Role]: Text to say...</code>
+                </p>
+                <textarea id="script-editor" placeholder="[Narrator]: Welcome to the show.
+[Guest]: Glad to be here!"></textarea>
+            </div>
+
+            <div id="prod-view" style="display:none;">
+                <div id="blocks-container" class="scroll-area">
+                    <!-- Dynamic Blocks Here -->
+                    <div class="empty-state">
+                        <p>No production blocks yet.</p>
+                        <p style="font-size:0.8rem;">Write in Draft mode then 'Promote' it.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: auto; padding: 16px; border-top: 1px solid var(--border);">
+                <div class="status-msg" id="status-msg" style="margin-bottom: 12px;">Ready</div>
+                <audio id="audio-player" controls style="width: 100%; border-radius: 8px;"></audio>
+            </div>
+        </div>
+
+        <!-- Column 3: Production -->
+        <div class="column">
+            <div class="header">
+                <h2>Production</h2>
+            </div>
+            <div class="production-controls">
+                <div class="control-group">
+                    <span class="label">Atmospheric Mood (BGM)</span>
+                    <select class="btn btn-secondary" id="bgm-select" style="text-align: left;">
+                        <option value="">None</option>
+                        <option value="mystery">Ambient Mystery</option>
+                        <option value="tech">Tech Newsroom</option>
+                        <option value="joy">Joyful Morning</option>
+                        <option value="rain">Soft Rain</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <button class="btn" id="generate-btn" onclick="generatePodcast()"
+                        style="padding: 16px; font-size: 1rem;">
+                        Produce Final Podcast
+                    </button>
+                </div>
+
+                <div id="progress-container" style="display: none;">
+                    <span class="label">Stitching segments...</span>
+                    <!-- Progress bar could go here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice Studio Modal (Hidden by default) -->
+    <div id="voice-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:100; align-items:center; justify-content:center;">
+        <div
+            style="background:var(--bg-card); padding:24px; border-radius:12px; width:400px; border:1px solid var(--border);">
+            <h2 id="modal-title">Create Voice</h2>
+            <div id="modal-content"></div>
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button class="btn" id="modal-save">Save</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>
