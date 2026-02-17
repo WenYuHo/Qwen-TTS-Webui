@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Tokenizer and Generation Stability Fixes**
+- [x] **Track: Tokenizer and Generation Stability Fixes**
   *Link: [./tracks/tokenizer_fixes_20260216/](./tracks/tokenizer_fixes_20260216/)*
