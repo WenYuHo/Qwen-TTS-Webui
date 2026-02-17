@@ -115,7 +115,18 @@ class Qwen3TTSModel:
                 f"AutoModel returned {type(model)}, expected Qwen3TTSForConditionalGeneration. "
             )
 
-        processor = AutoProcessor.from_pretrained(pretrained_model_name_or_path, fix_mistral_regex=True,)
+        # Map pad_token_id from tts_pad_token_id to satisfy transformers requirements
+        if hasattr(model.config, "tts_pad_token_id") and (not hasattr(model.config, "pad_token_id") or model.config.pad_token_id is None):
+            model.config.pad_token_id = model.config.tts_pad_token_id
+
+        try:
+            # Directly load tokenizer to ensure fix_mistral_regex is applied
+            from transformers import AutoTokenizer
+            tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path, fix_mistral_regex=True)
+            processor = Qwen3TTSProcessor(tokenizer=tokenizer)
+        except Exception:
+            # Fallback
+            processor = AutoProcessor.from_pretrained(pretrained_model_name_or_path)
 
         generate_defaults = model.generate_config
         return cls(model=model, processor=processor, generate_defaults=generate_defaults)

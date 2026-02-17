@@ -23,6 +23,12 @@ def test_root_serves_index():
 
 
 def test_health_endpoint():
+    # Ensure mock returns the expected structure
+    mock_engine.get_system_status.return_value = {
+        "status": "ok",
+        "models": {"models_dir_exists": True, "found_models": []},
+        "device": {"type": "cpu", "cuda_available": False}
+    }
     response = client.get("/api/health")
     assert response.status_code == 200
     data = response.json()
