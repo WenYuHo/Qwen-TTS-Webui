@@ -18,6 +18,8 @@ A professional, standalone web suite designed for high-fidelity audio production
 - **Batch Synthesis:** One-click generation for entire scripts with automated speaker assignment.
 - **Studio Diagnostics:** Robust health checks and centralized logging for reliable model monitoring and troubleshooting.
 - **High-Precision Tokenization:** Optimized tokenizer handling with custom regex fixes for superior speech consistency.
+- **Real-Time Production Monitoring:** Live feedback on synthesis tasks with progress bars and asynchronous execution tracking.
+- **Modern Responsive Interface:** A professional, redesigned UI optimized for non-blocking operations and high-fidelity storytelling.
 - **Timeline Recovery:** Robust autosave functionality to preserve work across sessions.
 
 ## Problem Statement

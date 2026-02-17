@@ -10,6 +10,8 @@
   - **Models:** Qwen-TTS for state-of-the-art text-to-speech synthesis.
 - **Configuration:** python-dotenv for `.env`-based environment variable management.
 - **Logging:** Centralized Python logging with `RotatingFileHandler` for automated log management.
+- **Task Management:** Custom asynchronous `TaskManager` using FastAPI BackgroundTasks for non-blocking inference.
+- **Performance Monitoring:** `psutil`-based system resource tracking (CPU/MEM utilization).
 
 ## Frontend
 - **Frameworks:** Vanilla JavaScript (ES6+), CSS3 (Glassmorphism), HTML5.
