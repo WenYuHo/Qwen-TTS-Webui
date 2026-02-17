@@ -16,6 +16,7 @@ A professional, standalone web suite designed for high-fidelity audio production
 - **Voice Studio:** Advanced cloning and description-based voice design for unique character creation.
 - **Production Timeline:** A granular, blocks-based interface for managing complex dialogues and BGM mixing.
 - **Batch Synthesis:** One-click generation for entire scripts with automated speaker assignment.
+- **Studio Diagnostics:** Robust health checks and centralized logging for reliable model monitoring and troubleshooting.
 - **Timeline Recovery:** Robust autosave functionality to preserve work across sessions.
 
 ## Problem Statement
