@@ -12,14 +12,16 @@
     <div class="dashboard">
         <!-- Column 1: Speaker Library -->
         <div class="column">
-            <div class="header">
+            <div class="header" style="display:flex; justify-content:space-between; align-items:center;">
                 <h2>Speaker Library</h2>
+                <a href="/static/studio.html" class="btn btn-secondary btn-sm" style="text-decoration:none">Studio</a>
             </div>
             <div class="scroll-area" id="speakers-list">
                 <!-- Dynamic cards -->
             </div>
             <div style="padding: 16px;">
-                <button class="btn btn-secondary" onclick="addSpeaker()">+ Add Speaker</button>
+                <a href="/static/studio.html" class="btn btn-secondary"
+                    style="display:block; text-align:center; text-decoration:none">+ Create Voice</a>
             </div>
         </div>
 
@@ -28,6 +30,14 @@
             <div class="canvas-header">
                 <h1>Story Canvas</h1>
                 <div class="header-actions">
+                    <select id="project-select" class="btn btn-secondary" style="margin-right:0px; max-width: 150px;">
+                        <option value="">(New Project)</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="loadProject()">Load</button>
+                    <button class="btn btn-secondary" onclick="saveProject()">Save</button>
+                    <div
+                        style="width:1px; background:var(--border); height:24px; margin:0 8px; display:inline-block; vertical-align:middle;">
+                    </div>
                     <button class="btn btn-secondary" onclick="toggleView('draft')">Draft</button>
                     <button class="btn btn-secondary" onclick="toggleView('prod')">Production</button>
                     <button class="btn btn-primary" onclick="promoteToProduction()">Promote</button>
@@ -44,6 +54,13 @@
             </div>
 
             <div id="prod-view" style="display:none;">
+                <!-- Timeline UI -->
+                <div id="timeline-container"
+                    style="background:var(--bg-card); padding:16px; margin-bottom:16px; border-radius:8px; border:1px solid var(--border);">
+                    <div id="waveform" style="margin-bottom: 10px;"></div>
+                    <div id="waveform-timeline"></div>
+                </div>
+
                 <div id="blocks-container" class="scroll-area">
                     <!-- Dynamic Blocks Here -->
                     <div class="empty-state">
@@ -52,6 +69,14 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Scripts -->
+            <script src="/static/libs/wavesurfer.min.js"></script>
+            <script src="/static/libs/wavesurfer-regions.min.js"></script>
+            <script src="/static/libs/wavesurfer-timeline.min.js"></script>
+            <script src="/static/shared.js"></script>
+            <script src="/static/timeline.js"></script>
+            <script src="/static/app.js"></script>
 
             <div style="margin-top: auto; padding: 16px; border-top: 1px solid var(--border);">
                 <div class="status-msg" id="status-msg" style="margin-bottom: 12px;">Ready</div>
@@ -105,7 +130,10 @@
         </div>
     </div>
 
-    <script src="/static/app.js"></script>
-</body>
+        <div class="dashboard">
 
-</html>
+            <!-- Column 1: Speaker Library -->
+
+            <div class="column">
+
+    
