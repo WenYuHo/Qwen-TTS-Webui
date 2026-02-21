@@ -492,9 +492,12 @@ class Qwen3TTSTalkerRotaryEmbedding(nn.Module):
         super().__init__()
         # BC: "rope_type" was originally "type"
         if hasattr(config, "rope_scaling") and config.rope_scaling is not None:
-            self.rope_type = config.rope_scaling.get("rope_type", config.rope_scaling.get("type"))
+            self.rope_type = config.rope_scaling.get("rope_type", config.rope_scaling.get("type", "linear"))
+            if self.rope_type == "default": self.rope_type = "linear"
+            if isinstance(config.rope_scaling, dict) and "factor" not in config.rope_scaling: config.rope_scaling["factor"] = 1.0
         else:
-            self.rope_type = "default"
+            self.rope_type = "linear"
+            config.rope_scaling = {"rope_type": "linear", "factor": 1.0}
         self.max_seq_len_cached = config.max_position_embeddings
         self.original_max_seq_len = config.max_position_embeddings
 
@@ -527,9 +530,12 @@ class Qwen3TTSRotaryEmbedding(nn.Module):
         super().__init__()
         # BC: "rope_type" was originally "type"
         if hasattr(config, "rope_scaling") and config.rope_scaling is not None:
-            self.rope_type = config.rope_scaling.get("rope_type", config.rope_scaling.get("type"))
+            self.rope_type = config.rope_scaling.get("rope_type", config.rope_scaling.get("type", "linear"))
+            if self.rope_type == "default": self.rope_type = "linear"
+            if isinstance(config.rope_scaling, dict) and "factor" not in config.rope_scaling: config.rope_scaling["factor"] = 1.0
         else:
-            self.rope_type = "default"
+            self.rope_type = "linear"
+            config.rope_scaling = {"rope_type": "linear", "factor": 1.0}
         self.max_seq_len_cached = config.max_position_embeddings
         self.original_max_seq_len = config.max_position_embeddings
 
@@ -982,7 +988,7 @@ class Qwen3TTSTalkerCodePredictorModel(Qwen3TTSPreTrainedModel):
 
     def __init__(self, config: Qwen3TTSTalkerCodePredictorConfig, embedding_dim: int):
         super().__init__(config)
-        self.padding_idx = config.pad_token_id
+        self.padding_idx = getattr(config, "pad_token_id", None)
         self.vocab_size = config.vocab_size
         self.layers = nn.ModuleList(
             [Qwen3TTSDecoderLayer(config, layer_idx) for layer_idx in range(config.num_hidden_layers)]
@@ -1394,7 +1400,7 @@ class Qwen3TTSTalkerModel(Qwen3TTSTalkerTextPreTrainedModel):
 
     def __init__(self, config):
         super().__init__(config)
-        self.padding_idx = config.pad_token_id
+        self.padding_idx = getattr(config, "pad_token_id", None)
         self.vocab_size = config.vocab_size
         self.layers = nn.ModuleList(
             [Qwen3TTSTalkerDecoderLayer(config, layer_idx) for layer_idx in range(config.num_hidden_layers)]

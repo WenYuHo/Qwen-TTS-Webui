@@ -1,8 +1,0 @@
-{
-  "track_id": "core_stability_20260216",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-02-16T22:11:00Z",
-  "updated_at": "2026-02-16T22:11:00Z",
-  "description": "Resolve model inference issues and implement a robust logging/diagnostics system to troubleshoot synthesis failures."
-}

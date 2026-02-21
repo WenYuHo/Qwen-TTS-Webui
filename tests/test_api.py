@@ -116,14 +116,25 @@ def test_podcast_empty_script():
 
 
 def test_generate_segment_calls_engine():
-    """Verify that generate_segment delegates to the engine"""
-    dummy_wav = np.zeros(24000, dtype=np.float32)
-    mock_engine.generate_segment.return_value = (dummy_wav, 24000)
-
+    """Verify that generate_segment returns a task ID"""
     payload = {
-        "profiles": [{"role": "Ryan", "type": "preset", "value": "Ryan"}],
-        "script": [{"role": "Ryan", "text": "Hello"}]
+        "profiles": [{"role": "ryan", "type": "preset", "value": "ryan"}],
+        "script": [{"role": "ryan", "text": "Hello"}]
     }
     response = client.post("/api/generate/segment", json=payload)
     assert response.status_code == 200
-    assert response.headers["content-type"] == "audio/wav"
+    data = response.json()
+    assert "task_id" in data
+    assert data["status"] == "pending"
+
+def test_task_status_endpoint():
+    """Verify task status can be retrieved"""
+    # Create a task manually for testing
+    from backend.task_manager import task_manager
+    tid = task_manager.create_task("test_task")
+    
+    response = client.get(f"/api/tasks/{tid}")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == tid
+    assert data["status"] == "pending"

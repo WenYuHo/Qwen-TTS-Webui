@@ -1,0 +1,1995 @@
+2026-02-16 22:45:27,603 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,604 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,608 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,608 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,608 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,608 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,609 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,609 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,609 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,613 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 22:45:27,613 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 22:45:27,613 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 22:45:27,615 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 22:45:27,615 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 22:45:27,615 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 22:45:27,631 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,631 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,631 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,631 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,632 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,632 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,632 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,632 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,639 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='2652426902160'>
+2026-02-16 22:45:27,639 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='2652426902160'>
+2026-02-16 22:45:27,639 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='2652426902160'>
+2026-02-16 22:45:27,639 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='2652426902160'>
+2026-02-16 22:45:27,645 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,645 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,645 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,645 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,645 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,646 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,646 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,646 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,646 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,646 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,650 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2652426905184'>
+2026-02-16 22:45:27,650 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2652426905184'>
+2026-02-16 22:45:27,650 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2652426905184'>
+2026-02-16 22:45:27,650 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2652426905184'>
+2026-02-16 22:45:27,650 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2652426905184'>
+2026-02-16 22:45:27,655 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,655 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,655 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,655 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,655 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,655 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,655 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,655 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,655 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,655 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,655 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,655 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,659 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,659 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,659 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,659 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,659 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,659 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,659 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:45:27,660 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,660 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,660 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,660 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,660 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,660 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,660 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:45:27,666 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2652426908544'>
+2026-02-16 22:45:27,666 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2652426908544'>
+2026-02-16 22:45:27,666 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2652426908544'>
+2026-02-16 22:45:27,666 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2652426908544'>
+2026-02-16 22:45:27,666 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2652426908544'>
+2026-02-16 22:45:27,666 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2652426908544'>
+2026-02-16 22:45:27,666 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2652426908544'>
+2026-02-16 22:45:27,666 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2652426908544'>
+2026-02-16 22:45:27,666 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2652426908544'>
+2026-02-16 22:45:27,666 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2652426908544'>
+2026-02-16 22:45:27,666 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2652426908544'>
+2026-02-16 22:45:27,666 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2652426908544'>
+2026-02-16 22:45:27,666 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2652426908544'>
+2026-02-16 22:45:27,666 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2652426908544'>
+2026-02-16 22:46:48,443 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:46:48,443 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:46:48,443 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 22:46:48,443 - studio - INFO - CUDA available: False
+2026-02-16 22:46:48,443 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 22:46:48,469 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 22:46:48,470 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 22:51:38,658 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,658 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,658 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 22:51:38,658 - studio - INFO - CUDA available: False
+2026-02-16 22:51:38,658 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 22:51:38,905 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,905 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,905 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,905 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,907 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,907 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,907 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,907 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 22:51:38,907 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 22:51:38,907 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 22:51:38,907 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 22:51:38,907 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 22:51:38,907 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 22:51:38,910 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,910 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,910 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,910 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,911 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,911 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,911 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,911 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,912 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='1447630205152'>
+2026-02-16 22:51:38,912 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='1447630205152'>
+2026-02-16 22:51:38,912 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='1447630205152'>
+2026-02-16 22:51:38,912 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='1447630205152'>
+2026-02-16 22:51:38,915 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,915 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,915 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,915 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,915 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,916 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,916 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,916 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,916 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,916 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,919 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1447767900912'>
+2026-02-16 22:51:38,919 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1447767900912'>
+2026-02-16 22:51:38,919 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1447767900912'>
+2026-02-16 22:51:38,919 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1447767900912'>
+2026-02-16 22:51:38,919 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1447767900912'>
+2026-02-16 22:51:38,922 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,922 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,922 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,922 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,922 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,922 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,922 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,922 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,922 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,922 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,922 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,922 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,925 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,925 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,925 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,925 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,925 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,925 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,925 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:51:38,926 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,926 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,926 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,926 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,926 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,926 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,926 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:51:38,928 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='1447767901584'>
+2026-02-16 22:51:38,928 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='1447767901584'>
+2026-02-16 22:51:38,928 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='1447767901584'>
+2026-02-16 22:51:38,928 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='1447767901584'>
+2026-02-16 22:51:38,928 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='1447767901584'>
+2026-02-16 22:51:38,928 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='1447767901584'>
+2026-02-16 22:51:38,928 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='1447767901584'>
+2026-02-16 22:51:38,928 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1447767901584'>
+2026-02-16 22:51:38,928 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1447767901584'>
+2026-02-16 22:51:38,928 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1447767901584'>
+2026-02-16 22:51:38,928 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1447767901584'>
+2026-02-16 22:51:38,928 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1447767901584'>
+2026-02-16 22:51:38,928 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1447767901584'>
+2026-02-16 22:51:38,928 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1447767901584'>
+2026-02-16 22:51:38,942 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 22:51:38,942 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 22:51:38,942 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 22:51:38,942 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 22:51:38,942 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 22:51:38,942 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 22:51:38,942 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 22:51:38,943 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 22:51:38,943 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 22:51:38,943 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 22:51:38,943 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 22:51:38,943 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 22:51:38,943 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 22:51:38,943 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 22:51:38,986 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 22:51:38,986 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 22:51:38,986 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 22:51:38,986 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 22:51:38,986 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 22:51:38,986 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 22:51:38,986 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 22:51:38,986 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 22:51:38,986 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 22:51:38,986 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 22:51:38,986 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 22:51:38,986 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 22:51:38,986 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 22:51:38,986 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 22:51:38,987 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 75, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 22:51:38,987 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 75, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 22:51:38,987 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 75, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 22:51:38,987 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 75, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 22:51:38,987 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 75, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 22:51:38,987 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 75, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 22:51:38,987 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 75, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 22:51:38,996 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 22:51:38,996 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 22:51:38,996 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 22:51:38,996 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 22:51:38,996 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 22:51:38,996 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 22:51:38,996 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 22:51:38,996 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 22:51:38,996 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 22:51:38,996 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 22:51:38,996 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 22:51:38,996 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 22:51:38,996 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 22:51:38,996 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 22:51:38,997 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 87, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 22:51:38,997 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 87, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 22:51:38,997 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 87, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 22:51:38,997 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 87, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 22:51:38,997 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 87, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 22:51:38,997 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 87, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 22:51:38,997 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 87, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 22:51:39,048 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 22:51:39,048 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 22:51:39,048 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 22:51:39,048 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 22:51:39,048 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 22:51:39,048 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 22:51:39,048 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 22:51:39,049 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 22:51:39,049 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 22:51:39,049 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 22:51:39,049 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 22:51:39,049 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 22:51:39,049 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 22:51:39,049 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 22:51:39,049 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 87, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 22:51:39,049 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 87, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 22:51:39,049 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 87, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 22:51:39,049 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 87, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 22:51:39,049 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 87, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 22:51:39,049 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 87, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 22:51:39,049 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 87, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 22:58:13,752 - studio - INFO - --- Logging initialized ---
+2026-02-16 22:58:13,752 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 22:58:13,752 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 22:58:13,752 - studio - INFO - CUDA available: False
+2026-02-16 22:58:13,752 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:02:30,985 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:02:30,985 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:02:30,986 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:02:32,507 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:02:32,508 - studio - INFO - CUDA available: False
+2026-02-16 23:02:32,508 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:02:34,606 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:02:34,606 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:02:34,607 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:02:34,607 - studio - INFO - CUDA available: False
+2026-02-16 23:02:34,607 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:03:12,299 - studio - INFO - Synthesis starting for role 'tester' (design): Hello, this is my new custom v...
+2026-02-16 23:03:12,299 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:03:12,302 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:03:20,389 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:03:20,389 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:03:20,390 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:03:38,440 - studio - INFO - Model loaded successfully.
+2026-02-16 23:06:08,219 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:06:08,220 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:06:08,220 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:06:08,220 - studio - INFO - CUDA available: False
+2026-02-16 23:06:08,221 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:06:08,221 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:06:08,222 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:06:12,224 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:06:12,225 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:06:12,225 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:06:24,530 - studio - INFO - Model loaded successfully.
+2026-02-16 23:06:53,095 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:06:53,095 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:06:53,095 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:06:53,096 - studio - INFO - CUDA available: False
+2026-02-16 23:06:53,096 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:06:53,097 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:06:53,097 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:06:57,031 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:06:57,031 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:06:57,031 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:07:09,116 - studio - INFO - Model loaded successfully.
+2026-02-16 23:07:30,894 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:07:30,895 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:07:30,895 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:07:30,896 - studio - INFO - CUDA available: False
+2026-02-16 23:07:30,896 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:07:30,896 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:07:30,897 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:07:34,802 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:07:34,803 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:07:34,803 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:07:46,665 - studio - INFO - Model loaded successfully.
+2026-02-16 23:08:46,018 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:08:46,018 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:08:46,018 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:08:46,018 - studio - INFO - CUDA available: False
+2026-02-16 23:08:46,019 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:08:46,019 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:08:46,020 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:08:50,069 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:08:50,069 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:08:50,070 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:09:02,072 - studio - INFO - Model loaded successfully.
+2026-02-16 23:09:21,902 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:09:21,902 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:09:21,903 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:09:21,903 - studio - INFO - CUDA available: False
+2026-02-16 23:09:21,903 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:09:21,920 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:09:21,921 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:11:34,128 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,129 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,129 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:11:34,129 - studio - INFO - CUDA available: False
+2026-02-16 23:11:34,129 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:11:34,347 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,347 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,347 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,347 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,349 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,349 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,349 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,349 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 23:11:34,349 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 23:11:34,349 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 23:11:34,350 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 23:11:34,350 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 23:11:34,350 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 23:11:34,353 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,353 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,353 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,353 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,354 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,354 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,354 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,354 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,356 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='3047353693056'>
+2026-02-16 23:11:34,356 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='3047353693056'>
+2026-02-16 23:11:34,356 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='3047353693056'>
+2026-02-16 23:11:34,356 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='3047353693056'>
+2026-02-16 23:11:34,359 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,359 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,359 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,359 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,359 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,359 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,359 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,359 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,359 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,359 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,361 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3047353685664'>
+2026-02-16 23:11:34,361 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3047353685664'>
+2026-02-16 23:11:34,361 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3047353685664'>
+2026-02-16 23:11:34,361 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3047353685664'>
+2026-02-16 23:11:34,361 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3047353685664'>
+2026-02-16 23:11:34,364 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,364 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,364 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,364 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,364 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,364 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,364 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,364 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,364 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,364 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,364 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,364 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,367 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,367 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,367 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,367 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,367 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,367 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,367 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:34,368 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,368 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,368 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,368 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,368 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,368 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,368 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:34,370 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='3047491324288'>
+2026-02-16 23:11:34,370 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='3047491324288'>
+2026-02-16 23:11:34,370 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='3047491324288'>
+2026-02-16 23:11:34,370 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='3047491324288'>
+2026-02-16 23:11:34,370 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='3047491324288'>
+2026-02-16 23:11:34,370 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='3047491324288'>
+2026-02-16 23:11:34,370 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='3047491324288'>
+2026-02-16 23:11:34,371 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3047491324288'>
+2026-02-16 23:11:34,371 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3047491324288'>
+2026-02-16 23:11:34,371 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3047491324288'>
+2026-02-16 23:11:34,371 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3047491324288'>
+2026-02-16 23:11:34,371 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3047491324288'>
+2026-02-16 23:11:34,371 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3047491324288'>
+2026-02-16 23:11:34,371 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3047491324288'>
+2026-02-16 23:11:34,385 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:11:34,385 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:11:34,385 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:11:34,385 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:11:34,385 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:11:34,385 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:11:34,385 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:11:34,386 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:11:34,386 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:11:34,386 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:11:34,386 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:11:34,386 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:11:34,386 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:11:34,386 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:11:34,397 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:11:34,397 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:11:34,397 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:11:34,397 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:11:34,397 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:11:34,397 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:11:34,397 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:11:34,398 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:11:34,398 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:11:34,398 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:11:34,398 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:11:34,398 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:11:34,398 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:11:34,398 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:11:34,398 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:11:34,398 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:11:34,398 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:11:34,398 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:11:34,398 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:11:34,398 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:11:34,398 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:11:34,400 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:11:34,400 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:11:34,400 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:11:34,400 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:11:34,400 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:11:34,400 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:11:34,400 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:11:34,400 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:11:34,400 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:11:34,400 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:11:34,400 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:11:34,400 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:11:34,400 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:11:34,400 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:11:34,400 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:11:34,400 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:11:34,400 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:11:34,400 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:11:34,400 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:11:34,400 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:11:34,400 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:11:34,437 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:11:34,437 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:11:34,437 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:11:34,437 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:11:34,437 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:11:34,437 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:11:34,437 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:11:34,438 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:11:34,438 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:11:34,438 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:11:34,438 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:11:34,438 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:11:34,438 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:11:34,438 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:11:38,296 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:11:38,296 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:11:38,296 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:11:38,296 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:11:38,296 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:11:38,296 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:11:38,296 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:11:38,296 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:11:38,296 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:11:38,296 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:11:38,296 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:11:38,296 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:11:38,296 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:11:38,296 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:11:38,297 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:11:38,297 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:11:38,297 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:11:38,297 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:11:38,297 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:11:38,297 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:11:38,297 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:11:50,184 - studio - INFO - Model loaded successfully.
+2026-02-16 23:11:50,184 - studio - INFO - Model loaded successfully.
+2026-02-16 23:11:50,184 - studio - INFO - Model loaded successfully.
+2026-02-16 23:11:50,184 - studio - INFO - Model loaded successfully.
+2026-02-16 23:11:50,184 - studio - INFO - Model loaded successfully.
+2026-02-16 23:11:50,184 - studio - INFO - Model loaded successfully.
+2026-02-16 23:11:50,184 - studio - INFO - Model loaded successfully.
+2026-02-16 23:11:50,215 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:11:50,215 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:11:50,215 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:11:50,215 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:11:50,215 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:11:50,215 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:11:50,215 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:11:50,216 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:11:50,216 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:11:50,216 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:11:50,216 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:11:50,216 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:11:50,216 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:11:50,216 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:11:50,216 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:11:50,216 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:11:50,216 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:11:50,216 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:11:50,216 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:11:50,216 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:11:50,216 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:11:51,256 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:51,256 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:51,256 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:11:52,883 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:11:52,883 - studio - INFO - CUDA available: False
+2026-02-16 23:11:52,883 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:11:55,109 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:11:55,109 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:11:55,110 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:11:55,110 - studio - INFO - CUDA available: False
+2026-02-16 23:11:55,110 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:12:56,746 - studio - INFO - Synthesis starting for role 'tester' (design): Hello, this is my new custom v...
+2026-02-16 23:12:56,746 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:12:56,747 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:13:00,446 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:13:00,446 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:13:00,447 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:13:12,415 - studio - INFO - Model loaded successfully.
+2026-02-16 23:13:26,011 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:13:26,011 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:13:26,012 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:13:26,012 - studio - INFO - CUDA available: False
+2026-02-16 23:13:26,012 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:13:53,076 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:13:53,076 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:13:53,077 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:13:53,077 - studio - INFO - CUDA available: False
+2026-02-16 23:13:53,077 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:14:19,693 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:19,694 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:19,695 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:14:19,695 - studio - INFO - CUDA available: False
+2026-02-16 23:14:19,695 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:14:38,681 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:38,682 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:38,682 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:14:38,682 - studio - INFO - CUDA available: False
+2026-02-16 23:14:38,682 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:14:38,984 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:38,984 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:38,984 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:38,984 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:38,986 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:38,986 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:38,986 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:38,987 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 23:14:38,987 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 23:14:38,987 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 23:14:38,989 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 23:14:38,989 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 23:14:38,989 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 23:14:38,994 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:38,994 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:38,994 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:38,994 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:38,995 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:38,995 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:38,995 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:38,995 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:38,997 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='3013547058448'>
+2026-02-16 23:14:38,997 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='3013547058448'>
+2026-02-16 23:14:38,997 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='3013547058448'>
+2026-02-16 23:14:38,997 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='3013547058448'>
+2026-02-16 23:14:39,002 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,002 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,002 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,002 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,002 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,003 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,003 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,003 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,003 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,003 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,006 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3013547060464'>
+2026-02-16 23:14:39,006 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3013547060464'>
+2026-02-16 23:14:39,006 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3013547060464'>
+2026-02-16 23:14:39,006 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3013547060464'>
+2026-02-16 23:14:39,006 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3013547060464'>
+2026-02-16 23:14:39,012 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,012 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,012 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,012 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,012 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,012 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,013 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,013 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,013 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,013 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,013 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,013 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,017 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,017 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,017 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,017 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,017 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,017 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,017 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:14:39,018 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,018 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,018 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,018 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,018 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,018 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,018 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:14:39,022 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='3013547057776'>
+2026-02-16 23:14:39,022 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='3013547057776'>
+2026-02-16 23:14:39,022 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='3013547057776'>
+2026-02-16 23:14:39,022 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='3013547057776'>
+2026-02-16 23:14:39,022 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='3013547057776'>
+2026-02-16 23:14:39,022 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='3013547057776'>
+2026-02-16 23:14:39,022 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='3013547057776'>
+2026-02-16 23:14:39,022 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3013547057776'>
+2026-02-16 23:14:39,022 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3013547057776'>
+2026-02-16 23:14:39,022 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3013547057776'>
+2026-02-16 23:14:39,022 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3013547057776'>
+2026-02-16 23:14:39,022 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3013547057776'>
+2026-02-16 23:14:39,022 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3013547057776'>
+2026-02-16 23:14:39,022 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='3013547057776'>
+2026-02-16 23:14:39,045 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:14:39,045 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:14:39,045 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:14:39,045 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:14:39,045 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:14:39,045 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:14:39,045 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:14:39,046 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:14:39,046 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:14:39,046 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:14:39,046 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:14:39,046 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:14:39,046 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:14:39,046 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:14:39,064 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:14:39,064 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:14:39,064 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:14:39,064 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:14:39,064 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:14:39,064 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:14:39,064 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:14:39,065 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:14:39,065 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:14:39,065 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:14:39,065 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:14:39,065 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:14:39,065 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:14:39,065 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:14:39,065 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:14:39,065 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:14:39,065 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:14:39,065 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:14:39,065 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:14:39,065 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:14:39,065 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:14:39,068 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:14:39,068 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:14:39,068 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:14:39,068 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:14:39,068 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:14:39,068 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:14:39,068 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:14:39,069 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:14:39,069 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:14:39,069 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:14:39,069 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:14:39,069 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:14:39,069 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:14:39,069 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:14:39,069 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:14:39,069 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:14:39,069 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:14:39,069 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:14:39,069 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:14:39,069 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:14:39,069 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:14:39,131 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:14:39,131 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:14:39,131 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:14:39,131 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:14:39,131 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:14:39,131 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:14:39,131 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:14:39,133 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:14:39,133 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:14:39,133 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:14:39,133 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:14:39,133 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:14:39,133 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:14:39,133 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:14:45,082 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:14:45,082 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:14:45,082 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:14:45,082 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:14:45,082 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:14:45,082 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:14:45,082 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:14:45,083 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:14:45,083 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:14:45,083 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:14:45,083 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:14:45,083 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:14:45,083 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:14:45,083 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:14:45,084 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:14:45,084 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:14:45,084 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:14:45,084 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:14:45,084 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:14:45,084 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:14:45,084 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:15:12,192 - studio - INFO - Model loaded successfully.
+2026-02-16 23:15:12,192 - studio - INFO - Model loaded successfully.
+2026-02-16 23:15:12,192 - studio - INFO - Model loaded successfully.
+2026-02-16 23:15:12,192 - studio - INFO - Model loaded successfully.
+2026-02-16 23:15:12,192 - studio - INFO - Model loaded successfully.
+2026-02-16 23:15:12,192 - studio - INFO - Model loaded successfully.
+2026-02-16 23:15:12,192 - studio - INFO - Model loaded successfully.
+2026-02-16 23:15:12,245 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:15:12,245 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:15:12,245 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:15:12,245 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:15:12,245 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:15:12,245 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:15:12,245 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:15:12,245 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:15:12,245 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:15:12,245 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:15:12,245 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:15:12,245 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:15:12,245 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:15:12,245 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:15:12,246 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:15:12,246 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:15:12,246 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:15:12,246 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:15:12,246 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:15:12,246 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:15:12,246 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:15:58,609 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:58,610 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:58,610 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:15:58,611 - studio - INFO - CUDA available: False
+2026-02-16 23:15:58,611 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:15:59,027 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,027 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,027 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,027 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,030 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,030 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,030 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,030 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 23:15:59,030 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 23:15:59,030 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 23:15:59,031 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 23:15:59,031 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 23:15:59,031 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 23:15:59,036 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,036 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,036 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,036 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,036 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,036 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,036 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,036 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,039 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='2140278544368'>
+2026-02-16 23:15:59,039 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='2140278544368'>
+2026-02-16 23:15:59,039 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='2140278544368'>
+2026-02-16 23:15:59,039 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='2140278544368'>
+2026-02-16 23:15:59,044 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,044 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,044 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,044 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,044 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,045 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,045 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,045 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,045 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,045 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,047 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2140278549744'>
+2026-02-16 23:15:59,047 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2140278549744'>
+2026-02-16 23:15:59,047 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2140278549744'>
+2026-02-16 23:15:59,047 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2140278549744'>
+2026-02-16 23:15:59,047 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2140278549744'>
+2026-02-16 23:15:59,055 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,055 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,055 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,055 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,055 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,055 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,056 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,056 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,056 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,056 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,056 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,056 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,061 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,061 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,061 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,061 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,061 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,061 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,061 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:15:59,061 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,061 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,061 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,061 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,061 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,061 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,061 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:15:59,065 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2140278547056'>
+2026-02-16 23:15:59,065 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2140278547056'>
+2026-02-16 23:15:59,065 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2140278547056'>
+2026-02-16 23:15:59,065 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2140278547056'>
+2026-02-16 23:15:59,065 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2140278547056'>
+2026-02-16 23:15:59,065 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2140278547056'>
+2026-02-16 23:15:59,065 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2140278547056'>
+2026-02-16 23:15:59,065 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2140278547056'>
+2026-02-16 23:15:59,065 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2140278547056'>
+2026-02-16 23:15:59,065 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2140278547056'>
+2026-02-16 23:15:59,065 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2140278547056'>
+2026-02-16 23:15:59,065 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2140278547056'>
+2026-02-16 23:15:59,065 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2140278547056'>
+2026-02-16 23:15:59,065 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2140278547056'>
+2026-02-16 23:15:59,100 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:15:59,100 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:15:59,100 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:15:59,100 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:15:59,100 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:15:59,100 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:15:59,100 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:15:59,100 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:15:59,100 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:15:59,100 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:15:59,100 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:15:59,100 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:15:59,100 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:15:59,100 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:15:59,122 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:15:59,122 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:15:59,122 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:15:59,122 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:15:59,122 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:15:59,122 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:15:59,122 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:15:59,123 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:15:59,123 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:15:59,123 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:15:59,123 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:15:59,123 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:15:59,123 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:15:59,123 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:15:59,123 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:15:59,123 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:15:59,123 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:15:59,123 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:15:59,123 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:15:59,123 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:15:59,123 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 86, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:15:59,127 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:15:59,127 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:15:59,127 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:15:59,127 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:15:59,127 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:15:59,127 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:15:59,127 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:15:59,128 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:15:59,128 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:15:59,128 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:15:59,128 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:15:59,128 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:15:59,128 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:15:59,128 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:15:59,128 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:15:59,128 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:15:59,128 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:15:59,128 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:15:59,128 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:15:59,128 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:15:59,128 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:15:59,154 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:15:59,154 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:15:59,154 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:15:59,154 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:15:59,154 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:15:59,154 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:15:59,154 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:15:59,158 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:15:59,158 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:15:59,158 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:15:59,158 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:15:59,158 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:15:59,158 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:15:59,158 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:16:08,681 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:16:08,681 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:16:08,681 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:16:08,681 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:16:08,681 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:16:08,681 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:16:08,681 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:16:08,682 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:16:08,682 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:16:08,682 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:16:08,682 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:16:08,682 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:16:08,682 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:16:08,682 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:16:08,683 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:16:08,683 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:16:08,683 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:16:08,683 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:16:08,683 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:16:08,683 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:16:08,683 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:16:28,831 - studio - INFO - Model loaded successfully.
+2026-02-16 23:16:28,831 - studio - INFO - Model loaded successfully.
+2026-02-16 23:16:28,831 - studio - INFO - Model loaded successfully.
+2026-02-16 23:16:28,831 - studio - INFO - Model loaded successfully.
+2026-02-16 23:16:28,831 - studio - INFO - Model loaded successfully.
+2026-02-16 23:16:28,831 - studio - INFO - Model loaded successfully.
+2026-02-16 23:16:28,831 - studio - INFO - Model loaded successfully.
+2026-02-16 23:16:28,878 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:16:28,878 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:16:28,878 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:16:28,878 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:16:28,878 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:16:28,878 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:16:28,878 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:16:28,878 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:16:28,878 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:16:28,878 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:16:28,878 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:16:28,878 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:16:28,878 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:16:28,878 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:16:28,879 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:16:28,879 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:16:28,879 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:16:28,879 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:16:28,879 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:16:28,879 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:16:28,879 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 98, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:21:07,819 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:21:07,819 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:21:07,819 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:21:07,819 - studio - INFO - CUDA available: False
+2026-02-16 23:21:07,819 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:21:08,047 - studio - INFO - Task created: d1b0e5de-ab75-4fc6-abf8-a844f76b8d12 (segment_generation)
+2026-02-16 23:21:08,049 - studio - ERROR - Task d1b0e5de-ab75-4fc6-abf8-a844f76b8d12 failed: not enough values to unpack (expected 2, got 0)
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\server.py", line 141, in run_synthesis_task
+    wav, sr = engine.generate_segment(line.role, line.text)
+    ^^^^^^^
+ValueError: not enough values to unpack (expected 2, got 0)
+2026-02-16 23:21:08,052 - studio - INFO - Task created: 1287cddb-ea14-4430-b965-3556a26e7059 (test_task)
+2026-02-16 23:22:52,440 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:22:52,440 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:22:52,443 - studio - INFO - Task created: 3c460c70-37e3-4b19-87bf-934b39192196 (old)
+2026-02-16 23:22:52,444 - studio - INFO - Cleaned up 1 old tasks
+2026-02-16 23:22:52,445 - studio - INFO - Task created: 7ee26c8a-7a7c-44d9-87d8-03fecdf0619b (test)
+2026-02-16 23:22:52,446 - studio - INFO - Task created: e7fdc154-c4cf-4fbb-9bb3-fe4d45920c74 (test)
+2026-02-16 23:26:32,188 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,189 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,189 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:26:32,189 - studio - INFO - CUDA available: False
+2026-02-16 23:26:32,189 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:26:32,400 - studio - INFO - Task created: 817c7cca-a191-48eb-a726-47d19f6ae5f6 (segment_generation)
+2026-02-16 23:26:32,401 - studio - ERROR - Task 817c7cca-a191-48eb-a726-47d19f6ae5f6 failed: not enough values to unpack (expected 2, got 0)
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\server.py", line 141, in run_synthesis_task
+    wav, sr = engine.generate_segment(line.role, line.text)
+    ^^^^^^^
+ValueError: not enough values to unpack (expected 2, got 0)
+2026-02-16 23:26:32,404 - studio - INFO - Task created: 50e83e4b-2534-4976-9e4b-b4cce178ecb8 (test_task)
+2026-02-16 23:26:32,411 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,411 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,411 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,411 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,412 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,412 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,412 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,412 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 23:26:32,412 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 23:26:32,412 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 23:26:32,413 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 23:26:32,413 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 23:26:32,413 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 23:26:32,417 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,417 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,417 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,417 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,417 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,417 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,417 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,417 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,418 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='1528328483376'>
+2026-02-16 23:26:32,418 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='1528328483376'>
+2026-02-16 23:26:32,418 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='1528328483376'>
+2026-02-16 23:26:32,418 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='1528328483376'>
+2026-02-16 23:26:32,421 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,421 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,421 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,421 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,421 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,422 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,422 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,422 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,422 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,422 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,424 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1528328483040'>
+2026-02-16 23:26:32,424 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1528328483040'>
+2026-02-16 23:26:32,424 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1528328483040'>
+2026-02-16 23:26:32,424 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1528328483040'>
+2026-02-16 23:26:32,424 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1528328483040'>
+2026-02-16 23:26:32,427 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,427 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,427 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,427 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,427 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,427 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,427 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,427 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,427 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,427 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,427 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,427 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,430 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,430 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,430 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,430 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,430 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,430 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,430 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:26:32,431 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,431 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,431 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,431 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,431 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,431 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,431 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:26:32,433 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='1528328478336'>
+2026-02-16 23:26:32,433 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='1528328478336'>
+2026-02-16 23:26:32,433 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='1528328478336'>
+2026-02-16 23:26:32,433 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='1528328478336'>
+2026-02-16 23:26:32,433 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='1528328478336'>
+2026-02-16 23:26:32,433 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='1528328478336'>
+2026-02-16 23:26:32,433 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='1528328478336'>
+2026-02-16 23:26:32,434 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1528328478336'>
+2026-02-16 23:26:32,434 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1528328478336'>
+2026-02-16 23:26:32,434 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1528328478336'>
+2026-02-16 23:26:32,434 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1528328478336'>
+2026-02-16 23:26:32,434 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1528328478336'>
+2026-02-16 23:26:32,434 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1528328478336'>
+2026-02-16 23:26:32,434 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='1528328478336'>
+2026-02-16 23:26:32,449 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:26:32,449 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:26:32,449 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:26:32,449 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:26:32,449 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:26:32,449 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:26:32,449 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:26:32,449 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:26:32,449 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:26:32,449 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:26:32,449 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:26:32,449 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:26:32,449 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:26:32,449 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:26:32,460 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:26:32,460 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:26:32,460 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:26:32,460 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:26:32,460 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:26:32,460 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:26:32,460 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:26:32,461 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:26:32,461 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:26:32,461 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:26:32,461 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:26:32,461 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:26:32,461 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:26:32,461 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:26:32,461 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 96, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:26:32,461 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 96, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:26:32,461 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 96, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:26:32,461 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 96, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:26:32,461 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 96, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:26:32,461 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 96, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:26:32,461 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 96, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:26:32,463 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:26:32,463 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:26:32,463 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:26:32,463 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:26:32,463 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:26:32,463 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:26:32,463 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:26:32,464 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:26:32,464 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:26:32,464 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:26:32,464 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:26:32,464 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:26:32,464 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:26:32,464 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:26:32,464 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:26:32,464 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:26:32,464 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:26:32,464 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:26:32,464 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:26:32,464 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:26:32,464 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:26:32,476 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:26:32,476 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:26:32,476 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:26:32,476 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:26:32,476 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:26:32,476 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:26:32,476 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:26:32,477 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:26:32,477 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:26:32,477 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:26:32,477 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:26:32,477 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:26:32,477 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:26:32,477 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:26:36,480 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:26:36,480 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:26:36,480 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:26:36,480 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:26:36,480 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:26:36,480 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:26:36,480 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:26:36,480 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:26:36,480 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:26:36,480 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:26:36,480 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:26:36,480 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:26:36,480 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:26:36,480 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:26:36,480 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:26:36,480 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:26:36,480 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:26:36,480 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:26:36,480 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:26:36,480 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:26:36,480 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:26:49,425 - studio - INFO - Model loaded successfully.
+2026-02-16 23:26:49,425 - studio - INFO - Model loaded successfully.
+2026-02-16 23:26:49,425 - studio - INFO - Model loaded successfully.
+2026-02-16 23:26:49,425 - studio - INFO - Model loaded successfully.
+2026-02-16 23:26:49,425 - studio - INFO - Model loaded successfully.
+2026-02-16 23:26:49,425 - studio - INFO - Model loaded successfully.
+2026-02-16 23:26:49,425 - studio - INFO - Model loaded successfully.
+2026-02-16 23:26:49,455 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:26:49,455 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:26:49,455 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:26:49,455 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:26:49,455 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:26:49,455 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:26:49,455 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:26:49,456 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:26:49,456 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:26:49,456 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:26:49,456 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:26:49,456 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:26:49,456 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:26:49,456 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:26:49,456 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:26:49,456 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:26:49,456 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:26:49,456 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:26:49,456 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:26:49,456 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:26:49,456 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:26:49,459 - studio - INFO - Task created: c2555e8b-aefe-4fb0-98b6-a60cbd980aba (old)
+2026-02-16 23:26:49,459 - studio - INFO - Task created: c2555e8b-aefe-4fb0-98b6-a60cbd980aba (old)
+2026-02-16 23:26:49,459 - studio - INFO - Task created: c2555e8b-aefe-4fb0-98b6-a60cbd980aba (old)
+2026-02-16 23:26:49,459 - studio - INFO - Task created: c2555e8b-aefe-4fb0-98b6-a60cbd980aba (old)
+2026-02-16 23:26:49,459 - studio - INFO - Task created: c2555e8b-aefe-4fb0-98b6-a60cbd980aba (old)
+2026-02-16 23:26:49,459 - studio - INFO - Task created: c2555e8b-aefe-4fb0-98b6-a60cbd980aba (old)
+2026-02-16 23:26:49,459 - studio - INFO - Task created: c2555e8b-aefe-4fb0-98b6-a60cbd980aba (old)
+2026-02-16 23:26:49,459 - studio - INFO - Cleaned up 1 old tasks
+2026-02-16 23:26:49,459 - studio - INFO - Cleaned up 1 old tasks
+2026-02-16 23:26:49,459 - studio - INFO - Cleaned up 1 old tasks
+2026-02-16 23:26:49,459 - studio - INFO - Cleaned up 1 old tasks
+2026-02-16 23:26:49,459 - studio - INFO - Cleaned up 1 old tasks
+2026-02-16 23:26:49,459 - studio - INFO - Cleaned up 1 old tasks
+2026-02-16 23:26:49,459 - studio - INFO - Cleaned up 1 old tasks
+2026-02-16 23:26:49,460 - studio - INFO - Task created: d14cba2b-0536-4df2-bd0c-43baebc08b36 (test)
+2026-02-16 23:26:49,460 - studio - INFO - Task created: d14cba2b-0536-4df2-bd0c-43baebc08b36 (test)
+2026-02-16 23:26:49,460 - studio - INFO - Task created: d14cba2b-0536-4df2-bd0c-43baebc08b36 (test)
+2026-02-16 23:26:49,460 - studio - INFO - Task created: d14cba2b-0536-4df2-bd0c-43baebc08b36 (test)
+2026-02-16 23:26:49,460 - studio - INFO - Task created: d14cba2b-0536-4df2-bd0c-43baebc08b36 (test)
+2026-02-16 23:26:49,460 - studio - INFO - Task created: d14cba2b-0536-4df2-bd0c-43baebc08b36 (test)
+2026-02-16 23:26:49,460 - studio - INFO - Task created: d14cba2b-0536-4df2-bd0c-43baebc08b36 (test)
+2026-02-16 23:26:49,462 - studio - INFO - Task created: adb40779-1f86-4aca-9eb0-30434f059a1e (test)
+2026-02-16 23:26:49,462 - studio - INFO - Task created: adb40779-1f86-4aca-9eb0-30434f059a1e (test)
+2026-02-16 23:26:49,462 - studio - INFO - Task created: adb40779-1f86-4aca-9eb0-30434f059a1e (test)
+2026-02-16 23:26:49,462 - studio - INFO - Task created: adb40779-1f86-4aca-9eb0-30434f059a1e (test)
+2026-02-16 23:26:49,462 - studio - INFO - Task created: adb40779-1f86-4aca-9eb0-30434f059a1e (test)
+2026-02-16 23:26:49,462 - studio - INFO - Task created: adb40779-1f86-4aca-9eb0-30434f059a1e (test)
+2026-02-16 23:26:49,462 - studio - INFO - Task created: adb40779-1f86-4aca-9eb0-30434f059a1e (test)
+2026-02-16 23:29:40,307 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,307 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,307 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:29:40,307 - studio - INFO - CUDA available: False
+2026-02-16 23:29:40,307 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:29:40,523 - studio - INFO - Task created: b33f6520-67df-4bcd-8ffb-987f042f88de (segment_generation)
+2026-02-16 23:29:40,524 - studio - ERROR - Task b33f6520-67df-4bcd-8ffb-987f042f88de failed: not enough values to unpack (expected 2, got 0)
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\server.py", line 141, in run_synthesis_task
+    wav, sr = engine.generate_segment(line.role, line.text)
+    ^^^^^^^
+ValueError: not enough values to unpack (expected 2, got 0)
+2026-02-16 23:29:40,527 - studio - INFO - Task created: 4a16c7f6-688d-4bfe-912f-495990967f39 (test_task)
+2026-02-16 23:29:40,533 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,533 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,533 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,533 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,534 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,534 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,534 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,535 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 23:29:40,535 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 23:29:40,535 - studio - WARNING - Models directory not found at C:\Custom\Models\Path
+2026-02-16 23:29:40,536 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 23:29:40,536 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 23:29:40,536 - studio - INFO - Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.
+2026-02-16 23:29:40,539 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,539 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,539 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,539 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,540 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,540 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,540 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,540 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,541 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='2295149552240'>
+2026-02-16 23:29:40,541 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='2295149552240'>
+2026-02-16 23:29:40,541 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='2295149552240'>
+2026-02-16 23:29:40,541 - studio - INFO - Model found at direct path: <MagicMock name='MODELS_PATH.__truediv__()' spec='Path' id='2295149552240'>
+2026-02-16 23:29:40,544 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,544 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,544 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,544 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,544 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,545 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,545 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,545 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,545 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,545 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,547 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2295149552240'>
+2026-02-16 23:29:40,547 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2295149552240'>
+2026-02-16 23:29:40,547 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2295149552240'>
+2026-02-16 23:29:40,547 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2295149552240'>
+2026-02-16 23:29:40,547 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2295149552240'>
+2026-02-16 23:29:40,550 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,550 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,550 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,550 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,550 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,550 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,551 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,551 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,551 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,551 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,551 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,551 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,554 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,554 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,554 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,554 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,554 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,554 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,554 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:29:40,554 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,554 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,554 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,554 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,554 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,554 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,554 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:29:40,557 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2295149550224'>
+2026-02-16 23:29:40,557 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2295149550224'>
+2026-02-16 23:29:40,557 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2295149550224'>
+2026-02-16 23:29:40,557 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2295149550224'>
+2026-02-16 23:29:40,557 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2295149550224'>
+2026-02-16 23:29:40,557 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2295149550224'>
+2026-02-16 23:29:40,557 - studio - INFO - Model found at direct path: <MagicMock spec='Path' id='2295149550224'>
+2026-02-16 23:29:40,557 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2295149550224'>
+2026-02-16 23:29:40,557 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2295149550224'>
+2026-02-16 23:29:40,557 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2295149550224'>
+2026-02-16 23:29:40,557 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2295149550224'>
+2026-02-16 23:29:40,557 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2295149550224'>
+2026-02-16 23:29:40,557 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2295149550224'>
+2026-02-16 23:29:40,557 - studio - INFO - Model found at flattened path: <MagicMock spec='Path' id='2295149550224'>
+2026-02-16 23:29:40,571 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:29:40,571 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:29:40,571 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:29:40,571 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:29:40,571 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:29:40,571 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:29:40,571 - studio - INFO - Synthesis starting for role 'Ryan' (preset): Hello, this is a test of the s...
+2026-02-16 23:29:40,572 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:29:40,572 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:29:40,572 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:29:40,572 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:29:40,572 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:29:40,572 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:29:40,572 - studio - INFO - Synthesis complete for role 'Ryan'!
+2026-02-16 23:29:40,583 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:29:40,583 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:29:40,583 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:29:40,583 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:29:40,583 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:29:40,583 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:29:40,583 - studio - INFO - Synthesis starting for role 'Cloner' (clone): Test...
+2026-02-16 23:29:40,583 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:29:40,583 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:29:40,583 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:29:40,583 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:29:40,583 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:29:40,583 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:29:40,583 - studio - ERROR - Cloning reference audio NOT found at: non_existent_voice.wav
+2026-02-16 23:29:40,584 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 96, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:29:40,584 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 96, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:29:40,584 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 96, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:29:40,584 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 96, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:29:40,584 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 96, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:29:40,584 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 96, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:29:40,584 - studio - ERROR - Synthesis failed for role 'Cloner': Cloning reference audio not found: non_existent_voice.wav
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 96, in generate_segment
+    raise FileNotFoundError(f"Cloning reference audio not found: {ref_path}")
+FileNotFoundError: Cloning reference audio not found: non_existent_voice.wav
+2026-02-16 23:29:40,586 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:29:40,586 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:29:40,586 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:29:40,586 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:29:40,586 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:29:40,586 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:29:40,586 - studio - INFO - Synthesis starting for role 'Bad' (magic): Test...
+2026-02-16 23:29:40,586 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:29:40,586 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:29:40,586 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:29:40,586 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:29:40,586 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:29:40,586 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:29:40,586 - studio - ERROR - Unknown speaker type requested: magic
+2026-02-16 23:29:40,586 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:29:40,586 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:29:40,586 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:29:40,586 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:29:40,586 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:29:40,586 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:29:40,586 - studio - ERROR - Synthesis failed for role 'Bad': Unknown speaker type: magic
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: magic
+2026-02-16 23:29:40,598 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:29:40,598 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:29:40,598 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:29:40,598 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:29:40,598 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:29:40,598 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:29:40,598 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:29:40,599 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:29:40,599 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:29:40,599 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:29:40,599 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:29:40,599 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:29:40,599 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:29:40,599 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:29:44,421 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:29:44,421 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:29:44,421 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:29:44,421 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:29:44,421 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:29:44,421 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:29:44,421 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:29:44,422 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:29:44,422 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:29:44,422 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:29:44,422 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:29:44,422 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:29:44,422 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:29:44,422 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:29:44,422 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:29:44,422 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:29:44,422 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:29:44,422 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:29:44,422 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:29:44,422 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:29:44,422 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:29:56,533 - studio - INFO - Model loaded successfully.
+2026-02-16 23:29:56,533 - studio - INFO - Model loaded successfully.
+2026-02-16 23:29:56,533 - studio - INFO - Model loaded successfully.
+2026-02-16 23:29:56,533 - studio - INFO - Model loaded successfully.
+2026-02-16 23:29:56,533 - studio - INFO - Model loaded successfully.
+2026-02-16 23:29:56,533 - studio - INFO - Model loaded successfully.
+2026-02-16 23:29:56,533 - studio - INFO - Model loaded successfully.
+2026-02-16 23:29:56,563 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:29:56,563 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:29:56,563 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:29:56,563 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:29:56,563 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:29:56,563 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:29:56,563 - studio - INFO - Synthesis starting for role 'Ghost' (unknown): Text...
+2026-02-16 23:29:56,563 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:29:56,563 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:29:56,563 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:29:56,563 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:29:56,563 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:29:56,563 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:29:56,563 - studio - ERROR - Unknown speaker type requested: unknown
+2026-02-16 23:29:56,564 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:29:56,564 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:29:56,564 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:29:56,564 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:29:56,564 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:29:56,564 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:29:56,564 - studio - ERROR - Synthesis failed for role 'Ghost': Unknown speaker type: unknown
+Traceback (most recent call last):
+  File "C:\Users\tony5\OneDrive\桌面\Qwen-TTS-Webui\src\backend\podcast_engine.py", line 108, in generate_segment
+    raise ValueError(f"Unknown speaker type: {profile['type']}")
+ValueError: Unknown speaker type: unknown
+2026-02-16 23:29:56,566 - studio - INFO - Task created: dc1570ea-591f-4c83-8a4b-921a64ee7f78 (old)
+2026-02-16 23:29:56,566 - studio - INFO - Task created: dc1570ea-591f-4c83-8a4b-921a64ee7f78 (old)
+2026-02-16 23:29:56,566 - studio - INFO - Task created: dc1570ea-591f-4c83-8a4b-921a64ee7f78 (old)
+2026-02-16 23:29:56,566 - studio - INFO - Task created: dc1570ea-591f-4c83-8a4b-921a64ee7f78 (old)
+2026-02-16 23:29:56,566 - studio - INFO - Task created: dc1570ea-591f-4c83-8a4b-921a64ee7f78 (old)
+2026-02-16 23:29:56,566 - studio - INFO - Task created: dc1570ea-591f-4c83-8a4b-921a64ee7f78 (old)
+2026-02-16 23:29:56,566 - studio - INFO - Task created: dc1570ea-591f-4c83-8a4b-921a64ee7f78 (old)
+2026-02-16 23:29:56,567 - studio - INFO - Cleaned up 1 old tasks
+2026-02-16 23:29:56,567 - studio - INFO - Cleaned up 1 old tasks
+2026-02-16 23:29:56,567 - studio - INFO - Cleaned up 1 old tasks
+2026-02-16 23:29:56,567 - studio - INFO - Cleaned up 1 old tasks
+2026-02-16 23:29:56,567 - studio - INFO - Cleaned up 1 old tasks
+2026-02-16 23:29:56,567 - studio - INFO - Cleaned up 1 old tasks
+2026-02-16 23:29:56,567 - studio - INFO - Cleaned up 1 old tasks
+2026-02-16 23:29:56,568 - studio - INFO - Task created: 52b9ca78-03ac-4e21-b7ad-30f5668f4d72 (test)
+2026-02-16 23:29:56,568 - studio - INFO - Task created: 52b9ca78-03ac-4e21-b7ad-30f5668f4d72 (test)
+2026-02-16 23:29:56,568 - studio - INFO - Task created: 52b9ca78-03ac-4e21-b7ad-30f5668f4d72 (test)
+2026-02-16 23:29:56,568 - studio - INFO - Task created: 52b9ca78-03ac-4e21-b7ad-30f5668f4d72 (test)
+2026-02-16 23:29:56,568 - studio - INFO - Task created: 52b9ca78-03ac-4e21-b7ad-30f5668f4d72 (test)
+2026-02-16 23:29:56,568 - studio - INFO - Task created: 52b9ca78-03ac-4e21-b7ad-30f5668f4d72 (test)
+2026-02-16 23:29:56,568 - studio - INFO - Task created: 52b9ca78-03ac-4e21-b7ad-30f5668f4d72 (test)
+2026-02-16 23:29:56,570 - studio - INFO - Task created: 8ac86762-655b-4d74-9db1-954b9053a120 (test)
+2026-02-16 23:29:56,570 - studio - INFO - Task created: 8ac86762-655b-4d74-9db1-954b9053a120 (test)
+2026-02-16 23:29:56,570 - studio - INFO - Task created: 8ac86762-655b-4d74-9db1-954b9053a120 (test)
+2026-02-16 23:29:56,570 - studio - INFO - Task created: 8ac86762-655b-4d74-9db1-954b9053a120 (test)
+2026-02-16 23:29:56,570 - studio - INFO - Task created: 8ac86762-655b-4d74-9db1-954b9053a120 (test)
+2026-02-16 23:29:56,570 - studio - INFO - Task created: 8ac86762-655b-4d74-9db1-954b9053a120 (test)
+2026-02-16 23:29:56,570 - studio - INFO - Task created: 8ac86762-655b-4d74-9db1-954b9053a120 (test)
+2026-02-16 23:30:41,393 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:30:41,394 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:30:41,394 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:30:42,894 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:30:42,894 - studio - INFO - CUDA available: False
+2026-02-16 23:30:42,894 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:30:44,993 - studio - INFO - --- Logging initialized ---
+2026-02-16 23:30:44,993 - studio - INFO - Models directory found at C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts
+2026-02-16 23:30:44,993 - studio - INFO - PyTorch version: 2.10.0+cpu
+2026-02-16 23:30:44,993 - studio - INFO - CUDA available: False
+2026-02-16 23:30:44,993 - studio - WARNING - CUDA not available. Falling back to CPU. Performance will be slower.
+2026-02-16 23:31:13,063 - studio - INFO - Task created: 0de131a9-238e-4216-b545-01c3410be5ca (segment_generation)
+2026-02-16 23:31:13,064 - studio - INFO - Synthesis starting for role 'tester' (design): Hello, this is my new custom v...
+2026-02-16 23:31:13,064 - studio - INFO - Initializing Qwen-TTS environment...
+2026-02-16 23:31:13,065 - studio - INFO - Applying sox shim for Windows environment
+2026-02-16 23:31:16,802 - studio - INFO - Successfully imported qwen_tts core
+2026-02-16 23:31:16,802 - studio - INFO - Model found at flattened path: C:\Users\tony5\Downloads\ComfyUI\models\qwen-tts\Qwen3-TTS-12Hz-1.7B-VoiceDesign
+2026-02-16 23:31:16,803 - studio - INFO - Loading Qwen-TTS model: Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign on cpu
+2026-02-16 23:31:28,894 - studio - INFO - Model loaded successfully.
+2026-02-16 23:31:35,053 - studio - INFO - Task created: 46dbc279-d0f8-43fa-8061-36d13303975f (segment_generation)
+2026-02-16 23:31:35,059 - studio - INFO - Synthesis starting for role 'tester' (design): Hello, this is my new custom v...
+2026-02-16 23:31:42,827 - studio - INFO - Synthesis starting for role '2' (design): This is a preview of my voice....

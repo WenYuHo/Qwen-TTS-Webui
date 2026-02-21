@@ -24,9 +24,18 @@ class PodcastEngine:
                 - models (dict): Result of verify_system_paths().
                 - device (dict): Information about the compute device (CPU/CUDA).
                 - loaded_model (str): The key of the currently loaded model, if any.
+                - performance (dict): Current CPU and Memory utilization.
         """
         try:
+            import psutil
             paths = verify_system_paths()
+            
+            # Simple performance metrics
+            perf = {
+                "cpu_percent": psutil.cpu_percent(),
+                "memory_percent": psutil.virtual_memory().percent
+            }
+            
             return {
                 "status": "ok",
                 "models": paths,
@@ -34,7 +43,8 @@ class PodcastEngine:
                     "type": manager.device,
                     "cuda_available": torch.cuda.is_available()
                 },
-                "loaded_model": manager.current_model_type
+                "loaded_model": manager.current_model_type,
+                "performance": perf
             }
         except Exception as e:
             logger.error(f"Health check diagnostics failed: {e}")

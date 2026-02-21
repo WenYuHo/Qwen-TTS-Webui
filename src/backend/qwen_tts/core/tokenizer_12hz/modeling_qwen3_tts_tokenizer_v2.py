@@ -267,9 +267,12 @@ class Qwen3TTSTokenizerV2DecoderRotatoryEmbedding(nn.Module):
         super().__init__()
         # BC: "rope_type" was originally "type"
         if hasattr(config, "rope_scaling") and isinstance(config.rope_scaling, dict):
-            self.rope_type = config.rope_scaling.get("rope_type", config.rope_scaling.get("type"))
+            self.rope_type = config.rope_scaling.get("rope_type", config.rope_scaling.get("type", "linear"))
+            if self.rope_type == "default": self.rope_type = "linear"
+            if "factor" not in config.rope_scaling: config.rope_scaling["factor"] = 1.0
         else:
-            self.rope_type = "default"
+            self.rope_type = "linear"
+            config.rope_scaling = {"rope_type": "linear", "factor": 1.0}
         self.max_seq_len_cached = config.max_position_embeddings
         self.original_max_seq_len = config.max_position_embeddings
 
