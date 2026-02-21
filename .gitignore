@@ -26,3 +26,5 @@ uploads/
 # System
 desktop.ini
 .DS_Store
+logs/
+*.log

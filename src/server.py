@@ -1,7 +1,6 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File
-from fastapi.middleware.cors import CORSMiddleware
-import uuid
+from fastapi import FastAPI, HTTPException, UploadFile, File, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from typing import List, Dict, Optional
@@ -9,6 +8,8 @@ import io
 import soundfile as sf
 import uvicorn
 import sys
+import uuid
+import json
 from pathlib import Path
 
 # Fix import path for backend modules
@@ -19,7 +20,9 @@ if str(current_dir) not in sys.path:
 from backend.podcast_engine import PodcastEngine
 from backend.config import MODELS, logger
 from backend.task_manager import task_manager, TaskStatus
-from fastapi import BackgroundTasks
+from backend.s2s_logic import run_s2s_task
+from backend.dub_logic import run_dub_task
+from backend.utils import numpy_to_wav_bytes
 
 app = FastAPI()
 
@@ -37,14 +40,12 @@ MAX_TEXT_LENGTH = 5000  # per segment
 MAX_SCRIPT_SEGMENTS = 100
 
 # serve static files
-static_dir = current_dir / "static" # src/static
+static_dir = current_dir / "static"
 if not static_dir.exists():
     static_dir.mkdir(parents=True)
 
-# Mount static files
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
-# previews directory
 preview_dir = static_dir / "previews"
 if not preview_dir.exists():
     preview_dir.mkdir(parents=True)
@@ -57,13 +58,6 @@ async def read_index():
 async def favicon():
     from fastapi import Response
     return Response(status_code=204)
-
-# Helper to save/stream audio
-def numpy_to_wav_bytes(waveform, sample_rate):
-    buffer = io.BytesIO()
-    sf.write(buffer, waveform, sample_rate, format='WAV')
-    buffer.seek(0)
-    return buffer
 
 # --- Models ---
 class SpeakerProfile(BaseModel):
@@ -81,23 +75,38 @@ class PodcastRequest(BaseModel):
     script: List[ScriptLine]
     bgm_mood: Optional[str] = None
 
+class S2SRequest(BaseModel):
+    source_audio: str
+    target_voice: dict
+
+class DubRequest(BaseModel):
+    source_audio: str
+    target_lang: str
+
+class ProjectBlock(BaseModel):
+    id: str
+    role: str
+    text: str
+    status: str
+
+class ProjectData(BaseModel):
+    name: str
+    blocks: List[ProjectBlock]
+    script_draft: Optional[str] = ""
+
 # --- Engine ---
 engine = PodcastEngine()
 
 @app.get("/api/health")
 async def health_check():
-    """Detailed system and model diagnostics"""
     return engine.get_system_status()
 
 @app.get("/api/tasks/{task_id}")
 async def get_task_status(task_id: str):
-    """Check the status of a background task"""
     task = task_manager.get_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     
-    # Don't return the raw audio bytes in status check to keep response small
-    # They will be retrieved via a separate result endpoint or the original task completion logic
     response = task.copy()
     if response["result"] and isinstance(response["result"], bytes):
         response["has_result"] = True
@@ -109,7 +118,6 @@ async def get_task_status(task_id: str):
 
 @app.get("/api/tasks/{task_id}/result")
 async def get_task_result(task_id: str):
-    """Retrieve the audio result of a completed task"""
     task = task_manager.get_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -123,11 +131,8 @@ async def get_task_result(task_id: str):
     return StreamingResponse(io.BytesIO(task["result"]), media_type="audio/wav")
 
 def run_synthesis_task(task_id: str, is_podcast: bool, request_data: PodcastRequest):
-    """Background worker for synthesis tasks"""
     try:
         task_manager.update_task(task_id, status=TaskStatus.PROCESSING, progress=10, message="Initializing engine")
-        
-        # 1. Setup profiles
         for p in request_data.profiles:
             engine.set_speaker_profile(p.role, {"type": p.type, "value": p.value})
         
@@ -142,22 +147,18 @@ def run_synthesis_task(task_id: str, is_podcast: bool, request_data: PodcastRequ
             result = {"waveform": wav, "sample_rate": sr}
             
         task_manager.update_task(task_id, progress=80, message="Encoding audio")
-        
         if not result:
             raise Exception("Generation returned no audio")
-            
-        wav_bytes = numpy_to_wav_bytes(result["waveform"], result["sample_rate"]).read()
         
+        wav_bytes = numpy_to_wav_bytes(result["waveform"], result["sample_rate"]).read()
         task_manager.update_task(task_id, status=TaskStatus.COMPLETED, progress=100, message="Ready", result=wav_bytes)
-        logger.info(f"Task {task_id} completed successfully")
         
     except Exception as e:
         logger.error(f"Task {task_id} failed: {e}", exc_info=True)
-        task_manager.update_task(task_id, status=TaskStatus.FAILED, error=str(e), message="Synthesis failed")
+        task_manager.update_task(task_id, status=TaskStatus.FAILED, error=str(e), message=f"Synthesis failed: {e}")
 
 @app.get("/api/speakers")
 async def get_speakers():
-    """Return available preset speakers"""
     return {
         "presets": ["aiden", "dylan", "eric", "ono_anna", "ryan", "serena", "sohee", "uncle_fu", "vivian"],
         "modes": ["preset", "design", "clone"]
@@ -165,144 +166,94 @@ async def get_speakers():
 
 @app.post("/api/voice/upload")
 async def upload_voice(file: UploadFile = File(...)):
-    """Handle 3s audio upload for cloning"""
-    upload_dir = current_dir.parent / "uploads"
-    if not upload_dir.exists():
-        upload_dir.mkdir(parents=True)
+    upload_dir = engine.upload_dir
     
     file_extension = Path(file.filename).suffix.lower()
     if file_extension not in [".wav", ".mp3", ".flac"]:
-        raise HTTPException(status_code=400, detail="Invalid file type. Only WAV, MP3, FLAC supported.")
+        raise HTTPException(status_code=400, detail="Invalid file type")
 
-    # Read with size limit
     content = await file.read()
     if len(content) > MAX_UPLOAD_BYTES:
-        raise HTTPException(status_code=413, detail=f"File too large. Maximum size is {MAX_UPLOAD_BYTES // (1024*1024)}MB.")
-        
+        raise HTTPException(status_code=413, detail="File too large")
+
     safe_filename = f"{uuid.uuid4()}{file_extension}"
     file_path = upload_dir / safe_filename
     with open(file_path, "wb") as f:
         f.write(content)
     
-    # Return only the filename, not the full server path
-    return {"filename": str(file_path)}
+    return {"filename": safe_filename}
+
+def validate_request(request: PodcastRequest):
+    if not request.script:
+        raise HTTPException(status_code=400, detail="Script is empty")
+    if len(request.script) > MAX_SCRIPT_SEGMENTS:
+        raise HTTPException(status_code=400, detail="Script too long")
+    for line in request.script:
+        if len(line.text) > MAX_TEXT_LENGTH:
+            raise HTTPException(status_code=400, detail="Text too long")
 
 @app.post("/api/generate/segment")
 async def generate_segment(request: PodcastRequest, background_tasks: BackgroundTasks):
-    """Start async generation for a single script line"""
-    if not request.script:
-        raise HTTPException(status_code=400, detail="Script is empty")
-    
-    if len(request.script) > MAX_SCRIPT_SEGMENTS:
-        raise HTTPException(status_code=400, detail=f"Script too long (max {MAX_SCRIPT_SEGMENTS} segments)")
-
-    # Validate text lengths
-    for line in request.script:
-        if len(line.text) > MAX_TEXT_LENGTH:
-            raise HTTPException(status_code=400, detail=f"Text too long for role '{line.role}' (max {MAX_TEXT_LENGTH} chars)")
-        
+    validate_request(request)
     task_id = task_manager.create_task("segment_generation", {"role": request.script[0].role})
     background_tasks.add_task(run_synthesis_task, task_id, False, request)
-    
     return {"task_id": task_id, "status": TaskStatus.PENDING}
 
 @app.post("/api/generate/podcast")
 async def generate_podcast(request: PodcastRequest, background_tasks: BackgroundTasks):
-    """
-    Start async podcast generation.
-    """
-    if not request.script:
-        raise HTTPException(status_code=400, detail="Script is empty")
-    
-    if len(request.script) > MAX_SCRIPT_SEGMENTS:
-        raise HTTPException(status_code=400, detail=f"Script too long (max {MAX_SCRIPT_SEGMENTS} segments)")
-
-    # Validate text lengths
-    for line in request.script:
-        if len(line.text) > MAX_TEXT_LENGTH:
-            raise HTTPException(status_code=400, detail=f"Text too long for role '{line.role}' (max {MAX_TEXT_LENGTH} chars)")
-
-    print(f"Received request with {len(request.script)} lines, BGM: {request.bgm_mood}")
-    
+    validate_request(request)
     task_id = task_manager.create_task("podcast_generation", {"segments": len(request.script)})
     background_tasks.add_task(run_synthesis_task, task_id, True, request)
-    
+    return {"task_id": task_id, "status": TaskStatus.PENDING}
+
+@app.post("/api/generate/s2s")
+async def generate_s2s(request: S2SRequest, background_tasks: BackgroundTasks):
+    task_id = task_manager.create_task("s2s_generation", {"source": request.source_audio})
+    background_tasks.add_task(run_s2s_task, task_id, request.source_audio, request.target_voice, engine)
+    return {"task_id": task_id, "status": TaskStatus.PENDING}
+
+@app.post("/api/generate/dub")
+async def generate_dub(request: DubRequest, background_tasks: BackgroundTasks):
+    task_id = task_manager.create_task("dubbing", {"source": request.source_audio})
+    background_tasks.add_task(run_dub_task, task_id, request.source_audio, request.target_lang, engine)
     return {"task_id": task_id, "status": TaskStatus.PENDING}
 
 @app.post("/api/voice/preview")
 async def voice_preview(request: SpeakerProfile):
-    """Generate and cache a preview for a specific voice"""
-    # Use role or name as part of filename handle
-    # Clean role name for filename
     safe_name = "".join([c for c in request.role if c.isalnum() or c in (' ', '.', '_', '-')]).strip()
     preview_path = preview_dir / f"{safe_name}.wav"
-    
-    # If exists, return cached
     if preview_path.exists():
         return FileResponse(preview_path)
-        
-    # Generate new
     try:
         engine.set_speaker_profile(request.role, {"type": request.type, "value": request.value})
-        test_text = "This is a preview of my voice."
-        wav, sr = engine.generate_segment(request.role, test_text)
-        
-        # Save to file
+        wav, sr = engine.generate_segment(request.role, "This is a preview of my voice.")
         sf.write(str(preview_path), wav, sr, format='WAV')
-        
         return FileResponse(preview_path)
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Preview failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-# --- Project Management (Phase 1) ---
-
+# --- Project Management ---
 PROJECTS_DIR = current_dir.parent / "projects"
 if not PROJECTS_DIR.exists():
     PROJECTS_DIR.mkdir(parents=True)
 
-class ProjectBlock(BaseModel):
-    id: str
-    role: str
-    text: str
-    status: str
-    # Future: start_time, duration, track_id
-
-class ProjectData(BaseModel):
-    name: str # Project name
-    blocks: List[ProjectBlock]
-    script_draft: Optional[str] = ""
-
 @app.get("/api/projects")
 async def list_projects():
-    """List all saved projects"""
-    projects = []
-    for f in PROJECTS_DIR.glob("*.json"):
-        projects.append(f.stem)
-    return {"projects": projects}
+    return {"projects": [f.stem for f in PROJECTS_DIR.glob("*.json")]}
 
 @app.post("/api/projects/{name}")
 async def save_project(name: str, data: ProjectData):
-    """Save a project to disk"""
     safe_name = "".join([c for c in name if c.isalnum() or c in (' ', '-', '_')]).strip()
-    if not safe_name:
-        raise HTTPException(status_code=400, detail="Invalid project name")
-        
     file_path = PROJECTS_DIR / f"{safe_name}.json"
-    import json
     with open(file_path, "w", encoding="utf-8") as f:
-        f.write(data.json())
-        
+        f.write(data.model_dump_json())
     return {"status": "saved", "name": safe_name}
 
 @app.get("/api/projects/{name}")
 async def load_project(name: str):
-    """Load a project from disk"""
     file_path = PROJECTS_DIR / f"{name}.json"
     if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Project not found")
-        
+        raise HTTPException(status_code=404, detail="Not found")
     return FileResponse(file_path)
 
 if __name__ == "__main__":

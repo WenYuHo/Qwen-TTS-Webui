@@ -1,462 +1,558 @@
-// app.js - Main Dashboard Logic
-// Dependence: shared.js
-// All state logic (SpeakerStore, CanvasManager) is handled in shared.js
+/**
+ * Qwen Studio - Main Application Logic
+ */
 
-// --- UI Elements ---
-const speakersList = document.getElementById('speakers-list');
-const scriptEditor = document.getElementById('script-editor');
-const statusMsg = document.getElementById('status-msg');
-const audioPlayer = document.getElementById('audio-player');
-const voiceModal = document.getElementById('voice-modal');
-const blocksContainer = document.getElementById('blocks-container');
-
-// --- Speaker Rendering ---
-function renderSpeakers() {
-    speakersList.innerHTML = '';
-
-    // Presets
-    PRESETS.forEach(p => {
-        speakersList.appendChild(createSpeakerItem(p, 'preset', p));
-    });
-
-    // Custom Voices
-    const customVoices = SpeakerStore.getVoices();
-    if (customVoices.length > 0) {
-        const divider = document.createElement('div');
-        divider.className = 'label';
-        divider.style.padding = '8px 16px';
-        divider.innerText = 'My Voices';
-        speakersList.appendChild(divider);
-
-        customVoices.forEach(v => {
-            speakersList.appendChild(createSpeakerItem(v.name, v.type, v.value, v.id));
-        });
+// --- State ---
+const state = {
+    currentView: 'speech',
+    speechSubTab: 'tts',
+    selectedVoice: null,
+    voicelab: {
+        designResult: null,
+        cloneResult: null,
+        lastUploadedPath: null,
+        recorder: null,
+        audioChunks: [],
+        isRecording: false
+    },
+    s2s: {
+        recorder: null,
+        audioChunks: [],
+        isRecording: false,
+        lastUploadedPath: null
     }
-
-    // Actions
-    const actions = document.createElement('div');
-    actions.style.display = 'flex';
-    actions.style.gap = '8px';
-    actions.style.marginTop = '12px';
-    actions.innerHTML = `
-        <button class="btn btn-secondary btn-sm" style="flex:1" onclick="exportVoices()">Export</button>
-        <button class="btn btn-secondary btn-sm" style="flex:1" onclick="document.getElementById('import-file').click()">Import</button>
-        <input type="file" id="import-file" style="display:none" onchange="importVoices(this.files[0])">
-    `;
-    speakersList.appendChild(actions);
-}
-
-function createSpeakerItem(name, type, value, id = null) {
-    const div = document.createElement('div');
-    div.className = 'speaker-card';
-    div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; width:100%">
-            <div style="flex:1">
-                <span class="speaker-role">${name}</span>
-                <span style="font-size: 0.65rem; color: var(--text-secondary); display:block">${type}</span>
-            </div>
-            <div style="display:flex; gap:4px; align-items:center;">
-                <button class="btn btn-secondary btn-sm" style="padding: 2px 6px; font-size: 0.7rem;" onclick="playVoicePreview('${name}', '${type}', '${value}')">🔊</button>
-                ${id ? `<button onclick="deleteVoice('${id}')" style="background:none; border:none; color:#a12; cursor:pointer; font-size:1.2rem;">×</button>` : ''}
-            </div>
-        </div>
-    `;
-    return div;
-}
-
-// --- Voice Preview ---
-async function playVoicePreview(role, type, value) {
-    statusMsg.innerText = `Previewing ${role}...`;
-    const blob = await getVoicePreview({ role, type, value });
-    if (blob) {
-        const url = URL.createObjectURL(blob);
-        const previewPlayer = new Audio(url);
-        previewPlayer.play();
-        statusMsg.innerText = "Ready";
-    } else {
-        statusMsg.innerText = "Preview failed.";
-    }
-}
-
-// --- Library Actions (Wrappers) ---
-function deleteVoice(id) {
-    if (confirm("Delete this voice?")) {
-        SpeakerStore.deleteVoice(id);
-        renderSpeakers();
-    }
-}
-
-function exportVoices() {
-    const data = JSON.stringify(SpeakerStore.getVoices(), null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `qwen_voices_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-}
-
-function importVoices(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            const voices = JSON.parse(e.target.result);
-            if (Array.isArray(voices)) {
-                localStorage.setItem('qwen_voices', JSON.stringify(voices));
-                renderSpeakers();
-                alert("Library imported!");
-            }
-        } catch (err) { alert("Invalid library file"); }
-    };
-    reader.readAsText(file);
-}
+};
 
 // --- View Management ---
-function toggleView(view) {
-    document.getElementById('draft-view').style.display = view === 'draft' ? 'block' : 'none';
-    document.getElementById('prod-view').style.display = view === 'prod' ? 'block' : 'none';
+function switchView(viewId) {
+    document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
-    if (view === 'prod' && window.TimelineManager) {
-        setTimeout(() => window.TimelineManager.renderTimeline(), 100);
+    const targetView = document.getElementById(viewId + '-view');
+    if (targetView) targetView.classList.add('active');
+
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        if (item.getAttribute('onclick').includes(viewId)) {
+            item.classList.add('active');
+        }
+    });
+
+    state.currentView = viewId;
+
+    if (viewId === 'voicelab') renderVoiceLibrary();
+    if (viewId === 'speech') renderSpeechVoiceList();
+}
+
+function switchSpeechSubTab(tab) {
+    state.speechSubTab = tab;
+    document.getElementById('tts-input').style.display = tab === 'tts' ? 'block' : 'none';
+    document.getElementById('s2s-input').style.display = tab === 's2s' ? 'block' : 'none';
+}
+
+// --- Recording Utilities ---
+async function startRecording(targetState, btnId, callback) {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        targetState.recorder = new MediaRecorder(stream);
+        targetState.audioChunks = [];
+        targetState.isRecording = true;
+
+        targetState.recorder.ondataavailable = (e) => {
+            targetState.audioChunks.push(e.data);
+        };
+
+        targetState.recorder.onstop = async () => {
+            const blob = new Blob(targetState.audioChunks, { type: 'audio/wav' });
+            const file = new File([blob], "recording.wav", { type: 'audio/wav' });
+            await callback(file);
+            stream.getTracks().forEach(track => track.stop());
+        };
+
+        targetState.recorder.start();
+        document.getElementById(btnId).innerHTML = '<i class="fas fa-stop"></i> Stop Recording';
+        document.getElementById(btnId).classList.replace('btn-danger', 'btn-primary');
+    } catch (e) {
+        alert("Microphone access denied.");
     }
 }
 
-function promoteToProduction() {
-    const text = scriptEditor.value;
-    const script = parseScript(text);
-
-    if (script.length === 0) return alert("Write something in Draft mode first!");
-    if (CanvasManager.blocks.length > 0 && !confirm("This will replace your existing Production timeline. Continue?")) return;
-
-    CanvasManager.clear();
-    script.forEach(line => CanvasManager.addBlock(line.role, line.text));
-    CanvasManager.save();
-
-    renderBlocks();
-    toggleView('prod');
-    statusMsg.innerText = "Production timeline ready";
+function stopRecording(targetState, btnId, originalHtml) {
+    if (targetState.recorder && targetState.isRecording) {
+        targetState.recorder.stop();
+        targetState.isRecording = false;
+        document.getElementById(btnId).innerHTML = originalHtml;
+        document.getElementById(btnId).classList.replace('btn-primary', 'btn-danger');
+    }
 }
 
-// --- Block UI ---
+// --- Voice List Rendering ---
+function renderSpeechVoiceList() {
+    const list = document.getElementById('speech-voice-list');
+    if (!list) return;
+    const voices = getAllProfiles();
+    list.innerHTML = '';
+
+    voices.forEach(v => {
+        const div = document.createElement('div');
+        div.className = 'voice-card' + (state.selectedVoice && state.selectedVoice.role === v.role ? ' selected' : '');
+        div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="flex:1">
+                    <strong>${v.role}</strong>
+                    <div style="font-size:0.7rem; color:var(--text-secondary);">${v.type.toUpperCase()}</div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="playVoicePreview('${v.role}', '${v.type}', '${v.value}', event)">
+                    <i class="fas fa-play"></i>
+                </button>
+            </div>
+        `;
+        div.onclick = () => {
+            state.selectedVoice = v;
+            renderSpeechVoiceList();
+        };
+        list.appendChild(div);
+    });
+}
+
+async function playVoicePreview(role, type, value, event) {
+    if (event) event.stopPropagation();
+    const player = document.getElementById('preview-player');
+    const blob = await getVoicePreview({ role, type, value });
+    if (blob) {
+        player.src = URL.createObjectURL(blob);
+        player.play();
+    }
+}
+
+// --- Speech Synthesis ---
+async function generateSpeech() {
+    if (!state.selectedVoice) return alert("Please select a voice first.");
+    const audioPlayer = document.getElementById('main-audio-player');
+    const statusText = document.getElementById('status-text');
+
+    if (state.speechSubTab === 'tts') {
+        const text = document.getElementById('tts-text').value;
+        if (!text) return alert("Please enter some text.");
+        statusText.innerText = "Synthesizing...";
+        try {
+            const profiles = [state.selectedVoice];
+            const script = [{ role: state.selectedVoice.role, text: text }];
+            const res = await fetch('/api/generate/segment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ profiles, script })
+            });
+            const { task_id } = await res.json();
+            const blob = await TaskPoller.poll(task_id, (task) => {
+                statusText.innerText = `Synthesizing: ${task.progress}%`;
+            });
+            audioPlayer.src = URL.createObjectURL(blob);
+            audioPlayer.play();
+            statusText.innerText = "Speech ready!";
+        } catch (e) {
+            alert("Error: " + e.message);
+            statusText.innerText = "Failed";
+        }
+    } else {
+        if (!state.s2s.lastUploadedPath) return alert("Please upload/record source audio.");
+        statusText.innerText = "Transcribing & Synthesizing...";
+        try {
+            const res = await fetch('/api/generate/s2s', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ source_audio: state.s2s.lastUploadedPath, target_voice: state.selectedVoice })
+            });
+            const { task_id } = await res.json();
+            const blob = await TaskPoller.poll(task_id, (task) => {
+                statusText.innerText = `Processing: ${task.progress}%`;
+            });
+            audioPlayer.src = URL.createObjectURL(blob);
+            audioPlayer.play();
+            statusText.innerText = "S2S Complete!";
+        } catch (e) {
+            alert(e.message);
+            statusText.innerText = "S2S failed";
+        }
+    }
+}
+
+// --- Voice Lab: Design ---
+function randomizeDesign() {
+    const prompts = [
+        "A calm, middle-aged man with a deep and soothing tone",
+        "A energetic young woman with a high-pitched, friendly voice",
+        "An elderly storyteller with a gravelly, wise-sounding voice",
+        "A professional news anchor with a clear, authoritative tone",
+        "A soft-spoken person with a gentle, whispering quality"
+    ];
+    document.getElementById('design-instruct').value = prompts[Math.floor(Math.random() * prompts.length)];
+}
+
+async function testVoiceDesign() {
+    const instruct = document.getElementById('design-instruct').value;
+    const gender = document.getElementById('design-gender').value;
+    const age = document.getElementById('design-age').value;
+    const accent = document.getElementById('design-accent').value;
+    const genderText = gender > 60 ? 'Female' : (gender < 40 ? 'Male' : 'Androgynous');
+    const ageText = age < 25 ? 'Young' : (age < 60 ? 'Middle-aged' : 'Elderly');
+    const enhancedPrompt = `${instruct}. Voice features: ${genderText}, ${ageText}. Accent intensity: ${accent/100}.`;
+
+    const status = document.getElementById('design-status');
+    document.getElementById('design-preview-container').style.display = 'block';
+    status.innerText = "Designing...";
+
+    try {
+        const profile = { role: 'tester', type: 'design', value: enhancedPrompt };
+        const res = await fetch('/api/generate/segment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ profiles: [profile], script: [{ role: 'tester', text: "Hello, this is my new custom voice design." }] })
+        });
+        const { task_id } = await res.json();
+        const blob = await TaskPoller.poll(task_id, (task) => {
+            status.innerText = `Designing: ${task.progress}%`;
+        });
+        state.voicelab.designResult = { url: URL.createObjectURL(blob), type: 'design', value: enhancedPrompt };
+        status.innerText = "Ready!";
+    } catch (e) {
+        alert("Error: " + e.message);
+        status.innerText = "Failed";
+    }
+}
+
+function playDesignPreview() {
+    if (state.voicelab.designResult) {
+        const player = document.getElementById('preview-player');
+        player.src = state.voicelab.designResult.url;
+        player.play();
+    }
+}
+
+async function saveDesignedVoice() {
+    const result = state.voicelab.designResult;
+    if (!result) return;
+    const name = prompt("Enter voice name:");
+    if (!name) return;
+    SpeakerStore.saveVoice({ id: Date.now().toString(), name: name, type: result.type, value: result.value });
+    renderVoiceLibrary();
+}
+
+// --- Voice Lab: Cloning ---
+async function handleCloneUpload(file) {
+    if (!file) return;
+    document.getElementById('clone-filename').innerText = "Uploading...";
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+        const res = await fetch('/api/voice/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (document.getElementById('clone-mode').value === 'professional' && state.voicelab.lastUploadedPath) {
+            state.voicelab.lastUploadedPath += "|" + data.filename;
+            document.getElementById('clone-filename').innerText = "✅ Multiple samples";
+        } else {
+            state.voicelab.lastUploadedPath = data.filename;
+            document.getElementById('clone-filename').innerText = "✅ Uploaded: " + file.name;
+        }
+    } catch (e) { alert(e.message); }
+}
+
+async function testVoiceClone() {
+    if (!state.voicelab.lastUploadedPath) return alert("Upload/record audio first.");
+    const status = document.getElementById('clone-status');
+    document.getElementById('clone-preview-container').style.display = 'block';
+    status.innerText = "Cloning...";
+    try {
+        const profile = { role: 'tester', type: 'clone', value: state.voicelab.lastUploadedPath };
+        const res = await fetch('/api/generate/segment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ profiles: [profile], script: [{ role: 'tester', text: "Testing high-fidelity clone." }] })
+        });
+        const { task_id } = await res.json();
+        const blob = await TaskPoller.poll(task_id, (task) => { status.innerText = `Cloning: ${task.progress}%`; });
+        state.voicelab.cloneResult = { url: URL.createObjectURL(blob), type: 'clone', value: state.voicelab.lastUploadedPath };
+        status.innerText = "Ready!";
+    } catch (e) { alert(e.message); }
+}
+
+function playClonePreview() {
+    if (state.voicelab.cloneResult) {
+        const player = document.getElementById('preview-player');
+        player.src = state.voicelab.cloneResult.url;
+        player.play();
+    }
+}
+
+async function saveClonedVoice() {
+    const result = state.voicelab.cloneResult;
+    if (!result) return;
+    const name = prompt("Voice name:");
+    if (!name) return;
+    SpeakerStore.saveVoice({ id: Date.now().toString(), name, type: 'clone', value: result.value });
+    renderVoiceLibrary();
+}
+
+// --- Library & Avatar ---
+function getAvatarColor(name) {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    return '#' + (hash & 0x00FFFFFF).toString(16).toUpperCase().padStart(6, '0');
+}
+
+function renderAvatar(name) {
+    const color = getAvatarColor(name);
+    return `<div class="avatar" style="background:${color}; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; font-size:0.8rem; border:2px solid rgba(255,255,255,0.2);">${name.substring(0, 1).toUpperCase()}</div>`;
+}
+
+function renderVoiceLibrary() {
+    const grid = document.getElementById('voice-library-grid');
+    if (!grid) return;
+    const voices = SpeakerStore.getVoices();
+    grid.innerHTML = voices.length ? '' : '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">Your library is empty.</p>';
+    voices.forEach(v => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.style.padding = '16px';
+        div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    ${renderAvatar(v.name)}
+                    <div>
+                        <strong>${v.name}</strong>
+                        <div style="font-size:0.7rem; color:var(--text-secondary);">${v.type.toUpperCase()}</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn btn-secondary btn-sm" onclick="playVoicePreview('${v.name}', '${v.type}', '${v.value}')"><i class="fas fa-play"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="deleteVoice('${v.id}')" style="color:var(--danger)"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        `;
+        grid.appendChild(div);
+    });
+}
+
+function deleteVoice(id) {
+    if (confirm("Delete voice?")) { SpeakerStore.deleteVoice(id); renderVoiceLibrary(); renderSpeechVoiceList(); }
+}
+
+// --- Project Studio ---
+function toggleCanvasView(view) {
+    document.getElementById('canvas-draft-view').style.display = view === 'draft' ? 'flex' : 'none';
+    document.getElementById('canvas-production-view').style.display = view === 'production' ? 'flex' : 'none';
+}
+
 function renderBlocks() {
-    blocksContainer.innerHTML = '';
-    if (CanvasManager.blocks.length === 0) {
-        blocksContainer.innerHTML = '<div class="empty-state"><p>No blocks. Write in Draft then Promote.</p></div>';
-        return;
-    }
-
-    CanvasManager.blocks.forEach((block, idx) => {
+    const container = document.getElementById('blocks-container');
+    if (!container) return;
+    container.innerHTML = '';
+    CanvasManager.blocks.forEach(block => {
         const div = document.createElement('div');
         div.className = 'story-block';
         div.innerHTML = `
-            <div class="story-block-header">
-                <div>
-                    <span class="story-block-role">${block.role}</span>
-                    <span class="status-indicator status-${block.status}">${block.status}</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    ${renderAvatar(block.role)}
+                    <span class="label" style="color:var(--accent); margin:0;">${block.role}</span>
                 </div>
-                <div>
-                    <button class="btn btn-secondary btn-sm" onclick="moveBlock('${block.id}', -1)" ${idx === 0 ? 'disabled' : ''}>↑</button>
-                    <button class="btn btn-secondary btn-sm" onclick="moveBlock('${block.id}', 1)" ${idx === CanvasManager.blocks.length - 1 ? 'disabled' : ''}>↓</button>
-                    <button class="btn btn-secondary btn-sm btn-danger" onclick="deleteBlock('${block.id}')">×</button>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">${block.status === 'ready' ? 'Regen' : 'Synth'}</button>
+                    <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')"><i class="fas fa-times"></i></button>
                 </div>
             </div>
-            <div class="story-block-text">${block.text}</div>
-            ${block.status === 'generating' ? `
-                <div class="progress-container">
-                    <div class="progress-bar" style="width: ${block.progress}%"></div>
-                </div>
-                <div style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 8px;">${block.status_msg || 'Initializing...'}</div>
-            ` : ''}
-            ${block.status === 'ready' ? '<div class="waveform-placeholder"></div>' : ''}
-            <div class="story-block-actions">
-                <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">
-                    ${block.status === 'ready' ? 'Regenerate' : (block.status === 'error' ? 'Retry' : 'Synthesize')}
-                </button>
-                ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')">▶ Play</button>` : ''}
-            </div>
+            <p style="margin: 12px 0; color:var(--text-primary);">${block.text}</p>
+            ${block.status === 'generating' ? `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
+            ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play"></i> Play</button>` : ''}
         `;
-        blocksContainer.appendChild(div);
+        container.appendChild(div);
     });
 }
 
-function moveBlock(id, dir) {
-    CanvasManager.moveBlock(id, dir);
+async function promoteToProduction() {
+    const script = parseScript(document.getElementById('script-editor').value);
+    if (script.length === 0) return alert("Write script first (e.g., Alice: Hello)");
+    CanvasManager.clear();
+    script.forEach(line => CanvasManager.addBlock(line.role, line.text));
     CanvasManager.save();
     renderBlocks();
-}
-
-function deleteBlock(id) {
-    CanvasManager.deleteBlock(id);
-    CanvasManager.save();
-    renderBlocks();
+    toggleCanvasView('production');
 }
 
 async function generateBlock(id) {
     const block = CanvasManager.blocks.find(b => b.id === id);
     if (!block) return;
-
-    block.status = 'generating';
-    block.progress = 0;
-    renderBlocks();
-
+    block.status = 'generating'; block.progress = 0; renderBlocks();
     const profiles = getAllProfiles();
-    const script = [{ role: block.role, text: block.text }];
-
     try {
         const res = await fetch('/api/generate/segment', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ profiles, script })
+            body: JSON.stringify({ profiles, script: [{ role: block.role, text: block.text }] })
         });
-
-        if (!res.ok) throw new Error("Synthesis initiation failed");
         const { task_id } = await res.json();
-
-        // Start polling
-        const blob = await TaskPoller.poll(task_id, (task) => {
-            block.progress = task.progress;
-            block.status_msg = task.message;
-            renderBlocks();
-        });
-
+        const blob = await TaskPoller.poll(task_id, (task) => { block.progress = task.progress; renderBlocks(); });
         block.audioUrl = URL.createObjectURL(blob);
-        block.status = 'ready';
-        block.progress = 100;
-
-        // Get duration for timeline
-        const tempAudio = new Audio(block.audioUrl);
-        tempAudio.onloadedmetadata = () => {
-            block.duration = tempAudio.duration;
-            CanvasManager.save(); // Save duration
-            if (window.TimelineManager) window.TimelineManager.renderTimeline();
-        };
-
-    } catch (e) {
-        block.status = 'error';
-        block.status_msg = e.message;
-        console.error("Synthesis failed:", e);
-    } finally {
-        renderBlocks();
-    }
+        block.status = 'ready'; renderBlocks();
+    } catch (e) { block.status = 'error'; alert(e.message); renderBlocks(); }
 }
 
 function playBlock(id) {
     const block = CanvasManager.blocks.find(b => b.id === id);
     if (block && block.audioUrl) {
-        audioPlayer.src = block.audioUrl;
-        audioPlayer.play();
+        const player = document.getElementById('main-audio-player');
+        player.src = block.audioUrl;
+        player.play();
     }
 }
 
-// --- Production Logic ---
-async function batchSynthesize() {
-    const blocksToSynth = CanvasManager.blocks.filter(b => b.status !== 'ready');
-    if (blocksToSynth.length === 0) return alert("All blocks are already synthesized!");
-
-    document.getElementById('batch-btn').disabled = true;
-    for (const block of blocksToSynth) {
-        await generateBlock(block.id);
-    }
-    document.getElementById('batch-btn').disabled = false;
-}
+function deleteBlock(id) { CanvasManager.deleteBlock(id); renderBlocks(); }
 
 async function generatePodcast() {
-    const inProd = document.getElementById('prod-view').style.display === 'block';
-    let script = [];
-    if (inProd) {
-        script = CanvasManager.blocks.map(b => ({
-            role: b.role,
-            text: b.text,
-            start_time: b.startTime // Ensure this is sent
-        }));
-    } else {
-        script = parseScript(scriptEditor.value);
-        // implicit timing for draft mode (null start_time will trigger sequential)
-    }
-
+    const inProd = document.getElementById('canvas-production-view').style.display === 'flex';
+    const script = inProd ? CanvasManager.blocks.map(b => ({ role: b.role, text: b.text })) : parseScript(document.getElementById('script-editor').value);
+    if (script.length === 0) return alert("Empty script.");
     const profiles = getAllProfiles();
     const bgm_mood = document.getElementById('bgm-select').value;
-
-    if (script.length === 0) return alert("Please enter a script.");
-
-    statusMsg.innerText = "Initiating production...";
-    const btn = document.getElementById('generate-btn');
-    btn.disabled = true;
-
+    const statusText = document.getElementById('status-text');
+    statusText.innerText = "Producing...";
     try {
-        const response = await fetch('/api/generate/podcast', {
+        const res = await fetch('/api/generate/podcast', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ profiles, script, bgm_mood })
         });
+        const { task_id } = await res.json();
+        const blob = await TaskPoller.poll(task_id, (task) => { statusText.innerText = `Producing: ${task.progress}%`; });
+        const player = document.getElementById('main-audio-player');
+        player.src = URL.createObjectURL(blob);
+        player.play();
+        statusText.innerText = "Ready!";
+    } catch (e) { alert(e.message); statusText.innerText = "Failed"; }
+}
 
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.detail || "Generation failed");
-        }
+async function batchSynthesize() {
+    const blocks = CanvasManager.blocks.filter(b => b.status !== 'ready');
+    for (const b of blocks) await generateBlock(b.id);
+}
+
+// --- Dubbing ---
+async function startDubbing() {
+    const fileInput = document.getElementById('dub-file');
+    const langSelect = document.getElementById('dub-lang');
+    const statusText = document.getElementById('status-text');
+
+    const file = fileInput.files[0];
+    if (!file) return alert("Please upload a file first.");
+
+    statusText.innerText = "Initiating Dubbing...";
+
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const uploadRes = await fetch('/api/voice/upload', { method: 'POST', body: formData });
+        const uploadData = await uploadRes.json();
+        const path = uploadData.filename;
         
-        const { task_id } = await response.json();
+        const res = await fetch('/api/generate/dub', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ source_audio: path, target_lang: langSelect.value })
+        });
         
-        // Polling for podcast generation
+        const { task_id } = await res.json();
         const blob = await TaskPoller.poll(task_id, (task) => {
-            statusMsg.innerText = `Production: ${task.message} (${task.progress}%)`;
+            statusText.innerText = `Dubbing: ${task.progress}%`;
         });
 
-        const url = URL.createObjectURL(blob);
-        audioPlayer.src = url;
-        audioPlayer.play();
-        statusMsg.innerText = "Podcast ready! 🎉";
+        const player = document.getElementById('main-audio-player');
+        player.src = URL.createObjectURL(blob);
+        player.play();
+        statusText.innerText = "Dubbing Complete!";
     } catch (e) {
-        alert("Error: " + e.message);
-        statusMsg.innerText = "Error in production";
-    } finally {
-        btn.disabled = false;
+        alert(e.message);
+        statusText.innerText = "Dubbing failed";
     }
 }
 
-// --- Utils ---
-function autosave() {
-    localStorage.setItem('qwen_draft', scriptEditor.value);
-}
-
-function loadAutosave() {
-    const draft = localStorage.getItem('qwen_draft');
-    if (draft) scriptEditor.value = draft;
-}
-
-// --- Init ---
-renderSpeakers();
-loadAutosave();
-CanvasManager.load();
-renderBlocks();
-UIHeartbeat.start();
-scriptEditor.addEventListener('input', autosave);
-
-// Globals for HTML onclicks
-window.toggleView = toggleView;
-window.promoteToProduction = promoteToProduction;
-window.generatePodcast = generatePodcast;
-window.batchSynthesize = batchSynthesize;
-window.generateBlock = generateBlock;
-window.playBlock = playBlock;
-window.moveBlock = moveBlock;
-window.deleteBlock = deleteBlock;
-window.playVoicePreview = playVoicePreview;
-window.deleteVoice = deleteVoice;
-window.importVoices = importVoices;
-window.exportVoices = exportVoices;
-window.saveProject = saveProject;
-window.loadProject = loadProject;
-
-// --- Project Management ---
+// --- Projects ---
 async function fetchProjects() {
     const select = document.getElementById('project-select');
-    select.innerHTML = '<option value="">(New Project)</option>';
-
+    if (!select) return;
     try {
         const res = await fetch('/api/projects');
         const data = await res.json();
+        select.innerHTML = '<option value="">(New Project)</option>';
         data.projects.forEach(p => {
             const opt = document.createElement('option');
-            opt.value = p;
-            opt.innerText = p;
-            select.appendChild(opt);
+            opt.value = p; opt.innerText = p; select.appendChild(opt);
         });
-    } catch (e) {
-        console.error("Failed to fetch projects", e);
-    }
+    } catch (e) { console.error(e); }
 }
 
 async function saveProject() {
-    let name = document.getElementById('project-select').value;
-    if (!name) {
-        name = prompt("Enter project name:");
-    }
+    let name = document.getElementById('project-select').value || prompt("Project Name:");
     if (!name) return;
-
-    const draftText = scriptEditor.value;
-    const blocks = CanvasManager.blocks.map(b => ({
-        id: b.id,
-        role: b.role,
-        text: b.text,
-        status: b.status
-    }));
-
+    const data = { name, blocks: CanvasManager.blocks.map(b => ({ id: b.id, role: b.role, text: b.text, status: b.status })), script_draft: document.getElementById('script-editor').value };
     try {
-        const res = await fetch(`/api/projects/${name}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name: name,
-                blocks: blocks,
-                script_draft: draftText
-            })
-        });
-
-        if (res.ok) {
-            alert("Project saved!");
-            fetchProjects(); // refresh list
-            // Set select to this project
-            setTimeout(() => document.getElementById('project-select').value = name, 500);
-        } else {
-            alert("Failed to save project.");
-        }
-    } catch (e) {
-        alert("Error saving: " + e.message);
-    }
+        await fetch(`/api/projects/${name}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        alert("Saved!"); fetchProjects();
+    } catch (e) { alert(e.message); }
 }
 
 async function loadProject() {
     const name = document.getElementById('project-select').value;
-    if (!name) return alert("Select a project first.");
-
-    if (CanvasManager.blocks.length > 0 && !confirm("Overwrite current workspace?")) return;
-
+    if (!name) return;
     try {
         const res = await fetch(`/api/projects/${name}`);
-        if (!res.ok) throw new Error("Load failed");
-
         const data = await res.json();
-
-        // Restore Draft
-        scriptEditor.value = data.script_draft || "";
-        localStorage.setItem('qwen_draft', scriptEditor.value);
-
-        // Restore Blocks
+        document.getElementById('script-editor').value = data.script_draft || "";
         CanvasManager.clear();
-        if (data.blocks && Array.isArray(data.blocks)) {
-            data.blocks.forEach(b => {
-                // Re-add block (manual push to preserve IDs if we wanted, but logic generates new IDs usually. 
-                // Let's force push for now to keep state simple, or reuse addBlock logic).
-                // Actually CanvasManager.addBlock generates ID. 
-                // We should probably allow restoring explicit state.
-                // Let's just push manually to blocks array for fidelity.
-                CanvasManager.blocks.push({
-                    id: b.id,
-                    role: b.role,
-                    text: b.text,
-                    status: 'idle', // Reset status to force re-gen or idle? Or keep 'ready' if we had audio?
-                    // Audio is not saved in JSON. So reset to idle/ready but no url.
-                    // If 'ready', user might think it plays. But we don't have the blob URL anymore.
-                    // So set to 'idle'.
-                    audioUrl: null
-                });
-            });
-        }
-        CanvasManager.save();
+        (data.blocks || []).forEach(b => { CanvasManager.blocks.push({ ...b, audioUrl: null }); });
         renderBlocks();
-        alert("Project loaded!");
-
-    } catch (e) {
-        alert("Error loading: " + e.message);
-    }
+        alert("Loaded!");
+    } catch (e) { alert(e.message); }
 }
 
-// Init additional
-fetchProjects();
+// --- Setup ---
+function setupEventListeners() {
+    const cloneRecordBtn = document.getElementById('clone-record-btn');
+    if (cloneRecordBtn) cloneRecordBtn.onclick = () => {
+        if (state.voicelab.isRecording) stopRecording(state.voicelab, 'clone-record-btn', '<i class="fas fa-circle"></i> Record');
+        else startRecording(state.voicelab, 'clone-record-btn', handleCloneUpload);
+    };
 
-// For voice modal (addSpeaker, toggleVoiceFields, closeModal) - these functions are assumed to be in shared.js or handled differently now.
-// The voiceModal element is still present, so its usage might be internal to shared.js or another module.
-// For now, we'll assume the modal functions are not directly exposed globally from app.js anymore.
-// If addSpeaker is still needed globally, it would need to be imported and exposed.
-// For the purpose of this edit, only the explicitly mentioned global functions are exposed.
+    const s2sRecordBtn = document.getElementById('s2s-record-btn');
+    if (s2sRecordBtn) s2sRecordBtn.onclick = () => {
+        if (state.s2s.isRecording) stopRecording(state.s2s, 's2s-record-btn', '<i class="fas fa-circle"></i> Record Audio');
+        else startRecording(state.s2s, 's2s-record-btn', async (file) => {
+            const formData = new FormData(); formData.append('file', file);
+            const res = await fetch('/api/voice/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+            state.s2s.lastUploadedPath = data.filename;
+            alert("Recording uploaded.");
+        });
+    };
+}
+
+window.onload = () => {
+    switchView('speech');
+    renderSpeechVoiceList();
+    renderVoiceLibrary();
+    fetchProjects();
+    setupEventListeners();
+    setInterval(() => {
+        const dot = document.getElementById('heartbeat');
+        if (dot) { dot.style.opacity = '1'; setTimeout(() => dot.style.opacity = '0.3', 200); }
+    }, 2000);
+};
+
+// Globals
+Object.assign(window, {
+    switchView, switchSpeechSubTab, generateSpeech, playVoicePreview,
+    randomizeDesign, testVoiceDesign, playDesignPreview, saveDesignedVoice,
+    handleCloneUpload, testVoiceClone, playClonePreview, saveClonedVoice,
+    deleteVoice, toggleCanvasView, promoteToProduction, generateBlock,
+    playBlock, deleteBlock, generatePodcast, batchSynthesize, saveProject, loadProject,
+    startDubbing
+});
