@@ -18,3 +18,7 @@ pytest
 pytest-asyncio
 httpx
 # huggingface_hub is required for download_models logic if used, but we use pre-downloaded
+openai-whisper
+librosa
+deep-translator
+beautifulsoup4
