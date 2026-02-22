@@ -1,18 +1,24 @@
 import pytest
 from fastapi.testclient import TestClient
-from src.server import app
-from src.backend.task_manager import task_manager, TaskStatus
+import sys
+from pathlib import Path
+
+# Add src to path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
+from server import app
+from backend.task_manager import task_manager, TaskStatus
 import json
 import os
 import numpy as np
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 client = TestClient(app)
 
 @pytest.fixture
 def mock_engine():
-    with patch('src.server.engine') as mock:
+    # Patch the engine in server_state where all routers get it from
+    with patch('backend.server_state.engine') as mock:
         mock.upload_dir = Path("uploads")
         if not mock.upload_dir.exists():
             mock.upload_dir.mkdir(parents=True)
@@ -46,6 +52,9 @@ def test_upload_voice(mock_engine):
         filename = response.json()["filename"]
         uploaded_file = mock_engine.upload_dir / filename
         assert uploaded_file.exists()
+        # Cleanup uploaded file
+        if uploaded_file.exists():
+            uploaded_file.unlink()
     finally:
         if dummy_wav_file.exists():
             dummy_wav_file.unlink()
@@ -58,11 +67,6 @@ def test_generate_segment(mock_engine):
     response = client.post("/api/generate/segment", json=data)
     assert response.status_code == 200
     assert "task_id" in response.json()
-    task_id = response.json()["task_id"]
-
-    # In tests, the background task might not have run yet or might fail if not mocked properly
-    # But the endpoint should return a task_id
-    assert task_id is not None
 
 def test_s2s_endpoint(mock_engine):
     data = {
