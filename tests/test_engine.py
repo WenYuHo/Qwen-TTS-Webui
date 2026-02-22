@@ -34,7 +34,7 @@ def test_generate_podcast_with_mocked_segment(monkeypatch):
     """Generate podcast concatenates segments with padding."""
     engine = PodcastEngine()
     dummy_wav = np.zeros(24000, dtype=np.float32)
-    monkeypatch.setattr(engine, "generate_segment", lambda role, text: (dummy_wav, 24000))
+    monkeypatch.setattr(engine, "generate_segment", lambda role, text, **kwargs: (dummy_wav, 24000))
 
     script = [{"role": "ryan", "text": "Hello"}]
     result = engine.generate_podcast(script)
@@ -50,7 +50,7 @@ def test_generate_podcast_missing_bgm_should_not_crash(monkeypatch):
     """Engine proceeds with voice generation even if BGM file is missing."""
     engine = PodcastEngine()
     dummy_wav = np.zeros(24000, dtype=np.float32)
-    monkeypatch.setattr(engine, "generate_segment", lambda role, text: (dummy_wav, 24000))
+    monkeypatch.setattr(engine, "generate_segment", lambda role, text, **kwargs: (dummy_wav, 24000))
 
     script = [{"role": "Ryan", "text": "Hello"}]
     result = engine.generate_podcast(script, bgm_mood="non_existent_mood_12345")
@@ -64,7 +64,7 @@ def test_normalization(monkeypatch):
     """Audio with values > 1.0 should be normalized to prevent clipping."""
     engine = PodcastEngine()
     clipping_wav = np.array([2.0, -1.5, 0.0], dtype=np.float32)
-    monkeypatch.setattr(engine, "generate_segment", lambda role, text: (clipping_wav, 24000))
+    monkeypatch.setattr(engine, "generate_segment", lambda role, text, **kwargs: (clipping_wav, 24000))
 
     script = [{"role": "Ryan", "text": "Hello"}]
     result = engine.generate_podcast(script)
@@ -104,7 +104,7 @@ def test_multi_segment_podcast(monkeypatch):
     """Multiple segments concatenate correctly with padding."""
     engine = PodcastEngine()
     dummy_wav = np.ones(1000, dtype=np.float32) * 0.5
-    monkeypatch.setattr(engine, "generate_segment", lambda role, text: (dummy_wav, 24000))
+    monkeypatch.setattr(engine, "generate_segment", lambda role, text, **kwargs: (dummy_wav, 24000))
 
     script = [
         {"role": "Host", "text": "Welcome"},
@@ -123,7 +123,7 @@ def test_segment_error_is_skipped(monkeypatch):
     engine = PodcastEngine()
     call_count = [0]
 
-    def mock_segment(role, text):
+    def mock_segment(role, text, **kwargs):
         call_count[0] += 1
         if call_count[0] == 2:
             raise RuntimeError("Simulated failure")
