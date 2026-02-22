@@ -1,336 +1,235 @@
-/**
- * Qwen Studio - Main Application Logic
- */
+// --- Qwen-TTS Studio Frontend ---
 
-// --- State ---
 const state = {
     currentView: 'speech',
-    speechSubTab: 'tts',
-    selectedVoice: null,
     voicelab: {
-        designResult: null,
-        cloneResult: null,
-        lastUploadedPath: null,
-        recorder: null,
-        audioChunks: [],
-        isRecording: false
+        lastDesignedPath: null,
+        lastClonedPath: null,
+        lastMixedPath: null,
+        isRecording: false,
+        mediaRecorder: null,
+        audioChunks: []
     },
     s2s: {
-        recorder: null,
-        audioChunks: [],
+        lastUploadedPath: null,
         isRecording: false,
-        lastUploadedPath: null
+        mediaRecorder: null,
+        audioChunks: []
     }
 };
 
-// --- View Management ---
-function switchView(viewId) {
-    document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+function switchView(view) {
+    state.currentView = view;
+    document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
 
-    const targetView = document.getElementById(viewId + '-view');
-    if (targetView) targetView.classList.add('active');
+    document.getElementById(`${view}-view`).classList.add('active');
+    document.querySelector(`button[onclick="switchView('${view}')"]`).classList.add('active');
 
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
-        if (item.getAttribute('onclick').includes(viewId)) {
-            item.classList.add('active');
-        }
-    });
-
-    state.currentView = viewId;
-
-    if (viewId === 'voicelab') renderVoiceLibrary();
-    if (viewId === 'speech') renderSpeechVoiceList();
-}
-
-function switchSpeechSubTab(tab) {
-    state.speechSubTab = tab;
-    document.getElementById('tts-input').style.display = tab === 'tts' ? 'block' : 'none';
-    document.getElementById('s2s-input').style.display = tab === 's2s' ? 'block' : 'none';
-}
-
-// --- Recording Utilities ---
-async function startRecording(targetState, btnId, callback) {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        targetState.recorder = new MediaRecorder(stream);
-        targetState.audioChunks = [];
-        targetState.isRecording = true;
-
-        targetState.recorder.ondataavailable = (e) => {
-            targetState.audioChunks.push(e.data);
-        };
-
-        targetState.recorder.onstop = async () => {
-            const blob = new Blob(targetState.audioChunks, { type: 'audio/wav' });
-            const file = new File([blob], "recording.wav", { type: 'audio/wav' });
-            await callback(file);
-            stream.getTracks().forEach(track => track.stop());
-        };
-
-        targetState.recorder.start();
-        document.getElementById(btnId).innerHTML = '<i class="fas fa-stop"></i> Stop Recording';
-        document.getElementById(btnId).classList.replace('btn-danger', 'btn-primary');
-    } catch (e) {
-        alert("Microphone access denied.");
+    if (view === 'speech') {
+        renderSpeechVoiceList();
+        renderVoiceLibrary();
+    }
+    if (view === 'dubbing') {
+        renderS2STargetList();
     }
 }
 
-function stopRecording(targetState, btnId, originalHtml) {
-    if (targetState.recorder && targetState.isRecording) {
-        targetState.recorder.stop();
-        targetState.isRecording = false;
-        document.getElementById(btnId).innerHTML = originalHtml;
-        document.getElementById(btnId).classList.replace('btn-primary', 'btn-danger');
-    }
+function renderAvatar(name) {
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B59B6'];
+    const color = colors[name.length % colors.length];
+    return `<div class="avatar" style="background:${color}">${name[0].toUpperCase()}</div>`;
 }
 
-// --- Voice List Rendering ---
+// --- Voice Studio ---
+
 function renderSpeechVoiceList() {
-    const list = document.getElementById('speech-voice-list');
-    if (!list) return;
-    const voices = getAllProfiles();
-    list.innerHTML = '';
+    const selects = ['mix-voice-a', 'mix-voice-b'];
+    const profiles = getAllProfiles();
 
-    voices.forEach(v => {
-        const div = document.createElement('div');
-        div.className = 'voice-card' + (state.selectedVoice && state.selectedVoice.role === v.role ? ' selected' : '');
-        div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="flex:1">
-                    <strong>${v.role}</strong>
-                    <div style="font-size:0.7rem; color:var(--text-secondary);">${v.type.toUpperCase()}</div>
-                </div>
-                <button class="btn btn-secondary btn-sm" onclick="playVoicePreview('${v.role}', '${v.type}', '${v.value}', event)">
-                    <i class="fas fa-play"></i>
-                </button>
-            </div>
-        `;
-        div.onclick = () => {
-            state.selectedVoice = v;
-            renderSpeechVoiceList();
-        };
-        list.appendChild(div);
+    selects.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = '';
+        profiles.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = JSON.stringify(p);
+            opt.innerText = p.role;
+            el.appendChild(opt);
+        });
     });
 }
 
-async function playVoicePreview(role, type, value, event) {
-    if (event) event.stopPropagation();
-    const player = document.getElementById('preview-player');
-    const blob = await getVoicePreview({ role, type, value });
-    if (blob) {
-        player.src = URL.createObjectURL(blob);
-        player.play();
-    }
-}
-
-// --- Speech Synthesis ---
-async function generateSpeech() {
-    if (!state.selectedVoice) return alert("Please select a voice first.");
-    const audioPlayer = document.getElementById('main-audio-player');
-    const statusText = document.getElementById('status-text');
-
-    if (state.speechSubTab === 'tts') {
-        const text = document.getElementById('tts-text').value;
-        if (!text) return alert("Please enter some text.");
-        statusText.innerText = "Synthesizing...";
-        try {
-            const profiles = [state.selectedVoice];
-            const script = [{ role: state.selectedVoice.role, text: text }];
-            const res = await fetch('/api/generate/segment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ profiles, script })
-            });
-            const { task_id } = await res.json();
-            const blob = await TaskPoller.poll(task_id, (task) => {
-                statusText.innerText = `Synthesizing: ${task.progress}%`;
-            });
-            audioPlayer.src = URL.createObjectURL(blob);
-            audioPlayer.play();
-            statusText.innerText = "Speech ready!";
-        } catch (e) {
-            alert("Error: " + e.message);
-            statusText.innerText = "Failed";
-        }
-    } else {
-        if (!state.s2s.lastUploadedPath) return alert("Please upload/record source audio.");
-        statusText.innerText = "Transcribing & Synthesizing...";
-        try {
-            const res = await fetch('/api/generate/s2s', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ source_audio: state.s2s.lastUploadedPath, target_voice: state.selectedVoice })
-            });
-            const { task_id } = await res.json();
-            const blob = await TaskPoller.poll(task_id, (task) => {
-                statusText.innerText = `Processing: ${task.progress}%`;
-            });
-            audioPlayer.src = URL.createObjectURL(blob);
-            audioPlayer.play();
-            statusText.innerText = "S2S Complete!";
-        } catch (e) {
-            alert(e.message);
-            statusText.innerText = "S2S failed";
-        }
-    }
-}
-
-// --- Voice Lab: Design ---
-function randomizeDesign() {
-    const prompts = [
-        "A calm, middle-aged man with a deep and soothing tone",
-        "A energetic young woman with a high-pitched, friendly voice",
-        "An elderly storyteller with a gravelly, wise-sounding voice",
-        "A professional news anchor with a clear, authoritative tone",
-        "A soft-spoken person with a gentle, whispering quality"
-    ];
-    document.getElementById('design-instruct').value = prompts[Math.floor(Math.random() * prompts.length)];
+function renderS2STargetList() {
+    const el = document.getElementById('s2s-target-voice');
+    if (!el) return;
+    const profiles = getAllProfiles();
+    el.innerHTML = '';
+    profiles.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = JSON.stringify(p);
+        opt.innerText = p.role;
+        el.appendChild(opt);
+    });
 }
 
 async function testVoiceDesign() {
-    const instruct = document.getElementById('design-instruct').value;
+    const prompt = document.getElementById('design-prompt').value;
     const gender = document.getElementById('design-gender').value;
     const age = document.getElementById('design-age').value;
-    const accent = document.getElementById('design-accent').value;
-    const genderText = gender > 60 ? 'Female' : (gender < 40 ? 'Male' : 'Androgynous');
-    const ageText = age < 25 ? 'Young' : (age < 60 ? 'Middle-aged' : 'Elderly');
-    const enhancedPrompt = `${instruct}. Voice features: ${genderText}, ${ageText}. Accent intensity: ${accent/100}.`;
+    const instruct = `${prompt}. Gender: ${gender}, Age: ${age}`;
 
     const status = document.getElementById('design-status');
-    document.getElementById('design-preview-container').style.display = 'block';
+    const container = document.getElementById('design-preview-container');
+
     status.innerText = "Designing...";
+    container.style.display = 'block';
 
     try {
-        const profile = { role: 'tester', type: 'design', value: enhancedPrompt };
-        const res = await fetch('/api/generate/segment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ profiles: [profile], script: [{ role: 'tester', text: "Hello, this is my new custom voice design." }] })
-        });
-        const { task_id } = await res.json();
-        const blob = await TaskPoller.poll(task_id, (task) => {
-            status.innerText = `Designing: ${task.progress}%`;
-        });
-        state.voicelab.designResult = { url: URL.createObjectURL(blob), type: 'design', value: enhancedPrompt };
-        status.innerText = "Ready!";
+        const blob = await getVoicePreview({ role: 'Designed Voice', type: 'design', value: instruct });
+        const url = URL.createObjectURL(blob);
+        state.voicelab.lastDesignedPath = instruct;
+        window.designPreviewUrl = url;
+        status.innerText = "Ready";
     } catch (e) {
-        alert("Error: " + e.message);
-        status.innerText = "Failed";
+        status.innerText = "Error: " + e.message;
     }
 }
 
 function playDesignPreview() {
-    if (state.voicelab.designResult) {
+    if (window.designPreviewUrl) {
         const player = document.getElementById('preview-player');
-        player.src = state.voicelab.designResult.url;
+        player.src = window.designPreviewUrl;
         player.play();
     }
 }
 
-async function saveDesignedVoice() {
-    const result = state.voicelab.designResult;
-    if (!result) return;
-    const name = prompt("Enter voice name:");
-    if (!name) return;
-    SpeakerStore.saveVoice({ id: Date.now().toString(), name: name, type: result.type, value: result.value });
+function saveDesignedVoice() {
+    const name = prompt("Voice Name:");
+    if (!name || !state.voicelab.lastDesignedPath) return;
+    SpeakerStore.saveVoice({ id: Date.now(), name, type: 'design', value: state.voicelab.lastDesignedPath });
     renderVoiceLibrary();
+    renderSpeechVoiceList();
 }
 
-// --- Voice Lab: Cloning ---
-async function handleCloneUpload(file) {
-    if (!file) return;
-    document.getElementById('clone-filename').innerText = "Uploading...";
-    const formData = new FormData();
-    formData.append('file', file);
-    try {
+async function handleCloneUpload(files) {
+    if (!files || files.length === 0) return;
+    const filenames = [];
+    for (let i = 0; i < files.length; i++) {
+        const formData = new FormData();
+        formData.append('file', files[i]);
         const res = await fetch('/api/voice/upload', { method: 'POST', body: formData });
         const data = await res.json();
-        if (document.getElementById('clone-mode').value === 'professional' && state.voicelab.lastUploadedPath) {
-            state.voicelab.lastUploadedPath += "|" + data.filename;
-            document.getElementById('clone-filename').innerText = "✅ Multiple samples";
-        } else {
-            state.voicelab.lastUploadedPath = data.filename;
-            document.getElementById('clone-filename').innerText = "✅ Uploaded: " + file.name;
-        }
-    } catch (e) { alert(e.message); }
+        filenames.push(data.filename);
+    }
+    state.voicelab.lastClonedPath = filenames.join('|');
+    document.getElementById('clone-filename').innerText = files.length > 1 ? `${files.length} samples selected` : files[0].name;
 }
 
 async function testVoiceClone() {
-    if (!state.voicelab.lastUploadedPath) return alert("Upload/record audio first.");
+    if (!state.voicelab.lastClonedPath) return alert("Upload audio first");
     const status = document.getElementById('clone-status');
-    document.getElementById('clone-preview-container').style.display = 'block';
+    const container = document.getElementById('clone-preview-container');
     status.innerText = "Cloning...";
+    container.style.display = 'block';
+
     try {
-        const profile = { role: 'tester', type: 'clone', value: state.voicelab.lastUploadedPath };
-        const res = await fetch('/api/generate/segment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ profiles: [profile], script: [{ role: 'tester', text: "Testing high-fidelity clone." }] })
-        });
-        const { task_id } = await res.json();
-        const blob = await TaskPoller.poll(task_id, (task) => { status.innerText = `Cloning: ${task.progress}%`; });
-        state.voicelab.cloneResult = { url: URL.createObjectURL(blob), type: 'clone', value: state.voicelab.lastUploadedPath };
-        status.innerText = "Ready!";
-    } catch (e) { alert(e.message); }
+        const blob = await getVoicePreview({ role: 'Cloned Voice', type: 'clone', value: state.voicelab.lastClonedPath });
+        window.clonePreviewUrl = URL.createObjectURL(blob);
+        status.innerText = "Ready";
+    } catch (e) { status.innerText = "Error"; }
 }
 
 function playClonePreview() {
-    if (state.voicelab.cloneResult) {
+    if (window.clonePreviewUrl) {
         const player = document.getElementById('preview-player');
-        player.src = state.voicelab.cloneResult.url;
+        player.src = window.clonePreviewUrl;
         player.play();
     }
 }
 
-async function saveClonedVoice() {
-    const result = state.voicelab.cloneResult;
-    if (!result) return;
-    const name = prompt("Voice name:");
-    if (!name) return;
-    SpeakerStore.saveVoice({ id: Date.now().toString(), name, type: 'clone', value: result.value });
+function saveClonedVoice() {
+    const name = prompt("Voice Name:");
+    if (!name || !state.voicelab.lastClonedPath) return;
+    SpeakerStore.saveVoice({ id: Date.now(), name, type: 'clone', value: state.voicelab.lastClonedPath });
     renderVoiceLibrary();
+    renderSpeechVoiceList();
 }
 
-// --- Library & Avatar ---
-function getAvatarColor(name) {
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    return '#' + (hash & 0x00FFFFFF).toString(16).toUpperCase().padStart(6, '0');
+async function testVoiceMix() {
+    const voiceA = JSON.parse(document.getElementById('mix-voice-a').value);
+    const voiceB = JSON.parse(document.getElementById('mix-voice-b').value);
+    const weightA = parseInt(document.getElementById('mix-weight-a').value) / 100;
+    const weightB = parseInt(document.getElementById('mix-weight-b').value) / 100;
+
+    const mixConfig = [
+        { profile: voiceA, weight: weightA },
+        { profile: voiceB, weight: weightB }
+    ];
+
+    const status = document.getElementById('mix-status');
+    const container = document.getElementById('mix-preview-container');
+    status.innerText = "Mixing...";
+    container.style.display = 'block';
+
+    try {
+        const mixVal = JSON.stringify(mixConfig);
+        const blob = await getVoicePreview({ role: 'Mixed Voice', type: 'mix', value: mixVal });
+        window.mixPreviewUrl = URL.createObjectURL(blob);
+        state.voicelab.lastMixedPath = mixVal;
+        status.innerText = "Ready";
+    } catch (e) { status.innerText = "Error"; }
 }
 
-function renderAvatar(name) {
-    const color = getAvatarColor(name);
-    return `<div class="avatar" style="background:${color}; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; font-size:0.8rem; border:2px solid rgba(255,255,255,0.2);">${name.substring(0, 1).toUpperCase()}</div>`;
+function playMixPreview() {
+    if (window.mixPreviewUrl) {
+        const player = document.getElementById('preview-player');
+        player.src = window.mixPreviewUrl;
+        player.play();
+    }
+}
+
+function saveMixedVoice() {
+    const name = prompt("Voice Name:");
+    if (!name || !state.voicelab.lastMixedPath) return;
+    SpeakerStore.saveVoice({ id: Date.now(), name, type: 'mix', value: state.voicelab.lastMixedPath });
+    renderVoiceLibrary();
+    renderSpeechVoiceList();
 }
 
 function renderVoiceLibrary() {
     const grid = document.getElementById('voice-library-grid');
     if (!grid) return;
+    grid.innerHTML = '';
+
     const voices = SpeakerStore.getVoices();
-    grid.innerHTML = voices.length ? '' : '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">Your library is empty.</p>';
     voices.forEach(v => {
         const div = document.createElement('div');
-        div.className = 'card';
-        div.style.padding = '16px';
+        div.className = 'card voice-card';
         div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    ${renderAvatar(v.name)}
-                    <div>
-                        <strong>${v.name}</strong>
-                        <div style="font-size:0.7rem; color:var(--text-secondary);">${v.type.toUpperCase()}</div>
-                    </div>
+            <div style="display:flex; align-items:center; gap:16px;">
+                ${renderAvatar(v.name)}
+                <div style="flex:1">
+                    <h3 style="margin:0; font-size:1rem;">${v.name}</h3>
+                    <span class="badge" style="background:rgba(255,255,255,0.1); font-size:0.7rem;">${v.type.toUpperCase()}</span>
                 </div>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn btn-secondary btn-sm" onclick="playVoicePreview('${v.name}', '${v.type}', '${v.value}')"><i class="fas fa-play"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="playVoicePreview('${v.name}', '${v.type}', '${v.value.replace(/'/g, "\\'")}')"><i class="fas fa-play"></i></button>
                     <button class="btn btn-secondary btn-sm" onclick="deleteVoice('${v.id}')" style="color:var(--danger)"><i class="fas fa-trash"></i></button>
                 </div>
             </div>
         `;
         grid.appendChild(div);
     });
+}
+
+async function playVoicePreview(role, type, value) {
+    const blob = await getVoicePreview({ role, type, value });
+    if (blob) {
+        const player = document.getElementById('preview-player');
+        player.src = URL.createObjectURL(blob);
+        player.play();
+    }
 }
 
 function deleteVoice(id) {
@@ -341,6 +240,7 @@ function deleteVoice(id) {
 function toggleCanvasView(view) {
     document.getElementById('canvas-draft-view').style.display = view === 'draft' ? 'flex' : 'none';
     document.getElementById('canvas-production-view').style.display = view === 'production' ? 'flex' : 'none';
+    if (view === 'production') renderBlocks();
 }
 
 function renderBlocks() {
@@ -356,12 +256,22 @@ function renderBlocks() {
                     ${renderAvatar(block.role)}
                     <span class="label" style="color:var(--accent); margin:0;">${block.role}</span>
                 </div>
-                <div style="display:flex; gap:8px;">
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <select class="btn btn-secondary btn-sm" style="font-size:0.7rem;" onchange="updateBlockProperty('${block.id}', 'language', this.value)">
+                        <option value="auto" ${block.language === 'auto' ? 'selected' : ''}>Auto</option>
+                        <option value="en" ${block.language === 'en' ? 'selected' : ''}>EN</option>
+                        <option value="zh" ${block.language === 'zh' ? 'selected' : ''}>ZH</option>
+                        <option value="ja" ${block.language === 'ja' ? 'selected' : ''}>JA</option>
+                        <option value="es" ${block.language === 'es' ? 'selected' : ''}>ES</option>
+                    </select>
+                    <div style="display:flex; align-items:center; gap:4px; font-size:0.7rem; color:var(--text-secondary);">
+                        Gap: <input type="number" step="0.1" value="${block.pause_after}" style="width:40px; background:none; border:1px solid var(--border); color:inherit; border-radius:4px; padding:2px;" onchange="updateBlockProperty('${block.id}', 'pause_after', this.value)">s
+                    </div>
                     <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">${block.status === 'ready' ? 'Regen' : 'Synth'}</button>
                     <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')"><i class="fas fa-times"></i></button>
                 </div>
             </div>
-            <p style="margin: 12px 0; color:var(--text-primary);">${block.text}</p>
+            <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${block.text}</p>
             ${block.status === 'generating' ? `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
             ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play"></i> Play</button>` : ''}
         `;
@@ -369,9 +279,17 @@ function renderBlocks() {
     });
 }
 
+function updateBlockProperty(id, prop, val) {
+    const block = CanvasManager.blocks.find(b => b.id === id);
+    if (block) {
+        block[prop] = prop === 'pause_after' ? parseFloat(val) : val;
+        CanvasManager.save();
+    }
+}
+
 async function promoteToProduction() {
     const script = parseScript(document.getElementById('script-editor').value);
-    if (script.length === 0) return alert("Write script first (e.g., Alice: Hello)");
+    if (script.length === 0) return alert("Write script first (e.g., [Alice]: Hello)");
     CanvasManager.clear();
     script.forEach(line => CanvasManager.addBlock(line.role, line.text));
     CanvasManager.save();
@@ -388,7 +306,15 @@ async function generateBlock(id) {
         const res = await fetch('/api/generate/segment', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ profiles, script: [{ role: block.role, text: block.text }] })
+            body: JSON.stringify({
+                profiles,
+                script: [{
+                    role: block.role,
+                    text: block.text,
+                    language: block.language,
+                    pause_after: block.pause_after
+                }]
+            })
         });
         const { task_id } = await res.json();
         const blob = await TaskPoller.poll(task_id, (task) => { block.progress = task.progress; renderBlocks(); });
@@ -410,12 +336,19 @@ function deleteBlock(id) { CanvasManager.deleteBlock(id); renderBlocks(); }
 
 async function generatePodcast() {
     const inProd = document.getElementById('canvas-production-view').style.display === 'flex';
-    const script = inProd ? CanvasManager.blocks.map(b => ({ role: b.role, text: b.text })) : parseScript(document.getElementById('script-editor').value);
+    const script = inProd ? CanvasManager.blocks.map(b => ({
+        role: b.role,
+        text: b.text,
+        language: b.language,
+        pause_after: b.pause_after
+    })) : parseScript(document.getElementById('script-editor').value);
+
     if (script.length === 0) return alert("Empty script.");
     const profiles = getAllProfiles();
     const bgm_mood = document.getElementById('bgm-select').value;
     const statusText = document.getElementById('status-text');
-    statusText.innerText = "Producing...";
+    statusText.innerText = "Producing Final Mix...";
+
     try {
         const res = await fetch('/api/generate/podcast', {
             method: 'POST',
@@ -427,7 +360,7 @@ async function generatePodcast() {
         const player = document.getElementById('main-audio-player');
         player.src = URL.createObjectURL(blob);
         player.play();
-        statusText.innerText = "Ready!";
+        statusText.innerText = "Final Mix Ready!";
     } catch (e) { alert(e.message); statusText.innerText = "Failed"; }
 }
 
@@ -436,7 +369,7 @@ async function batchSynthesize() {
     for (const b of blocks) await generateBlock(b.id);
 }
 
-// --- Dubbing ---
+// --- Dubbing & S2S ---
 async function startDubbing() {
     const fileInput = document.getElementById('dub-file');
     const langSelect = document.getElementById('dub-lang');
@@ -475,6 +408,34 @@ async function startDubbing() {
     }
 }
 
+async function startVoiceChanger() {
+    if (!state.s2s.lastUploadedPath) return alert("Record or upload source audio first.");
+    const targetVoice = JSON.parse(document.getElementById('s2s-target-voice').value);
+    const preserveProsody = document.getElementById('s2s-preserve').checked;
+    const statusText = document.getElementById('status-text');
+
+    statusText.innerText = "Converting Voice...";
+    try {
+        const res = await fetch('/api/generate/s2s', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                source_audio: state.s2s.lastUploadedPath,
+                target_voice: targetVoice,
+                preserve_prosody: preserveProsody
+            })
+        });
+        const { task_id } = await res.json();
+        const blob = await TaskPoller.poll(task_id, (task) => {
+            statusText.innerText = `Converting: ${task.progress}%`;
+        });
+        const player = document.getElementById('main-audio-player');
+        player.src = URL.createObjectURL(blob);
+        player.play();
+        statusText.innerText = "Conversion Complete!";
+    } catch (e) { alert(e.message); statusText.innerText = "Failed"; }
+}
+
 // --- Projects ---
 async function fetchProjects() {
     const select = document.getElementById('project-select');
@@ -493,7 +454,11 @@ async function fetchProjects() {
 async function saveProject() {
     let name = document.getElementById('project-select').value || prompt("Project Name:");
     if (!name) return;
-    const data = { name, blocks: CanvasManager.blocks.map(b => ({ id: b.id, role: b.role, text: b.text, status: b.status })), script_draft: document.getElementById('script-editor').value };
+    const data = {
+        name,
+        blocks: CanvasManager.blocks.map(b => ({ id: b.id, role: b.role, text: b.text, status: b.status, language: b.language, pause_after: b.pause_after })),
+        script_draft: document.getElementById('script-editor').value
+    };
     try {
         await fetch(`/api/projects/${name}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
         alert("Saved!"); fetchProjects();
@@ -514,19 +479,44 @@ async function loadProject() {
     } catch (e) { alert(e.message); }
 }
 
+// --- Utilities ---
+async function startRecording(targetState, btnId, onComplete) {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        targetState.mediaRecorder = new MediaRecorder(stream);
+        targetState.audioChunks = [];
+        targetState.mediaRecorder.ondataavailable = (e) => targetState.audioChunks.push(e.data);
+        targetState.mediaRecorder.onstop = async () => {
+            const blob = new Blob(targetState.audioChunks, { type: 'audio/wav' });
+            if (onComplete) onComplete([blob]); // Wrap in list for consistency with handleCloneUpload
+        };
+        targetState.mediaRecorder.start();
+        targetState.isRecording = true;
+        document.getElementById(btnId).innerHTML = '<i class="fas fa-stop"></i> Stop';
+        document.getElementById(btnId).classList.add('btn-danger');
+    } catch (e) { alert("Mic access denied"); }
+}
+
+function stopRecording(targetState, btnId, originalHtml) {
+    if (targetState.mediaRecorder) targetState.mediaRecorder.stop();
+    targetState.isRecording = false;
+    document.getElementById(btnId).innerHTML = originalHtml;
+    document.getElementById(btnId).classList.remove('btn-danger');
+}
+
 // --- Setup ---
 function setupEventListeners() {
     const cloneRecordBtn = document.getElementById('clone-record-btn');
     if (cloneRecordBtn) cloneRecordBtn.onclick = () => {
         if (state.voicelab.isRecording) stopRecording(state.voicelab, 'clone-record-btn', '<i class="fas fa-circle"></i> Record');
-        else startRecording(state.voicelab, 'clone-record-btn', handleCloneUpload);
+        else startRecording(state.voicelab, 'clone-record-btn', (blobs) => handleCloneUpload(blobs));
     };
 
     const s2sRecordBtn = document.getElementById('s2s-record-btn');
     if (s2sRecordBtn) s2sRecordBtn.onclick = () => {
         if (state.s2s.isRecording) stopRecording(state.s2s, 's2s-record-btn', '<i class="fas fa-circle"></i> Record Audio');
-        else startRecording(state.s2s, 's2s-record-btn', async (file) => {
-            const formData = new FormData(); formData.append('file', file);
+        else startRecording(state.s2s, 's2s-record-btn', async (blobs) => {
+            const formData = new FormData(); formData.append('file', blobs[0]);
             const res = await fetch('/api/voice/upload', { method: 'POST', body: formData });
             const data = await res.json();
             state.s2s.lastUploadedPath = data.filename;
@@ -549,10 +539,11 @@ window.onload = () => {
 
 // Globals
 Object.assign(window, {
-    switchView, switchSpeechSubTab, generateSpeech, playVoicePreview,
-    randomizeDesign, testVoiceDesign, playDesignPreview, saveDesignedVoice,
+    switchView, generateSpeech, playVoicePreview,
+    testVoiceDesign, playDesignPreview, saveDesignedVoice,
     handleCloneUpload, testVoiceClone, playClonePreview, saveClonedVoice,
+    testVoiceMix, playMixPreview, saveMixedVoice,
     deleteVoice, toggleCanvasView, promoteToProduction, generateBlock,
     playBlock, deleteBlock, generatePodcast, batchSynthesize, saveProject, loadProject,
-    startDubbing
+    startDubbing, startVoiceChanger, updateBlockProperty
 });
