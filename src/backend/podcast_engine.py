@@ -3,6 +3,7 @@ import numpy as np
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 import io
+import json
 import soundfile as sf
 from .model_loader import get_model, manager
 from .config import verify_system_paths, logger, BASE_DIR
@@ -12,20 +13,21 @@ PRESET_SPEAKERS = ["aiden", "dylan", "eric", "ono_anna", "ryan", "serena", "sohe
 
 class PodcastEngine:
     def __init__(self):
-        self.speaker_profiles = {}  # Map "Role Name" -> {type: "preset"|"design"|"clone", value: "Ryan"|"Description"|"filename"}
+        self.speaker_profiles = {}  # Map "Role Name" -> {type: "preset"|"design"|"clone"|"mix", value: ...}
         self._whisper_model = None
+        self.preset_embeddings = {}
         self.upload_dir = Path(BASE_DIR) / "uploads"
         if not self.upload_dir.exists():
             self.upload_dir.mkdir(parents=True)
 
     def _resolve_path(self, relative_path: str) -> Path:
         """Resolve a relative path against upload_dir and ensure it's safe."""
+        if not relative_path:
+            return []
         # Handle multiple paths for pro cloning (separated by |)
         paths = relative_path.split("|")
         resolved = []
         for p in paths:
-            # If it's already an absolute path and inside upload_dir, it's okay (for internal calls)
-            # But we prefer filenames.
             path_obj = Path(p)
             if not path_obj.is_absolute():
                 path_obj = (self.upload_dir / path_obj).resolve()
@@ -33,7 +35,6 @@ class PodcastEngine:
                 path_obj = path_obj.resolve()
 
             if not str(path_obj).startswith(str(self.upload_dir.resolve())):
-                # Also allow bgm directory
                 bgm_dir = (Path(BASE_DIR) / "bgm").resolve()
                 if not str(path_obj).startswith(str(bgm_dir)):
                      raise ValueError(f"Access denied to path: {p}")
@@ -41,7 +42,6 @@ class PodcastEngine:
             if not path_obj.exists():
                 raise FileNotFoundError(f"File not found: {p}")
             resolved.append(path_obj)
-
         return resolved
 
     def get_system_status(self) -> Dict[str, Any]:
@@ -77,20 +77,81 @@ class PodcastEngine:
                 logger.info("Loading Whisper model (base)...")
                 self._whisper_model = whisper.load_model("base", device=manager.device)
 
-            # Resolve path if it's relative
             resolved_paths = self._resolve_path(audio_path)
             safe_path = str(resolved_paths[0])
 
             logger.info(f"Transcribing audio: {safe_path}")
             result = self._whisper_model.transcribe(safe_path)
             text = result["text"].strip()
-            logger.info(f"Transcription complete: {text[:50]}...")
             return text
         except Exception as e:
             logger.error(f"Transcription failed: {e}")
             raise RuntimeError(f"Transcription failed: {e}")
 
-    def generate_segment(self, role: str, text: str) -> tuple:
+    def get_speaker_embedding(self, profile: Dict[str, str]) -> torch.Tensor:
+        """Extract speaker embedding for any profile."""
+        base_model = get_model("Base")
+
+        if profile["type"] == "clone":
+            resolved_paths = self._resolve_path(profile["value"])
+            ref_audio = str(resolved_paths[0])
+            prompt = base_model.create_voice_clone_prompt(ref_audio=ref_audio, x_vector_only_mode=True)
+            return prompt[0].ref_spk_embedding
+
+        elif profile["type"] == "preset":
+            name = profile["value"].lower()
+            if name in self.preset_embeddings:
+                return self.preset_embeddings[name]
+
+            logger.info(f"Extracting embedding for preset: {name}")
+            cv_model = get_model("CustomVoice")
+            wavs, sr = cv_model.generate_custom_voice(text="Speaker reference sample.", speaker=name)
+
+            base_model = get_model("Base") # Ensure Base is loaded back
+            prompt = base_model.create_voice_clone_prompt(ref_audio=(wavs[0], sr), x_vector_only_mode=True)
+            emb = prompt[0].ref_spk_embedding
+            self.preset_embeddings[name] = emb
+            return emb
+
+        elif profile["type"] == "design":
+            vd_model = get_model("VoiceDesign")
+            wavs, sr = vd_model.generate_voice_design(text="Speaker reference sample.", instruct=profile["value"])
+
+            base_model = get_model("Base")
+            prompt = base_model.create_voice_clone_prompt(ref_audio=(wavs[0], sr), x_vector_only_mode=True)
+            return prompt[0].ref_spk_embedding
+
+        elif profile["type"] == "mix":
+            # Nested mixing
+            mix_configs = json.loads(profile["value"])
+            return self._compute_mixed_embedding(mix_configs)
+
+        else:
+            raise ValueError(f"Cannot extract embedding for type: {profile['type']}")
+
+    def _compute_mixed_embedding(self, mix_configs: List[Dict]) -> torch.Tensor:
+        """Compute weighted average of multiple embeddings."""
+        total_emb = None
+        total_weight = 0
+
+        for item in mix_configs:
+            weight = item.get("weight", 1.0)
+            voice_profile = item.get("profile")
+            if not voice_profile: continue
+
+            emb = self.get_speaker_embedding(voice_profile)
+            if total_emb is None:
+                total_emb = emb * weight
+            else:
+                total_emb += emb * weight
+            total_weight += weight
+
+        if total_emb is None:
+            raise ValueError("No valid voices provided for mixing")
+
+        return total_emb / total_weight
+
+    def generate_segment(self, role: str, text: str, language: str = "auto") -> tuple:
         profile = self.speaker_profiles.get(role)
         if not profile:
             profile = {"type": "preset", "value": "Ryan"}
@@ -103,44 +164,56 @@ class PodcastEngine:
                 wavs, sr = model.generate_custom_voice(
                     text=text,
                     speaker=profile["value"], 
-                    language="auto"
+                    language=language
                 )
             elif profile["type"] == "design":
                 model = get_model("VoiceDesign")
                 wavs, sr = model.generate_voice_design(
                     text=text,
                     instruct=profile["value"],
-                    language="auto",
+                    language=language,
                     non_streaming_mode=True
                 )
             elif profile["type"] == "clone":
                 resolved_paths = self._resolve_path(profile["value"])
-
+                # ... same logic as before for multi-path ...
                 if len(resolved_paths) > 1:
-                    logger.info(f"Combining {len(resolved_paths)} reference audios for professional cloning")
                     combined_wav = []
                     target_sr = 24000
                     for path_obj in resolved_paths:
                         w, s = sf.read(str(path_obj))
                         if s != target_sr:
                             import librosa
-                            w = librosa.resample(w, orig_sr=s, target_sr=target_sr)
+                            w = librosa.resample(w.astype(np.float32), orig_sr=s, target_sr=target_sr)
                         combined_wav.append(w)
-                    
                     concatenated = np.concatenate(combined_wav)
-                    import uuid
-                    temp_ref = self.upload_dir / f"combined_{uuid.uuid4()}.wav"
-                    sf.write(str(temp_ref), concatenated, target_sr)
-                    ref_audio = str(temp_ref)
+                    ref_audio = (concatenated, target_sr)
                 else:
                     ref_audio = str(resolved_paths[0])
 
                 model = get_model("Base")
                 wavs, sr = model.generate_voice_clone(
                     text=text,
-                    language="auto",
+                    language=language,
                     ref_audio=ref_audio,
                     x_vector_only_mode=True,
+                )
+            elif profile["type"] == "mix":
+                mix_configs = json.loads(profile["value"])
+                mixed_emb = self._compute_mixed_embedding(mix_configs)
+
+                model = get_model("Base")
+                # Create a manual prompt dict
+                voice_clone_prompt = {
+                    "ref_spk_embedding": [mixed_emb],
+                    "x_vector_only_mode": [True],
+                    "icl_mode": [False],
+                    "ref_code": [None]
+                }
+                wavs, sr = model.generate_voice_clone(
+                    text=text,
+                    language=language,
+                    voice_clone_prompt=voice_clone_prompt
                 )
             else:
                 raise ValueError(f"Unknown speaker type: {profile['type']}")
@@ -154,6 +227,46 @@ class PodcastEngine:
             logger.error(f"Synthesis failed for role '{role}': {e}", exc_info=True)
             raise RuntimeError(f"Synthesis failed for role '{role}': {str(e)}") from e
 
+    def generate_voice_changer(self, source_audio: str, target_role: str) -> Dict[str, Any]:
+        """Preserve prosody of source while changing voice to target."""
+        try:
+            # 1. Transcribe source
+            text = self.transcribe_audio(source_audio)
+
+            # 2. Extract codes from source
+            resolved = self._resolve_path(source_audio)
+            source_path = str(resolved[0])
+
+            model = get_model("Base")
+            # We want ICL mode (x_vector_only=False) to get codes
+            prompt_items = model.create_voice_clone_prompt(ref_audio=source_path, ref_text=text, x_vector_only_mode=False)
+            source_item = prompt_items[0]
+
+            # 3. Get target embedding
+            target_profile = self.speaker_profiles.get(target_role)
+            if not target_profile:
+                target_profile = {"type": "preset", "value": "Ryan"}
+
+            target_emb = self.get_speaker_embedding(target_profile)
+
+            # 4. Synthesize with swapped embedding
+            voice_clone_prompt = {
+                "ref_code": [source_item.ref_code],
+                "ref_spk_embedding": [target_emb],
+                "x_vector_only_mode": [False],
+                "icl_mode": [True]
+            }
+
+            wavs, sr = model.generate_voice_clone(
+                text=text, # target text is same as source text
+                voice_clone_prompt=voice_clone_prompt
+            )
+
+            return {"waveform": wavs[0], "sample_rate": sr, "text": text}
+        except Exception as e:
+            logger.error(f"Voice changer failed: {e}")
+            raise RuntimeError(f"Voice changer failed: {e}")
+
     def generate_podcast(self, script: List[Dict[str, Any]], bgm_mood: Optional[str] = None) -> Dict[str, Any]:
         from pydub import AudioSegment
         segments = []
@@ -164,17 +277,21 @@ class PodcastEngine:
         for item in script:
             role = item["role"]
             text = item["text"]
+            lang = item.get("language", "auto")
+            pause_after = item.get("pause_after", 0.5)
             start_time = item.get("start_time", None) 
             
             try:
-                wav, sr = self.generate_segment(role, text)
+                wav, sr = self.generate_segment(role, text, language=lang)
                 sample_rate = sr
                 wav_int16 = (wav * 32767).astype(np.int16)
                 seg = AudioSegment(wav_int16.tobytes(), frame_rate=sr, sample_width=2, channels=1)
                 
                 position_ms = int(float(start_time) * 1000) if start_time is not None else current_offset_ms
                 segments.append({"audio": seg, "position": position_ms})
-                current_offset_ms = position_ms + len(seg) + 500
+
+                # Update offset for next block
+                current_offset_ms = position_ms + len(seg) + int(pause_after * 1000)
                 
                 end_pos = position_ms + len(seg)
                 if end_pos > max_duration_ms: max_duration_ms = end_pos
@@ -212,20 +329,22 @@ class PodcastEngine:
     def dub_audio(self, audio_path: str, target_lang: str) -> Dict[str, Any]:
         """Dub audio by transcribing, translating, and synthesizing."""
         try:
-            # Transcribe will handle the path safety
+            # 1. Transcribe
             text = self.transcribe_audio(audio_path)
 
-            # Translate
+            # 2. Translate
             from deep_translator import GoogleTranslator
             logger.info(f"Translating to {target_lang}...")
-            translated_text = GoogleTranslator(source='auto', target=target_lang).translate(text)
+            # Use zh-CN for Chinese if 'zh' is provided
+            trans_lang = 'zh-CN' if target_lang == 'zh' else target_lang
+            translated_text = GoogleTranslator(source='auto', target=trans_lang).translate(text)
             logger.info(f"Translated: {translated_text[:50]}...")
 
             # 3. Clone original voice for synthesis
             self.set_speaker_profile("original", {"type": "clone", "value": audio_path})
 
-            # 4. Synthesize
-            wav, sr = self.generate_segment("original", translated_text)
+            # 4. Synthesize with target language
+            wav, sr = self.generate_segment("original", translated_text, language=target_lang)
 
             return {"waveform": wav, "sample_rate": sr, "text": translated_text}
         except Exception as e:

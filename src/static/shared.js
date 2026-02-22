@@ -26,7 +26,9 @@ const CanvasManager = {
             status: 'idle',
             audioUrl: null,
             startTime: 0,
-            duration: 0
+            duration: 0,
+            language: 'auto',
+            pause_after: 0.5
         });
     },
     moveBlock(id, direction) {
@@ -46,7 +48,13 @@ const CanvasManager = {
         this.blocks = [];
     },
     save() {
-        const toSave = this.blocks.map(b => ({ role: b.role, text: b.text, status: b.status === 'ready' ? 'ready' : 'idle' }));
+        const toSave = this.blocks.map(b => ({
+            role: b.role,
+            text: b.text,
+            status: b.status === 'ready' ? 'ready' : 'idle',
+            language: b.language,
+            pause_after: b.pause_after
+        }));
         localStorage.setItem('qwen_blocks', JSON.stringify(toSave));
     },
     load() {
@@ -85,7 +93,6 @@ const TaskPoller = {
 
                     if (task.status === 'completed') {
                         clearInterval(timer);
-                        // Get the actual result
                         const resultRes = await fetch(`/api/tasks/${taskId}/result`);
                         if (!resultRes.ok) throw new Error("Failed to download result");
                         const blob = await resultRes.blob();
