@@ -103,3 +103,8 @@ MODELS = {
     "CustomVoice_1.7B": "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice", 
     "Tokenizer": "Qwen/Qwen3-TTS-Tokenizer-12Hz"
 }
+
+# Data paths
+PROJECTS_DIR = BASE_DIR / "projects"
+PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
+VOICE_LIBRARY_FILE = PROJECTS_DIR / "voices.json"

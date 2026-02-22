@@ -1,37 +1,14 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
 from ..server_state import engine, task_manager
 from ..task_manager import TaskStatus
 from ..utils import numpy_to_wav_bytes
 from ..dub_logic import run_dub_task
 from ..s2s_logic import run_s2s_task
-import logging
+from .schemas import PodcastRequest, S2SRequest, DubRequest
+from ..config import logger
 import io
 
 router = APIRouter(prefix="/api/generate", tags=["generation"])
-logger = logging.getLogger("studio")
-
-class ScriptLine(BaseModel):
-    role: str
-    text: str
-    start_time: Optional[float] = 0.0
-    language: Optional[str] = "auto"
-    pause_after: Optional[float] = 0.5
-
-class PodcastRequest(BaseModel):
-    profiles: List[Dict[str, Any]] # [{"role": "...", "type": "...", "value": "..."}]
-    script: List[ScriptLine]
-    bgm_mood: Optional[str] = None
-
-class S2SRequest(BaseModel):
-    source_audio: str
-    target_voice: Dict[str, Any]
-    preserve_prosody: bool = False
-
-class DubRequest(BaseModel):
-    source_audio: str
-    target_lang: str
 
 def run_synthesis_task(task_id: str, is_podcast: bool, request_data: PodcastRequest):
     try:
