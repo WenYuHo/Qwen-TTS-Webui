@@ -68,13 +68,13 @@
                             </div>
                         </div>
 
-                        <button class="btn btn-primary" style="width:100%; margin-top:24px;" onclick="testVoiceDesign()">
+                        <button class="btn btn-primary" style="width:100%; margin-top:24px;" onclick="testVoiceDesign(this)">
                             <i class="fas fa-magic"></i> Design & Preview
                         </button>
 
                         <div id="design-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.2); padding: 12px;">
                             <div style="display:flex; align-items:center; gap:12px;">
-                                <button class="btn btn-secondary btn-sm" onclick="playDesignPreview()"><i class="fas fa-play"></i></button>
+                                <button class="btn btn-secondary btn-sm" onclick="playDesignPreview()" aria-label="Play design preview" title="Play Preview"><i class="fas fa-play"></i></button>
                                 <span id="design-status" style="font-size:0.8rem;">Ready</span>
                                 <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="saveDesignedVoice()">Save</button>
                             </div>
@@ -98,13 +98,13 @@
                             <p id="clone-filename" style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">No file selected</p>
                         </div>
 
-                        <button class="btn btn-primary" style="width:100%;" onclick="testVoiceClone()">
+                        <button class="btn btn-primary" style="width:100%;" onclick="testVoiceClone(this)">
                             <i class="fas fa-clone"></i> Clone & Preview
                         </button>
 
                         <div id="clone-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.2); padding: 12px;">
                             <div style="display:flex; align-items:center; gap:12px;">
-                                <button class="btn btn-secondary btn-sm" onclick="playClonePreview()"><i class="fas fa-play"></i></button>
+                                <button class="btn btn-secondary btn-sm" onclick="playClonePreview()" aria-label="Play clone preview" title="Play Preview"><i class="fas fa-play"></i></button>
                                 <span id="clone-status" style="font-size:0.8rem;">Ready</span>
                                 <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="saveClonedVoice()">Save</button>
                             </div>
@@ -124,12 +124,12 @@
                             <select id="mix-voice-b" class="btn btn-secondary btn-sm" style="width:100%"></select>
                             <input type="range" id="mix-weight-b" min="0" max="100" value="50" style="margin-top:8px; width:100%">
                         </div>
-                        <button class="btn btn-primary" style="width:100%;" onclick="testVoiceMix()">
+                        <button class="btn btn-primary" style="width:100%;" onclick="testVoiceMix(this)">
                             <i class="fas fa-flask"></i> Mix & Preview
                         </button>
                         <div id="mix-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.2); padding: 12px;">
                             <div style="display:flex; align-items:center; gap:12px;">
-                                <button class="btn btn-secondary btn-sm" onclick="playMixPreview()"><i class="fas fa-play"></i></button>
+                                <button class="btn btn-secondary btn-sm" onclick="playMixPreview()" aria-label="Play mix preview" title="Play Preview"><i class="fas fa-play"></i></button>
                                 <span id="mix-status" style="font-size:0.8rem;">Ready</span>
                                 <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="saveMixedVoice()">Save</button>
                             </div>

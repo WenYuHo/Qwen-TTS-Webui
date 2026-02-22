@@ -75,7 +75,12 @@ function renderS2STargetList() {
     });
 }
 
-async function testVoiceDesign() {
+async function testVoiceDesign(btn) {
+    if (btn) {
+        btn.disabled = true;
+        btn.dataset.originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Designing...';
+    }
     const prompt = document.getElementById('design-prompt').value;
     const gender = document.getElementById('design-gender').value;
     const age = document.getElementById('design-age').value;
@@ -95,6 +100,11 @@ async function testVoiceDesign() {
         status.innerText = "Ready";
     } catch (e) {
         status.innerText = "Error: " + e.message;
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalHtml;
+        }
     }
 }
 
@@ -128,8 +138,13 @@ async function handleCloneUpload(files) {
     document.getElementById('clone-filename').innerText = files.length > 1 ? `${files.length} samples selected` : files[0].name;
 }
 
-async function testVoiceClone() {
+async function testVoiceClone(btn) {
     if (!state.voicelab.lastClonedPath) return alert("Upload audio first");
+    if (btn) {
+        btn.disabled = true;
+        btn.dataset.originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cloning...';
+    }
     const status = document.getElementById('clone-status');
     const container = document.getElementById('clone-preview-container');
     status.innerText = "Cloning...";
@@ -140,6 +155,12 @@ async function testVoiceClone() {
         window.clonePreviewUrl = URL.createObjectURL(blob);
         status.innerText = "Ready";
     } catch (e) { status.innerText = "Error"; }
+    finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalHtml;
+        }
+    }
 }
 
 function playClonePreview() {
@@ -158,7 +179,12 @@ function saveClonedVoice() {
     renderSpeechVoiceList();
 }
 
-async function testVoiceMix() {
+async function testVoiceMix(btn) {
+    if (btn) {
+        btn.disabled = true;
+        btn.dataset.originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mixing...';
+    }
     const voiceA = JSON.parse(document.getElementById('mix-voice-a').value);
     const voiceB = JSON.parse(document.getElementById('mix-voice-b').value);
     const weightA = parseInt(document.getElementById('mix-weight-a').value) / 100;
@@ -181,6 +207,12 @@ async function testVoiceMix() {
         state.voicelab.lastMixedPath = mixVal;
         status.innerText = "Ready";
     } catch (e) { status.innerText = "Error"; }
+    finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalHtml;
+        }
+    }
 }
 
 function playMixPreview() {
@@ -216,8 +248,8 @@ function renderVoiceLibrary() {
                     <span class="badge" style="background:rgba(255,255,255,0.1); font-size:0.7rem;">${v.type.toUpperCase()}</span>
                 </div>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn btn-secondary btn-sm" onclick="playVoicePreview('${v.name}', '${v.type}', '${v.value.replace(/'/g, "\\'")}')"><i class="fas fa-play"></i></button>
-                    <button class="btn btn-secondary btn-sm" onclick="deleteVoice('${v.id}')" style="color:var(--danger)"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="playVoicePreview('${v.name}', '${v.type}', '${v.value.replace(/'/g, "\\'")}')" aria-label="Play voice preview" title="Play Preview"><i class="fas fa-play"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="deleteVoice('${v.id}')" style="color:var(--danger)" aria-label="Delete voice" title="Delete Voice"><i class="fas fa-trash"></i></button>
                 </div>
             </div>
         `;
@@ -270,7 +302,7 @@ function renderBlocks() {
                         Gap: <input type="number" step="0.1" value="${block.pause_after}" style="width:40px; background:none; border:1px solid var(--border); color:inherit; border-radius:4px; padding:2px;" onchange="updateBlockProperty('${block.id}', 'pause_after', this.value)">s
                     </div>
                     <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">${block.status === 'ready' ? 'Regen' : 'Synth'}</button>
-                    <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')"><i class="fas fa-times"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times"></i></button>
                 </div>
             </div>
             <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${block.text}</p>
