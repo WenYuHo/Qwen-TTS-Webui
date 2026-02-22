@@ -33,7 +33,7 @@ setup_env.bat
 ### 3. Configuration
 Copy `.env.example` to `.env` and point to your existing model directory:
 ```env
-COMFY_QWEN_MODELS_DIR=C:\Path\To\Your\ComfyUI\models\qwen-tts
+QWEN_MODELS_DIR=./models
 ```
 
 ### 4. Usage

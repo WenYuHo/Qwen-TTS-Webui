@@ -22,6 +22,7 @@ from backend.config import MODELS, logger
 from backend.task_manager import task_manager, TaskStatus
 from backend.s2s_logic import run_s2s_task
 from backend.dub_logic import run_dub_task
+from backend.model_downloader import download_qwen_model_task, get_model_inventory
 from backend.utils import numpy_to_wav_bytes
 
 app = FastAPI()
@@ -110,6 +111,19 @@ engine = PodcastEngine()
 async def health_check():
     return engine.get_system_status()
 
+
+@app.get("/api/models/inventory")
+async def get_inventory():
+    return {"models": get_model_inventory()}
+
+class DownloadRequest(BaseModel):
+    repo_id: str
+
+@app.post("/api/models/download")
+async def trigger_download(request: DownloadRequest, background_tasks: BackgroundTasks):
+    task_id = task_manager.create_task("model_download", {"repo_id": request.repo_id})
+    background_tasks.add_task(download_qwen_model_task, task_id, request.repo_id)
+    return {"task_id": task_id, "status": TaskStatus.PENDING}
 @app.get("/api/tasks/{task_id}")
 async def get_task_status(task_id: str):
     task = task_manager.get_task(task_id)

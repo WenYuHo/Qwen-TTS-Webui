@@ -34,18 +34,20 @@ logger.addHandler(console_handler)
 
 logger.info("--- Logging initialized ---")
 
-COMFY_ROOT_GUESS = BASE_DIR.parent.parent.parent
+# Default model path: 'models' directory in project root
+DEFAULT_MODEL_DIR = BASE_DIR / "models"
 
-# Default model path
-DEFAULT_MODEL_DIR = COMFY_ROOT_GUESS / "models" / "qwen-tts"
-
-# Get from env or default
-COMFY_MODELS_DIR = os.getenv("COMFY_QWEN_MODELS_DIR", str(DEFAULT_MODEL_DIR))
-MODELS_PATH = Path(COMFY_MODELS_DIR)
+# Get from env (prioritize new generic name, then old comfy name) or default
+MODELS_DIR_ENV = os.getenv("QWEN_MODELS_DIR", os.getenv("COMFY_QWEN_MODELS_DIR", str(DEFAULT_MODEL_DIR)))
+MODELS_PATH = Path(MODELS_DIR_ENV)
 
 if not MODELS_PATH.exists():
     logger.warning(f"Models directory not found at {MODELS_PATH}")
-    logger.info("Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.")
+    logger.info("Please set QWEN_MODELS_DIR in .env to point to your Qwen-TTS models folder.")
+    # Create the local models folder as a placeholder if it's the default
+    if str(MODELS_PATH) == str(DEFAULT_MODEL_DIR):
+        MODELS_PATH.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Created local models directory at {MODELS_PATH}")
 else:
     logger.info(f"Models directory found at {MODELS_PATH}")
 

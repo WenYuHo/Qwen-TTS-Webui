@@ -25,6 +25,9 @@
                 <button class="nav-item" onclick="switchView('dubbing')">
                     <i class="fas fa-language"></i> Dubbing & S2S
                 </button>
+                <button class="nav-item" onclick="switchView('system')">
+                    <i class="fas fa-microchip"></i> System
+                </button>
             </nav>
             <div style="flex:1"></div>
             <div class="sidebar-footer">
@@ -261,6 +264,32 @@ Bob: Hi Alice, how are you today?"></textarea>
                         <button class="btn btn-primary" style="width:100%" onclick="startVoiceChanger()">
                             <i class="fas fa-arrows-rotate"></i> Change Voice
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: System -->
+            <div id="system-view" class="view-container">
+                <div class="view-header">
+                    <div class="view-title">
+                        <h1>System Manager</h1>
+                        <p>Monitor engine health and manage AI models.</p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h2 style="margin-bottom:16px; font-size: 1.1rem;">Model Inventory</h2>
+                        <div id="model-inventory-list" style="display:flex; flex-direction:column; gap:12px;">
+                            <!-- Models will be listed here -->
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2 style="margin-bottom:16px; font-size: 1.1rem;">System Status</h2>
+                        <div id="system-stats" style="color:var(--text-secondary); font-size:0.9rem;">
+                            Loading system stats...
+                        </div>
                     </div>
                 </div>
             </div>
