@@ -10,7 +10,8 @@ current_dir = Path(__file__).resolve().parent
 src_dir = current_dir.parent / "src"
 sys.path.insert(0, str(src_dir))
 
-from server import app, PROJECTS_DIR
+from server import app
+from backend.api.projects import PROJECTS_DIR
 
 client = TestClient(app)
 
@@ -59,7 +60,7 @@ def test_save_and_load_project():
 
 def test_invalid_project_name():
     response = client.post("/api/projects/   ", json={"name": " ", "blocks": []})
-    assert response.status_code == 400
+    assert response.status_code == 422
 
 def test_load_nonexistent():
     response = client.get("/api/projects/nonexistent_project_xyz")
