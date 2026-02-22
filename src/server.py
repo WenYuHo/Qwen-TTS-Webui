@@ -3,22 +3,10 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pathlib import Path
-import logging
 
 from backend.api import voices, generation, projects, tasks, models
 from backend.server_state import engine
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler("logs/studio.log"),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger("studio")
-logger.info("--- Logging initialized ---")
+from backend.config import logger
 
 app = FastAPI(title="Qwen-TTS Studio")
 
@@ -50,4 +38,5 @@ async def serve_index():
 if __name__ == "__main__":
     # Ensure logs directory exists
     Path("logs").mkdir(exist_ok=True)
+    logger.info("Starting Qwen-TTS Studio server...")
     uvicorn.run(app, host="0.0.0.0", port=8080)

@@ -1,25 +1,14 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File, BackgroundTasks
+from fastapi import APIRouter, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
 import uuid
 from pathlib import Path
 import json
 import logging
 import soundfile as sf
-from .schemas import SpeakerProfile
+from .schemas import SpeakerProfile, MixRequest, VoiceLibrary
+from ..config import VOICE_LIBRARY_FILE, logger
 
 router = APIRouter(prefix="/api/voice", tags=["voices"])
-logger = logging.getLogger("studio")
-
-VOICE_LIBRARY_FILE = Path("projects/voices.json")
-
-class MixRequest(BaseModel):
-    name: str
-    voices: List[Dict[str, Any]]
-
-class VoiceLibrary(BaseModel):
-    voices: List[Dict[str, Any]]
 
 @router.get("/speakers")
 async def get_speakers():
@@ -31,7 +20,6 @@ async def get_speakers():
 
 @router.post("/upload")
 async def upload_voice(file: UploadFile = File(...)):
-    # Note: engine dependency will be handled via app state or global
     from ..server_state import engine
     upload_dir = engine.upload_dir
 

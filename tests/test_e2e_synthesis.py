@@ -16,7 +16,7 @@ class TestE2ESynthesis(unittest.TestCase):
         self.engine = PodcastEngine()
 
     @patch("backend.podcast_engine.get_model")
-    @patch("backend.podcast_engine.verify_system_paths")
+    @patch("backend.config.verify_system_paths")
     def test_end_to_end_synthesis_flow(self, mock_verify, mock_get_model):
         """Test the full synthesis flow with mocked model inference."""
         # 1. Setup mock model

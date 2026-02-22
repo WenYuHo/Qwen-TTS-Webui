@@ -1,36 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, field_validator
-from typing import List, Optional, Any, Dict
-from pathlib import Path
-import logging
+from .schemas import ProjectData
+from ..config import PROJECTS_DIR, logger
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
-logger = logging.getLogger("studio")
-
-PROJECTS_DIR = Path("projects")
-PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
-
-class ProjectBlock(BaseModel):
-    id: str
-    role: str
-    text: str
-    status: str
-    language: Optional[str] = "auto"
-    pause_after: Optional[float] = 0.5
-
-class ProjectData(BaseModel):
-    name: str
-    blocks: List[ProjectBlock]
-    script_draft: Optional[str] = ""
-    voices: Optional[List[Dict[str, Any]]] = []
-
-    @field_validator('name')
-    @classmethod
-    def name_must_not_be_empty(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError('Project name cannot be empty')
-        return v.strip()
 
 @router.get("")
 async def list_projects():

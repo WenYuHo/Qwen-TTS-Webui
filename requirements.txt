@@ -8,7 +8,7 @@ pydub
 torch
 torchaudio
 librosa
-transformers
+transformers==5.2.0
 accelerate
 einops
 onnxruntime
