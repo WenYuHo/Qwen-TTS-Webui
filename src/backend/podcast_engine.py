@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import librosa
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 import io
@@ -16,6 +17,10 @@ class PodcastEngine:
         self.speaker_profiles = {}  # Map "Role Name" -> {type: "preset"|"design"|"clone"|"mix", value: ...}
         self._whisper_model = None
         self.preset_embeddings = {}
+        # Bolt: Caches for speaker embeddings and prompts to avoid redundant extractions
+        self.clone_embedding_cache = {}
+        self.design_embedding_cache = {}
+        self.prompt_cache = {}
         self.upload_dir = Path(BASE_DIR) / "uploads"
         if not self.upload_dir.exists():
             self.upload_dir.mkdir(parents=True)
@@ -90,19 +95,31 @@ class PodcastEngine:
 
     def get_speaker_embedding(self, profile: Dict[str, str]) -> torch.Tensor:
         """Extract speaker embedding for any profile."""
-        base_model = get_model("Base")
-
-        if profile["type"] == "clone":
-            resolved_paths = self._resolve_path(profile["value"])
-            ref_audio = str(resolved_paths[0])
-            prompt = base_model.create_voice_clone_prompt(ref_audio=ref_audio, x_vector_only_mode=True)
-            return prompt[0].ref_spk_embedding
-
-        elif profile["type"] == "preset":
+        # Bolt: Check caches first to avoid expensive extraction and model switches
+        if profile["type"] == "preset":
             name = profile["value"].lower()
             if name in self.preset_embeddings:
                 return self.preset_embeddings[name]
+        elif profile["type"] == "clone":
+            if profile["value"] in self.clone_embedding_cache:
+                return self.clone_embedding_cache[profile["value"]]
+        elif profile["type"] == "design":
+            if profile["value"] in self.design_embedding_cache:
+                return self.design_embedding_cache[profile["value"]]
 
+        if profile["type"] == "clone":
+            base_model = get_model("Base")
+            resolved_paths = self._resolve_path(profile["value"])
+            ref_audio = str(resolved_paths[0])
+            prompt = base_model.create_voice_clone_prompt(ref_audio=ref_audio, x_vector_only_mode=True)
+            emb = prompt[0].ref_spk_embedding
+            self.clone_embedding_cache[profile["value"]] = emb
+            # Also populate prompt cache since we already have it
+            self.prompt_cache[profile["value"]] = prompt
+            return emb
+
+        elif profile["type"] == "preset":
+            name = profile["value"].lower()
             logger.info(f"Extracting embedding for preset: {name}")
             cv_model = get_model("CustomVoice")
             wavs, sr = cv_model.generate_custom_voice(text="Speaker reference sample.", speaker=name)
@@ -119,7 +136,9 @@ class PodcastEngine:
 
             base_model = get_model("Base")
             prompt = base_model.create_voice_clone_prompt(ref_audio=(wavs[0], sr), x_vector_only_mode=True)
-            return prompt[0].ref_spk_embedding
+            emb = prompt[0].ref_spk_embedding
+            self.design_embedding_cache[profile["value"]] = emb
+            return emb
 
         elif profile["type"] == "mix":
             # Nested mixing
@@ -175,28 +194,42 @@ class PodcastEngine:
                     non_streaming_mode=True
                 )
             elif profile["type"] == "clone":
-                resolved_paths = self._resolve_path(profile["value"])
-                # ... same logic as before for multi-path ...
-                if len(resolved_paths) > 1:
-                    combined_wav = []
-                    target_sr = 24000
-                    for path_obj in resolved_paths:
-                        w, s = sf.read(str(path_obj))
-                        if s != target_sr:
-                            import librosa
-                            w = librosa.resample(w.astype(np.float32), orig_sr=s, target_sr=target_sr)
-                        combined_wav.append(w)
-                    concatenated = np.concatenate(combined_wav)
-                    ref_audio = (concatenated, target_sr)
-                else:
-                    ref_audio = str(resolved_paths[0])
+                # Bolt: Cache VoiceClonePromptItem to avoid redundant extraction and resampling
+                cache_key = profile["value"]
 
-                model = get_model("Base")
+                if cache_key in self.prompt_cache:
+                    logger.debug(f"Using cached prompt for {cache_key}")
+                    prompt = self.prompt_cache[cache_key]
+                    model = get_model("Base")
+                else:
+                    try:
+                        resolved_paths = self._resolve_path(profile["value"])
+                    except FileNotFoundError as e:
+                        # Bolt: Maintain compatibility with expected error message in tests
+                        raise RuntimeError(f"Cloning reference audio not found: {e}") from e
+
+                    model = get_model("Base")
+                    if len(resolved_paths) > 1:
+                        combined_wav = []
+                        target_sr = 24000
+                        for path_obj in resolved_paths:
+                            w, s = sf.read(str(path_obj))
+                            if s != target_sr:
+                                w = librosa.resample(w.astype(np.float32), orig_sr=s, target_sr=target_sr)
+                            combined_wav.append(w)
+                        concatenated = np.concatenate(combined_wav)
+                        ref_audio = (concatenated, target_sr)
+                    else:
+                        ref_audio = str(resolved_paths[0])
+
+                    logger.info(f"Extracting voice clone prompt for {cache_key}...")
+                    prompt = model.create_voice_clone_prompt(ref_audio=ref_audio, x_vector_only_mode=True)
+                    self.prompt_cache[cache_key] = prompt
+
                 wavs, sr = model.generate_voice_clone(
                     text=text,
                     language=language,
-                    ref_audio=ref_audio,
-                    x_vector_only_mode=True,
+                    voice_clone_prompt=prompt,
                 )
             elif profile["type"] == "mix":
                 mix_configs = json.loads(profile["value"])
