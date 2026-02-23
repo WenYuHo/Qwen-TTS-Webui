@@ -5,6 +5,7 @@ class SpeakerProfile(BaseModel):
     role: str
     type: str
     value: str
+    image_url: Optional[str] = None
 
 class MixRequest(BaseModel):
     name: str
@@ -41,6 +42,7 @@ class ProjectBlock(BaseModel):
     status: str
     language: Optional[str] = "auto"
     pause_after: Optional[float] = 0.5
+    image_url: Optional[str] = None
 
 class ProjectData(BaseModel):
     name: str
@@ -57,3 +59,11 @@ class ProjectData(BaseModel):
 
 class DownloadRequest(BaseModel):
     repo_id: str
+
+
+class VideoRequest(BaseModel):
+    project_name: str
+    aspect_ratio: str = "16:9"
+    include_subtitles: bool = True
+    font_size: int = 40
+    font_type: str = "DejaVuSans-Bold.ttf"

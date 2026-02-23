@@ -18,7 +18,14 @@ const state = {
     }
 };
 
-function renderAvatar(name) {
+function renderAvatar(name, imageUrl) {
+    if (imageUrl) {
+        return `<img src="${imageUrl}" class="avatar" style="object-fit: cover;">`;
+    }
+    const initials = (name || "??").substring(0, 2).toUpperCase();
+    return `<div class="avatar">${initials}</div>`;
+}
+
 function switchView(view) {
     state.currentView = view;
     document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
@@ -38,12 +45,40 @@ function switchView(view) {
         renderSystemView();
     }
 }
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B59B6'];
-    const color = colors[name.length % colors.length];
-    return `<div class="avatar" style="background:${color}">${name[0].toUpperCase()}</div>`;
-}
-
 // --- Voice Studio ---
+
+
+async function generateSpeech() {
+    const text = document.getElementById('speech-text').value;
+    const voice = JSON.parse(document.getElementById('speech-voice').value);
+    const lang = document.getElementById('speech-lang').value;
+    const statusText = document.getElementById('status-text');
+
+    if (!text) return alert('Enter text');
+    statusText.innerText = 'Generating...';
+
+    try {
+        const res = await fetch('/api/generate/segment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profiles: [{ role: 'user', ...voice }],
+                script: [{ role: 'user', text, language: lang }]
+            })
+        });
+        const { task_id } = await res.json();
+        const blob = await TaskPoller.poll(task_id, (task) => {
+            statusText.innerText = 'Generating: ' + task.progress + '%';
+        });
+        const player = document.getElementById('main-audio-player');
+        player.src = URL.createObjectURL(blob);
+        player.play();
+        statusText.innerText = 'Ready';
+    } catch (e) {
+        alert(e.message);
+        statusText.innerText = 'Failed';
+    }
+}
 
 function renderSpeechVoiceList() {
     const selects = ['mix-voice-a', 'mix-voice-b'];
@@ -232,24 +267,26 @@ function saveMixedVoice() {
 }
 
 function renderVoiceLibrary() {
-    const grid = document.getElementById('voice-library-grid');
+    const grid = document.getElementById("voice-library-grid");
     if (!grid) return;
-    grid.innerHTML = '';
+    grid.innerHTML = "";
 
     const voices = SpeakerStore.getVoices();
     voices.forEach(v => {
-        const div = document.createElement('div');
-        div.className = 'card voice-card';
+        const div = document.createElement("div");
+        div.className = "card voice-card";
         div.innerHTML = `
             <div style="display:flex; align-items:center; gap:16px;">
-                ${renderAvatar(v.name)}
+                ${renderAvatar(v.name, v.image_url)}
                 <div style="flex:1">
                     <h3 style="margin:0; font-size:1rem;">${v.name}</h3>
                     <span class="badge" style="background:rgba(255,255,255,0.1); font-size:0.7rem;">${v.type.toUpperCase()}</span>
                 </div>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn btn-secondary btn-sm" onclick="playVoicePreview('${v.name}', '${v.type}', '${v.value.replace(/'/g, "\\'")}')" aria-label="Play voice preview" title="Play Preview"><i class="fas fa-play"></i></button>
-                    <button class="btn btn-secondary btn-sm" onclick="deleteVoice('${v.id}')" style="color:var(--danger)" aria-label="Delete voice" title="Delete Voice"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('img-upload-${v.id}').click()" title="Upload Image"><i class="fas fa-image"></i></button>
+                    <input type="file" id="img-upload-${v.id}" style="display:none" accept="image/*" onchange="uploadVoiceImage('${v.id}', this.files[0])">
+                    <button class="btn btn-secondary btn-sm" onclick="playVoicePreview('${v.name}', '${v.type}', '${v.value.replace(/'/g, "\'")}')" title="Play Preview"><i class="fas fa-play"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="deleteVoice('${v.id}')" style="color:var(--danger)" title="Delete Voice"><i class="fas fa-trash"></i></button>
                 </div>
             </div>
         `;
@@ -491,7 +528,8 @@ async function saveProject() {
     const data = {
         name,
         blocks: CanvasManager.blocks.map(b => ({ id: b.id, role: b.role, text: b.text, status: b.status, language: b.language, pause_after: b.pause_after })),
-        script_draft: document.getElementById('script-editor').value
+        script_draft: document.getElementById('script-editor').value,
+        voices: SpeakerStore.getVoices()
     };
     try {
         await fetch(`/api/projects/${name}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
@@ -573,12 +611,12 @@ window.onload = () => {
 
 // Globals
 Object.assign(window, {
-    switchView, generateSpeech, playVoicePreview,
+    switchView, renderVoiceLibrary, renderSpeechVoiceList, generateSpeech, playVoicePreview,
     testVoiceDesign, playDesignPreview, saveDesignedVoice,
     handleCloneUpload, testVoiceClone, playClonePreview, saveClonedVoice,
     testVoiceMix, playMixPreview, saveMixedVoice,
     deleteVoice, toggleCanvasView, promoteToProduction, generateBlock,
-    playBlock, deleteBlock, generatePodcast, batchSynthesize, saveProject, loadProject,
+    playBlock, deleteBlock, generatePodcast, batchSynthesize, saveProject, loadProject, generateVideo, uploadVoiceImage,
     startDubbing, startVoiceChanger, updateBlockProperty
 });
 
@@ -656,3 +694,60 @@ async function downloadModel(repoId) {
 // Update switchView to handle system view
 const originalSwitchView = window.switchView;
 Object.assign(window, { downloadModel });
+
+async function uploadVoiceImage(voiceId, file) {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+        const res = await fetch("/api/voice/image/upload", { method: "POST", body: formData });
+        const data = await res.json();
+        SpeakerStore.updateVoice(voiceId, { image_url: data.url });
+        renderVoiceLibrary();
+        alert("Image uploaded!");
+    } catch (e) { alert("Upload failed: " + e.message); }
+}
+
+async function generateVideo() {
+    const projectName = document.getElementById("project-select").value;
+    if (!projectName) return alert("Please save/select a project first.");
+
+    const aspectRatio = document.getElementById("video-aspect").value;
+    const includeSubtitles = document.getElementById("video-subtitles").checked;
+    const statusText = document.getElementById("status-text");
+
+    statusText.innerText = "Generating Video (this takes time)...";
+    try {
+        // Save project first to ensure voices and blocks are up to date
+        await saveProject();
+
+        const res = await fetch("/api/generate/video", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                project_name: projectName,
+                aspect_ratio: aspectRatio,
+                include_subtitles: includeSubtitles,
+                font_size: parseInt(document.getElementById("video-font-size").value) || 40,
+                font_type: document.getElementById("video-font-type").value || "DejaVuSans-Bold.ttf"
+            })
+        });
+        const { task_id } = await res.json();
+        const blob = await TaskPoller.poll(task_id, (task) => {
+            statusText.innerText = `Video: ${task.progress}% - ${task.message}`;
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${projectName}_video.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        statusText.innerText = "Video Generation Complete! Download started.";
+    } catch (e) {
+        alert(e.message);
+        statusText.innerText = "Video failed";
+    }
+}

@@ -2,16 +2,20 @@
 
 const SpeakerStore = {
     getVoices() {
-        return JSON.parse(localStorage.getItem('qwen_voices') || '[]');
+        return JSON.parse(localStorage.getItem("qwen_voices") || "[]");
     },
     saveVoice(voice) {
         const voices = this.getVoices();
         voices.push(voice);
-        localStorage.setItem('qwen_voices', JSON.stringify(voices));
+        localStorage.setItem("qwen_voices", JSON.stringify(voices));
     },
     deleteVoice(id) {
         const voices = this.getVoices().filter(v => v.id !== id);
-        localStorage.setItem('qwen_voices', JSON.stringify(voices));
+        localStorage.setItem("qwen_voices", JSON.stringify(voices));
+    },
+    updateVoice(id, updates) {
+        const voices = this.getVoices().map(v => v.id === id ? { ...v, ...updates } : v);
+        localStorage.setItem("qwen_voices", JSON.stringify(voices));
     }
 };
 
@@ -28,7 +32,8 @@ const CanvasManager = {
             startTime: 0,
             duration: 0,
             language: 'auto',
-            pause_after: 0.5
+            pause_after: 0.5,
+            image_url: null
         });
     },
     moveBlock(id, direction) {

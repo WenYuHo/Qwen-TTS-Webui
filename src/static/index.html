@@ -207,10 +207,38 @@ Bob: Hi Alice, how are you today?"></textarea>
                         <button class="btn btn-secondary btn-sm" style="width:100%; margin-top:12px;" onclick="batchSynthesize()">
                             Synthesize All Blocks
                         </button>
+                        <div class="header-divider" style="margin-top:20px; border-top:1px solid var(--border); padding-top:20px;"></div>
+                        <span class="label">Video Production</span>
+                        <div class="control-group">
+                            <span class="label">Aspect Ratio</span>
+                            <select id="video-aspect">
+                                <option value="16:9">16:9 (YouTube)</option>
+                                <option value="9:16">9:16 (Shorts/TikTok)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <span class="label">Font Size</span>
+                            <input type="number" id="video-font-size" value="40" min="10" max="120" class="btn btn-secondary btn-sm" style="width:100%; background:rgba(255,255,255,0.05); color:white; border:1px solid var(--border);">
+                        </div>
+                        <div class="control-group">
+                            <span class="label">Font Type</span>
+                            <select id="video-font-type">
+                                <option value="DejaVuSans-Bold.ttf">DejaVu Sans Bold</option>
+                                <option value="LiberationSans-Bold.ttf">Liberation Sans Bold</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                <input type="checkbox" id="video-subtitles" checked>
+                                <span class="label" style="margin:0;">Include Subtitles</span>
+                            </label>
+                        </div>
+                        <button class="btn btn-secondary" style="width:100%; padding:12px;" onclick="generateVideo()">
+                            <i class="fas fa-video"></i> GENERATE VIDEO
+                        </button>
                     </div>
                 </div>
             </div>
-
             <!-- View: Dubbing -->
             <div id="dubbing-view" class="view-container">
                 <div class="view-header">
@@ -255,7 +283,9 @@ Bob: Hi Alice, how are you today?"></textarea>
                             <span class="label">Target Voice</span>
                             <select id="s2s-target-voice" class="btn btn-secondary btn-sm" style="width:100%"></select>
                         </div>
-                        <div class="control-group">
+
+
+<div class="control-group">
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                                 <input type="checkbox" id="s2s-preserve" checked>
                                 <span class="label" style="margin:0;">Preserve Prosody (Expressive)</span>

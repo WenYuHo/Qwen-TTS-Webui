@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from ..server_state import engine, task_manager
+from ..server_state import engine, video_engine, task_manager
 from ..task_manager import TaskStatus
 from ..utils import numpy_to_wav_bytes
 from ..dub_logic import run_dub_task
 from ..s2s_logic import run_s2s_task
-from .schemas import PodcastRequest, S2SRequest, DubRequest
-from ..config import logger
+from .schemas import PodcastRequest, S2SRequest, DubRequest, VideoRequest, ProjectData
+from ..config import logger, PROJECTS_DIR
 import io
 
 router = APIRouter(prefix="/api/generate", tags=["generation"])
@@ -86,4 +86,50 @@ async def generate_s2s(request: S2SRequest, background_tasks: BackgroundTasks):
 async def generate_dub(request: DubRequest, background_tasks: BackgroundTasks):
     task_id = task_manager.create_task("dubbing", {"source": request.source_audio})
     background_tasks.add_task(run_dub_task, task_id, request.source_audio, request.target_lang, engine)
+    return {"task_id": task_id, "status": TaskStatus.PENDING}
+
+def run_video_task(task_id: str, request: VideoRequest):
+    try:
+        task_manager.update_task(task_id, status=TaskStatus.PROCESSING, progress=10, message="Loading project...")
+
+        project_file = PROJECTS_DIR / f"{request.project_name}.json"
+        if not project_file.exists():
+            raise Exception(f"Project {request.project_name} not found")
+
+        with open(project_file, "r", encoding="utf-8") as f:
+            project_data = ProjectData.model_validate_json(f.read())
+
+        task_manager.update_task(task_id, progress=20, message="Generating video segments (this may take a while)...")
+
+        # Set speaker profiles from project
+        for voice in project_data.voices:
+             engine.set_speaker_profile(voice["role"], voice)
+
+        video_path = video_engine.generate_video(
+            project_data,
+            aspect_ratio=request.aspect_ratio,
+            include_subtitles=request.include_subtitles,
+            font_size=request.font_size,
+            font_type=request.font_type
+        )
+
+        failed_blocks = [i for i, b in enumerate(project_data.blocks) if b.status == "failed"]
+        msg = "Ready"
+        if failed_blocks:
+            msg = f"Completed with {len(failed_blocks)} failed blocks: {failed_blocks}"
+
+
+        with open(video_path, "rb") as f:
+            video_bytes = f.read()
+
+        task_manager.update_task(task_id, status=TaskStatus.COMPLETED, progress=100, message=msg, result=video_bytes)
+
+    except Exception as e:
+        logger.error(f"Video Task {task_id} failed: {e}", exc_info=True)
+        task_manager.update_task(task_id, status=TaskStatus.FAILED, error=str(e), message=f"Video generation failed: {e}")
+
+@router.post("/video")
+async def generate_video_api(request: VideoRequest, background_tasks: BackgroundTasks):
+    task_id = task_manager.create_task("video_generation", {"project": request.project_name})
+    background_tasks.add_task(run_video_task, task_id, request)
     return {"task_id": task_id, "status": TaskStatus.PENDING}

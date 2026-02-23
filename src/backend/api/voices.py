@@ -6,7 +6,7 @@ import json
 import logging
 import soundfile as sf
 from .schemas import SpeakerProfile, MixRequest, VoiceLibrary
-from ..config import VOICE_LIBRARY_FILE, logger
+from ..config import VOICE_LIBRARY_FILE, VOICE_IMAGES_DIR, logger
 
 router = APIRouter(prefix="/api/voice", tags=["voices"])
 
@@ -92,3 +92,27 @@ async def save_library(library: VoiceLibrary):
     except Exception as e:
         logger.error(f"Failed to save voice library: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/image/upload")
+async def upload_image(file: UploadFile = File(...)):
+    file_extension = Path(file.filename).suffix.lower()
+    if file_extension not in [".jpg", ".jpeg", ".png", ".webp"]:
+        raise HTTPException(status_code=400, detail="Invalid image type")
+
+    content = await file.read()
+    if len(content) > 5 * 1024 * 1024: # 5MB
+        raise HTTPException(status_code=413, detail="Image too large")
+
+    safe_filename = f"{uuid.uuid4()}{file_extension}"
+    file_path = VOICE_IMAGES_DIR / safe_filename
+    with open(file_path, "wb") as f:
+        f.write(content)
+
+    return {"url": f"/api/voice/image/{safe_filename}"}
+
+@router.get("/image/{filename}")
+async def get_image(filename: str):
+    file_path = VOICE_IMAGES_DIR / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Image not found")
+    return FileResponse(file_path)

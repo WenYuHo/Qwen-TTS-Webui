@@ -253,6 +253,7 @@ input:focus, textarea:focus, select:focus {
     height: 8px;
     background: var(--accent);
     border-radius: 50%;
+    overflow: hidden;
     box-shadow: 0 0 10px var(--accent);
 }
 
@@ -375,6 +376,7 @@ input[type="range"] {
     width: 36px;
     height: 36px;
     border-radius: 50%;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
