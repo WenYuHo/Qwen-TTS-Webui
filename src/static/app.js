@@ -19,13 +19,21 @@ const state = {
 };
 
 function renderAvatar(name) {
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B59B6'];
+    const color = colors[name.length % colors.length];
+    return `<div class="avatar" style="background:${color}">${name[0].toUpperCase()}</div>`;
+}
+
 function switchView(view) {
     state.currentView = view;
     document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
 
-    document.getElementById(`${view}-view`).classList.add('active');
-    document.querySelector(`button[onclick="switchView('${view}')"]`).classList.add('active');
+    const targetView = document.getElementById(`${view}-view`);
+    if (targetView) targetView.classList.add('active');
+
+    const navBtn = document.querySelector(`button[onclick="switchView('${view}')"]`);
+    if (navBtn) navBtn.classList.add('active');
 
     if (view === 'speech') {
         renderSpeechVoiceList();
@@ -37,10 +45,6 @@ function switchView(view) {
     if (view === 'system') {
         renderSystemView();
     }
-}
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B59B6'];
-    const color = colors[name.length % colors.length];
-    return `<div class="avatar" style="background:${color}">${name[0].toUpperCase()}</div>`;
 }
 
 // --- Voice Studio ---
@@ -277,6 +281,36 @@ function toggleCanvasView(view) {
     if (view === 'production') renderBlocks();
 }
 
+function renderBlockContent(block) {
+    return `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                ${renderAvatar(block.role)}
+                <span class="label" style="color:var(--accent); margin:0;">${block.role}</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <select class="btn btn-secondary btn-sm" style="font-size:0.7rem;" onchange="updateBlockProperty('${block.id}', 'language', this.value)">
+                    <option value="auto" ${block.language === 'auto' ? 'selected' : ''}>Auto</option>
+                    <option value="en" ${block.language === 'en' ? 'selected' : ''}>EN</option>
+                    <option value="zh" ${block.language === 'zh' ? 'selected' : ''}>ZH</option>
+                    <option value="ja" ${block.language === 'ja' ? 'selected' : ''}>JA</option>
+                    <option value="es" ${block.language === 'es' ? 'selected' : ''}>ES</option>
+                </select>
+                <div style="display:flex; align-items:center; gap:4px; font-size:0.7rem; color:var(--text-secondary);">
+                    Gap: <input type="number" step="0.1" value="${block.pause_after}" style="width:40px; background:none; border:1px solid var(--border); color:inherit; border-radius:4px; padding:2px;" onchange="updateBlockProperty('${block.id}', 'pause_after', this.value)">s
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">${block.status === 'ready' ? 'Regen' : 'Synth'}</button>
+                <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+        <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${block.text}</p>
+        <div class="block-status" id="status-${block.id}">
+            ${block.status === 'generating' ? `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
+            ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play"></i> Play</button>` : ''}
+        </div>
+    `;
+}
+
 function renderBlocks() {
     const container = document.getElementById('blocks-container');
     if (!container) return;
@@ -284,33 +318,35 @@ function renderBlocks() {
     CanvasManager.blocks.forEach(block => {
         const div = document.createElement('div');
         div.className = 'story-block';
-        div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    ${renderAvatar(block.role)}
-                    <span class="label" style="color:var(--accent); margin:0;">${block.role}</span>
-                </div>
-                <div style="display:flex; gap:8px; align-items:center;">
-                    <select class="btn btn-secondary btn-sm" style="font-size:0.7rem;" onchange="updateBlockProperty('${block.id}', 'language', this.value)">
-                        <option value="auto" ${block.language === 'auto' ? 'selected' : ''}>Auto</option>
-                        <option value="en" ${block.language === 'en' ? 'selected' : ''}>EN</option>
-                        <option value="zh" ${block.language === 'zh' ? 'selected' : ''}>ZH</option>
-                        <option value="ja" ${block.language === 'ja' ? 'selected' : ''}>JA</option>
-                        <option value="es" ${block.language === 'es' ? 'selected' : ''}>ES</option>
-                    </select>
-                    <div style="display:flex; align-items:center; gap:4px; font-size:0.7rem; color:var(--text-secondary);">
-                        Gap: <input type="number" step="0.1" value="${block.pause_after}" style="width:40px; background:none; border:1px solid var(--border); color:inherit; border-radius:4px; padding:2px;" onchange="updateBlockProperty('${block.id}', 'pause_after', this.value)">s
-                    </div>
-                    <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">${block.status === 'ready' ? 'Regen' : 'Synth'}</button>
-                    <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times"></i></button>
-                </div>
-            </div>
-            <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${block.text}</p>
-            ${block.status === 'generating' ? `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
-            ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play"></i> Play</button>` : ''}
-        `;
+        div.id = `block-${block.id}`;
+        div.innerHTML = renderBlockContent(block);
         container.appendChild(div);
     });
+}
+
+/**
+ * Optimizes UI updates by re-rendering only the affected block.
+ * For progress updates, it only updates the width of the progress bar.
+ */
+function updateBlockUI(id) {
+    const block = CanvasManager.blocks.find(b => b.id === id);
+    if (!block) return;
+    const statusEl = document.getElementById(`status-${id}`);
+    if (statusEl) {
+        if (block.status === 'generating') {
+            const bar = statusEl.querySelector('.progress-bar');
+            if (bar) {
+                bar.style.width = `${block.progress}%`;
+            } else {
+                statusEl.innerHTML = `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>`;
+            }
+        } else {
+            const blockEl = document.getElementById(`block-${id}`);
+            if (blockEl) blockEl.innerHTML = renderBlockContent(block);
+        }
+    } else {
+        renderBlocks();
+    }
 }
 
 function updateBlockProperty(id, prop, val) {
@@ -334,7 +370,7 @@ async function promoteToProduction() {
 async function generateBlock(id) {
     const block = CanvasManager.blocks.find(b => b.id === id);
     if (!block) return;
-    block.status = 'generating'; block.progress = 0; renderBlocks();
+    block.status = 'generating'; block.progress = 0; updateBlockUI(id);
     const profiles = getAllProfiles();
     try {
         const res = await fetch('/api/generate/segment', {
@@ -351,10 +387,10 @@ async function generateBlock(id) {
             })
         });
         const { task_id } = await res.json();
-        const blob = await TaskPoller.poll(task_id, (task) => { block.progress = task.progress; renderBlocks(); });
+        const blob = await TaskPoller.poll(task_id, (task) => { block.progress = task.progress; updateBlockUI(id); });
         block.audioUrl = URL.createObjectURL(blob);
-        block.status = 'ready'; renderBlocks();
-    } catch (e) { block.status = 'error'; alert(e.message); renderBlocks(); }
+        block.status = 'ready'; updateBlockUI(id);
+    } catch (e) { block.status = 'error'; alert(e.message); updateBlockUI(id); }
 }
 
 function playBlock(id) {

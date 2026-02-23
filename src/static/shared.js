@@ -65,15 +65,25 @@ const CanvasManager = {
     }
 };
 
+const _voicePreviewCache = new Map();
+
 async function getVoicePreview(profile) {
+    // Optimization: Cache voice preview blobs to avoid redundant backend synthesis
+    const cacheKey = JSON.stringify(profile);
+    if (_voicePreviewCache.has(cacheKey)) {
+        return _voicePreviewCache.get(cacheKey);
+    }
+
     try {
         const res = await fetch('/api/voice/preview', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(profile)
+            body: cacheKey
         });
         if (!res.ok) throw new Error("Preview failed");
-        return await res.blob();
+        const blob = await res.blob();
+        _voicePreviewCache.set(cacheKey, blob);
+        return blob;
     } catch (e) {
         console.error("Preview error:", e);
         return null;
