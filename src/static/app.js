@@ -1,7 +1,7 @@
 // --- Qwen-TTS Studio Frontend ---
 
 const state = {
-    currentView: 'speech',
+    currentView: 'home',
     voicelab: {
         lastDesignedPath: null,
         lastClonedPath: null,
@@ -31,8 +31,11 @@ function switchView(view) {
     document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
 
-    document.getElementById(`${view}-view`).classList.add('active');
-    document.querySelector(`button[onclick="switchView('${view}')"]`).classList.add('active');
+    const viewEl = document.getElementById(`${view}-view`);
+    if (viewEl) viewEl.classList.add('active');
+
+    const navBtn = document.querySelector(`button[onclick="switchView('${view}')"]`);
+    if (navBtn) navBtn.classList.add('active');
 
     if (view === 'speech') {
         renderSpeechVoiceList();
@@ -44,13 +47,19 @@ function switchView(view) {
     if (view === 'system') {
         renderSystemView();
     }
+    if (view === 'projects') {
+        fetchProjects();
+    }
 }
-// --- Voice Studio ---
 
+// --- Voice Studio ---
 
 async function generateSpeech() {
     const text = document.getElementById('speech-text').value;
-    const voice = JSON.parse(document.getElementById('speech-voice').value);
+    const voiceVal = document.getElementById('speech-voice').value;
+    if (!voiceVal) return alert('Select a voice first');
+
+    const voice = JSON.parse(voiceVal);
     const lang = document.getElementById('speech-lang').value;
     const statusText = document.getElementById('status-text');
 
@@ -81,7 +90,7 @@ async function generateSpeech() {
 }
 
 function renderSpeechVoiceList() {
-    const selects = ['mix-voice-a', 'mix-voice-b'];
+    const selects = ['mix-voice-a', 'mix-voice-b', 'speech-voice', 's2s-target-voice'];
     const profiles = getAllProfiles();
 
     selects.forEach(id => {
@@ -100,9 +109,8 @@ function renderSpeechVoiceList() {
 function renderS2STargetList() {
     const el = document.getElementById('s2s-target-voice');
     if (!el) return;
-    const profiles = getAllProfiles();
     el.innerHTML = '';
-    profiles.forEach(p => {
+    getAllProfiles().forEach(p => {
         const opt = document.createElement('option');
         opt.value = JSON.stringify(p);
         opt.innerText = p.role;
@@ -110,37 +118,38 @@ function renderS2STargetList() {
     });
 }
 
+// --- Voice Lab ---
+
 async function testVoiceDesign(btn) {
-    if (btn) {
-        btn.disabled = true;
-        btn.dataset.originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Designing...';
-    }
     const prompt = document.getElementById('design-prompt').value;
     const gender = document.getElementById('design-gender').value;
     const age = document.getElementById('design-age').value;
+    const statusText = document.getElementById('status-text');
+
+    if (!prompt) return alert("Describe the voice");
     const instruct = `${prompt}. Gender: ${gender}, Age: ${age}`;
 
-    const status = document.getElementById('design-status');
-    const container = document.getElementById('design-preview-container');
-
-    status.innerText = "Designing...";
-    container.style.display = 'block';
+    if (btn) btn.disabled = true;
+    statusText.innerText = "Designing voice...";
 
     try {
-        const blob = await getVoicePreview({ role: 'Designed Voice', type: 'design', value: instruct });
-        const url = URL.createObjectURL(blob);
+        const res = await fetch('/api/generate/segment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profiles: [{ role: 'preview', type: 'design', value: instruct }],
+                script: [{ role: 'preview', text: "This is a preview of my designed voice." }]
+            })
+        });
+        const { task_id } = await res.json();
+        const blob = await TaskPoller.poll(task_id);
+
+        window.designPreviewUrl = URL.createObjectURL(blob);
         state.voicelab.lastDesignedPath = instruct;
-        window.designPreviewUrl = url;
-        status.innerText = "Ready";
-    } catch (e) {
-        status.innerText = "Error: " + e.message;
-    } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = btn.dataset.originalHtml;
-        }
-    }
+        document.getElementById('design-preview-container').style.display = 'block';
+        statusText.innerText = "Ready";
+    } catch (e) { alert(e.message); }
+    finally { if (btn) btn.disabled = false; }
 }
 
 function playDesignPreview() {
@@ -161,41 +170,39 @@ function saveDesignedVoice() {
 
 async function handleCloneUpload(files) {
     if (!files || files.length === 0) return;
-    const filenames = [];
-    for (let i = 0; i < files.length; i++) {
-        const formData = new FormData();
-        formData.append('file', files[i]);
+    const formData = new FormData();
+    for (let f of files) formData.append('file', f);
+
+    try {
         const res = await fetch('/api/voice/upload', { method: 'POST', body: formData });
         const data = await res.json();
-        filenames.push(data.filename);
-    }
-    state.voicelab.lastClonedPath = filenames.join('|');
-    document.getElementById('clone-filename').innerText = files.length > 1 ? `${files.length} samples selected` : files[0].name;
+        state.voicelab.lastClonedPath = data.filename;
+        alert("Audio uploaded successfully.");
+    } catch (e) { alert("Upload failed"); }
 }
 
 async function testVoiceClone(btn) {
     if (!state.voicelab.lastClonedPath) return alert("Upload audio first");
-    if (btn) {
-        btn.disabled = true;
-        btn.dataset.originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cloning...';
-    }
-    const status = document.getElementById('clone-status');
-    const container = document.getElementById('clone-preview-container');
-    status.innerText = "Cloning...";
-    container.style.display = 'block';
+    const statusText = document.getElementById('status-text');
+    if (btn) btn.disabled = true;
+    statusText.innerText = "Cloning voice...";
 
     try {
-        const blob = await getVoicePreview({ role: 'Cloned Voice', type: 'clone', value: state.voicelab.lastClonedPath });
+        const res = await fetch('/api/generate/segment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profiles: [{ role: 'preview', type: 'clone', value: state.voicelab.lastClonedPath }],
+                script: [{ role: 'preview', text: "This is a preview of my cloned voice." }]
+            })
+        });
+        const { task_id } = await res.json();
+        const blob = await TaskPoller.poll(task_id);
         window.clonePreviewUrl = URL.createObjectURL(blob);
-        status.innerText = "Ready";
-    } catch (e) { status.innerText = "Error"; }
-    finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = btn.dataset.originalHtml;
-        }
-    }
+        document.getElementById('clone-preview-container').style.display = 'block';
+        statusText.innerText = "Ready";
+    } catch (e) { alert(e.message); }
+    finally { if (btn) btn.disabled = false; }
 }
 
 function playClonePreview() {
@@ -215,39 +222,37 @@ function saveClonedVoice() {
 }
 
 async function testVoiceMix(btn) {
-    if (btn) {
-        btn.disabled = true;
-        btn.dataset.originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mixing...';
-    }
-    const voiceA = JSON.parse(document.getElementById('mix-voice-a').value);
-    const voiceB = JSON.parse(document.getElementById('mix-voice-b').value);
-    const weightA = parseInt(document.getElementById('mix-weight-a').value) / 100;
-    const weightB = parseInt(document.getElementById('mix-weight-b').value) / 100;
+    const vA = JSON.parse(document.getElementById('mix-voice-a').value);
+    const vB = JSON.parse(document.getElementById('mix-voice-b').value);
+    const wA = document.getElementById('mix-weight-a').value / 100;
+    const wB = document.getElementById('mix-weight-b').value / 100;
 
     const mixConfig = [
-        { profile: voiceA, weight: weightA },
-        { profile: voiceB, weight: weightB }
+        { profile: vA, weight: wA },
+        { profile: vB, weight: wB }
     ];
 
-    const status = document.getElementById('mix-status');
-    const container = document.getElementById('mix-preview-container');
-    status.innerText = "Mixing...";
-    container.style.display = 'block';
+    const statusText = document.getElementById('status-text');
+    if (btn) btn.disabled = true;
+    statusText.innerText = "Mixing voices...";
 
     try {
-        const mixVal = JSON.stringify(mixConfig);
-        const blob = await getVoicePreview({ role: 'Mixed Voice', type: 'mix', value: mixVal });
+        const res = await fetch('/api/generate/segment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profiles: [{ role: 'preview', type: 'mix', value: JSON.stringify(mixConfig) }],
+                script: [{ role: 'preview', text: "This is a preview of my mixed voice." }]
+            })
+        });
+        const { task_id } = await res.json();
+        const blob = await TaskPoller.poll(task_id);
         window.mixPreviewUrl = URL.createObjectURL(blob);
-        state.voicelab.lastMixedPath = mixVal;
-        status.innerText = "Ready";
-    } catch (e) { status.innerText = "Error"; }
-    finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = btn.dataset.originalHtml;
-        }
-    }
+        state.voicelab.lastMixedPath = JSON.stringify(mixConfig);
+        document.getElementById('mix-preview-container').style.display = 'block';
+        statusText.innerText = "Ready";
+    } catch (e) { alert(e.message); }
+    finally { if (btn) btn.disabled = false; }
 }
 
 function playMixPreview() {
@@ -274,20 +279,27 @@ function renderVoiceLibrary() {
     const voices = SpeakerStore.getVoices();
     voices.forEach(v => {
         const div = document.createElement("div");
-        div.className = "card voice-card";
+        div.className = "card";
+        div.style.padding = "20px";
+        div.style.display = "flex";
+        div.style.flexDirection = "column";
+        div.style.gap = "16px";
+
+        const escapedValue = (v.value || "").replace(/'/g, "\\'");
+
         div.innerHTML = `
             <div style="display:flex; align-items:center; gap:16px;">
                 ${renderAvatar(v.name, v.image_url)}
                 <div style="flex:1">
-                    <h3 style="margin:0; font-size:1rem;">${v.name}</h3>
-                    <span class="badge" style="background:rgba(255,255,255,0.1); font-size:0.7rem;">${v.type.toUpperCase()}</span>
+                    <h3 style="margin:0; font-size:1rem; font-weight:600;">${v.name}</h3>
+                    <span class="badge">${v.type.toUpperCase()}</span>
                 </div>
-                <div style="display:flex; gap:8px;">
-                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('img-upload-${v.id}').click()" title="Upload Image"><i class="fas fa-image"></i></button>
-                    <input type="file" id="img-upload-${v.id}" style="display:none" accept="image/*" onchange="uploadVoiceImage('${v.id}', this.files[0])">
-                    <button class="btn btn-secondary btn-sm" onclick="playVoicePreview('${v.name}', '${v.type}', '${v.value.replace(/'/g, "\'")}')" title="Play Preview"><i class="fas fa-play"></i></button>
-                    <button class="btn btn-secondary btn-sm" onclick="deleteVoice('${v.id}')" style="color:var(--danger)" title="Delete Voice"><i class="fas fa-trash"></i></button>
-                </div>
+            </div>
+            <div style="display:flex; gap:8px; border-top:1px solid var(--border); padding-top:12px;">
+                <button class="btn btn-secondary btn-sm" style="flex:1" onclick="playVoicePreview('${v.name}', '${v.type}', '${escapedValue}')" title="Play Preview"><i class="fas fa-play"></i> Preview</button>
+                <button class="btn btn-secondary btn-sm" onclick="document.getElementById('img-upload-${v.id}').click()" title="Change Image"><i class="fas fa-image"></i></button>
+                <input type="file" id="img-upload-${v.id}" style="display:none" accept="image/*" onchange="uploadVoiceImage('${v.id}', this.files[0])">
+                <button class="btn btn-secondary btn-sm" onclick="deleteVoice('${v.id}')" style="color:var(--danger)" title="Delete Voice"><i class="fas fa-trash"></i></button>
             </div>
         `;
         grid.appendChild(div);
@@ -308,6 +320,7 @@ function deleteVoice(id) {
 }
 
 // --- Project Studio ---
+
 function toggleCanvasView(view) {
     document.getElementById('canvas-draft-view').style.display = view === 'draft' ? 'flex' : 'none';
     document.getElementById('canvas-production-view').style.display = view === 'production' ? 'flex' : 'none';
@@ -321,30 +334,37 @@ function renderBlocks() {
     CanvasManager.blocks.forEach(block => {
         const div = document.createElement('div');
         div.className = 'story-block';
+        div.style.background = 'white';
+        div.style.boxShadow = 'var(--shadow-sm)';
+
         div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
                 <div style="display:flex; align-items:center; gap:12px;">
                     ${renderAvatar(block.role)}
-                    <span class="label" style="color:var(--accent); margin:0;">${block.role}</span>
+                    <span style="font-weight:600; font-size:0.9rem;">${block.role}</span>
                 </div>
-                <div style="display:flex; gap:8px; align-items:center;">
-                    <select class="btn btn-secondary btn-sm" style="font-size:0.7rem;" onchange="updateBlockProperty('${block.id}', 'language', this.value)">
-                        <option value="auto" ${block.language === 'auto' ? 'selected' : ''}>Auto</option>
-                        <option value="en" ${block.language === 'en' ? 'selected' : ''}>EN</option>
-                        <option value="zh" ${block.language === 'zh' ? 'selected' : ''}>ZH</option>
-                        <option value="ja" ${block.language === 'ja' ? 'selected' : ''}>JA</option>
-                        <option value="es" ${block.language === 'es' ? 'selected' : ''}>ES</option>
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <select class="btn btn-secondary btn-sm" style="font-size:0.75rem; background:var(--bg-sidebar); border:none;" onchange="updateBlockProperty('${block.id}', 'language', this.value)">
+                        <option value="auto" ${block.language === 'auto' ? 'selected' : ''}>Auto Detect</option>
+                        <option value="en" ${block.language === 'en' ? 'selected' : ''}>English</option>
+                        <option value="zh" ${block.language === 'zh' ? 'selected' : ''}>Chinese</option>
+                        <option value="ja" ${block.language === 'ja' ? 'selected' : ''}>Japanese</option>
+                        <option value="es" ${block.language === 'es' ? 'selected' : ''}>Spanish</option>
                     </select>
-                    <div style="display:flex; align-items:center; gap:4px; font-size:0.7rem; color:var(--text-secondary);">
-                        Gap: <input type="number" step="0.1" value="${block.pause_after}" style="width:40px; background:none; border:1px solid var(--border); color:inherit; border-radius:4px; padding:2px;" onchange="updateBlockProperty('${block.id}', 'pause_after', this.value)">s
+                    <div style="font-size:0.75rem; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
+                        Pause: <input type="number" step="0.1" value="${block.pause_after}" style="width:50px; background:var(--bg-sidebar); border:none; border-radius:6px; padding:4px 8px; font-size:0.75rem;" onchange="updateBlockProperty('${block.id}', 'pause_after', this.value)">s
                     </div>
-                    <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">${block.status === 'ready' ? 'Regen' : 'Synth'}</button>
-                    <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" title="Remove"><i class="fas fa-times"></i></button>
                 </div>
             </div>
-            <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${block.text}</p>
-            ${block.status === 'generating' ? `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
-            ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play"></i> Play</button>` : ''}
+            <p style="margin: 0 0 16px; color:var(--text-primary); line-height:1.6; font-size:1rem;">${block.text}</p>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <button class="btn ${block.status === 'ready' ? 'btn-secondary' : 'btn-primary'} btn-sm" onclick="generateBlock('${block.id}')">
+                    <i class="fas ${block.status === 'ready' ? 'fa-redo' : 'fa-magic'}"></i> ${block.status === 'ready' ? 'Regenerate' : 'Synthesize'}
+                </button>
+                ${block.audioUrl ? `<button class="btn btn-secondary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play"></i> Play Audio</button>` : ''}
+                ${block.status === 'generating' ? `<div class="progress-container" style="flex:1; margin:0;"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
+            </div>
         `;
         container.appendChild(div);
     });
@@ -378,20 +398,19 @@ async function generateBlock(id) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                profiles,
-                script: [{
-                    role: block.role,
-                    text: block.text,
-                    language: block.language,
-                    pause_after: block.pause_after
-                }]
+                profiles: profiles,
+                script: [{ role: block.role, text: block.text, language: block.language }]
             })
         });
         const { task_id } = await res.json();
-        const blob = await TaskPoller.poll(task_id, (task) => { block.progress = task.progress; renderBlocks(); });
+        const blob = await TaskPoller.poll(task_id, (task) => {
+            block.progress = task.progress;
+            renderBlocks();
+        });
         block.audioUrl = URL.createObjectURL(blob);
-        block.status = 'ready'; renderBlocks();
-    } catch (e) { block.status = 'error'; alert(e.message); renderBlocks(); }
+        block.status = 'ready';
+        renderBlocks();
+    } catch (e) { block.status = 'error'; renderBlocks(); alert(e.message); }
 }
 
 function playBlock(id) {
@@ -406,59 +425,53 @@ function playBlock(id) {
 function deleteBlock(id) { CanvasManager.deleteBlock(id); renderBlocks(); }
 
 async function generatePodcast(btn) {
-    if (btn) btn.disabled = true;
-    const inProd = document.getElementById('canvas-production-view').style.display === 'flex';
-    const script = inProd ? CanvasManager.blocks.map(b => ({
-        role: b.role,
-        text: b.text,
-        language: b.language,
-        pause_after: b.pause_after
-    })) : parseScript(document.getElementById('script-editor').value);
-
+    const script = CanvasManager.blocks.map(b => ({ role: b.role, text: b.text, language: b.language, pause_after: b.pause_after }));
     if (script.length === 0) return alert("Empty script.");
     const profiles = getAllProfiles();
-    const bgm_mood = document.getElementById('bgm-select').value;
+    const bgm = document.getElementById('bgm-select').value;
     const statusText = document.getElementById('status-text');
-    statusText.innerText = "Producing Final Mix...";
+
+    if (btn) btn.disabled = true;
+    statusText.innerText = "Producing podcast...";
 
     try {
         const res = await fetch('/api/generate/podcast', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ profiles, script, bgm_mood })
+            body: JSON.stringify({ profiles, script, bgm_mood: bgm })
         });
         const { task_id } = await res.json();
         const blob = await TaskPoller.poll(task_id, (task) => { statusText.innerText = `Producing: ${task.progress}%`; });
         const player = document.getElementById('main-audio-player');
         player.src = URL.createObjectURL(blob);
         player.play();
-        statusText.innerText = "Final Mix Ready!";
+        statusText.innerText = 'Ready';
     } catch (e) { alert(e.message); statusText.innerText = "Failed"; }
+    finally { if (btn) btn.disabled = false; }
 }
 
 async function batchSynthesize() {
-    const blocks = CanvasManager.blocks.filter(b => b.status !== 'ready');
-    for (const b of blocks) await generateBlock(b.id);
+    for (let block of CanvasManager.blocks) {
+        if (block.status !== 'ready') await generateBlock(block.id);
+    }
 }
 
 // --- Dubbing & S2S ---
+
 async function startDubbing() {
     const fileInput = document.getElementById('dub-file');
     const langSelect = document.getElementById('dub-lang');
     const statusText = document.getElementById('status-text');
-
     const file = fileInput.files[0];
     if (!file) return alert("Please upload a file first.");
 
-    statusText.innerText = "Initiating Dubbing...";
-
+    statusText.innerText = "Uploading audio...";
+    const formData = new FormData(); formData.append('file', file);
     try {
-        const formData = new FormData();
-        formData.append('file', file);
         const uploadRes = await fetch('/api/voice/upload', { method: 'POST', body: formData });
-        const uploadData = await uploadRes.json();
-        const path = uploadData.filename;
+        const { filename: path } = await uploadRes.json();
         
+        statusText.innerText = "Dubbing in progress...";
         const res = await fetch('/api/generate/dub', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -474,10 +487,7 @@ async function startDubbing() {
         player.src = URL.createObjectURL(blob);
         player.play();
         statusText.innerText = "Dubbing Complete!";
-    } catch (e) {
-        alert(e.message);
-        statusText.innerText = "Dubbing failed";
-    }
+    } catch (e) { alert(e.message); statusText.innerText = "Dubbing failed"; }
 }
 
 async function startVoiceChanger() {
@@ -509,6 +519,7 @@ async function startVoiceChanger() {
 }
 
 // --- Projects ---
+
 async function fetchProjects() {
     const select = document.getElementById('project-select');
     if (!select) return;
@@ -552,6 +563,8 @@ async function loadProject() {
     } catch (e) { alert(e.message); }
 }
 
+// --- Video ---
+
 async function uploadVoiceImage(voiceId, file) {
     if (!file) return;
     const formData = new FormData();
@@ -566,19 +579,18 @@ async function uploadVoiceImage(voiceId, file) {
 }
 
 async function generateVideo(btn) {
-    if (btn) btn.disabled = true;
-
-    if (btn) btn.disabled = true;
     const projectName = document.getElementById("project-select").value;
     if (!projectName) return alert("Please save/select a project first.");
 
     const aspectRatio = document.getElementById("video-aspect").value;
     const includeSubtitles = document.getElementById("video-subtitles").checked;
+    const font_size = parseInt(document.getElementById("video-font-size").value) || 40;
+    const font_type = document.getElementById("video-font-type").value || "DejaVuSans-Bold.ttf";
     const statusText = document.getElementById("status-text");
 
+    if (btn) btn.disabled = true;
     statusText.innerText = "Generating Video (this takes time)...";
     try {
-        // Save project first to ensure voices and blocks are up to date
         await saveProject();
 
         const res = await fetch("/api/generate/video", {
@@ -588,8 +600,8 @@ async function generateVideo(btn) {
                 project_name: projectName,
                 aspect_ratio: aspectRatio,
                 include_subtitles: includeSubtitles,
-                font_size: parseInt(document.getElementById("video-font-size").value) || 40,
-                font_type: document.getElementById("video-font-type").value || "DejaVuSans-Bold.ttf"
+                font_size: font_size,
+                font_type: font_type
             })
         });
         const { task_id } = await res.json();
@@ -605,14 +617,13 @@ async function generateVideo(btn) {
         a.click();
         document.body.removeChild(a);
 
-        statusText.innerText = \"Video Generation Complete! Download started.\";
-    } catch (e) {
-        alert(e.message);
-        statusText.innerText = "Video failed";
-    } finally { if (btn) btn.disabled = false; }
+        statusText.innerText = "Video Generation Complete! Download started.";
+    } catch (e) { alert(e.message); statusText.innerText = "Video failed"; }
+    finally { if (btn) btn.disabled = false; }
 }
 
 // --- Utilities ---
+
 async function startRecording(targetState, btnId, onComplete) {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -621,7 +632,7 @@ async function startRecording(targetState, btnId, onComplete) {
         targetState.mediaRecorder.ondataavailable = (e) => targetState.audioChunks.push(e.data);
         targetState.mediaRecorder.onstop = async () => {
             const blob = new Blob(targetState.audioChunks, { type: 'audio/wav' });
-            if (onComplete) onComplete([blob]); // Wrap in list for consistency with handleCloneUpload
+            if (onComplete) onComplete([blob]);
         };
         targetState.mediaRecorder.start();
         targetState.isRecording = true;
@@ -637,7 +648,6 @@ function stopRecording(targetState, btnId, originalHtml) {
     document.getElementById(btnId).classList.remove('btn-danger');
 }
 
-// --- Setup ---
 function setupEventListeners() {
     const cloneRecordBtn = document.getElementById('clone-record-btn');
     if (cloneRecordBtn) cloneRecordBtn.onclick = () => {
@@ -658,36 +668,13 @@ function setupEventListeners() {
     };
 }
 
-window.onload = () => {
-    switchView('speech');
-    renderSpeechVoiceList();
-    renderVoiceLibrary();
-    fetchProjects();
-    setupEventListeners();
-    setInterval(() => {
-        const dot = document.getElementById('heartbeat');
-        if (dot) { dot.style.opacity = '1'; setTimeout(() => dot.style.opacity = '0.3', 200); }
-    }, 2000);
-};
+// --- System ---
 
-// Globals
-Object.assign(window, {
-    switchView, renderVoiceLibrary, renderSpeechVoiceList, generateSpeech, playVoicePreview,
-    testVoiceDesign, playDesignPreview, saveDesignedVoice,
-    handleCloneUpload, testVoiceClone, playClonePreview, saveClonedVoice,
-    testVoiceMix, playMixPreview, saveMixedVoice,
-    deleteVoice, toggleCanvasView, promoteToProduction, generateBlock,
-    playBlock, deleteBlock, generatePodcast, batchSynthesize, saveProject, loadProject, generateVideo, uploadVoiceImage,
-    startDubbing, startVoiceChanger, updateBlockProperty
-});
-
-// --- System Manager ---
 async function renderSystemView() {
     const invList = document.getElementById('model-inventory-list');
     const stats = document.getElementById('system-stats');
     if (!invList || !stats) return;
 
-    // Fetch Inventory
     try {
         const res = await fetch('/api/models/inventory');
         const data = await res.json();
@@ -695,7 +682,7 @@ async function renderSystemView() {
         data.models.forEach(m => {
             const div = document.createElement('div');
             div.style.padding = '12px';
-            div.style.background = 'rgba(255,255,255,0.03)';
+            div.style.background = 'var(--bg-sidebar)';
             div.style.border = '1px solid var(--border)';
             div.style.borderRadius = '10px';
             div.style.display = 'flex';
@@ -709,7 +696,7 @@ async function renderSystemView() {
                 </div>
                 <div>
                     ${m.status === 'downloaded'
-                        ? '<span class="badge" style="background:var(--success)">Ready</span>'
+                        ? '<span class="badge" style="background:var(--success); color:white;">Ready</span>'
                         : `<button class="btn btn-primary btn-sm" onclick="downloadModel('${m.repo_id}')"><i class="fas fa-download"></i> Download</button>`}
                 </div>
             `;
@@ -717,7 +704,6 @@ async function renderSystemView() {
         });
     } catch (e) { invList.innerText = "Failed to load inventory"; }
 
-    // Fetch Stats
     try {
         const res = await fetch('/api/health');
         const data = await res.json();
@@ -726,7 +712,6 @@ async function renderSystemView() {
             <div style="margin-bottom:8px;"><strong>Device:</strong> ${data.device.type} (CUDA: ${data.device.cuda_available})</div>
             <div style="margin-bottom:8px;"><strong>CPU:</strong> ${data.performance.cpu_percent}%</div>
             <div style="margin-bottom:8px;"><strong>Memory:</strong> ${data.performance.memory_percent}%</div>
-            <div><strong>Models Dir:</strong> ${data.models.models_dir_path}</div>
         `;
     } catch (e) { stats.innerText = "Failed to load stats"; }
 }
@@ -752,8 +737,14 @@ async function downloadModel(repoId) {
     }
 }
 
-// Update switchView to handle system view
-const originalSwitchView = window.switchView;
+window.onload = () => {
+    switchView('home');
+    setupEventListeners();
+    setInterval(() => {
+        const dot = document.getElementById('heartbeat');
+        if (dot) { dot.style.opacity = '1'; setTimeout(() => dot.style.opacity = '0.3', 200); }
+    }, 2000);
+};
 
 Object.assign(window, {
     batchSynthesize,

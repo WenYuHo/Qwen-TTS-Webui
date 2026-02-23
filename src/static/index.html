@@ -3,131 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Qwen-TTS Podcast Studio</title>
+    <title>Qwen-TTS Studio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="app-container">
-        <!-- Sidebar Navigation -->
+        <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <i class="fas fa-microphone-lines fa-2x" style="color:var(--accent)"></i>
-                <span>Qwen-TTS Studio</span>
+            <div class="logo">
+                <div class="logo-icon">Q</div>
+                <div class="logo-text">Studio</div>
             </div>
-            <nav class="sidebar-nav">
-                <button class="nav-item active" onclick="switchView('speech')">
-                    <i class="fas fa-comment-dots"></i> Voice Studio
-                </button>
-                <button class="nav-item" onclick="switchView('projects')">
-                    <i class="fas fa-layer-group"></i> Project Studio
-                </button>
-                <button class="nav-item" onclick="switchView('dubbing')">
-                    <i class="fas fa-language"></i> Dubbing & S2S
-                </button>
-                <button class="nav-item" onclick="switchView('system')">
-                    <i class="fas fa-microchip"></i> System
-                </button>
+
+            <nav>
+                <div class="sidebar-group">
+                    <button class="nav-item active" onclick="switchView('home')">
+                        <i class="fas fa-home"></i> Home
+                    </button>
+                    <button class="nav-item" onclick="switchView('speech')">
+                        <i class="fas fa-microphone"></i> Voices
+                    </button>
+                </div>
+
+                <div class="sidebar-group">
+                    <div class="sidebar-label">Products</div>
+                    <button class="nav-item" onclick="switchView('projects')">
+                        <i class="fas fa-book"></i> Project Studio
+                    </button>
+                    <button class="nav-item" onclick="switchView('dubbing')">
+                        <i class="fas fa-video"></i> Dubbing & S2S
+                    </button>
+                </div>
+
+                <div class="sidebar-group">
+                    <div class="sidebar-label">Resources</div>
+                    <button class="nav-item" onclick="switchView('system')">
+                        <i class="fas fa-server"></i> System
+                    </button>
+                </div>
             </nav>
             <div style="flex:1"></div>
             <div class="sidebar-footer">
-                <div id="status-badge" class="badge">Engine Ready</div>
+                <span style="font-size:0.75rem; color:var(--text-secondary);">v2.2 Production</span>
             </div>
         </aside>
 
-        <!-- Main Content Area -->
+        <!-- Main Content -->
         <main class="main-content">
-            <!-- View: Voice Studio -->
-            <div id="speech-view" class="view-container active">
+            <!-- View: Home -->
+            <div id="home-view" class="view-container active">
+                <div class="view-title">
+                    <p style="margin-bottom: 4px; color: var(--text-secondary);">Welcome back,</p>
+                    <h1>Studio Dashboard</h1>
+                    <p>Create high-quality AI voiceovers and cinematic video stories.</p>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card" onclick="switchView('speech')">
+                        <div class="feature-icon"><i class="fas fa-comment-dots"></i></div>
+                        <div class="feature-title">Instant Speech</div>
+                    </div>
+                    <div class="feature-card" onclick="switchView('projects')">
+                        <div class="feature-icon"><i class="fas fa-book-open"></i></div>
+                        <div class="feature-title">Project Studio</div>
+                    </div>
+                    <div class="feature-card" onclick="switchView('dubbing')">
+                        <div class="feature-icon"><i class="fas fa-language"></i></div>
+                        <div class="feature-title">Dubbed Video</div>
+                    </div>
+                    <div class="feature-card" onclick="switchView('system')">
+                        <div class="feature-icon"><i class="fas fa-microchip"></i></div>
+                        <div class="feature-title">Model Lab</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: Speech (Voice Studio) -->
+            <div id="speech-view" class="view-container">
                 <div class="view-header">
                     <div class="view-title">
                         <h1>Voice Studio</h1>
-                        <p>Design, clone, and mix unique AI voices.</p>
+                        <p>Generate speech or design custom AI voices.</p>
                     </div>
                 </div>
 
-                <div class="grid-3">
-                    <!-- Voice Design -->
+                <div class="grid-2">
+                    <!-- Generation Card -->
                     <div class="card">
-                        <h2 style="margin-bottom:16px; font-size: 1.2rem;">Voice Design</h2>
+                        <span class="label">Instant Synthesis</span>
+                        <textarea id="speech-text" style="height:120px; margin-bottom:16px;" placeholder="Enter text to synthesize..."></textarea>
                         <div class="control-group">
-                            <span class="label">Style Prompt</span>
-                            <textarea id="design-prompt" placeholder="A calm, soothing female voice with a slight British accent..." style="height: 80px;"></textarea>
+                            <span class="label">Select Voice</span>
+                            <select id="speech-voice"></select>
                         </div>
-
-                        <div class="sliders">
-                            <div class="slider-item">
-                                <span class="label">Gender</span>
-                                <input type="range" id="design-gender" min="0" max="100" value="50">
-                                <span style="font-size:0.8rem; width:50px; text-align:right;">M / F</span>
-                            </div>
-                            <div class="slider-item">
-                                <span class="label">Age</span>
-                                <input type="range" id="design-age" min="0" max="100" value="30">
-                                <span style="font-size:0.8rem; width:50px; text-align:right;">Young / Old</span>
-                            </div>
+                        <div class="control-group">
+                            <span class="label">Language</span>
+                            <select id="speech-lang">
+                                <option value="auto">Auto Detect</option>
+                                <option value="en">English</option>
+                                <option value="zh">Chinese</option>
+                                <option value="ja">Japanese</option>
+                                <option value="es">Spanish</option>
+                            </select>
                         </div>
-
-                        <button class="btn btn-primary" style="width:100%; margin-top:24px;" onclick="testVoiceDesign(this)">
-                            <i class="fas fa-magic"></i> Design & Preview
+                        <button class="btn btn-primary" style="width:100%" onclick="generateSpeech()">
+                            <i class="fas fa-play"></i> Generate Speech
                         </button>
-
-                        <div id="design-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.2); padding: 12px;">
-                            <div style="display:flex; align-items:center; gap:12px;">
-                                <button class="btn btn-secondary btn-sm" onclick="playDesignPreview()" aria-label="Play design preview" title="Play Preview"><i class="fas fa-play"></i></button>
-                                <span id="design-status" style="font-size:0.8rem;">Ready</span>
-                                <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="saveDesignedVoice()">Save</button>
-                            </div>
-                        </div>
                     </div>
 
-                    <!-- Voice Cloning -->
+                    <!-- Voice Design Card -->
                     <div class="card">
-                        <h2 style="margin-bottom:16px; font-size: 1.2rem;">Voice Cloning</h2>
-                        <div class="control-group">
-                            <span class="label">Reference Audio</span>
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                                <button class="btn btn-secondary" onclick="document.getElementById('clone-file').click()">
-                                    <i class="fas fa-upload"></i> Upload
-                                </button>
-                                <button class="btn btn-danger" id="clone-record-btn">
-                                    <i class="fas fa-circle"></i> Record
-                                </button>
-                            </div>
-                            <input type="file" id="clone-file" accept="audio/*" multiple style="display:none" onchange="handleCloneUpload(this.files)">
-                            <p id="clone-filename" style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">No file selected</p>
-                        </div>
-
-                        <button class="btn btn-primary" style="width:100%;" onclick="testVoiceClone(this)">
-                            <i class="fas fa-clone"></i> Clone & Preview
-                        </button>
-
-                        <div id="clone-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.2); padding: 12px;">
-                            <div style="display:flex; align-items:center; gap:12px;">
-                                <button class="btn btn-secondary btn-sm" onclick="playClonePreview()" aria-label="Play clone preview" title="Play Preview"><i class="fas fa-play"></i></button>
-                                <span id="clone-status" style="font-size:0.8rem;">Ready</span>
-                                <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="saveClonedVoice()">Save</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Voice Mixing -->
-                    <div class="card">
-                        <h2 style="margin-bottom:16px; font-size: 1.2rem;">Voice Lab (Mixer)</h2>
+                        <span class="label">Voice Lab (Mixer)</span>
                         <div class="control-group">
                             <span class="label">Base Voice A</span>
-                            <select id="mix-voice-a" class="btn btn-secondary btn-sm" style="width:100%"></select>
+                            <select id="mix-voice-a"></select>
                             <input type="range" id="mix-weight-a" min="0" max="100" value="50" style="margin-top:8px; width:100%">
                         </div>
                         <div class="control-group">
                             <span class="label">Base Voice B</span>
-                            <select id="mix-voice-b" class="btn btn-secondary btn-sm" style="width:100%"></select>
+                            <select id="mix-voice-b"></select>
                             <input type="range" id="mix-weight-b" min="0" max="100" value="50" style="margin-top:8px; width:100%">
                         </div>
-                        <button class="btn btn-primary" style="width:100%;" onclick="testVoiceMix(this)">
+                        <button class="btn btn-secondary" style="width:100%;" onclick="testVoiceMix(this)">
                             <i class="fas fa-flask"></i> Mix & Preview
                         </button>
-                        <div id="mix-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.2); padding: 12px;">
+                        <div id="mix-preview-container" class="card" style="margin-top:20px; display:none; padding: 12px;">
                             <div style="display:flex; align-items:center; gap:12px;">
                                 <button class="btn btn-secondary btn-sm" onclick="playMixPreview()" aria-label="Play mix preview" title="Play Preview"><i class="fas fa-play"></i></button>
                                 <span id="mix-status" style="font-size:0.8rem;">Ready</span>
@@ -142,7 +143,7 @@
                         <h2>My Voice Library</h2>
                     </div>
                 </div>
-                <div id="voice-library-grid" class="grid-2" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+                <div id="voice-library-grid" class="grid-2">
                     <!-- Library voices -->
                 </div>
             </div>
@@ -155,90 +156,86 @@
                         <p>Create multi-character stories and audio dramas.</p>
                     </div>
                     <div style="display:flex; gap:12px;">
-                        <select id="project-select" class="btn btn-secondary btn-sm" style="width:160px;">
+                        <select id="project-select" class="btn btn-secondary" style="width:180px;">
                             <option value="">(New Project)</option>
                         </select>
-                        <button class="btn btn-secondary btn-sm" onclick="loadProject()"><i class="fas fa-folder-open"></i> Load</button>
-                        <button class="btn btn-primary btn-sm" onclick="saveProject()"><i class="fas fa-save"></i> Save</button>
+                        <button class="btn btn-secondary" onclick="loadProject()"><i class="fas fa-folder-open"></i> Load</button>
+                        <button class="btn btn-primary" onclick="saveProject()"><i class="fas fa-save"></i> Save</button>
                     </div>
                 </div>
 
                 <div class="canvas-layout">
                     <div class="canvas-editor-container">
-                        <div class="header" style="border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; gap: 16px;">
+                        <div class="header" style="border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; gap: 16px; background: var(--bg-sidebar);">
                             <button class="btn btn-secondary btn-sm" onclick="toggleCanvasView('draft')">Draft</button>
                             <button class="btn btn-secondary btn-sm" onclick="toggleCanvasView('production')">Production</button>
                             <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="promoteToProduction()">Promote to Blocks</button>
                         </div>
 
                         <div id="canvas-draft-view" style="flex:1; display:flex;">
-                            <textarea id="script-editor" placeholder="Alice: Hello there!
-Bob: Hi Alice, how are you today?"></textarea>
+                            <textarea id="script-editor" placeholder="[Alice]: Hello there!
+[Bob]: Hi Alice, how are you today?"></textarea>
                         </div>
 
                         <div id="canvas-production-view" style="flex:1; display:none; flex-direction:column;">
-                            <div id="timeline-viz" style="height:120px; border-bottom:1px solid var(--border); padding:10px; display:none;">
-                                <div id="waveform" style="height:80px;"></div>
-                                <div id="waveform-timeline"></div>
-                            </div>
                             <div id="blocks-container" class="blocks-container">
                                 <!-- Dynamic Blocks -->
                             </div>
                         </div>
                     </div>
 
-                    <div class="card sidebar-controls">
-                        <span class="label">Production Settings</span>
-                        <div class="control-group">
-                            <span class="label">BGM Mood</span>
-                            <select id="bgm-select">
-                                <option value="">None</option>
-                                <option value="mystery">Mystery</option>
-                                <option value="tech">Tech</option>
-                                <option value="joy">Joyful</option>
-                                <option value="rain">Rain</option>
-                            </select>
-                        </div>
+                    <aside class="sidebar-controls">
+                        <div class="card" style="padding: 20px;">
+                            <span class="label">Final Production</span>
+                            <div class="control-group">
+                                <span class="label">BGM Mood</span>
+                                <select id="bgm-select">
+                                    <option value="">None</option>
+                                    <option value="mystery">Mystery</option>
+                                    <option value="tech">Tech</option>
+                                    <option value="joy">Joyful</option>
+                                    <option value="rain">Rain</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" style="width:100%; margin-bottom:12px;" onclick="generatePodcast(this)">
+                                <i class="fas fa-microphone"></i> Generate Podcast
+                            </button>
 
-                        <button class="btn btn-primary" style="width:100%; padding:20px;" onclick="generatePodcast(this)">
-                            <i class="fas fa-microphone"></i> PRODUCE FINAL
-                        </button>
-
-                        <button class="btn btn-secondary btn-sm" style="width:100%; margin-top:12px;" onclick="batchSynthesize()">
-                            Synthesize All Blocks
-                        </button>
-                        <div class="header-divider" style="margin-top:20px; border-top:1px solid var(--border); padding-top:20px;"></div>
-                        <span class="label">Video Production</span>
-                        <div class="control-group">
-                            <span class="label">Aspect Ratio</span>
-                            <select id="video-aspect">
-                                <option value="16:9">16:9 (YouTube)</option>
-                                <option value="9:16">9:16 (Shorts/TikTok)</option>
-                            </select>
+                            <div style="border-top: 1px solid var(--border); margin: 24px 0; padding-top: 24px;">
+                                <span class="label">Video Production</span>
+                                <div class="control-group">
+                                    <span class="label">Aspect Ratio</span>
+                                    <select id="video-aspect">
+                                        <option value="16:9">16:9 (YouTube)</option>
+                                        <option value="9:16">9:16 (Shorts/TikTok)</option>
+                                    </select>
+                                </div>
+                                <div class="control-group">
+                                    <span class="label">Font Size</span>
+                                    <input type="number" id="video-font-size" value="40" min="10" max="120">
+                                </div>
+                                <div class="control-group">
+                                    <span class="label">Font Type</span>
+                                    <select id="video-font-type">
+                                        <option value="DejaVuSans-Bold.ttf">DejaVu Sans Bold</option>
+                                        <option value="LiberationSans-Bold.ttf">Liberation Sans Bold</option>
+                                    </select>
+                                </div>
+                                <div class="control-group">
+                                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                        <input type="checkbox" id="video-subtitles" checked>
+                                        <span class="label" style="margin:0;">Include Subtitles</span>
+                                    </label>
+                                </div>
+                                <button class="btn btn-secondary" style="width:100%" onclick="generateVideo(this)">
+                                    <i class="fas fa-video"></i> Generate Video
+                                </button>
+                            </div>
                         </div>
-                        <div class="control-group">
-                            <span class="label">Font Size</span>
-                            <input type="number" id="video-font-size" value="40" min="10" max="120" class="btn btn-secondary btn-sm" style="width:100%; background:rgba(255,255,255,0.05); color:white; border:1px solid var(--border);">
-                        </div>
-                        <div class="control-group">
-                            <span class="label">Font Type</span>
-                            <select id="video-font-type">
-                                <option value="DejaVuSans-Bold.ttf">DejaVu Sans Bold</option>
-                                <option value="LiberationSans-Bold.ttf">Liberation Sans Bold</option>
-                            </select>
-                        </div>
-                        <div class="control-group">
-                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                                <input type="checkbox" id="video-subtitles" checked>
-                                <span class="label" style="margin:0;">Include Subtitles</span>
-                            </label>
-                        </div>
-                        <button class="btn btn-secondary" style="width:100%; padding:12px;" onclick="generateVideo(this)">
-                            <i class="fas fa-video"></i> GENERATE VIDEO
-                        </button>
-                    </div>
+                    </aside>
                 </div>
             </div>
+
             <!-- View: Dubbing -->
             <div id="dubbing-view" class="view-container">
                 <div class="view-header">
@@ -281,14 +278,12 @@ Bob: Hi Alice, how are you today?"></textarea>
                         </div>
                         <div class="control-group">
                             <span class="label">Target Voice</span>
-                            <select id="s2s-target-voice" class="btn btn-secondary btn-sm" style="width:100%"></select>
+                            <select id="s2s-target-voice" style="width:100%"></select>
                         </div>
-
-
-<div class="control-group">
+                        <div class="control-group">
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                                 <input type="checkbox" id="s2s-preserve" checked>
-                                <span class="label" style="margin:0;">Preserve Prosody (Expressive)</span>
+                                <span class="label" style="margin:0;">Preserve Prosody</span>
                             </label>
                         </div>
                         <button class="btn btn-primary" style="width:100%" onclick="startVoiceChanger()">
@@ -310,16 +305,12 @@ Bob: Hi Alice, how are you today?"></textarea>
                 <div class="grid-2">
                     <div class="card">
                         <h2 style="margin-bottom:16px; font-size: 1.1rem;">Model Inventory</h2>
-                        <div id="model-inventory-list" style="display:flex; flex-direction:column; gap:12px;">
-                            <!-- Models will be listed here -->
-                        </div>
+                        <div id="model-inventory-list" style="display:flex; flex-direction:column; gap:12px;"></div>
                     </div>
 
                     <div class="card">
                         <h2 style="margin-bottom:16px; font-size: 1.1rem;">System Status</h2>
-                        <div id="system-stats" style="color:var(--text-secondary); font-size:0.9rem;">
-                            Loading system stats...
-                        </div>
+                        <div id="system-stats" style="color:var(--text-secondary); font-size:0.9rem;"></div>
                     </div>
                 </div>
             </div>
@@ -334,15 +325,11 @@ Bob: Hi Alice, how are you today?"></textarea>
         </main>
     </div>
 
-    <!-- Hidden Elements -->
     <audio id="preview-player" style="display:none"></audio>
 
     <!-- Scripts -->
     <script src="/static/libs/wavesurfer.min.js"></script>
-    <script src="/static/libs/wavesurfer-regions.min.js"></script>
-    <script src="/static/libs/wavesurfer-timeline.min.js"></script>
     <script src="/static/shared.js"></script>
-    <script src="/static/timeline.js"></script>
     <script src="/static/app.js"></script>
 </body>
 </html>
