@@ -43,7 +43,14 @@
                     </button>
                 </div>
             </nav>
-            <div style="flex:1"></div>
+
+                <div class="sidebar-group" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+                    <div class="sidebar-label">Active Tasks</div>
+                    <div id="task-monitor-container" style="flex:1; overflow-y:auto; padding:0 12px;">
+                        <p style="color:var(--text-secondary); font-size:0.85rem; text-align:center; padding:20px;">No active tasks</p>
+                    </div>
+                </div>
+
             <div class="sidebar-footer">
                 <span style="font-size:0.75rem; color:var(--text-secondary);">v2.2 Production</span>
             </div>
@@ -319,7 +326,14 @@
             <footer class="footer-status">
                 <div class="heartbeat-dot" id="heartbeat"></div>
                 <span id="status-text">Engine Ready</span>
-                <div style="flex:1"></div>
+
+                <div class="sidebar-group" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+                    <div class="sidebar-label">Active Tasks</div>
+                    <div id="task-monitor-container" style="flex:1; overflow-y:auto; padding:0 12px;">
+                        <p style="color:var(--text-secondary); font-size:0.85rem; text-align:center; padding:20px;">No active tasks</p>
+                    </div>
+                </div>
+
                 <audio id="main-audio-player" controls style="height: 32px; width: 300px;"></audio>
             </footer>
         </main>
@@ -329,7 +343,7 @@
 
     <!-- Scripts -->
     <script src="/static/libs/wavesurfer.min.js"></script>
-    <script src="/static/shared.js"></script>
-    <script src="/static/app.js"></script>
+
+    <script type="module" src="/static/app.js"></script>
 </body>
 </html>

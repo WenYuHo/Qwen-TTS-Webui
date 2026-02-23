@@ -1,5 +1,7 @@
+from .exceptions import VideoError, SynthesisError
 import os
 import json
+import tempfile
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 import numpy as np
@@ -11,10 +13,10 @@ from moviepy import (
     CompositeVideoClip,
     VideoClip,
     ColorClip,
-    vfx
+    afx
 )
 import soundfile as sf
-from .config import VIDEO_OUTPUT_DIR, VOICE_IMAGES_DIR, logger
+from .config import VIDEO_OUTPUT_DIR, VOICE_IMAGES_DIR, BASE_DIR, logger
 from .api.schemas import ProjectData
 
 class VideoEngine:
@@ -26,7 +28,7 @@ class VideoEngine:
         search_paths = [
             Path("/usr/share/fonts/truetype/dejavu"),
             Path("/usr/share/fonts/truetype/liberation"),
-            Path("src/static/fonts"),
+            BASE_DIR / "src" / "static" / "fonts",
             Path("/usr/share/fonts/TTF")
         ]
 
@@ -43,7 +45,10 @@ class VideoEngine:
                     return ImageFont.truetype(str(f), size)
 
         # 3. Last resort
-        return ImageFont.load_default()
+        try:
+            return ImageFont.load_default()
+        except:
+            return None
 
     def _create_text_image(self, text: str, width: int, height: int, font_size: int = 40, font_type: str = "DejaVuSans-Bold.ttf") -> np.ndarray:
         """Create a transparent RGBA image with wrapped text and shadow."""
@@ -51,37 +56,36 @@ class VideoEngine:
         draw = ImageDraw.Draw(img)
         font = self._get_font(font_size, font_type)
 
+        if not font:
+            return np.array(img)
+
         # Robust wrapping
         words = text.split()
         lines = []
         current_line = []
         for word in words:
             current_line.append(word)
-            # Use draw.textbbox for more accurate measurement in modern PIL
             bbox = draw.textbbox((0, 0), " ".join(current_line), font=font)
             line_w = bbox[2] - bbox[0]
             if line_w > width * 0.85:
                 if len(current_line) > 1:
                     lines.append(" ".join(current_line[:-1]))
                     current_line = [word]
-                else: # Single word too long
+                else:
                     lines.append(" ".join(current_line))
                     current_line = []
         if current_line:
             lines.append(" ".join(current_line))
 
-        # Render lines from bottom
         line_height = font_size + 12
         total_height = len(lines) * line_height
-        y = height - total_height - 80 # Padding from bottom
+        y = height - total_height - 80
 
         for line in lines:
             bbox = draw.textbbox((0, 0), line, font=font)
             line_w = bbox[2] - bbox[0]
             x = (width - line_w) / 2
-            # Shadow for readability
             draw.text((x+2, y+2), line, font=font, fill=(0, 0, 0, 200))
-            # Main white text
             draw.text((x, y), line, font=font, fill=(255, 255, 255, 255))
             y += line_height
 
@@ -95,12 +99,10 @@ class VideoEngine:
         current_ratio = img_w / img_h
 
         if current_ratio > target_ratio:
-            # Too wide, crop sides
             new_w = int(img_h * target_ratio)
             offset = (img_w - new_w) // 2
             img = img.crop((offset, 0, offset + new_w, img_h))
         else:
-            # Too tall, crop top/bottom
             new_h = int(img_w / target_ratio)
             offset = (img_h - new_h) // 2
             img = img.crop((0, offset, img_w, offset + new_h))
@@ -118,30 +120,28 @@ class VideoEngine:
             logger.warning(f"Ken Burns zoom failed: {e}")
             return clip
 
-    def generate_video(self, project: ProjectData, aspect_ratio: str = "16:9", include_subtitles: bool = True, font_size: int = 40, font_type: str = "DejaVuSans-Bold.ttf", progress_callback=None) -> Path:
+    def generate_video(self, project: ProjectData, aspect_ratio: str = "16:9", include_subtitles: bool = True, font_size: int = 40, font_type: str = "DejaVuSans-Bold.ttf", bgm_mood: Optional[str] = None, progress_callback=None) -> Path:
         """Orchestrate the full video generation from project blocks."""
-        logger.info(f"Generating {aspect_ratio} video for: {project.name}")
+        logger.info(f"Generating {aspect_ratio} video for: {project.name} (BGM: {bgm_mood})")
 
         w, h = (1920, 1080) if aspect_ratio == "16:9" else (1080, 1920)
         clips = []
         audio_clips = []
         current_time = 0.0
 
-        # Pre-map speaker images
         speaker_images = {s["role"]: s.get("image_url") for s in project.voices}
 
-        temp_dir = Path("temp_video_assets")
-        temp_dir.mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
 
-        try:
             for i, block in enumerate(project.blocks):
                 try:
                     # 1. Audio
                     wav, sr = self.podcast_engine.generate_segment(block.role, block.text, block.language)
-                    audio_path = temp_dir / f"seg_{i}.wav"
-                    sf.write(str(audio_path), wav, sr)
+                    audio_file = temp_path / f"seg_{i}.wav"
+                    sf.write(str(audio_file), wav, sr)
 
-                    audio_clip = AudioFileClip(str(audio_path))
+                    audio_clip = AudioFileClip(str(audio_file))
                     duration = audio_clip.duration
                     full_duration = duration + block.pause_after
 
@@ -162,7 +162,6 @@ class VideoEngine:
                     if include_subtitles and block.text.strip():
                         txt_arr = self._create_text_image(block.text, w, h, font_size, font_type)
                         txt_clip = ImageClip(txt_arr).with_duration(duration).with_position(("center", "center"))
-                        # Layer text on top of image
                         segment_clip = CompositeVideoClip([img_clip, txt_clip])
                     else:
                         segment_clip = img_clip
@@ -173,7 +172,7 @@ class VideoEngine:
 
                     current_time += full_duration
                     if progress_callback:
-                        progress_callback(int(20 + 70 * (i + 1) / len(project.blocks)))
+                        progress_callback(int(10 + 80 * (i + 1) / len(project.blocks)))
 
                 except Exception as e:
                     logger.error(f"Error in block {i} ({block.role}): {e}")
@@ -181,10 +180,22 @@ class VideoEngine:
                     continue
 
             if not clips:
-                raise RuntimeError("No valid clips were generated for this video.")
+                raise VideoError("No valid clips were generated for this video.")
 
-            # 5. Final Composition
+            # 5. Composition
             final_v = CompositeVideoClip(clips)
+
+            # Handle BGM
+            if bgm_mood:
+                try:
+                    bgm_file = Path(BASE_DIR) / "bgm" / f"{bgm_mood}.mp3"
+                    if bgm_file.exists():
+                        bgm_clip = AudioFileClip(str(bgm_file)).with_effects([afx.AudioLoop(duration=current_time), afx.AudioFadeIn(1.0), afx.AudioFadeOut(1.0)])
+                        bgm_clip = bgm_clip.with_volume_scaled(0.1) # Soft background
+                        audio_clips.append(bgm_clip.with_start(0))
+                except Exception as e:
+                    logger.error(f"BGM overlay failed: {e}")
+
             final_a = CompositeAudioClip(audio_clips)
             final_v = final_v.with_audio(final_a)
 
@@ -197,15 +208,7 @@ class VideoEngine:
                 codec="libx264",
                 audio_codec="aac",
                 threads=os.cpu_count(),
-                logger=None # Suppress MoviePy verbose output
+                logger=None
             )
 
             return output_file
-
-        finally:
-            # Cleanup
-            for f in temp_dir.glob("seg_*.wav"):
-                try: f.unlink()
-                except: pass
-            try: temp_dir.rmdir()
-            except: pass

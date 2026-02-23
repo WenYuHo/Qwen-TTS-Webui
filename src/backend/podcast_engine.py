@@ -1,3 +1,4 @@
+from .exceptions import SynthesisError, VoiceNotFoundError
 import os
 import json
 import uuid
@@ -219,7 +220,7 @@ class PodcastEngine:
                     voice_clone_prompt=voice_clone_prompt
                 )
             else:
-                raise ValueError(f"Unknown speaker type: {profile['type']}")
+                raise VoiceNotFoundError(f"Unknown speaker type: {profile['type']}")
                 
             if not wavs:
                 raise RuntimeError("Engine returned no waveforms")
@@ -228,7 +229,7 @@ class PodcastEngine:
             
         except Exception as e:
             logger.error(f"Synthesis failed for role '{role}': {e}", exc_info=True)
-            raise RuntimeError(f"Synthesis failed for role '{role}': {str(e)}") from e
+            raise SynthesisError(f"Synthesis failed for role '{role}': {str(e)}") from e
 
     def generate_voice_changer(self, source_audio: str, target_role: str) -> Dict[str, Any]:
         """Preserve prosody of source while changing voice to target."""

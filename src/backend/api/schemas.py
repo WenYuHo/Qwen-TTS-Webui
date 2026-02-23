@@ -67,3 +67,4 @@ class VideoRequest(BaseModel):
     include_subtitles: bool = True
     font_size: int = 40
     font_type: str = "DejaVuSans-Bold.ttf"
+    bgm_mood: Optional[str] = None

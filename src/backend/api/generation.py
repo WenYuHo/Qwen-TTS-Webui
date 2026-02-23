@@ -111,6 +111,7 @@ def run_video_task(task_id: str, request: VideoRequest):
             include_subtitles=request.include_subtitles,
             font_size=request.font_size,
             font_type=request.font_type,
+            bgm_mood=request.bgm_mood,
             progress_callback=lambda p: task_manager.update_task(task_id, progress=p)
         )
 
