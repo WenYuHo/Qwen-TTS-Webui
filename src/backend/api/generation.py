@@ -110,7 +110,8 @@ def run_video_task(task_id: str, request: VideoRequest):
             aspect_ratio=request.aspect_ratio,
             include_subtitles=request.include_subtitles,
             font_size=request.font_size,
-            font_type=request.font_type
+            font_type=request.font_type,
+            progress_callback=lambda p: task_manager.update_task(task_id, progress=p)
         )
 
         failed_blocks = [i for i, b in enumerate(project_data.blocks) if b.status == "failed"]

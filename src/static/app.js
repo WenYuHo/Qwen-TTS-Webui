@@ -551,6 +551,63 @@ async function loadProject() {
     } catch (e) { alert(e.message); }
 }
 
+async function uploadVoiceImage(voiceId, file) {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+        const res = await fetch("/api/voice/image/upload", { method: "POST", body: formData });
+        const data = await res.json();
+        SpeakerStore.updateVoice(voiceId, { image_url: data.url });
+        renderVoiceLibrary();
+        alert("Image uploaded!");
+    } catch (e) { alert("Upload failed: " + e.message); }
+}
+
+async function generateVideo() {
+    const projectName = document.getElementById("project-select").value;
+    if (!projectName) return alert("Please save/select a project first.");
+
+    const aspectRatio = document.getElementById("video-aspect").value;
+    const includeSubtitles = document.getElementById("video-subtitles").checked;
+    const statusText = document.getElementById("status-text");
+
+    statusText.innerText = "Generating Video (this takes time)...";
+    try {
+        // Save project first to ensure voices and blocks are up to date
+        await saveProject();
+
+        const res = await fetch("/api/generate/video", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                project_name: projectName,
+                aspect_ratio: aspectRatio,
+                include_subtitles: includeSubtitles,
+                font_size: parseInt(document.getElementById("video-font-size").value) || 40,
+                font_type: document.getElementById("video-font-type").value || "DejaVuSans-Bold.ttf"
+            })
+        });
+        const { task_id } = await res.json();
+        const blob = await TaskPoller.poll(task_id, (task) => {
+            statusText.innerText = `Video: ${task.progress}% - ${task.message}`;
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${projectName}_video.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        statusText.innerText = "Video Generation Complete! Download started.";
+    } catch (e) {
+        alert(e.message);
+        statusText.innerText = "Video failed";
+    }
+}
+
 // --- Utilities ---
 async function startRecording(targetState, btnId, onComplete) {
     try {
@@ -693,61 +750,37 @@ async function downloadModel(repoId) {
 
 // Update switchView to handle system view
 const originalSwitchView = window.switchView;
-Object.assign(window, { downloadModel });
 
-async function uploadVoiceImage(voiceId, file) {
-    if (!file) return;
-    const formData = new FormData();
-    formData.append("file", file);
-    try {
-        const res = await fetch("/api/voice/image/upload", { method: "POST", body: formData });
-        const data = await res.json();
-        SpeakerStore.updateVoice(voiceId, { image_url: data.url });
-        renderVoiceLibrary();
-        alert("Image uploaded!");
-    } catch (e) { alert("Upload failed: " + e.message); }
-}
-
-async function generateVideo() {
-    const projectName = document.getElementById("project-select").value;
-    if (!projectName) return alert("Please save/select a project first.");
-
-    const aspectRatio = document.getElementById("video-aspect").value;
-    const includeSubtitles = document.getElementById("video-subtitles").checked;
-    const statusText = document.getElementById("status-text");
-
-    statusText.innerText = "Generating Video (this takes time)...";
-    try {
-        // Save project first to ensure voices and blocks are up to date
-        await saveProject();
-
-        const res = await fetch("/api/generate/video", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                project_name: projectName,
-                aspect_ratio: aspectRatio,
-                include_subtitles: includeSubtitles,
-                font_size: parseInt(document.getElementById("video-font-size").value) || 40,
-                font_type: document.getElementById("video-font-type").value || "DejaVuSans-Bold.ttf"
-            })
-        });
-        const { task_id } = await res.json();
-        const blob = await TaskPoller.poll(task_id, (task) => {
-            statusText.innerText = `Video: ${task.progress}% - ${task.message}`;
-        });
-
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${projectName}_video.mp4`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        statusText.innerText = "Video Generation Complete! Download started.";
-    } catch (e) {
-        alert(e.message);
-        statusText.innerText = "Video failed";
-    }
-}
+Object.assign(window, {
+    batchSynthesize,
+    deleteBlock,
+    deleteVoice,
+    downloadModel,
+    generateBlock,
+    generatePodcast,
+    generateSpeech,
+    generateVideo,
+    handleCloneUpload,
+    loadProject,
+    playBlock,
+    playClonePreview,
+    playDesignPreview,
+    playMixPreview,
+    playVoicePreview,
+    promoteToProduction,
+    renderSpeechVoiceList,
+    renderVoiceLibrary,
+    saveClonedVoice,
+    saveDesignedVoice,
+    saveMixedVoice,
+    saveProject,
+    startDubbing,
+    startVoiceChanger,
+    switchView,
+    testVoiceClone,
+    testVoiceDesign,
+    testVoiceMix,
+    toggleCanvasView,
+    updateBlockProperty,
+    uploadVoiceImage
+});
