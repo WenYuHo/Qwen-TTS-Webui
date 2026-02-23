@@ -405,7 +405,8 @@ function playBlock(id) {
 
 function deleteBlock(id) { CanvasManager.deleteBlock(id); renderBlocks(); }
 
-async function generatePodcast() {
+async function generatePodcast(btn) {
+    if (btn) btn.disabled = true;
     const inProd = document.getElementById('canvas-production-view').style.display === 'flex';
     const script = inProd ? CanvasManager.blocks.map(b => ({
         role: b.role,
@@ -564,7 +565,10 @@ async function uploadVoiceImage(voiceId, file) {
     } catch (e) { alert("Upload failed: " + e.message); }
 }
 
-async function generateVideo() {
+async function generateVideo(btn) {
+    if (btn) btn.disabled = true;
+
+    if (btn) btn.disabled = true;
     const projectName = document.getElementById("project-select").value;
     if (!projectName) return alert("Please save/select a project first.");
 
@@ -601,11 +605,11 @@ async function generateVideo() {
         a.click();
         document.body.removeChild(a);
 
-        statusText.innerText = "Video Generation Complete! Download started.";
+        statusText.innerText = \"Video Generation Complete! Download started.\";
     } catch (e) {
         alert(e.message);
         statusText.innerText = "Video failed";
-    }
+    } finally { if (btn) btn.disabled = false; }
 }
 
 // --- Utilities ---
