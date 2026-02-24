@@ -21,7 +21,7 @@ const state = {
 function renderAvatar(name) {
     const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B59B6'];
     const color = colors[name.length % colors.length];
-    return `<div class="avatar" style="background:${color}">${name[0].toUpperCase()}</div>`;
+    return `<div class="avatar" style="background:${color}" title="${name}" aria-label="Avatar for ${name}">${name[0].toUpperCase()}</div>`;
 }
 
 function switchView(view) {
@@ -82,6 +82,7 @@ function renderS2STargetList() {
 async function testVoiceDesign(btn) {
     if (btn) {
         btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
         btn.dataset.originalHtml = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Designing...';
     }
@@ -107,6 +108,7 @@ async function testVoiceDesign(btn) {
     } finally {
         if (btn) {
             btn.disabled = false;
+            btn.removeAttribute('aria-busy');
             btn.innerHTML = btn.dataset.originalHtml;
         }
     }
@@ -146,6 +148,7 @@ async function testVoiceClone(btn) {
     if (!state.voicelab.lastClonedPath) return alert("Upload audio first");
     if (btn) {
         btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
         btn.dataset.originalHtml = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cloning...';
     }
@@ -162,6 +165,7 @@ async function testVoiceClone(btn) {
     finally {
         if (btn) {
             btn.disabled = false;
+            btn.removeAttribute('aria-busy');
             btn.innerHTML = btn.dataset.originalHtml;
         }
     }
@@ -186,6 +190,7 @@ function saveClonedVoice() {
 async function testVoiceMix(btn) {
     if (btn) {
         btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
         btn.dataset.originalHtml = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mixing...';
     }
@@ -214,6 +219,7 @@ async function testVoiceMix(btn) {
     finally {
         if (btn) {
             btn.disabled = false;
+            btn.removeAttribute('aria-busy');
             btn.innerHTML = btn.dataset.originalHtml;
         }
     }
@@ -241,6 +247,16 @@ function renderVoiceLibrary() {
     grid.innerHTML = '';
 
     const voices = SpeakerStore.getVoices();
+    if (voices.length === 0) {
+        grid.innerHTML = `
+            <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 48px; background: rgba(255,255,255,0.02); border-style: dashed; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
+                <i class="fas fa-microphone-slash fa-3x" style="color: var(--text-secondary); opacity: 0.5;"></i>
+                <p style="color: var(--text-secondary); max-width: 300px;">Your voice library is empty. Design or clone a voice to get started!</p>
+            </div>
+        `;
+        return;
+    }
+
     voices.forEach(v => {
         const div = document.createElement('div');
         div.className = 'card voice-card';
@@ -404,7 +420,13 @@ function playBlock(id) {
 
 function deleteBlock(id) { CanvasManager.deleteBlock(id); renderBlocks(); }
 
-async function generatePodcast() {
+async function generatePodcast(btn) {
+    if (btn) {
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+        btn.dataset.originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Producing...';
+    }
     const inProd = document.getElementById('canvas-production-view').style.display === 'flex';
     const script = inProd ? CanvasManager.blocks.map(b => ({
         role: b.role,
@@ -432,6 +454,13 @@ async function generatePodcast() {
         player.play();
         statusText.innerText = "Final Mix Ready!";
     } catch (e) { alert(e.message); statusText.innerText = "Failed"; }
+    finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.removeAttribute('aria-busy');
+            btn.innerHTML = btn.dataset.originalHtml;
+        }
+    }
 }
 
 async function batchSynthesize() {
@@ -440,7 +469,13 @@ async function batchSynthesize() {
 }
 
 // --- Dubbing & S2S ---
-async function startDubbing() {
+async function startDubbing(btn) {
+    if (btn) {
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+        btn.dataset.originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Dubbing...';
+    }
     const fileInput = document.getElementById('dub-file');
     const langSelect = document.getElementById('dub-lang');
     const statusText = document.getElementById('status-text');
@@ -475,11 +510,23 @@ async function startDubbing() {
     } catch (e) {
         alert(e.message);
         statusText.innerText = "Dubbing failed";
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.removeAttribute('aria-busy');
+            btn.innerHTML = btn.dataset.originalHtml;
+        }
     }
 }
 
-async function startVoiceChanger() {
+async function startVoiceChanger(btn) {
     if (!state.s2s.lastUploadedPath) return alert("Record or upload source audio first.");
+    if (btn) {
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+        btn.dataset.originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Converting...';
+    }
     const targetVoice = JSON.parse(document.getElementById('s2s-target-voice').value);
     const preserveProsody = document.getElementById('s2s-preserve').checked;
     const statusText = document.getElementById('status-text');
@@ -504,6 +551,13 @@ async function startVoiceChanger() {
         player.play();
         statusText.innerText = "Conversion Complete!";
     } catch (e) { alert(e.message); statusText.innerText = "Failed"; }
+    finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.removeAttribute('aria-busy');
+            btn.innerHTML = btn.dataset.originalHtml;
+        }
+    }
 }
 
 // --- Projects ---
