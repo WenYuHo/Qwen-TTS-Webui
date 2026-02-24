@@ -1,0 +1,4 @@
+## 2026-02-23 - Path Traversal in BGM and Weak Path Validation
+**Vulnerability:** The `generate_podcast` method in `PodcastEngine` was performing direct path concatenation for BGM mood resolution without sanitization, leading to a path traversal vulnerability. Additionally, the centralized `_resolve_paths` method used a weak `startswith` string check for subpath validation.
+**Learning:** `startswith(str(base_path))` is insufficient for path security as it can be bypassed by directories sharing the same prefix (e.g., `uploads_secret` passing a check for `uploads`).
+**Prevention:** Use `Path.is_relative_to(base_path)` (Python 3.9+) or `path.relative_to(base_path)` for robust, filesystem-aware subpath validation. Ensure all user-controlled path parameters are routed through this centralized validation logic.

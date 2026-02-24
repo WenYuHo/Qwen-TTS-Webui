@@ -101,18 +101,46 @@
                         <span class="label">Instant Synthesis</span>
                         <textarea id="speech-text" style="height:120px; margin-bottom:16px;" placeholder="Enter text to synthesize..."></textarea>
                         <div class="control-group">
-                            <span class="label">Select Voice</span>
-                            <select id="speech-voice"></select>
+                            <label class="label" for="design-prompt">Style Prompt</label>
+                            <textarea id="design-prompt" placeholder="A calm, soothing female voice with a slight British accent..." style="height: 80px;"></textarea>
+                        </div>
+
+                        <div class="sliders">
+                            <div class="slider-item">
+                                <label class="label" for="design-gender" style="margin-bottom:0; width:60px;">Gender</label>
+                                <input type="range" id="design-gender" min="0" max="100" value="50">
+                                <span style="font-size:0.8rem; width:50px; text-align:right;">M / F</span>
+                            </div>
+                            <div class="slider-item">
+                                <label class="label" for="design-age" style="margin-bottom:0; width:60px;">Age</label>
+                                <input type="range" id="design-age" min="0" max="100" value="30">
+                                <span style="font-size:0.8rem; width:50px; text-align:right;">Young / Old</span>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" style="width:100%; margin-top:24px;" onclick="testVoiceDesign(this)">
+                            <i class="fas fa-magic"></i> Design & Preview
+                        </button>
+
+                        <div id="design-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.2); padding: 12px;">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <button class="btn btn-secondary btn-sm" onclick="playDesignPreview()" aria-label="Play design preview" title="Play Preview"><i class="fas fa-play"></i></button>
+                                <span id="design-status" style="font-size:0.8rem;">Ready</span>
+                                <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="saveDesignedVoice()">Save</button>
+                            </div>
                         </div>
                         <div class="control-group">
-                            <span class="label">Language</span>
-                            <select id="speech-lang">
-                                <option value="auto">Auto Detect</option>
-                                <option value="en">English</option>
-                                <option value="zh">Chinese</option>
-                                <option value="ja">Japanese</option>
-                                <option value="es">Spanish</option>
-                            </select>
+                            <label class="label">Reference Audio</label>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                                <button class="btn btn-secondary" onclick="document.getElementById('clone-file').click()">
+                                    <i class="fas fa-upload"></i> Upload
+                                </button>
+                                <button class="btn btn-danger" id="clone-record-btn">
+                                    <i class="fas fa-circle"></i> Record
+                                </button>
+                            </div>
+                            <input type="file" id="clone-file" accept="audio/*" multiple style="display:none" onchange="handleCloneUpload(this.files)">
+                            <p id="clone-filename" style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">No file selected</p>
                         </div>
                         <button class="btn btn-primary" style="width:100%" onclick="generateSpeech()">
                             <i class="fas fa-play"></i> Generate Speech
@@ -123,14 +151,16 @@
                     <div class="card">
                         <span class="label">Voice Lab (Mixer)</span>
                         <div class="control-group">
-                            <span class="label">Base Voice A</span>
-                            <select id="mix-voice-a"></select>
-                            <input type="range" id="mix-weight-a" min="0" max="100" value="50" style="margin-top:8px; width:100%">
+                            <label class="label" for="mix-voice-a">Base Voice A</label>
+                            <select id="mix-voice-a" class="btn btn-secondary btn-sm" style="width:100%"></select>
+                            <label class="label" for="mix-weight-a" style="margin-top:8px; font-size:0.65rem;">Weight A</label>
+                            <input type="range" id="mix-weight-a" min="0" max="100" value="50" style="width:100%">
                         </div>
                         <div class="control-group">
-                            <span class="label">Base Voice B</span>
-                            <select id="mix-voice-b"></select>
-                            <input type="range" id="mix-weight-b" min="0" max="100" value="50" style="margin-top:8px; width:100%">
+                            <label class="label" for="mix-voice-b">Base Voice B</label>
+                            <select id="mix-voice-b" class="btn btn-secondary btn-sm" style="width:100%"></select>
+                            <label class="label" for="mix-weight-b" style="margin-top:8px; font-size:0.65rem;">Weight B</label>
+                            <input type="range" id="mix-weight-b" min="0" max="100" value="50" style="width:100%">
                         </div>
                         <button class="btn btn-secondary" style="width:100%;" onclick="testVoiceMix(this)">
                             <i class="fas fa-flask"></i> Mix & Preview
@@ -191,22 +221,22 @@
                         </div>
                     </div>
 
-                    <aside class="sidebar-controls">
-                        <div class="card" style="padding: 20px;">
-                            <span class="label">Final Production</span>
-                            <div class="control-group">
-                                <span class="label">BGM Mood</span>
-                                <select id="bgm-select">
-                                    <option value="">None</option>
-                                    <option value="mystery">Mystery</option>
-                                    <option value="tech">Tech</option>
-                                    <option value="joy">Joyful</option>
-                                    <option value="rain">Rain</option>
-                                </select>
-                            </div>
-                            <button class="btn btn-primary" style="width:100%; margin-bottom:12px;" onclick="generatePodcast(this)">
-                                <i class="fas fa-microphone"></i> Generate Podcast
-                            </button>
+                    <div class="card sidebar-controls">
+                        <span class="label">Production Settings</span>
+                        <div class="control-group">
+                            <label class="label" for="bgm-select">BGM Mood</label>
+                            <select id="bgm-select">
+                                <option value="">None</option>
+                                <option value="mystery">Mystery</option>
+                                <option value="tech">Tech</option>
+                                <option value="joy">Joyful</option>
+                                <option value="rain">Rain</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-primary" style="width:100%; padding:20px;" onclick="generatePodcast(this)">
+                            <i class="fas fa-microphone"></i> PRODUCE FINAL
+                        </button>
 
                             <div style="border-top: 1px solid var(--border); margin: 24px 0; padding-top: 24px;">
                                 <span class="label">Video Production</span>
@@ -255,14 +285,14 @@
                     <div class="card">
                         <h2 style="margin-bottom:16px; font-size: 1.1rem;">Dubbing (Translation)</h2>
                         <div class="control-group">
-                            <span class="label">Source File</span>
+                            <label class="label">Source File</label>
                             <button class="btn btn-secondary" style="width:100%" onclick="document.getElementById('dub-file').click()">
                                 <i class="fas fa-file-video"></i> Upload File
                             </button>
                             <input type="file" id="dub-file" accept="video/*,audio/*" style="display:none">
                         </div>
                         <div class="control-group">
-                            <span class="label">Target Language</span>
+                            <label class="label" for="dub-lang">Target Language</label>
                             <select id="dub-lang">
                                 <option value="en">English</option>
                                 <option value="zh">Chinese</option>
@@ -270,7 +300,7 @@
                                 <option value="es">Spanish</option>
                             </select>
                         </div>
-                        <button class="btn btn-primary" style="width:100%" onclick="startDubbing()">
+                        <button class="btn btn-primary" style="width:100%" onclick="startDubbing(this)">
                             <i class="fas fa-magic"></i> Start Dubbing
                         </button>
                     </div>
@@ -278,14 +308,14 @@
                     <div class="card">
                         <h2 style="margin-bottom:16px; font-size: 1.1rem;">Voice Changer (S2S)</h2>
                         <div class="control-group">
-                            <span class="label">Source Audio</span>
+                            <label class="label">Source Audio</label>
                             <button class="btn btn-secondary" style="width:100%" id="s2s-record-btn">
                                 <i class="fas fa-circle"></i> Record Audio
                             </button>
                         </div>
                         <div class="control-group">
-                            <span class="label">Target Voice</span>
-                            <select id="s2s-target-voice" style="width:100%"></select>
+                            <label class="label" for="s2s-target-voice">Target Voice</label>
+                            <select id="s2s-target-voice" class="btn btn-secondary btn-sm" style="width:100%"></select>
                         </div>
                         <div class="control-group">
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
@@ -293,7 +323,7 @@
                                 <span class="label" style="margin:0;">Preserve Prosody</span>
                             </label>
                         </div>
-                        <button class="btn btn-primary" style="width:100%" onclick="startVoiceChanger()">
+                        <button class="btn btn-primary" style="width:100%" onclick="startVoiceChanger(this)">
                             <i class="fas fa-arrows-rotate"></i> Change Voice
                         </button>
                     </div>
