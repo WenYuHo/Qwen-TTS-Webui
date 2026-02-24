@@ -40,10 +40,14 @@ class PodcastEngine:
             else:
                 path_obj = path_obj.resolve()
 
-            if not str(path_obj).startswith(str(self.upload_dir.resolve())):
+            # Security: Use is_relative_to for robust path validation (avoids partial path traversal)
+            is_safe = path_obj.is_relative_to(self.upload_dir.resolve())
+            if not is_safe:
                 bgm_dir = (Path(BASE_DIR) / "bgm").resolve()
-                if not str(path_obj).startswith(str(bgm_dir)):
-                     raise ValueError(f"Access denied to path: {p}")
+                is_safe = path_obj.is_relative_to(bgm_dir)
+
+            if not is_safe:
+                raise ValueError(f"Access denied to path: {p}")
 
             if not path_obj.exists():
                 raise FileNotFoundError(f"File not found: {p}")
