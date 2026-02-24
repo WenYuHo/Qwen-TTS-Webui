@@ -1,4 +1,4 @@
-## 2026-02-24 - [Partial Path Traversal via String Prefix Matching]
-**Vulnerability:** The `PodcastEngine._resolve_paths` and `utils.validate_safe_path` functions used `str(path).startswith(str(base))` to validate that a resolved path was within an allowed directory.
-**Learning:** This check can be bypassed if an attacker can access a directory that shares a common prefix with the allowed directory (e.g., if `/app/uploads` is allowed, `/app/uploads_secret` will also be accepted). String-based prefix matching is insufficient for path security.
-**Prevention:** Always use `Path.is_relative_to(base)` or similar robust path comparison methods (like `os.path.commonpath`) to ensure a path is a literal child of the intended base directory.
+## 2026-02-23 - Path Traversal in BGM and Weak Path Validation
+**Vulnerability:** The `generate_podcast` method in `PodcastEngine` was performing direct path concatenation for BGM mood resolution without sanitization, leading to a path traversal vulnerability. Additionally, the centralized `_resolve_paths` method used a weak `startswith` string check for subpath validation.
+**Learning:** `startswith(str(base_path))` is insufficient for path security as it can be bypassed by directories sharing the same prefix (e.g., `uploads_secret` passing a check for `uploads`).
+**Prevention:** Use `Path.is_relative_to(base_path)` (Python 3.9+) or `path.relative_to(base_path)` for robust, filesystem-aware subpath validation. Ensure all user-controlled path parameters are routed through this centralized validation logic.
