@@ -29,10 +29,10 @@ class TestE2ESynthesis(unittest.TestCase):
         script = [
             {"role": "Ryan", "text": "Hello, this is a test of the stability track."}
         ]
-        self.engine.set_speaker_profile("Ryan", {"type": "preset", "value": "ryan"})
+        profiles = {"Ryan": {"type": "preset", "value": "ryan"}}
         
         # 3. Generate
-        result = self.engine.generate_podcast(script)
+        result = self.engine.generate_podcast(script, profiles=profiles)
         
         # 4. Verify
         self.assertIsNotNone(result)

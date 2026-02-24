@@ -18,7 +18,6 @@ class PodcastEngine:
     def __init__(self):
         self.upload_dir = Path("uploads")
         self.upload_dir.mkdir(parents=True, exist_ok=True)
-        self.speaker_profiles = {}
         # Caches
         self.preset_embeddings = {}
         self.clone_embedding_cache = {}
@@ -54,9 +53,6 @@ class PodcastEngine:
             resolved.append(path_obj)
         return resolved
 
-    def set_speaker_profile(self, role: str, profile: Dict[str, str]):
-        self.speaker_profiles[role] = profile
-        logger.info(f"Speaker profile set for '{role}': {profile['type']}")
 
     def get_system_status(self) -> Dict[str, Any]:
         return {
@@ -147,12 +143,11 @@ class PodcastEngine:
 
         return total_emb / total_weight
 
-    def generate_segment(self, role: str, text: str, language: str = "auto") -> tuple:
-        profile = self.speaker_profiles.get(role)
+    def generate_segment(self, text: str, profile: Optional[Dict[str, Any]] = None, language: str = "auto") -> tuple:
         if not profile:
             profile = {"type": "preset", "value": "Ryan"}
             
-        logger.info(f"Synthesis starting for role '{role}' ({profile['type']}): {text[:30]}...")
+        logger.info(f"Synthesis starting with profile type '{profile['type']}': {text[:30]}...")
             
         try:
             if profile["type"] == "preset":
@@ -231,10 +226,10 @@ class PodcastEngine:
             return wavs[0], sr
             
         except Exception as e:
-            logger.error(f"Synthesis failed for role '{role}': {e}", exc_info=True)
-            raise RuntimeError(f"Synthesis failed for role '{role}': {str(e)}") from e
+            logger.error(f"Synthesis failed: {e}", exc_info=True)
+            raise RuntimeError(f"Synthesis failed: {str(e)}") from e
 
-    def generate_voice_changer(self, source_audio: str, target_role: str) -> Dict[str, Any]:
+    def generate_voice_changer(self, source_audio: str, target_profile: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Preserve prosody of source while changing voice to target."""
         try:
             # 1. Transcribe source
@@ -250,7 +245,6 @@ class PodcastEngine:
             source_item = prompt_items[0]
 
             # 3. Get target embedding
-            target_profile = self.speaker_profiles.get(target_role)
             if not target_profile:
                 target_profile = {"type": "preset", "value": "Ryan"}
 
@@ -274,7 +268,7 @@ class PodcastEngine:
             logger.error(f"Voice changer failed: {e}")
             raise RuntimeError(f"Voice changer failed: {e}")
 
-    def generate_podcast(self, script: List[Dict[str, Any]], bgm_mood: Optional[str] = None) -> Dict[str, Any]:
+    def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None) -> Dict[str, Any]:
         segments = []
         sample_rate = 24000
         max_duration_ms = 0
@@ -288,7 +282,10 @@ class PodcastEngine:
             start_time = item.get("start_time", None) 
             
             try:
-                wav, sr = self.generate_segment(role, text, language=lang)
+                profile = profiles.get(role)
+                if not profile:
+                    logger.warning(f"No profile found for role '{role}'. Using default.")
+                wav, sr = self.generate_segment(text, profile=profile, language=lang)
                 sample_rate = sr
                 wav_int16 = (wav * 32767).astype(np.int16)
                 seg = AudioSegment(wav_int16.tobytes(), frame_rate=sr, sample_width=2, channels=1)
@@ -349,10 +346,10 @@ class PodcastEngine:
             logger.info(f"Translated: {translated_text[:50]}...")
 
             # 3. Clone original voice for synthesis
-            self.set_speaker_profile("original", {"type": "clone", "value": audio_path})
+            original_profile = {"type": "clone", "value": audio_path}
 
             # 4. Synthesize with target language
-            wav, sr = self.generate_segment("original", translated_text, language=target_lang)
+            wav, sr = self.generate_segment(translated_text, profile=original_profile, language=target_lang)
 
             return {"waveform": wav, "sample_rate": sr, "text": translated_text}
         except Exception as e:

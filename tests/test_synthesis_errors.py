@@ -26,17 +26,16 @@ class TestSynthesisErrors(unittest.TestCase):
         
         # We expect a RuntimeError to be raised to the API layer, but with logging
         with self.assertRaises(RuntimeError) as cm:
-            self.engine.generate_segment("Ryan", "Hello world")
+            self.engine.generate_segment("Hello world", profile={"type": "preset", "value": "Ryan"})
         
-        self.assertIn("Synthesis failed for role 'Ryan'", str(cm.exception))
+        self.assertIn("Synthesis failed", str(cm.exception))
         mock_logger.error.assert_called()
 
     @patch("backend.podcast_engine.get_model")
     def test_generate_segment_invalid_type(self, mock_get_model):
         """Test that unknown speaker types raise RuntimeError (wrapped from ValueError)."""
-        self.engine.set_speaker_profile("Ghost", {"type": "unknown", "value": "val"})
         with self.assertRaises(RuntimeError) as cm:
-            self.engine.generate_segment("Ghost", "Text")
+            self.engine.generate_segment("Text", profile={"type": "unknown", "value": "val"})
         self.assertIn("Unknown speaker type", str(cm.exception))
 
 if __name__ == "__main__":
