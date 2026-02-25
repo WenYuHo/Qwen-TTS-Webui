@@ -19,6 +19,6 @@ def validate_safe_path(base_dir, relative_path):
     from pathlib import Path
     base = Path(base_dir).resolve()
     full_path = (base / relative_path).resolve()
-    if not str(full_path).startswith(str(base)):
+    if not full_path.is_relative_to(base):
         raise ValueError("Invalid path: path escapes base directory")
     return full_path

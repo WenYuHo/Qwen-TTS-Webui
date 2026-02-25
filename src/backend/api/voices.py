@@ -54,13 +54,9 @@ async def voice_preview(request: SpeakerProfile):
     preview_dir = Path("src/static/previews")
     preview_dir.mkdir(parents=True, exist_ok=True)
 
-    safe_name = "".join([c for c in request.role if c.isalnum() or c in (' ', '.', '_', '-')]).strip()
-    if not safe_name:
-        safe_name = "preview_" + str(uuid.uuid4())[:8]
-
+    # Security: Use UUID for preview filename to prevent path traversal and collision
+    safe_name = f"preview_{uuid.uuid4().hex[:12]}"
     preview_path = preview_dir / f"{safe_name}.wav"
-    if preview_path.exists():
-        preview_path.unlink()
 
     try:
         profile = {"type": request.type, "value": request.value}
