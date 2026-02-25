@@ -59,8 +59,8 @@ async def voice_preview(request: SpeakerProfile):
     preview_path = preview_dir / f"{safe_name}.wav"
 
     try:
-        engine.set_speaker_profile(request.role, {"type": request.type, "value": request.value})
-        wav, sr = engine.generate_segment(request.role, "This is a preview of my voice.")
+        profile = {"type": request.type, "value": request.value}
+        wav, sr = engine.generate_segment("This is a preview of my voice.", profile=profile)
         sf.write(str(preview_path), wav, sr, format='WAV')
         return FileResponse(preview_path)
     except Exception as e:

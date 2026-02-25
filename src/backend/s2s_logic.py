@@ -12,10 +12,10 @@ def run_s2s_task(task_id, source_audio, target_voice, engine: PodcastEngine):
         task_manager.update_task(task_id, progress=50, message="Synthesizing with target voice...")
 
         # 2. Setup target voice
-        engine.set_speaker_profile(target_voice["role"], {"type": target_voice["type"], "value": target_voice["value"]})
+        profile = {"type": target_voice["type"], "value": target_voice["value"]}
 
         # 3. Generate
-        wav, sr = engine.generate_segment(target_voice["role"], text)
+        wav, sr = engine.generate_segment(text, profile=profile)
 
         task_manager.update_task(task_id, progress=90, message="Encoding audio...")
 

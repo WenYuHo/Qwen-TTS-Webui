@@ -13,17 +13,17 @@ router = APIRouter(prefix="/api/generate", tags=["generation"])
 def run_synthesis_task(task_id: str, is_podcast: bool, request_data: PodcastRequest):
     try:
         task_manager.update_task(task_id, status=TaskStatus.PROCESSING, progress=10, message="Initializing engine")
-        for p in request_data.profiles:
-            engine.set_speaker_profile(p["role"], {"type": p["type"], "value": p["value"]})
+        profiles_map = {p["role"]: {"type": p["type"], "value": p["value"]} for p in request_data.profiles}
 
         task_manager.update_task(task_id, progress=30, message="Loading models and starting inference")
 
         if is_podcast:
             script_data = [line.model_dump() for line in request_data.script]
-            result = engine.generate_podcast(script_data, bgm_mood=request_data.bgm_mood)
+            result = engine.generate_podcast(script_data, profiles=profiles_map, bgm_mood=request_data.bgm_mood)
         else:
             line = request_data.script[0]
-            wav, sr = engine.generate_segment(line.role, line.text, language=line.language)
+            profile = profiles_map.get(line.role)
+            wav, sr = engine.generate_segment(line.text, profile=profile, language=line.language)
             result = {"waveform": wav, "sample_rate": sr}
 
         task_manager.update_task(task_id, progress=80, message="Encoding audio")
@@ -37,10 +37,10 @@ def run_synthesis_task(task_id: str, is_podcast: bool, request_data: PodcastRequ
         logger.error(f"Task {task_id} failed: {e}", exc_info=True)
         task_manager.update_task(task_id, status=TaskStatus.FAILED, error=str(e), message=f"Synthesis failed: {e}")
 
-def run_voice_changer_task(task_id: str, source_audio: str, target_role: str):
+def run_voice_changer_task(task_id: str, source_audio: str, target_profile: dict):
     try:
         task_manager.update_task(task_id, status=TaskStatus.PROCESSING, progress=20, message="Processing source audio...")
-        result = engine.generate_voice_changer(source_audio, target_role)
+        result = engine.generate_voice_changer(source_audio, target_profile)
 
         task_manager.update_task(task_id, progress=80, message="Encoding audio...")
         wav_bytes = numpy_to_wav_bytes(result["waveform"], result["sample_rate"]).read()
@@ -76,7 +76,7 @@ async def generate_podcast(request: PodcastRequest, background_tasks: Background
 async def generate_s2s(request: S2SRequest, background_tasks: BackgroundTasks):
     if request.preserve_prosody:
         task_id = task_manager.create_task("voice_changer", {"source": request.source_audio})
-        background_tasks.add_task(run_voice_changer_task, task_id, request.source_audio, request.target_voice["role"])
+        background_tasks.add_task(run_voice_changer_task, task_id, request.source_audio, request.target_voice)
     else:
         task_id = task_manager.create_task("s2s_generation", {"source": request.source_audio})
         background_tasks.add_task(run_s2s_task, task_id, request.source_audio, request.target_voice, engine)

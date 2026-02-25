@@ -18,7 +18,6 @@ class PodcastEngine:
     def __init__(self):
         self.upload_dir = Path("uploads").resolve()
         self.upload_dir.mkdir(parents=True, exist_ok=True)
-        self.speaker_profiles = {}
         # Caches
         self.preset_embeddings = {}
         self.clone_embedding_cache = {}
@@ -54,9 +53,15 @@ class PodcastEngine:
             resolved.append(path_obj)
         return resolved
 
-    def set_speaker_profile(self, role: str, profile: Dict[str, str]):
-        self.speaker_profiles[role] = profile
-        logger.info(f"Speaker profile set for '{role}': {profile['type']}")
+    def _get_model_type_for_profile(self, profile: Dict[str, Any]) -> str:
+        """Determines the required Qwen-TTS model type for a given speaker profile."""
+        ptype = profile.get("type")
+        if ptype == "preset":
+            return "CustomVoice"
+        if ptype == "design":
+            return "VoiceDesign"
+        # Clone and Mix both use the Base model
+        return "Base"
 
     def get_system_status(self) -> Dict[str, Any]:
         return {
@@ -147,12 +152,11 @@ class PodcastEngine:
 
         return total_emb / total_weight
 
-    def generate_segment(self, role: str, text: str, language: str = "auto") -> tuple:
-        profile = self.speaker_profiles.get(role)
+    def generate_segment(self, text: str, profile: Optional[Dict[str, Any]] = None, language: str = "auto") -> tuple:
         if not profile:
             profile = {"type": "preset", "value": "Ryan"}
             
-        logger.info(f"Synthesis starting for role '{role}' ({profile['type']}): {text[:30]}...")
+        logger.info(f"Synthesis starting with profile type '{profile['type']}': {text[:30]}...")
             
         try:
             if profile["type"] == "preset":
@@ -231,10 +235,10 @@ class PodcastEngine:
             return wavs[0], sr
             
         except Exception as e:
-            logger.error(f"Synthesis failed for role '{role}': {e}", exc_info=True)
-            raise RuntimeError(f"Synthesis failed for role '{role}': {str(e)}") from e
+            logger.error(f"Synthesis failed: {e}", exc_info=True)
+            raise RuntimeError(f"Synthesis failed: {str(e)}") from e
 
-    def generate_voice_changer(self, source_audio: str, target_role: str) -> Dict[str, Any]:
+    def generate_voice_changer(self, source_audio: str, target_profile: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Preserve prosody of source while changing voice to target."""
         try:
             # 1. Transcribe source
@@ -250,7 +254,6 @@ class PodcastEngine:
             source_item = prompt_items[0]
 
             # 3. Get target embedding
-            target_profile = self.speaker_profiles.get(target_role)
             if not target_profile:
                 target_profile = {"type": "preset", "value": "Ryan"}
 
@@ -274,35 +277,63 @@ class PodcastEngine:
             logger.error(f"Voice changer failed: {e}")
             raise RuntimeError(f"Voice changer failed: {e}")
 
-    def generate_podcast(self, script: List[Dict[str, Any]], bgm_mood: Optional[str] = None) -> Dict[str, Any]:
-        segments = []
+    def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None) -> Dict[str, Any]:
         sample_rate = 24000
+
+        # 1. Pre-map indices to model types for grouping to prevent model thrashing
+        # Loading/unloading 1.7B models for every segment is a major performance bottleneck.
+        model_groups = {} # model_type -> list of (index, item)
+        for i, item in enumerate(script):
+            role = item["role"]
+            profile = profiles.get(role, {"type": "preset", "value": "Ryan"})
+            mtype = self._get_model_type_for_profile(profile)
+            if mtype not in model_groups:
+                model_groups[mtype] = []
+            model_groups[mtype].append((i, item))
+
+        # 2. Batch synthesis by model type to minimize switches
+        waveforms = [None] * len(script)
+        srs = [None] * len(script)
+
+        for mtype, group in model_groups.items():
+            logger.info(f"⚡ Bolt: Synthesizing group for model '{mtype}' ({len(group)} segments)")
+            for i, item in group:
+                role = item["role"]
+                text = item["text"]
+                lang = item.get("language", "auto")
+                profile = profiles.get(role)
+                try:
+                    wav, sr = self.generate_segment(text, profile=profile, language=lang)
+                    waveforms[i] = wav
+                    srs[i] = sr
+                except Exception as e:
+                    logger.error(f"Error generating segment {i} for {role}: {e}")
+
+        # 3. Assemble chronological mix
+        segments = []
         max_duration_ms = 0
         current_offset_ms = 0
         
-        for item in script:
-            role = item["role"]
-            text = item["text"]
-            lang = item.get("language", "auto")
-            pause_after = item.get("pause_after", 0.5)
-            start_time = item.get("start_time", None) 
-            
-            try:
-                wav, sr = self.generate_segment(role, text, language=lang)
-                sample_rate = sr
-                wav_int16 = (wav * 32767).astype(np.int16)
-                seg = AudioSegment(wav_int16.tobytes(), frame_rate=sr, sample_width=2, channels=1)
-                
-                position_ms = int(float(start_time) * 1000) if start_time is not None else current_offset_ms
-                segments.append({"audio": seg, "position": position_ms})
-
-                current_offset_ms = position_ms + len(seg) + int(pause_after * 1000)
-                
-                end_pos = position_ms + len(seg)
-                if end_pos > max_duration_ms: max_duration_ms = end_pos
-            except Exception as e:
-                logger.error(f"Error generating segment for {role}: {e}")
+        for i, item in enumerate(script):
+            if waveforms[i] is None:
                 continue
+
+            wav = waveforms[i]
+            sr = srs[i]
+            sample_rate = sr
+            pause_after = item.get("pause_after", 0.5)
+            start_time = item.get("start_time", None)
+
+            wav_int16 = (wav * 32767).astype(np.int16)
+            seg = AudioSegment(wav_int16.tobytes(), frame_rate=sr, sample_width=2, channels=1)
+            
+            position_ms = int(float(start_time) * 1000) if start_time is not None else current_offset_ms
+            segments.append({"audio": seg, "position": position_ms})
+
+            current_offset_ms = position_ms + len(seg) + int(pause_after * 1000)
+
+            end_pos = position_ms + len(seg)
+            if end_pos > max_duration_ms: max_duration_ms = end_pos
                 
         if not segments: return None
         final_mix = AudioSegment.silent(duration=max_duration_ms + 2000, frame_rate=sample_rate)
@@ -346,10 +377,10 @@ class PodcastEngine:
             logger.info(f"Translated: {translated_text[:50]}...")
 
             # 3. Clone original voice for synthesis
-            self.set_speaker_profile("original", {"type": "clone", "value": audio_path})
+            original_profile = {"type": "clone", "value": audio_path}
 
             # 4. Synthesize with target language
-            wav, sr = self.generate_segment("original", translated_text, language=target_lang)
+            wav, sr = self.generate_segment(translated_text, profile=original_profile, language=target_lang)
 
             return {"waveform": wav, "sample_rate": sr, "text": translated_text}
         except Exception as e:

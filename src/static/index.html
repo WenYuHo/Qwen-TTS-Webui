@@ -12,21 +12,21 @@
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <i class="fas fa-microphone-lines fa-2x" style="color:var(--accent)"></i>
+                <i class="fas fa-microphone-lines fa-2x" style="color:var(--accent)" aria-hidden="true"></i>
                 <span>Qwen-TTS Studio</span>
             </div>
             <nav class="sidebar-nav">
-                <button class="nav-item active" onclick="switchView('speech')">
-                    <i class="fas fa-comment-dots"></i> Voice Studio
+                <button class="nav-item active" onclick="switchView('speech')" aria-pressed="true">
+                    <i class="fas fa-comment-dots" aria-hidden="true"></i> Voice Studio
                 </button>
-                <button class="nav-item" onclick="switchView('projects')">
-                    <i class="fas fa-layer-group"></i> Project Studio
+                <button class="nav-item" onclick="switchView('projects')" aria-pressed="false">
+                    <i class="fas fa-layer-group" aria-hidden="true"></i> Project Studio
                 </button>
-                <button class="nav-item" onclick="switchView('dubbing')">
-                    <i class="fas fa-language"></i> Dubbing & S2S
+                <button class="nav-item" onclick="switchView('dubbing')" aria-pressed="false">
+                    <i class="fas fa-language" aria-hidden="true"></i> Dubbing & S2S
                 </button>
-                <button class="nav-item" onclick="switchView('system')">
-                    <i class="fas fa-microchip"></i> System
+                <button class="nav-item" onclick="switchView('system')" aria-pressed="false">
+                    <i class="fas fa-microchip" aria-hidden="true"></i> System
                 </button>
             </nav>
             <div style="flex:1"></div>
@@ -41,7 +41,7 @@
             <div id="speech-view" class="view-container active">
                 <div class="view-header">
                     <div class="view-title">
-                        <h1>Voice Studio</h1>
+                        <h1 tabindex="-1">Voice Studio</h1>
                         <p>Design, clone, and mix unique AI voices.</p>
                     </div>
                 </div>
@@ -139,7 +139,7 @@
 
                 <div class="view-header" style="margin-top: 48px;">
                     <div class="view-title">
-                        <h2>My Voice Library</h2>
+                        <h2 tabindex="-1">My Voice Library</h2>
                     </div>
                 </div>
                 <div id="voice-library-grid" class="grid-2" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
@@ -151,11 +151,11 @@
             <div id="projects-view" class="view-container">
                 <div class="view-header">
                     <div class="view-title">
-                        <h1>Project Studio</h1>
+                        <h1 tabindex="-1">Project Studio</h1>
                         <p>Create multi-character stories and audio dramas.</p>
                     </div>
                     <div style="display:flex; gap:12px;">
-                        <select id="project-select" class="btn btn-secondary btn-sm" style="width:160px;">
+                        <select id="project-select" class="btn btn-secondary btn-sm" style="width:160px;" aria-label="Select project">
                             <option value="">(New Project)</option>
                         </select>
                         <button class="btn btn-secondary btn-sm" onclick="loadProject()"><i class="fas fa-folder-open"></i> Load</button>
@@ -215,7 +215,7 @@ Bob: Hi Alice, how are you today?"></textarea>
             <div id="dubbing-view" class="view-container">
                 <div class="view-header">
                     <div class="view-title">
-                        <h1>Dubbing & S2S</h1>
+                        <h1 tabindex="-1">Dubbing & S2S</h1>
                         <p>Translate audio or perform expressive voice conversion.</p>
                     </div>
                 </div>
@@ -272,7 +272,7 @@ Bob: Hi Alice, how are you today?"></textarea>
             <div id="system-view" class="view-container">
                 <div class="view-header">
                     <div class="view-title">
-                        <h1>System Manager</h1>
+                        <h1 tabindex="-1">System Manager</h1>
                         <p>Monitor engine health and manage AI models.</p>
                     </div>
                 </div>
@@ -296,10 +296,10 @@ Bob: Hi Alice, how are you today?"></textarea>
 
             <!-- Footer Status -->
             <footer class="footer-status">
-                <div class="heartbeat-dot" id="heartbeat"></div>
-                <span id="status-text">Engine Ready</span>
+                <div class="heartbeat-dot" id="heartbeat" aria-hidden="true"></div>
+                <span id="status-text" aria-live="polite">Engine Ready</span>
                 <div style="flex:1"></div>
-                <audio id="main-audio-player" controls style="height: 32px; width: 300px;"></audio>
+                <audio id="main-audio-player" controls style="height: 32px; width: 300px;" aria-label="Main Audio Player"></audio>
             </footer>
         </main>
     </div>

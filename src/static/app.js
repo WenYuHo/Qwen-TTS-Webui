@@ -19,13 +19,34 @@ const state = {
 };
 
 function renderAvatar(name) {
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B59B6'];
+    const color = colors[(name || '').length % colors.length];
+    const safeName = escapeHTML(name || '');
+    const initial = (name && name.length > 0) ? escapeHTML(name[0].toUpperCase()) : '?';
+    return `<div class="avatar" style="background:${color}" title="${safeName}" aria-label="Avatar for ${safeName}">${initial}</div>`;
+}
+
 function switchView(view) {
     state.currentView = view;
     document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(v => {
+        v.classList.remove('active');
+        v.setAttribute('aria-pressed', 'false');
+    });
 
-    document.getElementById(`${view}-view`).classList.add('active');
-    document.querySelector(`button[onclick="switchView('${view}')"]`).classList.add('active');
+    const targetView = document.getElementById(`${view}-view`);
+    if (targetView) {
+        targetView.classList.add('active');
+        // Move focus to the view heading for screen readers
+        const heading = targetView.querySelector('h1');
+        if (heading) heading.focus();
+    }
+
+    const navBtn = document.querySelector(`button[onclick="switchView('${view}')"]`);
+    if (navBtn) {
+        navBtn.classList.add('active');
+        navBtn.setAttribute('aria-pressed', 'true');
+    }
 
     if (view === 'speech') {
         renderSpeechVoiceList();
@@ -240,29 +261,46 @@ function renderVoiceLibrary() {
     voices.forEach(v => {
         const div = document.createElement('div');
         div.className = 'card voice-card';
+        const escapedName = escapeHTML(v.name);
         div.innerHTML = `
             <div style="display:flex; align-items:center; gap:16px;">
                 ${renderAvatar(v.name)}
                 <div style="flex:1">
-                    <h3 style="margin:0; font-size:1rem;">${v.name}</h3>
-                    <span class="badge" style="background:rgba(255,255,255,0.1); font-size:0.7rem;">${v.type.toUpperCase()}</span>
+                    <h3 style="margin:0; font-size:1rem;">${escapedName}</h3>
+                    <span class="badge" style="background:rgba(255,255,255,0.1); font-size:0.7rem;">${escapeHTML(v.type.toUpperCase())}</span>
                 </div>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn btn-secondary btn-sm" onclick="playVoicePreview('${v.name}', '${v.type}', '${v.value.replace(/'/g, "\\'")}')" aria-label="Play voice preview" title="Play Preview"><i class="fas fa-play"></i></button>
-                    <button class="btn btn-secondary btn-sm" onclick="deleteVoice('${v.id}')" style="color:var(--danger)" aria-label="Delete voice" title="Delete Voice"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="playVoicePreview(this, '${v.name}', '${v.type}', '${v.value.replace(/'/g, "\\'")}')" aria-label="Play voice preview" title="Play Preview"><i class="fas fa-play" aria-hidden="true"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="deleteVoice('${v.id}')" style="color:var(--danger)" aria-label="Delete voice" title="Delete Voice"><i class="fas fa-trash" aria-hidden="true"></i></button>
                 </div>
             </div>
         `;
+        div.querySelector('.js-play').onclick = () => playVoicePreview(v.name, v.type, v.value);
+        div.querySelector('.js-delete').onclick = () => deleteVoice(v.id);
         grid.appendChild(div);
     });
 }
 
-async function playVoicePreview(role, type, value) {
-    const blob = await getVoicePreview({ role, type, value });
-    if (blob) {
-        const player = document.getElementById('preview-player');
-        player.src = URL.createObjectURL(blob);
-        player.play();
+async function playVoicePreview(btn, role, type, value) {
+    if (btn) {
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+        btn.dataset.originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+    try {
+        const blob = await getVoicePreview({ role, type, value });
+        if (blob) {
+            const player = document.getElementById('preview-player');
+            player.src = URL.createObjectURL(blob);
+            player.play();
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.removeAttribute('aria-busy');
+            btn.innerHTML = btn.dataset.originalHtml;
+        }
     }
 }
 
@@ -275,6 +313,38 @@ function toggleCanvasView(view) {
     document.getElementById('canvas-draft-view').style.display = view === 'draft' ? 'flex' : 'none';
     document.getElementById('canvas-production-view').style.display = view === 'production' ? 'flex' : 'none';
     if (view === 'production') renderBlocks();
+}
+
+function renderBlockContent(block) {
+    const escapedRole = escapeHTML(block.role);
+    const escapedText = escapeHTML(block.text);
+    return `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                ${renderAvatar(block.role)}
+                <span class="label" style="color:var(--accent); margin:0;">${escapedRole}</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <select class="btn btn-secondary btn-sm" style="font-size:0.7rem;" onchange="updateBlockProperty('${block.id}', 'language', this.value)">
+                    <option value="auto" ${block.language === 'auto' ? 'selected' : ''}>Auto</option>
+                    <option value="en" ${block.language === 'en' ? 'selected' : ''}>EN</option>
+                    <option value="zh" ${block.language === 'zh' ? 'selected' : ''}>ZH</option>
+                    <option value="ja" ${block.language === 'ja' ? 'selected' : ''}>JA</option>
+                    <option value="es" ${block.language === 'es' ? 'selected' : ''}>ES</option>
+                </select>
+                <div style="display:flex; align-items:center; gap:4px; font-size:0.7rem; color:var(--text-secondary);">
+                    Gap: <input type="number" step="0.1" value="${block.pause_after}" style="width:40px; background:none; border:1px solid var(--border); color:inherit; border-radius:4px; padding:2px;" onchange="updateBlockProperty('${block.id}', 'pause_after', this.value)">s
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">${block.status === 'ready' ? 'Regen' : 'Synth'}</button>
+                <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times" aria-hidden="true"></i></button>
+            </div>
+        </div>
+        <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${escapedText}</p>
+        <div class="block-status" id="status-${block.id}">
+            ${block.status === 'generating' ? `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
+            ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play" aria-hidden="true"></i> Play</button>` : ''}
+        </div>
+    `;
 }
 
 function renderBlocks() {
@@ -603,17 +673,25 @@ async function renderSystemView() {
             div.style.justifyContent = 'space-between';
             div.style.alignItems = 'center';
 
+            const escapedKey = escapeHTML(m.key);
+            const escapedRepoId = escapeHTML(m.repo_id);
+
             div.innerHTML = `
                 <div>
-                    <div style="font-weight:600; font-size:0.9rem;">${m.key}</div>
-                    <div style="font-size:0.75rem; color:var(--text-secondary);">${m.repo_id}</div>
+                    <div style="font-weight:600; font-size:0.9rem;">${escapedKey}</div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary);">${escapedRepoId}</div>
                 </div>
-                <div>
+                <div class="action-area">
                     ${m.status === 'downloaded'
                         ? '<span class="badge" style="background:var(--success)">Ready</span>'
-                        : `<button class="btn btn-primary btn-sm" onclick="downloadModel('${m.repo_id}')"><i class="fas fa-download"></i> Download</button>`}
+                        : `<button class="btn btn-primary btn-sm js-download"><i class="fas fa-download"></i> Download</button>`}
                 </div>
             `;
+
+            const downloadBtn = div.querySelector('.js-download');
+            if (downloadBtn) {
+                downloadBtn.onclick = () => downloadModel(m.repo_id);
+            }
             invList.appendChild(div);
         });
     } catch (e) { invList.innerText = "Failed to load inventory"; }
@@ -623,11 +701,11 @@ async function renderSystemView() {
         const res = await fetch('/api/health');
         const data = await res.json();
         stats.innerHTML = `
-            <div style="margin-bottom:8px;"><strong>Status:</strong> ${data.status}</div>
-            <div style="margin-bottom:8px;"><strong>Device:</strong> ${data.device.type} (CUDA: ${data.device.cuda_available})</div>
-            <div style="margin-bottom:8px;"><strong>CPU:</strong> ${data.performance.cpu_percent}%</div>
-            <div style="margin-bottom:8px;"><strong>Memory:</strong> ${data.performance.memory_percent}%</div>
-            <div><strong>Models Dir:</strong> ${data.models.models_dir_path}</div>
+            <div style="margin-bottom:8px;"><strong>Status:</strong> ${escapeHTML(data.status)}</div>
+            <div style="margin-bottom:8px;"><strong>Device:</strong> ${escapeHTML(data.device.type)} (CUDA: ${escapeHTML(String(data.device.cuda_available))})</div>
+            <div style="margin-bottom:8px;"><strong>CPU:</strong> ${escapeHTML(String(data.performance.cpu_percent))}%</div>
+            <div style="margin-bottom:8px;"><strong>Memory:</strong> ${escapeHTML(String(data.performance.memory_percent))}%</div>
+            <div><strong>Models Dir:</strong> ${escapeHTML(data.models.models_dir_path)}</div>
         `;
     } catch (e) { stats.innerText = "Failed to load stats"; }
 }
