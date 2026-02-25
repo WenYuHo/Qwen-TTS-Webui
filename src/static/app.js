@@ -20,8 +20,10 @@ const state = {
 
 function renderAvatar(name) {
     const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B59B6'];
-    const color = colors[name.length % colors.length];
-    return `<div class="avatar" style="background:${color}" title="${name}" aria-label="Avatar for ${name}">${name[0].toUpperCase()}</div>`;
+    const color = colors[(name || '').length % colors.length];
+    const safeName = escapeHTML(name || '');
+    const initial = (name && name.length > 0) ? escapeHTML(name[0].toUpperCase()) : '?';
+    return `<div class="avatar" style="background:${color}" title="${safeName}" aria-label="Avatar for ${safeName}">${initial}</div>`;
 }
 
 function switchView(view) {
@@ -271,12 +273,13 @@ function renderVoiceLibrary() {
     voices.forEach(v => {
         const div = document.createElement('div');
         div.className = 'card voice-card';
+        const escapedName = escapeHTML(v.name);
         div.innerHTML = `
             <div style="display:flex; align-items:center; gap:16px;">
                 ${renderAvatar(v.name)}
                 <div style="flex:1">
-                    <h3 style="margin:0; font-size:1rem;">${v.name}</h3>
-                    <span class="badge" style="background:rgba(255,255,255,0.1); font-size:0.7rem;">${v.type.toUpperCase()}</span>
+                    <h3 style="margin:0; font-size:1rem;">${escapedName}</h3>
+                    <span class="badge" style="background:rgba(255,255,255,0.1); font-size:0.7rem;">${escapeHTML(v.type.toUpperCase())}</span>
                 </div>
                 <div style="display:flex; gap:8px;">
                     <button class="btn btn-secondary btn-sm" onclick="playVoicePreview(this, '${v.name}', '${v.type}', '${v.value.replace(/'/g, "\\'")}')" aria-label="Play voice preview" title="Play Preview"><i class="fas fa-play" aria-hidden="true"></i></button>
@@ -284,6 +287,8 @@ function renderVoiceLibrary() {
                 </div>
             </div>
         `;
+        div.querySelector('.js-play').onclick = () => playVoicePreview(v.name, v.type, v.value);
+        div.querySelector('.js-delete').onclick = () => deleteVoice(v.id);
         grid.appendChild(div);
     });
 }
@@ -323,11 +328,13 @@ function toggleCanvasView(view) {
 }
 
 function renderBlockContent(block) {
+    const escapedRole = escapeHTML(block.role);
+    const escapedText = escapeHTML(block.text);
     return `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
             <div style="display:flex; align-items:center; gap:12px;">
                 ${renderAvatar(block.role)}
-                <span class="label" style="color:var(--accent); margin:0;">${block.role}</span>
+                <span class="label" style="color:var(--accent); margin:0;">${escapedRole}</span>
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
                 <select class="btn btn-secondary btn-sm" style="font-size:0.7rem;" onchange="updateBlockProperty('${block.id}', 'language', this.value)">
@@ -344,7 +351,7 @@ function renderBlockContent(block) {
                 <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times" aria-hidden="true"></i></button>
             </div>
         </div>
-        <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${block.text}</p>
+        <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${escapedText}</p>
         <div class="block-status" id="status-${block.id}">
             ${block.status === 'generating' ? `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
             ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play" aria-hidden="true"></i> Play</button>` : ''}
@@ -718,17 +725,25 @@ async function renderSystemView() {
             div.style.justifyContent = 'space-between';
             div.style.alignItems = 'center';
 
+            const escapedKey = escapeHTML(m.key);
+            const escapedRepoId = escapeHTML(m.repo_id);
+
             div.innerHTML = `
                 <div>
-                    <div style="font-weight:600; font-size:0.9rem;">${m.key}</div>
-                    <div style="font-size:0.75rem; color:var(--text-secondary);">${m.repo_id}</div>
+                    <div style="font-weight:600; font-size:0.9rem;">${escapedKey}</div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary);">${escapedRepoId}</div>
                 </div>
-                <div>
+                <div class="action-area">
                     ${m.status === 'downloaded'
                         ? '<span class="badge" style="background:var(--success)">Ready</span>'
-                        : `<button class="btn btn-primary btn-sm" onclick="downloadModel('${m.repo_id}')"><i class="fas fa-download"></i> Download</button>`}
+                        : `<button class="btn btn-primary btn-sm js-download"><i class="fas fa-download"></i> Download</button>`}
                 </div>
             `;
+
+            const downloadBtn = div.querySelector('.js-download');
+            if (downloadBtn) {
+                downloadBtn.onclick = () => downloadModel(m.repo_id);
+            }
             invList.appendChild(div);
         });
     } catch (e) { invList.innerText = "Failed to load inventory"; }
@@ -738,11 +753,11 @@ async function renderSystemView() {
         const res = await fetch('/api/health');
         const data = await res.json();
         stats.innerHTML = `
-            <div style="margin-bottom:8px;"><strong>Status:</strong> ${data.status}</div>
-            <div style="margin-bottom:8px;"><strong>Device:</strong> ${data.device.type} (CUDA: ${data.device.cuda_available})</div>
-            <div style="margin-bottom:8px;"><strong>CPU:</strong> ${data.performance.cpu_percent}%</div>
-            <div style="margin-bottom:8px;"><strong>Memory:</strong> ${data.performance.memory_percent}%</div>
-            <div><strong>Models Dir:</strong> ${data.models.models_dir_path}</div>
+            <div style="margin-bottom:8px;"><strong>Status:</strong> ${escapeHTML(data.status)}</div>
+            <div style="margin-bottom:8px;"><strong>Device:</strong> ${escapeHTML(data.device.type)} (CUDA: ${escapeHTML(String(data.device.cuda_available))})</div>
+            <div style="margin-bottom:8px;"><strong>CPU:</strong> ${escapeHTML(String(data.performance.cpu_percent))}%</div>
+            <div style="margin-bottom:8px;"><strong>Memory:</strong> ${escapeHTML(String(data.performance.memory_percent))}%</div>
+            <div><strong>Models Dir:</strong> ${escapeHTML(data.models.models_dir_path)}</div>
         `;
     } catch (e) { stats.innerText = "Failed to load stats"; }
 }

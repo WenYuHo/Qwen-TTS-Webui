@@ -1,5 +1,15 @@
 // --- Shared State & Logic for Qwen-TTS Studio ---
 
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 const SpeakerStore = {
     getVoices() {
         return JSON.parse(localStorage.getItem('qwen_voices') || '[]');
