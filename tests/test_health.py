@@ -10,7 +10,7 @@ def test_enhanced_health_check():
     """Test that the health check returns detailed system status."""
     
     # Patch the global engine instance in server.py
-    with patch("server.engine") as mock_engine:
+    with patch("backend.server_state.engine") as mock_engine:
         from server import app
         from fastapi.testclient import TestClient
         

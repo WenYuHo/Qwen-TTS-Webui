@@ -134,7 +134,19 @@ const UIHeartbeat = {
     }
 };
 
-const PRESETS = ["aiden", "dylan", "eric", "ono_anna", "ryan", "serena", "sohee", "uncle_fu", "vivian"];
+let PRESETS = [];
+
+async function initializePresets() {
+    try {
+        const res = await fetch('/api/voice/speakers');
+        const data = await res.json();
+        PRESETS = data.presets || [];
+    } catch (e) {
+        console.error("Failed to fetch presets:", e);
+        // Fallback to minimal set if backend fails
+        PRESETS = ["aiden", "dylan", "eric", "ono_anna", "ryan", "serena", "sohee", "uncle_fu", "vivian"];
+    }
+}
 
 function getAllProfiles() {
     const profiles = [];

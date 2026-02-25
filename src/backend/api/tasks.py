@@ -1,14 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 import io
-from ..server_state import task_manager
-from ..task_manager import TaskStatus
+from .. import server_state
 
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
 @router.get("/{task_id}")
 async def get_task_status(task_id: str):
-    task = task_manager.get_task(task_id)
+    task = server_state.task_manager.get_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
@@ -23,11 +22,11 @@ async def get_task_status(task_id: str):
 
 @router.get("/{task_id}/result")
 async def get_task_result(task_id: str):
-    task = task_manager.get_task(task_id)
+    task = server_state.task_manager.get_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    if task["status"] != TaskStatus.COMPLETED:
+    if task["status"] != server_state.TaskStatus.COMPLETED:
         raise HTTPException(status_code=400, detail="Task not completed yet")
 
     if not task["result"]:

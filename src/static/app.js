@@ -59,13 +59,6 @@ function switchView(view) {
         renderSystemView();
     }
 }
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B59B6'];
-    const color = colors[name.length % colors.length];
-    return `<div class="avatar" style="background:${color}">${name[0].toUpperCase()}</div>`;
-}
-
-// --- Voice Studio ---
-
 function renderSpeechVoiceList() {
     const selects = ['mix-voice-a', 'mix-voice-b'];
     const profiles = getAllProfiles();
@@ -561,7 +554,8 @@ async function saveProject() {
     const data = {
         name,
         blocks: CanvasManager.blocks.map(b => ({ id: b.id, role: b.role, text: b.text, status: b.status, language: b.language, pause_after: b.pause_after })),
-        script_draft: document.getElementById('script-editor').value
+        script_draft: document.getElementById('script-editor').value,
+        voices: SpeakerStore.getVoices()
     };
     try {
         await fetch(`/api/projects/${name}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
@@ -579,6 +573,13 @@ async function loadProject() {
         CanvasManager.clear();
         (data.blocks || []).forEach(b => { CanvasManager.blocks.push({ ...b, audioUrl: null }); });
         renderBlocks();
+        if (data.voices && data.voices.length > 0) {
+            const currentVoices = SpeakerStore.getVoices();
+            data.voices.forEach(v => {
+                if (!currentVoices.find(cv => cv.id === v.id)) SpeakerStore.saveVoice(v);
+            });
+            renderVoiceLibrary();
+        }
         alert("Loaded!");
     } catch (e) { alert(e.message); }
 }
@@ -629,7 +630,8 @@ function setupEventListeners() {
     };
 }
 
-window.onload = () => {
+window.onload = async () => {
+    await initializePresets();
     switchView('speech');
     renderSpeechVoiceList();
     renderVoiceLibrary();
@@ -643,7 +645,7 @@ window.onload = () => {
 
 // Globals
 Object.assign(window, {
-    switchView, generateSpeech, playVoicePreview,
+    switchView, playVoicePreview,
     testVoiceDesign, playDesignPreview, saveDesignedVoice,
     handleCloneUpload, testVoiceClone, playClonePreview, saveClonedVoice,
     testVoiceMix, playMixPreview, saveMixedVoice,

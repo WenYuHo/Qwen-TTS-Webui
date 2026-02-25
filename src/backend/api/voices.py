@@ -7,21 +7,23 @@ import logging
 import soundfile as sf
 from .schemas import SpeakerProfile, MixRequest, VoiceLibrary
 from ..config import VOICE_LIBRARY_FILE, logger
+from .. import server_state
 
 router = APIRouter(prefix="/api/voice", tags=["voices"])
+
+PRESETS = ["aiden", "dylan", "eric", "ono_anna", "ryan", "serena", "sohee", "uncle_fu", "vivian"]
 
 @router.get("/speakers")
 async def get_speakers():
     return {
-        "presets": ["aiden", "dylan", "eric", "ono_anna", "ryan", "serena", "sohee", "uncle_fu", "vivian"],
+        "presets": PRESETS,
         "modes": ["preset", "design", "clone", "mix"],
         "languages": ["auto", "en", "zh", "ja", "es"]
     }
 
 @router.post("/upload")
 async def upload_voice(file: UploadFile = File(...)):
-    from ..server_state import engine
-    upload_dir = engine.upload_dir
+    upload_dir = server_state.engine.upload_dir
 
     file_extension = Path(file.filename).suffix.lower()
     if file_extension not in [".wav", ".mp3", ".flac"]:
@@ -40,17 +42,15 @@ async def upload_voice(file: UploadFile = File(...)):
 
 @router.post("/mix")
 async def voice_mix(request: MixRequest):
-    from ..server_state import engine
     try:
         for item in request.voices:
-            engine.get_speaker_embedding(item["profile"])
+            server_state.engine.get_speaker_embedding(item["profile"])
         return {"status": "ok", "message": "Mix configuration validated"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/preview")
 async def voice_preview(request: SpeakerProfile):
-    from ..server_state import engine
     preview_dir = Path("src/static/previews")
     preview_dir.mkdir(parents=True, exist_ok=True)
 
@@ -60,7 +60,7 @@ async def voice_preview(request: SpeakerProfile):
 
     try:
         profile = {"type": request.type, "value": request.value}
-        wav, sr = engine.generate_segment("This is a preview of my voice.", profile=profile)
+        wav, sr = server_state.engine.generate_segment("This is a preview of my voice.", profile=profile)
         sf.write(str(preview_path), wav, sr, format='WAV')
         return FileResponse(preview_path)
     except Exception as e:
