@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 from pathlib import Path
 
 from backend.api import voices, generation, projects, tasks, models
-from backend.server_state import engine
+from backend import server_state
 from backend.config import logger
 
 app = FastAPI(title="Qwen-TTS Studio")
@@ -17,15 +17,10 @@ app.include_router(projects.router)
 app.include_router(tasks.router)
 app.include_router(models.router)
 
-# Aliases and root level endpoints
+# Health check
 @app.get("/api/health")
 async def health_check():
-    return engine.get_system_status()
-
-@app.get("/api/speakers")
-async def get_speakers_alias():
-    # Return same as /api/voice/speakers
-    return await voices.get_speakers()
+    return server_state.engine.get_system_status()
 
 # Static files
 static_dir = Path(__file__).parent / "static"

@@ -38,7 +38,7 @@ def test_health_endpoint():
 
 
 def test_api_speakers():
-    response = client.get("/api/speakers")
+    response = client.get("/api/voice/speakers")
     assert response.status_code == 200
     data = response.json()
     assert "presets" in data
