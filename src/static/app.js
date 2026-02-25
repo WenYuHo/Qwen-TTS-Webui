@@ -19,21 +19,13 @@ const state = {
 };
 
 function renderAvatar(name) {
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B59B6'];
-    const color = colors[name.length % colors.length];
-    return `<div class="avatar" style="background:${color}" title="${name}" aria-label="Avatar for ${name}">${name[0].toUpperCase()}</div>`;
-}
-
 function switchView(view) {
     state.currentView = view;
     document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
 
-    const targetView = document.getElementById(`${view}-view`);
-    if (targetView) targetView.classList.add('active');
-
-    const navBtn = document.querySelector(`button[onclick="switchView('${view}')"]`);
-    if (navBtn) navBtn.classList.add('active');
+    document.getElementById(`${view}-view`).classList.add('active');
+    document.querySelector(`button[onclick="switchView('${view}')"]`).classList.add('active');
 
     if (view === 'speech') {
         renderSpeechVoiceList();
@@ -45,6 +37,10 @@ function switchView(view) {
     if (view === 'system') {
         renderSystemView();
     }
+}
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B59B6'];
+    const color = colors[name.length % colors.length];
+    return `<div class="avatar" style="background:${color}">${name[0].toUpperCase()}</div>`;
 }
 
 // --- Voice Studio ---
@@ -82,7 +78,6 @@ function renderS2STargetList() {
 async function testVoiceDesign(btn) {
     if (btn) {
         btn.disabled = true;
-        btn.setAttribute('aria-busy', 'true');
         btn.dataset.originalHtml = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Designing...';
     }
@@ -108,7 +103,6 @@ async function testVoiceDesign(btn) {
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.removeAttribute('aria-busy');
             btn.innerHTML = btn.dataset.originalHtml;
         }
     }
@@ -148,7 +142,6 @@ async function testVoiceClone(btn) {
     if (!state.voicelab.lastClonedPath) return alert("Upload audio first");
     if (btn) {
         btn.disabled = true;
-        btn.setAttribute('aria-busy', 'true');
         btn.dataset.originalHtml = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cloning...';
     }
@@ -165,7 +158,6 @@ async function testVoiceClone(btn) {
     finally {
         if (btn) {
             btn.disabled = false;
-            btn.removeAttribute('aria-busy');
             btn.innerHTML = btn.dataset.originalHtml;
         }
     }
@@ -190,7 +182,6 @@ function saveClonedVoice() {
 async function testVoiceMix(btn) {
     if (btn) {
         btn.disabled = true;
-        btn.setAttribute('aria-busy', 'true');
         btn.dataset.originalHtml = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mixing...';
     }
@@ -219,7 +210,6 @@ async function testVoiceMix(btn) {
     finally {
         if (btn) {
             btn.disabled = false;
-            btn.removeAttribute('aria-busy');
             btn.innerHTML = btn.dataset.originalHtml;
         }
     }
@@ -247,16 +237,6 @@ function renderVoiceLibrary() {
     grid.innerHTML = '';
 
     const voices = SpeakerStore.getVoices();
-    if (voices.length === 0) {
-        grid.innerHTML = `
-            <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 48px; background: rgba(255,255,255,0.02); border-style: dashed; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
-                <i class="fas fa-microphone-slash fa-3x" style="color: var(--text-secondary); opacity: 0.5;"></i>
-                <p style="color: var(--text-secondary); max-width: 300px;">Your voice library is empty. Design or clone a voice to get started!</p>
-            </div>
-        `;
-        return;
-    }
-
     voices.forEach(v => {
         const div = document.createElement('div');
         div.className = 'card voice-card';
@@ -297,36 +277,6 @@ function toggleCanvasView(view) {
     if (view === 'production') renderBlocks();
 }
 
-function renderBlockContent(block) {
-    return `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <div style="display:flex; align-items:center; gap:12px;">
-                ${renderAvatar(block.role)}
-                <span class="label" style="color:var(--accent); margin:0;">${block.role}</span>
-            </div>
-            <div style="display:flex; gap:8px; align-items:center;">
-                <select class="btn btn-secondary btn-sm" style="font-size:0.7rem;" onchange="updateBlockProperty('${block.id}', 'language', this.value)">
-                    <option value="auto" ${block.language === 'auto' ? 'selected' : ''}>Auto</option>
-                    <option value="en" ${block.language === 'en' ? 'selected' : ''}>EN</option>
-                    <option value="zh" ${block.language === 'zh' ? 'selected' : ''}>ZH</option>
-                    <option value="ja" ${block.language === 'ja' ? 'selected' : ''}>JA</option>
-                    <option value="es" ${block.language === 'es' ? 'selected' : ''}>ES</option>
-                </select>
-                <div style="display:flex; align-items:center; gap:4px; font-size:0.7rem; color:var(--text-secondary);">
-                    Gap: <input type="number" step="0.1" value="${block.pause_after}" style="width:40px; background:none; border:1px solid var(--border); color:inherit; border-radius:4px; padding:2px;" onchange="updateBlockProperty('${block.id}', 'pause_after', this.value)">s
-                </div>
-                <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">${block.status === 'ready' ? 'Regen' : 'Synth'}</button>
-                <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times"></i></button>
-            </div>
-        </div>
-        <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${block.text}</p>
-        <div class="block-status" id="status-${block.id}">
-            ${block.status === 'generating' ? `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
-            ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play"></i> Play</button>` : ''}
-        </div>
-    `;
-}
-
 function renderBlocks() {
     const container = document.getElementById('blocks-container');
     if (!container) return;
@@ -334,35 +284,33 @@ function renderBlocks() {
     CanvasManager.blocks.forEach(block => {
         const div = document.createElement('div');
         div.className = 'story-block';
-        div.id = `block-${block.id}`;
-        div.innerHTML = renderBlockContent(block);
+        div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    ${renderAvatar(block.role)}
+                    <span class="label" style="color:var(--accent); margin:0;">${block.role}</span>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <select class="btn btn-secondary btn-sm" style="font-size:0.7rem;" onchange="updateBlockProperty('${block.id}', 'language', this.value)">
+                        <option value="auto" ${block.language === 'auto' ? 'selected' : ''}>Auto</option>
+                        <option value="en" ${block.language === 'en' ? 'selected' : ''}>EN</option>
+                        <option value="zh" ${block.language === 'zh' ? 'selected' : ''}>ZH</option>
+                        <option value="ja" ${block.language === 'ja' ? 'selected' : ''}>JA</option>
+                        <option value="es" ${block.language === 'es' ? 'selected' : ''}>ES</option>
+                    </select>
+                    <div style="display:flex; align-items:center; gap:4px; font-size:0.7rem; color:var(--text-secondary);">
+                        Gap: <input type="number" step="0.1" value="${block.pause_after}" style="width:40px; background:none; border:1px solid var(--border); color:inherit; border-radius:4px; padding:2px;" onchange="updateBlockProperty('${block.id}', 'pause_after', this.value)">s
+                    </div>
+                    <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">${block.status === 'ready' ? 'Regen' : 'Synth'}</button>
+                    <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${block.text}</p>
+            ${block.status === 'generating' ? `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
+            ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play"></i> Play</button>` : ''}
+        `;
         container.appendChild(div);
     });
-}
-
-/**
- * Optimizes UI updates by re-rendering only the affected block.
- * For progress updates, it only updates the width of the progress bar.
- */
-function updateBlockUI(id) {
-    const block = CanvasManager.blocks.find(b => b.id === id);
-    if (!block) return;
-    const statusEl = document.getElementById(`status-${id}`);
-    if (statusEl) {
-        if (block.status === 'generating') {
-            const bar = statusEl.querySelector('.progress-bar');
-            if (bar) {
-                bar.style.width = `${block.progress}%`;
-            } else {
-                statusEl.innerHTML = `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>`;
-            }
-        } else {
-            const blockEl = document.getElementById(`block-${id}`);
-            if (blockEl) blockEl.innerHTML = renderBlockContent(block);
-        }
-    } else {
-        renderBlocks();
-    }
 }
 
 function updateBlockProperty(id, prop, val) {
@@ -386,7 +334,7 @@ async function promoteToProduction() {
 async function generateBlock(id) {
     const block = CanvasManager.blocks.find(b => b.id === id);
     if (!block) return;
-    block.status = 'generating'; block.progress = 0; updateBlockUI(id);
+    block.status = 'generating'; block.progress = 0; renderBlocks();
     const profiles = getAllProfiles();
     try {
         const res = await fetch('/api/generate/segment', {
@@ -403,10 +351,10 @@ async function generateBlock(id) {
             })
         });
         const { task_id } = await res.json();
-        const blob = await TaskPoller.poll(task_id, (task) => { block.progress = task.progress; updateBlockUI(id); });
+        const blob = await TaskPoller.poll(task_id, (task) => { block.progress = task.progress; renderBlocks(); });
         block.audioUrl = URL.createObjectURL(blob);
-        block.status = 'ready'; updateBlockUI(id);
-    } catch (e) { block.status = 'error'; alert(e.message); updateBlockUI(id); }
+        block.status = 'ready'; renderBlocks();
+    } catch (e) { block.status = 'error'; alert(e.message); renderBlocks(); }
 }
 
 function playBlock(id) {
@@ -420,13 +368,7 @@ function playBlock(id) {
 
 function deleteBlock(id) { CanvasManager.deleteBlock(id); renderBlocks(); }
 
-async function generatePodcast(btn) {
-    if (btn) {
-        btn.disabled = true;
-        btn.setAttribute('aria-busy', 'true');
-        btn.dataset.originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Producing...';
-    }
+async function generatePodcast() {
     const inProd = document.getElementById('canvas-production-view').style.display === 'flex';
     const script = inProd ? CanvasManager.blocks.map(b => ({
         role: b.role,
@@ -454,13 +396,6 @@ async function generatePodcast(btn) {
         player.play();
         statusText.innerText = "Final Mix Ready!";
     } catch (e) { alert(e.message); statusText.innerText = "Failed"; }
-    finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.removeAttribute('aria-busy');
-            btn.innerHTML = btn.dataset.originalHtml;
-        }
-    }
 }
 
 async function batchSynthesize() {
@@ -469,13 +404,7 @@ async function batchSynthesize() {
 }
 
 // --- Dubbing & S2S ---
-async function startDubbing(btn) {
-    if (btn) {
-        btn.disabled = true;
-        btn.setAttribute('aria-busy', 'true');
-        btn.dataset.originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Dubbing...';
-    }
+async function startDubbing() {
     const fileInput = document.getElementById('dub-file');
     const langSelect = document.getElementById('dub-lang');
     const statusText = document.getElementById('status-text');
@@ -510,23 +439,11 @@ async function startDubbing(btn) {
     } catch (e) {
         alert(e.message);
         statusText.innerText = "Dubbing failed";
-    } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.removeAttribute('aria-busy');
-            btn.innerHTML = btn.dataset.originalHtml;
-        }
     }
 }
 
-async function startVoiceChanger(btn) {
+async function startVoiceChanger() {
     if (!state.s2s.lastUploadedPath) return alert("Record or upload source audio first.");
-    if (btn) {
-        btn.disabled = true;
-        btn.setAttribute('aria-busy', 'true');
-        btn.dataset.originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Converting...';
-    }
     const targetVoice = JSON.parse(document.getElementById('s2s-target-voice').value);
     const preserveProsody = document.getElementById('s2s-preserve').checked;
     const statusText = document.getElementById('status-text');
@@ -551,13 +468,6 @@ async function startVoiceChanger(btn) {
         player.play();
         statusText.innerText = "Conversion Complete!";
     } catch (e) { alert(e.message); statusText.innerText = "Failed"; }
-    finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.removeAttribute('aria-busy');
-            btn.innerHTML = btn.dataset.originalHtml;
-        }
-    }
 }
 
 // --- Projects ---

@@ -16,7 +16,7 @@ from .config import BASE_DIR, logger
 
 class PodcastEngine:
     def __init__(self):
-        self.upload_dir = Path("uploads")
+        self.upload_dir = Path("uploads").resolve()
         self.upload_dir.mkdir(parents=True, exist_ok=True)
         self.speaker_profiles = {}
         # Caches
@@ -33,21 +33,21 @@ class PodcastEngine:
         # Handle multiple paths for pro cloning (separated by |)
         paths = relative_path.split("|")
         resolved = []
-
-        # Absolute versions of allowed directories for robust subpath checking
-        upload_dir_abs = self.upload_dir.resolve()
-        bgm_dir_abs = (Path(BASE_DIR) / "bgm").resolve()
-
         for p in paths:
             path_obj = Path(p)
             if not path_obj.is_absolute():
-                path_obj = (upload_dir_abs / path_obj).resolve()
+                path_obj = (self.upload_dir / path_obj).resolve()
             else:
                 path_obj = path_obj.resolve()
 
-            # Security: use is_relative_to for robust path validation
-            if not (path_obj.is_relative_to(upload_dir_abs) or path_obj.is_relative_to(bgm_dir_abs)):
-                 raise ValueError(f"Access denied to path: {p}")
+            # Security: Use is_relative_to for robust path validation (avoids partial path traversal)
+            is_safe = path_obj.is_relative_to(self.upload_dir)
+            if not is_safe:
+                bgm_dir = (Path(BASE_DIR) / "bgm").resolve()
+                is_safe = path_obj.is_relative_to(bgm_dir)
+
+            if not is_safe:
+                raise ValueError(f"Access denied to path: {p}")
 
             if not path_obj.exists():
                 raise FileNotFoundError(f"File not found: {p}")
@@ -311,20 +311,17 @@ class PodcastEngine:
 
         if bgm_mood:
             try:
-                # Security: use _resolve_paths to securely resolve the BGM path
-                # We expect the mood file to be in the bgm directory
-                bgm_path_str = f"../bgm/{bgm_mood}.mp3"
-                resolved = self._resolve_paths(bgm_path_str)
-                bgm_file = resolved[0]
-
-                bgm_segment = AudioSegment.from_file(bgm_file) - 20
-                if len(bgm_segment) < len(final_mix):
-                    loops = int(len(final_mix) / len(bgm_segment)) + 1
-                    bgm_segment = bgm_segment * loops
-                bgm_segment = bgm_segment[:len(final_mix)]
-                final_mix = final_mix.overlay(bgm_segment)
-            except (ValueError, FileNotFoundError) as e:
-                logger.warning(f"BGM skip: {e}")
+                # Security: Use _resolve_paths for safe BGM path resolution
+                bgm_full_path = (Path(BASE_DIR) / "bgm" / f"{bgm_mood}.mp3").resolve()
+                bgm_paths = self._resolve_paths(str(bgm_full_path))
+                if bgm_paths:
+                    bgm_file = bgm_paths[0]
+                    bgm_segment = AudioSegment.from_file(bgm_file) - 20
+                    if len(bgm_segment) < len(final_mix):
+                        loops = int(len(final_mix) / len(bgm_segment)) + 1
+                        bgm_segment = bgm_segment * loops
+                    bgm_segment = bgm_segment[:len(final_mix)]
+                    final_mix = final_mix.overlay(bgm_segment)
             except Exception as e:
                 logger.error(f"BGM mixing failed: {e}")
 
