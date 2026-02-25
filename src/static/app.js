@@ -29,13 +29,24 @@ function renderAvatar(name) {
 function switchView(view) {
     state.currentView = view;
     document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(v => {
+        v.classList.remove('active');
+        v.setAttribute('aria-pressed', 'false');
+    });
 
     const targetView = document.getElementById(`${view}-view`);
-    if (targetView) targetView.classList.add('active');
+    if (targetView) {
+        targetView.classList.add('active');
+        // Move focus to the view heading for screen readers
+        const heading = targetView.querySelector('h1');
+        if (heading) heading.focus();
+    }
 
     const navBtn = document.querySelector(`button[onclick="switchView('${view}')"]`);
-    if (navBtn) navBtn.classList.add('active');
+    if (navBtn) {
+        navBtn.classList.add('active');
+        navBtn.setAttribute('aria-pressed', 'true');
+    }
 
     if (view === 'speech') {
         renderSpeechVoiceList();
@@ -271,8 +282,8 @@ function renderVoiceLibrary() {
                     <span class="badge" style="background:rgba(255,255,255,0.1); font-size:0.7rem;">${escapeHTML(v.type.toUpperCase())}</span>
                 </div>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn btn-secondary btn-sm js-play" aria-label="Play voice preview" title="Play Preview"><i class="fas fa-play"></i></button>
-                    <button class="btn btn-secondary btn-sm js-delete" style="color:var(--danger)" aria-label="Delete voice" title="Delete Voice"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="playVoicePreview(this, '${v.name}', '${v.type}', '${v.value.replace(/'/g, "\\'")}')" aria-label="Play voice preview" title="Play Preview"><i class="fas fa-play" aria-hidden="true"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="deleteVoice('${v.id}')" style="color:var(--danger)" aria-label="Delete voice" title="Delete Voice"><i class="fas fa-trash" aria-hidden="true"></i></button>
                 </div>
             </div>
         `;
@@ -282,12 +293,26 @@ function renderVoiceLibrary() {
     });
 }
 
-async function playVoicePreview(role, type, value) {
-    const blob = await getVoicePreview({ role, type, value });
-    if (blob) {
-        const player = document.getElementById('preview-player');
-        player.src = URL.createObjectURL(blob);
-        player.play();
+async function playVoicePreview(btn, role, type, value) {
+    if (btn) {
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+        btn.dataset.originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+    try {
+        const blob = await getVoicePreview({ role, type, value });
+        if (blob) {
+            const player = document.getElementById('preview-player');
+            player.src = URL.createObjectURL(blob);
+            player.play();
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.removeAttribute('aria-busy');
+            btn.innerHTML = btn.dataset.originalHtml;
+        }
     }
 }
 
@@ -323,13 +348,13 @@ function renderBlockContent(block) {
                     Gap: <input type="number" step="0.1" value="${block.pause_after}" style="width:40px; background:none; border:1px solid var(--border); color:inherit; border-radius:4px; padding:2px;" onchange="updateBlockProperty('${block.id}', 'pause_after', this.value)">s
                 </div>
                 <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">${block.status === 'ready' ? 'Regen' : 'Synth'}</button>
-                <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times"></i></button>
+                <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times" aria-hidden="true"></i></button>
             </div>
         </div>
         <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${escapedText}</p>
         <div class="block-status" id="status-${block.id}">
             ${block.status === 'generating' ? `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
-            ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play"></i> Play</button>` : ''}
+            ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play" aria-hidden="true"></i> Play</button>` : ''}
         </div>
     `;
 }
