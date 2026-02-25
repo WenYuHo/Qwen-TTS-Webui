@@ -75,7 +75,16 @@ const CanvasManager = {
     }
 };
 
+const previewCache = new Map();
+
 async function getVoicePreview(profile) {
+    // Cache key based on profile values (type and value/instruct)
+    const cacheKey = `${profile.type}:${profile.value}`;
+    if (previewCache.has(cacheKey)) {
+        console.log(`⚡ Bolt: Using cached preview for ${profile.role}`);
+        return previewCache.get(cacheKey);
+    }
+
     try {
         const res = await fetch('/api/voice/preview', {
             method: 'POST',
@@ -83,7 +92,9 @@ async function getVoicePreview(profile) {
             body: JSON.stringify(profile)
         });
         if (!res.ok) throw new Error("Preview failed");
-        return await res.blob();
+        const blob = await res.blob();
+        previewCache.set(cacheKey, blob);
+        return blob;
     } catch (e) {
         console.error("Preview error:", e);
         return null;
