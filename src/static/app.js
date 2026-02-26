@@ -251,6 +251,17 @@ function renderVoiceLibrary() {
     grid.innerHTML = '';
 
     const voices = SpeakerStore.getVoices();
+    if (voices.length === 0) {
+        grid.innerHTML = `
+            <div class="empty-state empty-state-grid" style="grid-column: 1 / -1;">
+                <i class="fas fa-microphone-slash" aria-hidden="true"></i>
+                <h3>No custom voices yet</h3>
+                <p>Design, clone, or mix a new voice above to start building your library.</p>
+            </div>
+        `;
+        return;
+    }
+
     voices.forEach(v => {
         const div = document.createElement('div');
         div.className = 'card voice-card';
@@ -263,12 +274,12 @@ function renderVoiceLibrary() {
                     <span class="badge" style="background:rgba(255,255,255,0.1); font-size:0.7rem;">${escapeHTML(v.type.toUpperCase())}</span>
                 </div>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn btn-secondary btn-sm" onclick="playVoicePreview(this, '${v.name}', '${v.type}', '${v.value.replace(/'/g, "\\'")}')" aria-label="Play voice preview" title="Play Preview"><i class="fas fa-play" aria-hidden="true"></i></button>
-                    <button class="btn btn-secondary btn-sm" onclick="deleteVoice('${v.id}')" style="color:var(--danger)" aria-label="Delete voice" title="Delete Voice"><i class="fas fa-trash" aria-hidden="true"></i></button>
+                    <button class="btn btn-secondary btn-sm js-play" aria-label="Play voice preview" title="Play Preview"><i class="fas fa-play" aria-hidden="true"></i></button>
+                    <button class="btn btn-secondary btn-sm js-delete" style="color:var(--danger)" aria-label="Delete voice" title="Delete Voice"><i class="fas fa-trash" aria-hidden="true"></i></button>
                 </div>
             </div>
         `;
-        div.querySelector('.js-play').onclick = () => playVoicePreview(v.name, v.type, v.value);
+        div.querySelector('.js-play').onclick = () => playVoicePreview(div.querySelector('.js-play'), v.name, v.type, v.value);
         div.querySelector('.js-delete').onclick = () => deleteVoice(v.id);
         grid.appendChild(div);
     });
@@ -344,14 +355,28 @@ function renderBlocks() {
     const container = document.getElementById('blocks-container');
     if (!container) return;
     container.innerHTML = '';
+
+    if (CanvasManager.blocks.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state empty-state-list">
+                <i class="fas fa-pen-nib" aria-hidden="true"></i>
+                <h3>Script is empty</h3>
+                <p>Switch to <strong>Draft</strong> view to write your script, then promote it to blocks.</p>
+            </div>
+        `;
+        return;
+    }
+
     CanvasManager.blocks.forEach(block => {
         const div = document.createElement('div');
         div.className = 'story-block';
+        const escapedRole = escapeHTML(block.role);
+        const escapedText = escapeHTML(block.text);
         div.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                 <div style="display:flex; align-items:center; gap:12px;">
                     ${renderAvatar(block.role)}
-                    <span class="label" style="color:var(--accent); margin:0;">${block.role}</span>
+                    <span class="label" style="color:var(--accent); margin:0;">${escapedRole}</span>
                 </div>
                 <div style="display:flex; gap:8px; align-items:center;">
                     <select class="btn btn-secondary btn-sm" style="font-size:0.7rem;" onchange="updateBlockProperty('${block.id}', 'language', this.value)">
@@ -365,12 +390,12 @@ function renderBlocks() {
                         Gap: <input type="number" step="0.1" value="${block.pause_after}" style="width:40px; background:none; border:1px solid var(--border); color:inherit; border-radius:4px; padding:2px;" onchange="updateBlockProperty('${block.id}', 'pause_after', this.value)">s
                     </div>
                     <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">${block.status === 'ready' ? 'Regen' : 'Synth'}</button>
-                    <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times" aria-hidden="true"></i></button>
                 </div>
             </div>
-            <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${block.text}</p>
+            <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${escapedText}</p>
             ${block.status === 'generating' ? `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
-            ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play"></i> Play</button>` : ''}
+            ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play" aria-hidden="true"></i> Play</button>` : ''}
         `;
         container.appendChild(div);
     });
@@ -387,6 +412,7 @@ function updateBlockProperty(id, prop, val) {
 async function promoteToProduction() {
     const script = parseScript(document.getElementById('script-editor').value);
     if (script.length === 0) return alert("Write script first (e.g., [Alice]: Hello)");
+    if (CanvasManager.blocks.length > 0 && !confirm("Replace current blocks?")) return;
     CanvasManager.clear();
     script.forEach(line => CanvasManager.addBlock(line.role, line.text));
     CanvasManager.save();
@@ -429,7 +455,12 @@ function playBlock(id) {
     }
 }
 
-function deleteBlock(id) { CanvasManager.deleteBlock(id); renderBlocks(); }
+function deleteBlock(id) {
+    if (confirm("Delete this script block?")) {
+        CanvasManager.deleteBlock(id);
+        renderBlocks();
+    }
+}
 
 async function generatePodcast() {
     const inProd = document.getElementById('canvas-production-view').style.display === 'flex';

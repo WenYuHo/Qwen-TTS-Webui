@@ -403,3 +403,44 @@ input[type="range"] {
     background: var(--accent);
     transition: width 0.3s ease;
 }
+
+/* Empty States */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--text-secondary);
+    width: 100%;
+}
+
+.empty-state-grid {
+    border: 2px dashed var(--border);
+    border-radius: 20px;
+    padding: 48px;
+}
+
+.empty-state-list {
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 32px;
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    font-size: 0.9rem;
+    max-width: 300px;
+}

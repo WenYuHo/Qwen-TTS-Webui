@@ -9,3 +9,7 @@
 ## 2025-06-12 - [Navigation Accessibility and SPA Focus Management]
 **Learning:** In Single Page Applications (SPAs), updating the visual state of navigation (e.g., active classes) is insufficient for accessibility. Using `aria-pressed` (for buttons) or `aria-selected` (for tabs) communicates the current state to screen readers. Crucially, programmatically moving focus to the new view's heading (which must have `tabindex="-1"`) ensures that assistive technologies announce the transition and place the user at the start of the new content.
 **Action:** Implement `aria-pressed` on navigation triggers and manage programmatic focus on view transitions to ensure a seamless and accessible SPA experience.
+
+## 2026-02-26 - [Empty States and Destructive Actions]
+**Learning:** Providing informative empty states for dynamic lists and grids (like the Voice Library or script blocks) significantly improves the user's initial experience and provides clear calls-to-action. Adding confirmation dialogs for destructive or state-overwriting actions (like deleting blocks or promoting drafts) prevents accidental data loss and builds user confidence.
+**Action:** Always implement empty states with helpful icons and text. Use `window.confirm()` for any action that deletes or overwrites significant user-created content.
