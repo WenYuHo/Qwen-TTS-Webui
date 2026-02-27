@@ -36,8 +36,9 @@ def test_generate_podcast_with_mocked_segment(monkeypatch):
     assert result is not None
     assert "waveform" in result
     assert result["sample_rate"] == 24000
-    # 1s (dummy) + 2s (padding) = 3s = 72000 samples
-    assert len(result["waveform"]) == 72000
+    # ⚡ Bolt: New vectorized assembly has 1s final buffer
+    # 1s (dummy) + 1s (final buffer) = 2s = 48000 samples
+    assert len(result["waveform"]) == 48000
 
 
 def test_generate_podcast_missing_bgm_should_not_crash(monkeypatch):

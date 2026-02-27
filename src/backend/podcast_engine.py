@@ -274,6 +274,7 @@ class PodcastEngine:
             raise RuntimeError(f"Voice changer failed: {e}")
 
     def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None) -> Dict[str, Any]:
+        """⚡ Bolt: Optimized podcast generation with batch synthesis and vectorized audio assembly."""
         sample_rate = 24000
 
         # 1. Pre-map indices to model types for grouping to prevent model thrashing
@@ -304,59 +305,77 @@ class PodcastEngine:
                 except Exception as e:
                     logger.error(f"Error generating segment {i} for {role}: {e}")
 
-        # 3. Assemble chronological mix
-        segments = []
-        max_duration_ms = 0
-        current_offset_ms = 0
-        
+        # 3. Vectorized audio assembly (Directly in NumPy)
+        # 3.1 Calculate segment positions and total duration
+        segment_placements = [] # (start_idx, end_idx, wav_data)
+        current_offset_samples = 0
+        max_sample_idx = 0
+
         for i, item in enumerate(script):
             if waveforms[i] is None:
                 continue
 
             wav = waveforms[i]
             sr = srs[i]
-            sample_rate = sr
+            sample_rate = sr # Assume consistent SR or resample if needed (Qwen is 24k)
+
             pause_after = item.get("pause_after", 0.5)
             start_time = item.get("start_time", None)
 
-            wav_int16 = (wav * 32767).astype(np.int16)
-            seg = AudioSegment(wav_int16.tobytes(), frame_rate=sr, sample_width=2, channels=1)
+            start_idx = int(float(start_time) * sr) if start_time is not None else current_offset_samples
+            end_idx = start_idx + len(wav)
             
-            position_ms = int(float(start_time) * 1000) if start_time is not None else current_offset_ms
-            segments.append({"audio": seg, "position": position_ms})
+            segment_placements.append((start_idx, end_idx, wav))
 
-            current_offset_ms = position_ms + len(seg) + int(pause_after * 1000)
+            current_offset_samples = end_idx + int(pause_after * sr)
+            if end_idx > max_sample_idx:
+                max_sample_idx = end_idx
 
-            end_pos = position_ms + len(seg)
-            if end_pos > max_duration_ms: max_duration_ms = end_pos
-                
-        if not segments: return None
-        final_mix = AudioSegment.silent(duration=max_duration_ms + 2000, frame_rate=sample_rate)
-        for seg in segments:
-            final_mix = final_mix.overlay(seg["audio"], position=seg["position"])
+        if not segment_placements:
+            return None
 
+        # 3.2 Initialize final buffer (float32)
+        total_len = max_sample_idx + int(1.0 * sample_rate) # Add 1s buffer at the end
+        final_wav = np.zeros(total_len, dtype=np.float32)
+
+        # 3.3 Mix segments using vectorized addition
+        for start_idx, end_idx, wav in segment_placements:
+            # Handle potential overlaps with additive mixing
+            final_wav[start_idx:end_idx] += wav
+
+        # 4. Optimized BGM Mixing
         if bgm_mood:
             try:
-                # Security: Use _resolve_paths for safe BGM path resolution
                 bgm_full_path = (Path(BASE_DIR) / "bgm" / f"{bgm_mood}.mp3").resolve()
                 bgm_paths = self._resolve_paths(str(bgm_full_path))
                 if bgm_paths:
                     bgm_file = bgm_paths[0]
-                    bgm_segment = AudioSegment.from_file(bgm_file) - 20
-                    if len(bgm_segment) < len(final_mix):
-                        loops = int(len(final_mix) / len(bgm_segment)) + 1
-                        bgm_segment = bgm_segment * loops
-                    bgm_segment = bgm_segment[:len(final_mix)]
-                    final_mix = final_mix.overlay(bgm_segment)
-            except Exception as e:
-                logger.error(f"BGM mixing failed: {e}")
+                    # Load BGM into numpy
+                    bgm_wav, bgm_sr = sf.read(str(bgm_file))
+                    # Resample if needed
+                    if bgm_sr != sample_rate:
+                        bgm_wav = librosa.resample(bgm_wav.astype(np.float32), orig_sr=bgm_sr, target_sr=sample_rate)
 
-        samples = np.array(final_mix.get_array_of_samples())
-        if final_mix.channels == 2:
-            samples = samples.reshape((-1, 2)).mean(axis=1)
-        final_wav = samples.astype(np.float32) / 32768.0
+                    if bgm_wav.ndim > 1:
+                        bgm_wav = bgm_wav.mean(axis=1) # Mono
+
+                    # Apply gain (-20dB approx 0.1 factor)
+                    bgm_wav = bgm_wav * 0.1
+
+                    # ⚡ Bolt: Vectorized BGM tiling
+                    num_tiles = (len(final_wav) // len(bgm_wav)) + 1
+                    full_bgm = np.tile(bgm_wav, num_tiles)[:len(final_wav)]
+
+                    # Add BGM
+                    final_wav += full_bgm
+            except Exception as e:
+                logger.error(f"⚡ Bolt: BGM mixing failed: {e}")
+
+        # 5. Normalization
         max_val = np.max(np.abs(final_wav))
-        if max_val > 1.0: final_wav = final_wav / max_val
+        if max_val > 1.0:
+            final_wav = final_wav / max_val
+
         return {"waveform": final_wav, "sample_rate": sample_rate}
 
     def dub_audio(self, audio_path: str, target_lang: str) -> Dict[str, Any]:

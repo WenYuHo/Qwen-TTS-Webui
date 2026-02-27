@@ -3,6 +3,7 @@ import os
 import torch
 import threading
 from pathlib import Path
+from collections import OrderedDict
 
 # Fix import path for qwen_tts
 current_file = Path(__file__).resolve()
@@ -53,11 +54,25 @@ def _ensure_qwen_tts():
 
 class ModelManager:
     def __init__(self):
-        self.model = None
-        self.current_model_type = None
+        self.models = OrderedDict() # LRU Cache: key -> model
         self.device = self._get_best_device()
+        self.max_cache_size = self._determine_max_cache_size()
         self.lock = threading.Lock()
         
+    def _determine_max_cache_size(self):
+        """Determine max models to keep in VRAM/RAM based on system resources."""
+        if self.device == "cuda":
+            try:
+                # 1.7B models in FP16 take ~3.5GB each.
+                # We want to leave room for inference buffers and other OS tasks.
+                total_mem = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+                if total_mem > 12: return 3
+                if total_mem > 8: return 2
+                return 1
+            except Exception:
+                return 1
+        return 1 # Default to 1 for CPU to save RAM
+
     def _get_best_device(self):
         """Identify best available device and log diagnostics."""
         cuda_available = torch.cuda.is_available()
@@ -81,10 +96,16 @@ class ModelManager:
 
         with self.lock:
             key = f"{size}_{model_type}"
-            if self.model and self.current_model_type == key:
-                logger.debug(f"Model {key} already loaded.")
-                return self.model
+
+            # 1. Check if model is already in cache
+            if key in self.models:
+                logger.info(f"⚡ Bolt: Using cached model '{key}'")
+                # Move to end (most recently used)
+                model = self.models.pop(key)
+                self.models[key] = model
+                return model
                 
+            # 2. Prepare to load new model
             if model_type == "VoiceDesign":
                 model_name = MODELS["1.7B_VoiceDesign"]
             elif model_type == "CustomVoice":
@@ -100,28 +121,31 @@ class ModelManager:
                 logger.critical(f"Model {model_name} NOT FOUND. Initialization failed.")
                 raise FileNotFoundError(f"Model {model_name} not found.")
 
-            logger.info(f"Loading Qwen-TTS model: {model_name} on {self.device}")
-            if self.model:
-                logger.info(f"Unloading previous model: {self.current_model_type}")
-                del self.model
+            # 3. Evict oldest model if cache is full
+            if len(self.models) >= self.max_cache_size:
+                old_key, old_model = self.models.popitem(last=False)
+                logger.info(f"⚡ Bolt: Evicting model '{old_key}' from cache to free memory")
+                del old_model
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
-                
+
+            # 4. Load the new model
+            logger.info(f"Loading Qwen-TTS model: {model_name} on {self.device}")
             try:
-                self.model = _Qwen3TTSModel.from_pretrained(
+                model = _Qwen3TTSModel.from_pretrained(
                     str(model_path), 
                     device_map=self.device,
                     torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
                     local_files_only=True
                 )
-                logger.info("Model loaded successfully.")
+                self.models[key] = model
+                logger.info(f"Model '{key}' loaded and cached successfully (Cache size: {len(self.models)}/{self.max_cache_size})")
+                return model
             except Exception as e:
                 logger.critical(f"CRITICAL ERROR loading model: {e}")
                 import traceback
                 traceback.print_exc()
                 raise e
-            self.current_model_type = key
-            return self.model
 
 # Global instance
 manager = ModelManager()
