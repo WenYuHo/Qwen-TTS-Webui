@@ -23,3 +23,5 @@ librosa
 deep-translator
 beautifulsoup4
 huggingface_hub
+moviepy
+Pillow

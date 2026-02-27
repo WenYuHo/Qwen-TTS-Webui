@@ -108,3 +108,8 @@ MODELS = {
 PROJECTS_DIR = BASE_DIR / "projects"
 PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
 VOICE_LIBRARY_FILE = PROJECTS_DIR / "voices.json"
+
+VIDEO_DIR = PROJECTS_DIR / "videos"
+VIDEO_DIR.mkdir(parents=True, exist_ok=True)
+VOICE_IMAGES_DIR = PROJECTS_DIR / "voice_images"
+VOICE_IMAGES_DIR.mkdir(parents=True, exist_ok=True)

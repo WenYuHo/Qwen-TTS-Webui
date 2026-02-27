@@ -31,35 +31,44 @@ if not has_ffmpeg or not has_sox:
 
 print("\nChecking imports and models...")
 try:
-    from backend.config import MODELS_PATH, find_model_path, MODELS
+    import moviepy
+    print("[OK] MoviePy version: " + moviepy.__version__)
+except ImportError:
+    print("[FAIL] MoviePy not found. Install with: pip install moviepy")
+
+try:
+    from PIL import Image
+    print("[OK] Pillow found.")
+except ImportError:
+    print("[FAIL] Pillow not found. Install with: pip install Pillow")
+
+try:
+    from backend.config import MODELS_PATH, find_model_path, MODELS, VIDEO_DIR
+    from backend.config import BASE_DIR
+    BGM_PATH = BASE_DIR / "bgm"
+
     # Check if models path exists
     if not MODELS_PATH.exists():
         print(f"[FAIL] Models directory NOT found at: {MODELS_PATH}")
-        print("   Please set COMFY_QWEN_MODELS_DIR in .env to point to your ComfyUI models/qwen-tts folder.")
     else:
         print(f"[OK] Models directory found: {MODELS_PATH}")
-        # Verify at least one model
-        test_model = MODELS["1.7B_VoiceDesign"]
-        p = find_model_path(test_model)
-        if p:
-            print(f"[OK] Found model: {test_model}")
-        else:
-            print(f"[WARN] Model '{test_model}' not found in the directory.")
+
+    if not BGM_PATH.exists() or not any(BGM_PATH.iterdir()):
+        print(f"[WARN] BGM directory is missing or empty at: {BGM_PATH}")
+        print("   Mood-based mixing may not work without BGM files (mystery.mp3, tech.mp3, etc.)")
+    else:
+        print(f"[OK] BGM directory contains assets.")
 
     try:
         import torch
         device = "cuda" if torch.cuda.is_available() else "cpu"
         print(f"[OK] Torch version: {torch.__version__}")
         print(f"[OK] Computing Device: {device.upper()}")
-        if device == "cpu":
-            print("   CAUTION: Running on CPU will be significantly slower.")
         
         from backend.podcast_engine import PodcastEngine
         print("[OK] PodcastEngine initialized successfully.")
     except Exception as e:
         print(f"[FAIL] Backend initialization failed: {e}")
-        import traceback
-        traceback.print_exc()
     
 except ImportError as e:
     print(f"[ERROR] Import failed: {e}")

@@ -26,7 +26,7 @@ async def upload_voice(file: UploadFile = File(...)):
     upload_dir = server_state.engine.upload_dir
 
     file_extension = Path(file.filename).suffix.lower()
-    if file_extension not in [".wav", ".mp3", ".flac"]:
+    if file_extension not in [".wav", ".mp3", ".flac", ".mp4", ".mkv", ".avi", ".mov"]:
         raise HTTPException(status_code=400, detail="Invalid file type")
 
     content = await file.read()
