@@ -9,3 +9,7 @@
 ## 2025-06-12 - [Navigation Accessibility and SPA Focus Management]
 **Learning:** In Single Page Applications (SPAs), updating the visual state of navigation (e.g., active classes) is insufficient for accessibility. Using `aria-pressed` (for buttons) or `aria-selected` (for tabs) communicates the current state to screen readers. Crucially, programmatically moving focus to the new view's heading (which must have `tabindex="-1"`) ensures that assistive technologies announce the transition and place the user at the start of the new content.
 **Action:** Implement `aria-pressed` on navigation triggers and manage programmatic focus on view transitions to ensure a seamless and accessible SPA experience.
+
+## 2025-06-25 - [Clean Event Binding and Robust Empty States]
+**Learning:** When generating dynamic lists using `innerHTML`, separating the HTML structure from the event logic by using semantic selector classes (e.g., `.js-action`) for JavaScript-based binding is much cleaner and less error-prone than interpolating complex `onclick` strings. Additionally, empty states should be designed to match the parent container's layout; for grids, use `grid-column: 1 / -1` to ensure the empty state spans the full width and provides a centered, balanced appearance.
+**Action:** Use semantic JS-only classes for event binding in dynamic templates. Always ensure empty states in grid layouts use column spanning for better visual balance.

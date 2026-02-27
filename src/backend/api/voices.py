@@ -4,7 +4,6 @@ import uuid
 from pathlib import Path
 import json
 import logging
-import soundfile as sf
 from .schemas import SpeakerProfile, MixRequest, VoiceLibrary
 from ..config import VOICE_LIBRARY_FILE, logger
 from .. import server_state
@@ -56,9 +55,14 @@ async def voice_preview(request: SpeakerProfile):
     try:
         profile = {"type": request.type, "value": request.value}
         wav, sr = server_state.engine.generate_segment("This is a preview of my voice.", profile=profile)
-        return StreamingResponse(numpy_to_wav_bytes(wav, sr), media_type="audio/wav")
+
+        # Security: Return audio from memory instead of writing to a public static directory
+        # This prevents disk space exhaustion (DoS) and unintended file access.
+        buffer = numpy_to_wav_bytes(wav, sr)
+        return StreamingResponse(buffer, media_type="audio/wav")
     except Exception as e:
         logger.error(f"Preview failed: {e}", exc_info=True)
+        # Security: Return a generic error message instead of leaking internal details
         raise HTTPException(status_code=500, detail="Preview generation failed")
 
 @router.get("/library")

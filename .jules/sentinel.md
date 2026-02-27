@@ -8,7 +8,7 @@
 **Learning:** Even if a filename is constructed from multiple parts, if one part is user-controlled and can contain traversal characters (like `../`), it can escape the intended directory.
 **Prevention:** Use randomly generated names (like UUIDs) for temporary files and avoid using user-controlled strings in filesystem paths whenever possible.
 
-## 2026-02-26 - [Information Leakage and Disk Resource Exhaustion in Previews]
-**Vulnerability:** API endpoints were leaking internal exception details (including paths and stack traces) to the frontend. Additionally, the voice preview endpoint was writing transient audio files to disk without a cleanup mechanism, risking disk exhaustion (DoS).
-**Learning:** Returning `str(e)` in API responses is a major security risk as it exposes internal environment details. Serving transient assets from disk without lifecycle management creates a resource leak.
-**Prevention:** Always use generic error messages for client-facing API responses while logging full exceptions on the backend with `exc_info=True`. For transient assets like previews, use `StreamingResponse` to serve content directly from memory.
+## 2026-02-26 - [Disk Exhaustion via Transient Resource Creation]
+**Vulnerability:** The `/api/voice/preview` endpoint wrote temporary WAV files to a public static directory (`src/static/previews`) using UUIDs but lacked a cleanup mechanism. This could lead to disk space exhaustion (DoS) if called repeatedly.
+**Learning:** Writing transient files to disk for short-lived UI requests is a resource management risk. Even with unique names, persistent storage of temporary data is a liability.
+**Prevention:** Prefer memory-buffered responses (e.g., `StreamingResponse` with `io.BytesIO`) for short-lived assets. Always use generic error messages in public APIs to prevent leaking internal stack traces or environment details.
