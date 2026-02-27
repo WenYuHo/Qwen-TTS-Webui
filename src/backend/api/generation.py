@@ -34,7 +34,7 @@ def run_synthesis_task(task_id: str, is_podcast: bool, request_data: PodcastRequ
 
     except Exception as e:
         logger.error(f"Task {task_id} failed: {e}", exc_info=True)
-        server_state.task_manager.update_task(task_id, status=server_state.TaskStatus.FAILED, error=str(e), message=f"Synthesis failed: {e}")
+        server_state.task_manager.update_task(task_id, status=server_state.TaskStatus.FAILED, error="Synthesis error", message="Synthesis failed. Please check your inputs or logs.")
 
 def run_voice_changer_task(task_id: str, source_audio: str, target_profile: dict):
     try:
@@ -45,8 +45,8 @@ def run_voice_changer_task(task_id: str, source_audio: str, target_profile: dict
         wav_bytes = numpy_to_wav_bytes(result["waveform"], result["sample_rate"]).read()
         server_state.task_manager.update_task(task_id, status=server_state.TaskStatus.COMPLETED, progress=100, message="Ready", result=wav_bytes)
     except Exception as e:
-        logger.error(f"Voice Changer Task {task_id} failed: {e}")
-        server_state.task_manager.update_task(task_id, status=server_state.TaskStatus.FAILED, error=str(e), message=f"Voice changer failed: {e}")
+        logger.error(f"Voice Changer Task {task_id} failed: {e}", exc_info=True)
+        server_state.task_manager.update_task(task_id, status=server_state.TaskStatus.FAILED, error="Voice changer error", message="Voice changer failed. Please check your inputs or logs.")
 
 def validate_request(request: PodcastRequest):
     if not request.script:

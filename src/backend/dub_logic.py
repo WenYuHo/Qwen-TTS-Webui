@@ -14,4 +14,6 @@ def run_dub_task(task_id, source_audio, target_lang, engine: PodcastEngine):
         task_manager.update_task(task_id, status=TaskStatus.COMPLETED, progress=100, message="Ready", result=wav_bytes)
 
     except Exception as e:
-        task_manager.update_task(task_id, status=TaskStatus.FAILED, error=str(e), message=f"Dubbing failed: {e}")
+        from .config import logger
+        logger.error(f"Dubbing Task {task_id} failed: {e}", exc_info=True)
+        task_manager.update_task(task_id, status=TaskStatus.FAILED, error="Dubbing error", message="Dubbing failed. Please check your inputs or logs.")

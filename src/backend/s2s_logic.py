@@ -23,4 +23,6 @@ def run_s2s_task(task_id, source_audio, target_voice, engine: PodcastEngine):
         task_manager.update_task(task_id, status=TaskStatus.COMPLETED, progress=100, message="Ready", result=wav_bytes)
 
     except Exception as e:
-        task_manager.update_task(task_id, status=TaskStatus.FAILED, error=str(e), message=f"S2S failed: {e}")
+        from .config import logger
+        logger.error(f"S2S Task {task_id} failed: {e}", exc_info=True)
+        task_manager.update_task(task_id, status=TaskStatus.FAILED, error="S2S error", message="S2S failed. Please check your inputs or logs.")
