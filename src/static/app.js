@@ -408,6 +408,7 @@ function updateBlockProperty(id, prop, val) {
 async function promoteToProduction() {
     const script = parseScript(document.getElementById('script-editor').value);
     if (script.length === 0) return alert("Write script first (e.g., [Alice]: Hello)");
+    if (CanvasManager.blocks.length > 0 && !confirm("Replace current blocks?")) return;
     CanvasManager.clear();
     script.forEach(line => CanvasManager.addBlock(line.role, line.text));
     CanvasManager.save();
@@ -457,7 +458,12 @@ function playBlock(id) {
     }
 }
 
-function deleteBlock(id) { CanvasManager.deleteBlock(id); renderBlocks(); }
+function deleteBlock(id) {
+    if (confirm("Delete this script block?")) {
+        CanvasManager.deleteBlock(id);
+        renderBlocks();
+    }
+}
 
 async function generatePodcast() {
     const inProd = document.getElementById('canvas-production-view').style.display === 'flex';
