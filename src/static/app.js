@@ -251,6 +251,17 @@ function renderVoiceLibrary() {
     grid.innerHTML = '';
 
     const voices = SpeakerStore.getVoices();
+    if (voices.length === 0) {
+        grid.innerHTML = `
+            <div style="grid-column: 1 / -1; padding: 48px; text-align: center; background: rgba(255,255,255,0.02); border: 2px dashed var(--border); border-radius: 20px;">
+                <i class="fas fa-microphone-slash fa-3x" style="color: var(--text-secondary); margin-bottom: 16px; opacity: 0.5;"></i>
+                <h3 style="color: var(--text-primary); margin-bottom: 8px;">No custom voices yet</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">Design, clone, or mix voices above to build your library.</p>
+            </div>
+        `;
+        return;
+    }
+
     voices.forEach(v => {
         const div = document.createElement('div');
         div.className = 'card voice-card';
@@ -263,12 +274,12 @@ function renderVoiceLibrary() {
                     <span class="badge" style="background:rgba(255,255,255,0.1); font-size:0.7rem;">${escapeHTML(v.type.toUpperCase())}</span>
                 </div>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn btn-secondary btn-sm" onclick="playVoicePreview(this, '${v.name}', '${v.type}', '${v.value.replace(/'/g, "\\'")}')" aria-label="Play voice preview" title="Play Preview"><i class="fas fa-play" aria-hidden="true"></i></button>
-                    <button class="btn btn-secondary btn-sm" onclick="deleteVoice('${v.id}')" style="color:var(--danger)" aria-label="Delete voice" title="Delete Voice"><i class="fas fa-trash" aria-hidden="true"></i></button>
+                    <button class="btn btn-secondary btn-sm js-play" aria-label="Play voice preview" title="Play Preview"><i class="fas fa-play" aria-hidden="true"></i></button>
+                    <button class="btn btn-secondary btn-sm js-delete" style="color:var(--danger)" aria-label="Delete voice" title="Delete Voice"><i class="fas fa-trash" aria-hidden="true"></i></button>
                 </div>
             </div>
         `;
-        div.querySelector('.js-play').onclick = () => playVoicePreview(v.name, v.type, v.value);
+        div.querySelector('.js-play').onclick = (e) => playVoicePreview(e.currentTarget, v.name, v.type, v.value);
         div.querySelector('.js-delete').onclick = () => deleteVoice(v.id);
         grid.appendChild(div);
     });
@@ -344,6 +355,17 @@ function renderBlocks() {
     const container = document.getElementById('blocks-container');
     if (!container) return;
     container.innerHTML = '';
+
+    if (CanvasManager.blocks.length === 0) {
+        container.innerHTML = `
+            <div style="padding: 40px; text-align: center; color: var(--text-secondary); background: rgba(0,0,0,0.1); border-radius: 16px; border: 1px dashed var(--border);">
+                <i class="fas fa-layer-group fa-2x" style="margin-bottom: 12px; opacity: 0.3;"></i>
+                <p>No story blocks yet. Use the Draft tab to write your script, then click "Promote to Blocks".</p>
+            </div>
+        `;
+        return;
+    }
+
     CanvasManager.blocks.forEach(block => {
         const div = document.createElement('div');
         div.className = 'story-block';

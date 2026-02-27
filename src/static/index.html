@@ -51,18 +51,18 @@
                     <div class="card">
                         <h2 style="margin-bottom:16px; font-size: 1.2rem;">Voice Design</h2>
                         <div class="control-group">
-                            <span class="label">Style Prompt</span>
+                            <label class="label" for="design-prompt">Style Prompt</label>
                             <textarea id="design-prompt" placeholder="A calm, soothing female voice with a slight British accent..." style="height: 80px;"></textarea>
                         </div>
 
                         <div class="sliders">
                             <div class="slider-item">
-                                <span class="label">Gender</span>
+                                <label class="label" for="design-gender">Gender</label>
                                 <input type="range" id="design-gender" min="0" max="100" value="50">
                                 <span style="font-size:0.8rem; width:50px; text-align:right;">M / F</span>
                             </div>
                             <div class="slider-item">
-                                <span class="label">Age</span>
+                                <label class="label" for="design-age">Age</label>
                                 <input type="range" id="design-age" min="0" max="100" value="30">
                                 <span style="font-size:0.8rem; width:50px; text-align:right;">Young / Old</span>
                             </div>
@@ -85,7 +85,7 @@
                     <div class="card">
                         <h2 style="margin-bottom:16px; font-size: 1.2rem;">Voice Cloning</h2>
                         <div class="control-group">
-                            <span class="label">Reference Audio</span>
+                            <label class="label" for="clone-file">Reference Audio</label>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                                 <button class="btn btn-secondary" onclick="document.getElementById('clone-file').click()">
                                     <i class="fas fa-upload"></i> Upload
@@ -115,12 +115,12 @@
                     <div class="card">
                         <h2 style="margin-bottom:16px; font-size: 1.2rem;">Voice Lab (Mixer)</h2>
                         <div class="control-group">
-                            <span class="label">Base Voice A</span>
+                            <label class="label" for="mix-voice-a">Base Voice A</label>
                             <select id="mix-voice-a" class="btn btn-secondary btn-sm" style="width:100%"></select>
                             <input type="range" id="mix-weight-a" min="0" max="100" value="50" style="margin-top:8px; width:100%">
                         </div>
                         <div class="control-group">
-                            <span class="label">Base Voice B</span>
+                            <label class="label" for="mix-voice-b">Base Voice B</label>
                             <select id="mix-voice-b" class="btn btn-secondary btn-sm" style="width:100%"></select>
                             <input type="range" id="mix-weight-b" min="0" max="100" value="50" style="margin-top:8px; width:100%">
                         </div>
@@ -190,7 +190,7 @@ Bob: Hi Alice, how are you today?"></textarea>
                     <div class="card sidebar-controls">
                         <span class="label">Production Settings</span>
                         <div class="control-group">
-                            <span class="label">BGM Mood</span>
+                            <label class="label" for="bgm-select">BGM Mood</label>
                             <select id="bgm-select">
                                 <option value="">None</option>
                                 <option value="mystery">Mystery</option>
@@ -223,14 +223,14 @@ Bob: Hi Alice, how are you today?"></textarea>
                     <div class="card">
                         <h2 style="margin-bottom:16px; font-size: 1.1rem;">Dubbing (Translation)</h2>
                         <div class="control-group">
-                            <span class="label">Source File</span>
+                            <label class="label" for="dub-file">Source File</label>
                             <button class="btn btn-secondary" style="width:100%" onclick="document.getElementById('dub-file').click()">
                                 <i class="fas fa-file-video"></i> Upload File
                             </button>
                             <input type="file" id="dub-file" accept="video/*,audio/*" style="display:none">
                         </div>
                         <div class="control-group">
-                            <span class="label">Target Language</span>
+                            <label class="label" for="dub-lang">Target Language</label>
                             <select id="dub-lang">
                                 <option value="en">English</option>
                                 <option value="zh">Chinese</option>
@@ -252,7 +252,7 @@ Bob: Hi Alice, how are you today?"></textarea>
                             </button>
                         </div>
                         <div class="control-group">
-                            <span class="label">Target Voice</span>
+                            <label class="label" for="s2s-target-voice">Target Voice</label>
                             <select id="s2s-target-voice" class="btn btn-secondary btn-sm" style="width:100%"></select>
                         </div>
                         <div class="control-group">
