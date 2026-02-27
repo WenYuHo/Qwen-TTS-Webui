@@ -13,6 +13,7 @@ from deep_translator import GoogleTranslator
 
 from .model_loader import get_model
 from .config import BASE_DIR, logger
+from .video_engine import VideoEngine
 
 class PodcastEngine:
     def __init__(self):
@@ -44,6 +45,11 @@ class PodcastEngine:
             if not is_safe:
                 bgm_dir = (Path(BASE_DIR) / "bgm").resolve()
                 is_safe = path_obj.is_relative_to(bgm_dir)
+
+            if not is_safe:
+                # Check video dir too
+                from .config import VIDEO_DIR
+                is_safe = path_obj.is_relative_to(VIDEO_DIR)
 
             if not is_safe:
                 raise ValueError(f"Access denied to path: {p}")
@@ -80,7 +86,11 @@ class PodcastEngine:
             resolved_paths = self._resolve_paths(audio_path)
             safe_path = str(resolved_paths[0])
 
-            logger.info(f"Transcribing audio: {safe_path}")
+            # Handle Video
+            if VideoEngine.is_video(safe_path):
+                safe_path = VideoEngine.extract_audio(safe_path)
+
+            logger.info(f"Transcribing: {safe_path}")
             result = self._whisper_model.transcribe(safe_path)
             text = result["text"].strip()
             return text
@@ -99,68 +109,33 @@ class PodcastEngine:
             if profile["value"] in self.clone_embedding_cache:
                 return self.clone_embedding_cache[profile["value"]]
 
-        base_model = get_model("Base")
+        model = get_model("Base")
 
-        if profile["type"] == "clone":
-            resolved_paths = self._resolve_paths(profile["value"])
-            ref_audio = str(resolved_paths[0])
-            prompt = base_model.create_voice_clone_prompt(ref_audio=ref_audio, x_vector_only_mode=True)
+        if profile["type"] == "preset":
+            emb = model.get_speaker_embedding(profile["value"])
+            self.preset_embeddings[profile["value"].lower()] = emb
+            return emb
+        elif profile["type"] == "clone":
+            resolved = self._resolve_paths(profile["value"])
+            # Handle Video for cloning if needed
+            clone_path = str(resolved[0])
+            if VideoEngine.is_video(clone_path):
+                clone_path = VideoEngine.extract_audio(clone_path)
+
+            prompt = model.create_voice_clone_prompt(ref_audio=clone_path, x_vector_only_mode=True)
             emb = prompt[0].ref_spk_embedding
             self.clone_embedding_cache[profile["value"]] = emb
-            # Also populate prompt cache since we already have it
-            self.prompt_cache[profile["value"]] = prompt
             return emb
-
-        elif profile["type"] == "preset":
-            name = profile["value"].lower()
-            logger.info(f"Extracting embedding for preset: {name}")
-            cv_model = get_model("CustomVoice")
-            wavs, sr = cv_model.generate_custom_voice(text="Speaker reference sample.", speaker=name)
-
-            base_model = get_model("Base") # Ensure Base is loaded back
-            prompt = base_model.create_voice_clone_prompt(ref_audio=(wavs[0], sr), x_vector_only_mode=True)
-            emb = prompt[0].ref_spk_embedding
-            self.preset_embeddings[name] = emb
-            return emb
-
-        elif profile["type"] == "design":
-            # Designs are usually processed per-segment but we can pre-extract
-            # However, design depends on the prompt. For simplicity, we just return None
-            # and let generate_segment handle it.
-            return None
-        elif profile["type"] == "mix":
-            mix_configs = json.loads(profile["value"])
-            return self._compute_mixed_embedding(mix_configs)
         return None
 
-    def _compute_mixed_embedding(self, mix_configs: List[Dict[str, Any]]) -> torch.Tensor:
-        total_emb = None
-        total_weight = 0.0
-
-        for item in mix_configs:
-            weight = float(item.get("weight", 0.5))
-            voice_profile = item["profile"]
-            emb = self.get_speaker_embedding(voice_profile)
-            if total_emb is None:
-                total_emb = emb * weight
-            else:
-                total_emb += emb * weight
-            total_weight += weight
-
-        if total_emb is None:
-            raise ValueError("No valid voices provided for mixing")
-
-        return total_emb / total_weight
-
-    def generate_segment(self, text: str, profile: Optional[Dict[str, Any]] = None, language: str = "auto") -> tuple:
-        if not profile:
-            profile = {"type": "preset", "value": "Ryan"}
-            
-        logger.info(f"Synthesis starting with profile type '{profile['type']}': {text[:30]}...")
-            
+    def generate_segment(self, text: str, profile: Dict[str, Any], language: str = "auto") -> tuple:
+        """Generates a single audio segment for a given speaker profile."""
         try:
+            def get_model_wrapper(mtype):
+                return get_model(mtype)
+
             if profile["type"] == "preset":
-                model = get_model("CustomVoice") 
+                model = get_model("CustomVoice")
                 wavs, sr = model.generate_custom_voice(
                     text=text,
                     speaker=profile["value"], 
@@ -200,6 +175,8 @@ class PodcastEngine:
                         ref_audio = (concatenated, target_sr)
                     else:
                         ref_audio = str(resolved_paths[0])
+                        if VideoEngine.is_video(ref_audio):
+                            ref_audio = VideoEngine.extract_audio(ref_audio)
 
                     logger.info(f"Extracting voice clone prompt for {cache_key}...")
                     prompt = model.create_voice_clone_prompt(ref_audio=ref_audio, x_vector_only_mode=True)
@@ -238,6 +215,22 @@ class PodcastEngine:
             logger.error(f"Synthesis failed: {e}", exc_info=True)
             raise RuntimeError(f"Synthesis failed: {str(e)}") from e
 
+    def _compute_mixed_embedding(self, mix_configs: List[Dict[str, Any]]) -> torch.Tensor:
+        """Compute a weighted average of multiple speaker embeddings."""
+        total_weight = sum(c["weight"] for c in mix_configs)
+        if total_weight == 0:
+            return None
+
+        mixed_emb = None
+        for config in mix_configs:
+            emb = self.get_speaker_embedding(config["profile"])
+            weight = config["weight"] / total_weight
+            if mixed_emb is None:
+                mixed_emb = emb * weight
+            else:
+                mixed_emb += emb * weight
+        return mixed_emb
+
     def generate_voice_changer(self, source_audio: str, target_profile: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Preserve prosody of source while changing voice to target."""
         try:
@@ -247,6 +240,9 @@ class PodcastEngine:
             # 2. Extract codes from source
             resolved = self._resolve_paths(source_audio)
             source_path = str(resolved[0])
+
+            if VideoEngine.is_video(source_path):
+                source_path = VideoEngine.extract_audio(source_path)
 
             model = get_model("Base")
             # We want ICL mode (x_vector_only=False) to get codes
@@ -281,7 +277,6 @@ class PodcastEngine:
         sample_rate = 24000
 
         # 1. Pre-map indices to model types for grouping to prevent model thrashing
-        # Loading/unloading 1.7B models for every segment is a major performance bottleneck.
         model_groups = {} # model_type -> list of (index, item)
         for i, item in enumerate(script):
             role = item["role"]
@@ -367,7 +362,7 @@ class PodcastEngine:
     def dub_audio(self, audio_path: str, target_lang: str) -> Dict[str, Any]:
         """Dub audio by transcribing, translating, and synthesizing."""
         try:
-            # 1. Transcribe
+            # 1. Transcribe (Handles Video automatically)
             text = self.transcribe_audio(audio_path)
 
             # 2. Translate
@@ -376,7 +371,7 @@ class PodcastEngine:
             translated_text = GoogleTranslator(source='auto', target=trans_lang).translate(text)
             logger.info(f"Translated: {translated_text[:50]}...")
 
-            # 3. Clone original voice for synthesis
+            # 3. Clone original voice for synthesis (Handles Video automatically)
             original_profile = {"type": "clone", "value": audio_path}
 
             # 4. Synthesize with target language
