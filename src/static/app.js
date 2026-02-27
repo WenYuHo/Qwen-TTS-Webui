@@ -340,15 +340,31 @@ function renderBlockContent(block) {
                     Gap: <input type="number" step="0.1" value="${block.pause_after}" style="width:40px; background:none; border:1px solid var(--border); color:inherit; border-radius:4px; padding:2px;" onchange="updateBlockProperty('${block.id}', 'pause_after', this.value)">s
                 </div>
                 <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">${block.status === 'ready' ? 'Regen' : 'Synth'}</button>
-                <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times" aria-hidden="true"></i></button>
+                <button class="btn btn-secondary btn-sm js-delete" aria-label="Delete block" title="Delete Block"><i class="fas fa-times" aria-hidden="true"></i></button>
             </div>
         </div>
         <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${escapedText}</p>
         <div class="block-status" id="status-${block.id}">
             ${block.status === 'generating' ? `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
-            ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play" aria-hidden="true"></i> Play</button>` : ''}
+            ${block.audioUrl ? `<button class="btn btn-primary btn-sm js-play"><i class="fas fa-play" aria-hidden="true"></i> Play</button>` : ''}
         </div>
     `;
+}
+
+function updateBlockUI(id) {
+    const block = CanvasManager.blocks.find(b => b.id === id);
+    if (!block) return;
+    const el = document.getElementById(`block-${id}`);
+    if (el) {
+        el.innerHTML = renderBlockContent(block);
+        // Re-attach event listeners for dynamic elements
+        const playBtn = el.querySelector('.js-play');
+        if (playBtn) playBtn.onclick = () => playBlock(id);
+        const deleteBtn = el.querySelector('.js-delete');
+        if (deleteBtn) deleteBtn.onclick = () => deleteBlock(id);
+    } else {
+        renderBlocks();
+    }
 }
 
 function renderBlocks() {
@@ -369,31 +385,14 @@ function renderBlocks() {
     CanvasManager.blocks.forEach(block => {
         const div = document.createElement('div');
         div.className = 'story-block';
-        div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    ${renderAvatar(block.role)}
-                    <span class="label" style="color:var(--accent); margin:0;">${block.role}</span>
-                </div>
-                <div style="display:flex; gap:8px; align-items:center;">
-                    <select class="btn btn-secondary btn-sm" style="font-size:0.7rem;" onchange="updateBlockProperty('${block.id}', 'language', this.value)">
-                        <option value="auto" ${block.language === 'auto' ? 'selected' : ''}>Auto</option>
-                        <option value="en" ${block.language === 'en' ? 'selected' : ''}>EN</option>
-                        <option value="zh" ${block.language === 'zh' ? 'selected' : ''}>ZH</option>
-                        <option value="ja" ${block.language === 'ja' ? 'selected' : ''}>JA</option>
-                        <option value="es" ${block.language === 'es' ? 'selected' : ''}>ES</option>
-                    </select>
-                    <div style="display:flex; align-items:center; gap:4px; font-size:0.7rem; color:var(--text-secondary);">
-                        Gap: <input type="number" step="0.1" value="${block.pause_after}" style="width:40px; background:none; border:1px solid var(--border); color:inherit; border-radius:4px; padding:2px;" onchange="updateBlockProperty('${block.id}', 'pause_after', this.value)">s
-                    </div>
-                    <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">${block.status === 'ready' ? 'Regen' : 'Synth'}</button>
-                    <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times"></i></button>
-                </div>
-            </div>
-            <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${block.text}</p>
-            ${block.status === 'generating' ? `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
-            ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play"></i> Play</button>` : ''}
-        `;
+        div.id = `block-${block.id}`;
+        div.innerHTML = renderBlockContent(block);
+
+        const playBtn = div.querySelector('.js-play');
+        if (playBtn) playBtn.onclick = () => playBlock(block.id);
+        const deleteBtn = div.querySelector('.js-delete');
+        if (deleteBtn) deleteBtn.onclick = () => deleteBlock(block.id);
+
         container.appendChild(div);
     });
 }
@@ -419,7 +418,7 @@ async function promoteToProduction() {
 async function generateBlock(id) {
     const block = CanvasManager.blocks.find(b => b.id === id);
     if (!block) return;
-    block.status = 'generating'; block.progress = 0; renderBlocks();
+    block.status = 'generating'; block.progress = 0; updateBlockUI(id);
     const profiles = getAllProfiles();
     try {
         const res = await fetch('/api/generate/segment', {
@@ -436,10 +435,17 @@ async function generateBlock(id) {
             })
         });
         const { task_id } = await res.json();
-        const blob = await TaskPoller.poll(task_id, (task) => { block.progress = task.progress; renderBlocks(); });
+        const blob = await TaskPoller.poll(task_id, (task) => {
+            block.progress = task.progress;
+            updateBlockUI(id);
+        });
         block.audioUrl = URL.createObjectURL(blob);
-        block.status = 'ready'; renderBlocks();
-    } catch (e) { block.status = 'error'; alert(e.message); renderBlocks(); }
+        block.status = 'ready'; updateBlockUI(id);
+    } catch (e) {
+        block.status = 'error';
+        alert(e.message);
+        updateBlockUI(id);
+    }
 }
 
 function playBlock(id) {
