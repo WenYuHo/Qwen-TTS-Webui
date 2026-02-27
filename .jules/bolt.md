@@ -9,3 +9,7 @@
 ## 2026-02-24 - [Model Grouping in Podcast Engine]
 **Learning:** In multi-speaker podcasts, alternating between profile types (e.g., Preset using CustomVoice model and Clone using Base model) causes the backend to repeatedly unload and reload 1.7B parameter models from disk/VRAM. This "thrashing" can add seconds of overhead to every segment. Grouping script items by their required model type and processing them in batches reduces model switches to the minimum count (O(M) instead of O(N)).
 **Action:** When processing batch jobs that utilize different underlying ML models, always group items by model type before execution to minimize context-switching overhead.
+
+## 2026-02-25 - [Dynamic Event Binding Consistency]
+**Learning:** Mixing inline 'onclick' attributes with dynamic JS event attachment (via querySelector) leads to duplication and bugs if class names (like .js-play) are missing from the HTML strings. Using a consistent pattern of semantic 'js-' classes for all dynamic list items prevents runtime errors and simplifies DOM manipulation.
+**Action:** Always verify that 'js-' classes used for event binding are present in the corresponding HTML templates.

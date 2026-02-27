@@ -253,10 +253,10 @@ function renderVoiceLibrary() {
     const voices = SpeakerStore.getVoices();
     if (voices.length === 0) {
         grid.innerHTML = `
-            <div class="empty-state empty-state-grid" style="grid-column: 1 / -1;">
-                <i class="fas fa-microphone-slash" aria-hidden="true"></i>
-                <h3>No custom voices yet</h3>
-                <p>Design, clone, or mix a new voice above to start building your library.</p>
+            <div style="grid-column: 1 / -1; padding: 48px; text-align: center; background: rgba(255,255,255,0.02); border: 2px dashed var(--border); border-radius: 20px;">
+                <i class="fas fa-microphone-slash fa-3x" style="color: var(--text-secondary); margin-bottom: 16px; opacity: 0.5;"></i>
+                <h3 style="color: var(--text-primary); margin-bottom: 8px;">No custom voices yet</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">Design, clone, or mix voices above to build your library.</p>
             </div>
         `;
         return;
@@ -279,7 +279,7 @@ function renderVoiceLibrary() {
                 </div>
             </div>
         `;
-        div.querySelector('.js-play').onclick = () => playVoicePreview(div.querySelector('.js-play'), v.name, v.type, v.value);
+        div.querySelector('.js-play').onclick = (e) => playVoicePreview(e.currentTarget, v.name, v.type, v.value);
         div.querySelector('.js-delete').onclick = () => deleteVoice(v.id);
         grid.appendChild(div);
     });
@@ -340,15 +340,31 @@ function renderBlockContent(block) {
                     Gap: <input type="number" step="0.1" value="${block.pause_after}" style="width:40px; background:none; border:1px solid var(--border); color:inherit; border-radius:4px; padding:2px;" onchange="updateBlockProperty('${block.id}', 'pause_after', this.value)">s
                 </div>
                 <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">${block.status === 'ready' ? 'Regen' : 'Synth'}</button>
-                <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times" aria-hidden="true"></i></button>
+                <button class="btn btn-secondary btn-sm js-delete" aria-label="Delete block" title="Delete Block"><i class="fas fa-times" aria-hidden="true"></i></button>
             </div>
         </div>
         <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${escapedText}</p>
         <div class="block-status" id="status-${block.id}">
             ${block.status === 'generating' ? `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
-            ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play" aria-hidden="true"></i> Play</button>` : ''}
+            ${block.audioUrl ? `<button class="btn btn-primary btn-sm js-play"><i class="fas fa-play" aria-hidden="true"></i> Play</button>` : ''}
         </div>
     `;
+}
+
+function updateBlockUI(id) {
+    const block = CanvasManager.blocks.find(b => b.id === id);
+    if (!block) return;
+    const el = document.getElementById(`block-${id}`);
+    if (el) {
+        el.innerHTML = renderBlockContent(block);
+        // Re-attach event listeners for dynamic elements
+        const playBtn = el.querySelector('.js-play');
+        if (playBtn) playBtn.onclick = () => playBlock(id);
+        const deleteBtn = el.querySelector('.js-delete');
+        if (deleteBtn) deleteBtn.onclick = () => deleteBlock(id);
+    } else {
+        renderBlocks();
+    }
 }
 
 function renderBlocks() {
@@ -358,10 +374,9 @@ function renderBlocks() {
 
     if (CanvasManager.blocks.length === 0) {
         container.innerHTML = `
-            <div class="empty-state empty-state-list">
-                <i class="fas fa-pen-nib" aria-hidden="true"></i>
-                <h3>Script is empty</h3>
-                <p>Switch to <strong>Draft</strong> view to write your script, then promote it to blocks.</p>
+            <div style="padding: 40px; text-align: center; color: var(--text-secondary); background: rgba(0,0,0,0.1); border-radius: 16px; border: 1px dashed var(--border);">
+                <i class="fas fa-layer-group fa-2x" style="margin-bottom: 12px; opacity: 0.3;"></i>
+                <p>No story blocks yet. Use the Draft tab to write your script, then click "Promote to Blocks".</p>
             </div>
         `;
         return;
@@ -370,33 +385,14 @@ function renderBlocks() {
     CanvasManager.blocks.forEach(block => {
         const div = document.createElement('div');
         div.className = 'story-block';
-        const escapedRole = escapeHTML(block.role);
-        const escapedText = escapeHTML(block.text);
-        div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    ${renderAvatar(block.role)}
-                    <span class="label" style="color:var(--accent); margin:0;">${escapedRole}</span>
-                </div>
-                <div style="display:flex; gap:8px; align-items:center;">
-                    <select class="btn btn-secondary btn-sm" style="font-size:0.7rem;" onchange="updateBlockProperty('${block.id}', 'language', this.value)">
-                        <option value="auto" ${block.language === 'auto' ? 'selected' : ''}>Auto</option>
-                        <option value="en" ${block.language === 'en' ? 'selected' : ''}>EN</option>
-                        <option value="zh" ${block.language === 'zh' ? 'selected' : ''}>ZH</option>
-                        <option value="ja" ${block.language === 'ja' ? 'selected' : ''}>JA</option>
-                        <option value="es" ${block.language === 'es' ? 'selected' : ''}>ES</option>
-                    </select>
-                    <div style="display:flex; align-items:center; gap:4px; font-size:0.7rem; color:var(--text-secondary);">
-                        Gap: <input type="number" step="0.1" value="${block.pause_after}" style="width:40px; background:none; border:1px solid var(--border); color:inherit; border-radius:4px; padding:2px;" onchange="updateBlockProperty('${block.id}', 'pause_after', this.value)">s
-                    </div>
-                    <button class="btn btn-secondary btn-sm" onclick="generateBlock('${block.id}')">${block.status === 'ready' ? 'Regen' : 'Synth'}</button>
-                    <button class="btn btn-secondary btn-sm" onclick="deleteBlock('${block.id}')" aria-label="Delete block" title="Delete Block"><i class="fas fa-times" aria-hidden="true"></i></button>
-                </div>
-            </div>
-            <p style="margin: 12px 0; color:var(--text-primary); font-size:0.95rem;">${escapedText}</p>
-            ${block.status === 'generating' ? `<div class="progress-container"><div class="progress-bar" style="width: ${block.progress}%"></div></div>` : ''}
-            ${block.audioUrl ? `<button class="btn btn-primary btn-sm" onclick="playBlock('${block.id}')"><i class="fas fa-play" aria-hidden="true"></i> Play</button>` : ''}
-        `;
+        div.id = `block-${block.id}`;
+        div.innerHTML = renderBlockContent(block);
+
+        const playBtn = div.querySelector('.js-play');
+        if (playBtn) playBtn.onclick = () => playBlock(block.id);
+        const deleteBtn = div.querySelector('.js-delete');
+        if (deleteBtn) deleteBtn.onclick = () => deleteBlock(block.id);
+
         container.appendChild(div);
     });
 }
@@ -423,7 +419,7 @@ async function promoteToProduction() {
 async function generateBlock(id) {
     const block = CanvasManager.blocks.find(b => b.id === id);
     if (!block) return;
-    block.status = 'generating'; block.progress = 0; renderBlocks();
+    block.status = 'generating'; block.progress = 0; updateBlockUI(id);
     const profiles = getAllProfiles();
     try {
         const res = await fetch('/api/generate/segment', {
@@ -440,10 +436,17 @@ async function generateBlock(id) {
             })
         });
         const { task_id } = await res.json();
-        const blob = await TaskPoller.poll(task_id, (task) => { block.progress = task.progress; renderBlocks(); });
+        const blob = await TaskPoller.poll(task_id, (task) => {
+            block.progress = task.progress;
+            updateBlockUI(id);
+        });
         block.audioUrl = URL.createObjectURL(blob);
-        block.status = 'ready'; renderBlocks();
-    } catch (e) { block.status = 'error'; alert(e.message); renderBlocks(); }
+        block.status = 'ready'; updateBlockUI(id);
+    } catch (e) {
+        block.status = 'error';
+        alert(e.message);
+        updateBlockUI(id);
+    }
 }
 
 function playBlock(id) {
