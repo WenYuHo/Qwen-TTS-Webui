@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 import uuid
 from pathlib import Path
 import json
 import logging
-import soundfile as sf
 from .schemas import SpeakerProfile, MixRequest, VoiceLibrary
 from ..config import VOICE_LIBRARY_FILE, logger
 from .. import server_state
+from ..utils import numpy_to_wav_bytes
 
 router = APIRouter(prefix="/api/voice", tags=["voices"])
 
@@ -51,21 +51,18 @@ async def voice_mix(request: MixRequest):
 
 @router.post("/preview")
 async def voice_preview(request: SpeakerProfile):
-    preview_dir = Path("src/static/previews")
-    preview_dir.mkdir(parents=True, exist_ok=True)
-
-    # Security: Use UUID for preview filename to prevent path traversal and collision
-    safe_name = f"preview_{uuid.uuid4().hex[:12]}"
-    preview_path = preview_dir / f"{safe_name}.wav"
-
     try:
         profile = {"type": request.type, "value": request.value}
         wav, sr = server_state.engine.generate_segment("This is a preview of my voice.", profile=profile)
-        sf.write(str(preview_path), wav, sr, format='WAV')
-        return FileResponse(preview_path)
+
+        # Security: Return audio from memory instead of writing to a public static directory
+        # This prevents disk space exhaustion (DoS) and unintended file access.
+        buffer = numpy_to_wav_bytes(wav, sr)
+        return StreamingResponse(buffer, media_type="audio/wav")
     except Exception as e:
-        logger.error(f"Preview failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Preview failed: {e}", exc_info=True)
+        # Security: Return a generic error message instead of leaking internal details
+        raise HTTPException(status_code=500, detail="Preview generation failed")
 
 @router.get("/library")
 async def get_library():

@@ -4,6 +4,7 @@ from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 import sys
 from pathlib import Path
+import os
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
@@ -138,3 +139,39 @@ def test_task_status_endpoint():
     data = response.json()
     assert data["id"] == tid
     assert data["status"] == "pending"
+
+def test_voice_preview_returns_streaming_response():
+    """Verify that /api/voice/preview returns audio bytes and doesn't write to disk."""
+    # Mock engine.generate_segment to return a dummy waveform
+    dummy_wav = np.zeros(16000, dtype=np.float32)
+    dummy_sr = 16000
+    mock_engine.generate_segment.return_value = (dummy_wav, dummy_sr)
+
+    # Path where previews were previously written
+    preview_dir = Path("src/static/previews")
+
+    # Get initial files in preview_dir if it exists
+    initial_files = set()
+    if preview_dir.exists():
+        initial_files = set(os.listdir(preview_dir))
+
+    payload = {"role": "Test", "type": "preset", "value": "aiden"}
+    response = client.post("/api/voice/preview", json=payload)
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "audio/wav"
+    assert len(response.content) > 0
+
+    # Verify no new files were created in src/static/previews
+    if preview_dir.exists():
+        final_files = set(os.listdir(preview_dir))
+        new_files = final_files - initial_files
+        assert len(new_files) == 0, f"New files were created in {preview_dir}: {new_files}"
+
+def test_security_headers():
+    """Verify that security headers are present in responses."""
+    response = client.get("/api/health")
+    assert response.headers["X-Content-Type-Options"] == "nosniff"
+    assert response.headers["X-Frame-Options"] == "DENY"
+    assert "X-XSS-Protection" in response.headers
+    assert "Strict-Transport-Security" in response.headers

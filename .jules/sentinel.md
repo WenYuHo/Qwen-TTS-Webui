@@ -7,3 +7,8 @@
 **Vulnerability:** User-provided `role` names were used to construct temporary filenames for voice previews without sufficient sanitization, potentially allowing path traversal if the filename was not strictly controlled.
 **Learning:** Even if a filename is constructed from multiple parts, if one part is user-controlled and can contain traversal characters (like `../`), it can escape the intended directory.
 **Prevention:** Use randomly generated names (like UUIDs) for temporary files and avoid using user-controlled strings in filesystem paths whenever possible.
+
+## 2026-02-26 - [Disk Exhaustion via Transient Resource Creation]
+**Vulnerability:** The `/api/voice/preview` endpoint wrote temporary WAV files to a public static directory (`src/static/previews`) using UUIDs but lacked a cleanup mechanism. This could lead to disk space exhaustion (DoS) if called repeatedly.
+**Learning:** Writing transient files to disk for short-lived UI requests is a resource management risk. Even with unique names, persistent storage of temporary data is a liability.
+**Prevention:** Prefer memory-buffered responses (e.g., `StreamingResponse` with `io.BytesIO`) for short-lived assets. Always use generic error messages in public APIs to prevent leaking internal stack traces or environment details.
