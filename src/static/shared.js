@@ -193,3 +193,16 @@ function parseScript(text) {
     flush();
     return script;
 }
+
+// Expose utilities to global window object
+Object.assign(window, {
+    escapeHTML,
+    SpeakerStore,
+    CanvasManager,
+    TaskPoller,
+    UIHeartbeat,
+    getVoicePreview,
+    initializePresets,
+    getAllProfiles,
+    parseScript
+});

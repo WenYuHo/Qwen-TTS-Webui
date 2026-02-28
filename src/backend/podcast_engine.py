@@ -274,10 +274,11 @@ class PodcastEngine:
             raise RuntimeError(f"Voice changer failed: {e}")
 
     def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None) -> Dict[str, Any]:
+        """⚡ Bolt: High-performance podcast generation with vectorized audio assembly."""
         sample_rate = 24000
 
         # 1. Pre-map indices to model types for grouping to prevent model thrashing
-        model_groups = {} # model_type -> list of (index, item)
+        model_groups = {}
         for i, item in enumerate(script):
             role = item["role"]
             profile = profiles.get(role, {"type": "preset", "value": "Ryan"})
@@ -286,78 +287,90 @@ class PodcastEngine:
                 model_groups[mtype] = []
             model_groups[mtype].append((i, item))
 
-        # 2. Batch synthesis by model type to minimize switches
+        # 2. Batch synthesis by model type
         waveforms = [None] * len(script)
         srs = [None] * len(script)
 
         for mtype, group in model_groups.items():
-            logger.info(f"⚡ Bolt: Synthesizing group for model '{mtype}' ({len(group)} segments)")
+            logger.info(f"⚡ Bolt: Processing model group '{mtype}' ({len(group)} segments)")
             for i, item in group:
                 role = item["role"]
                 text = item["text"]
                 lang = item.get("language", "auto")
-                profile = profiles.get(role)
+                profile = profiles.get(role, {"type": "preset", "value": "Ryan"})
                 try:
                     wav, sr = self.generate_segment(text, profile=profile, language=lang)
                     waveforms[i] = wav
                     srs[i] = sr
+                    sample_rate = sr # Assume consistency
                 except Exception as e:
                     logger.error(f"Error generating segment {i} for {role}: {e}")
 
-        # 3. Assemble chronological mix
-        segments = []
-        max_duration_ms = 0
-        current_offset_ms = 0
-        
+        # 3. Vectorized Audio Assembly (NumPy)
+        # Calculate timeline offsets and total duration
+        offsets = []
+        current_offset = 0
         for i, item in enumerate(script):
             if waveforms[i] is None:
+                offsets.append(0)
                 continue
 
-            wav = waveforms[i]
-            sr = srs[i]
-            sample_rate = sr
+            start_time = item.get("start_time")
+            if start_time is not None:
+                pos = int(float(start_time) * sample_rate)
+            else:
+                pos = current_offset
+
+            offsets.append(pos)
             pause_after = item.get("pause_after", 0.5)
-            start_time = item.get("start_time", None)
+            current_offset = pos + len(waveforms[i]) + int(pause_after * sample_rate)
 
-            wav_int16 = (wav * 32767).astype(np.int16)
-            seg = AudioSegment(wav_int16.tobytes(), frame_rate=sr, sample_width=2, channels=1)
-            
-            position_ms = int(float(start_time) * 1000) if start_time is not None else current_offset_ms
-            segments.append({"audio": seg, "position": position_ms})
+        if not any(w is not None for w in waveforms):
+            return None
 
-            current_offset_ms = position_ms + len(seg) + int(pause_after * 1000)
+        total_length = max(offsets[i] + (len(waveforms[i]) if waveforms[i] is not None else 0) for i in range(len(script)))
+        # Add a bit of tail padding (2.0s to match original behavior)
+        total_length += int(2.0 * sample_rate)
 
-            end_pos = position_ms + len(seg)
-            if end_pos > max_duration_ms: max_duration_ms = end_pos
-                
-        if not segments: return None
-        final_mix = AudioSegment.silent(duration=max_duration_ms + 2000, frame_rate=sample_rate)
-        for seg in segments:
-            final_mix = final_mix.overlay(seg["audio"], position=seg["position"])
+        logger.info(f"⚡ Bolt: Assembling {len(script)} segments into {total_length/sample_rate:.2f}s waveform via NumPy")
+        final_waveform = np.zeros(total_length, dtype=np.float32)
 
+        for i, wav in enumerate(waveforms):
+            if wav is not None:
+                start = offsets[i]
+                end = start + len(wav)
+                # Linear overlay (addition) - assumes non-overlapping or intentional overlap
+                final_waveform[start:end] += wav
+
+        # 4. Vectorized BGM Mixing
         if bgm_mood:
             try:
-                # Security: Use _resolve_paths for safe BGM path resolution
                 bgm_full_path = (Path(BASE_DIR) / "bgm" / f"{bgm_mood}.mp3").resolve()
                 bgm_paths = self._resolve_paths(str(bgm_full_path))
                 if bgm_paths:
                     bgm_file = bgm_paths[0]
-                    bgm_segment = AudioSegment.from_file(bgm_file) - 20
-                    if len(bgm_segment) < len(final_mix):
-                        loops = int(len(final_mix) / len(bgm_segment)) + 1
-                        bgm_segment = bgm_segment * loops
-                    bgm_segment = bgm_segment[:len(final_mix)]
-                    final_mix = final_mix.overlay(bgm_segment)
+                    # Load BGM as float32 at project sample rate
+                    bgm_wav, bgm_sr = librosa.load(str(bgm_file), sr=sample_rate)
+                    # Lower volume (-20dB approx)
+                    bgm_wav = bgm_wav * 0.1
+
+                    # Tile BGM to cover total duration
+                    num_tiles = int(np.ceil(total_length / len(bgm_wav)))
+                    bgm_tiled = np.tile(bgm_wav, num_tiles)[:total_length]
+
+                    # Mix BGM
+                    final_waveform += bgm_tiled
+                    logger.info(f"⚡ Bolt: BGM '{bgm_mood}' mixed using vectorized tiling.")
             except Exception as e:
                 logger.error(f"BGM mixing failed: {e}")
 
-        samples = np.array(final_mix.get_array_of_samples())
-        if final_mix.channels == 2:
-            samples = samples.reshape((-1, 2)).mean(axis=1)
-        final_wav = samples.astype(np.float32) / 32768.0
-        max_val = np.max(np.abs(final_wav))
-        if max_val > 1.0: final_wav = final_wav / max_val
-        return {"waveform": final_wav, "sample_rate": sample_rate}
+        # 5. Fast Normalization
+        max_val = np.max(np.abs(final_waveform))
+        if max_val > 1.0:
+            logger.info(f"⚡ Bolt: Normalizing output (peak: {max_val:.2f})")
+            final_waveform /= max_val
+
+        return {"waveform": final_waveform, "sample_rate": sample_rate}
 
     def dub_audio(self, audio_path: str, target_lang: str) -> Dict[str, Any]:
         """Dub audio by transcribing, translating, and synthesizing."""

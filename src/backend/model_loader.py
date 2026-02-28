@@ -14,6 +14,7 @@ if str(backend_dir) not in sys.path:
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+from collections import OrderedDict
 from .config import find_model_path, MODELS, logger
 
 # Lazy-loaded reference (set on first use, not at import time)
@@ -52,9 +53,9 @@ def _ensure_qwen_tts():
 
 
 class ModelManager:
-    def __init__(self):
-        self.model = None
-        self.current_model_type = None
+    def __init__(self, cache_size=3):
+        self.models = OrderedDict()
+        self.cache_size = cache_size
         self.device = self._get_best_device()
         self.lock = threading.Lock()
         
@@ -74,6 +75,7 @@ class ModelManager:
             return "cpu"
 
     def load_model(self, model_type="VoiceDesign", size="1.7B"):
+        """Loads a model with LRU caching to prevent multi-second reload overhead."""
         _ensure_qwen_tts()
         if _Qwen3TTSModel is None:
             logger.error("qwen_tts package failed to import. Check installation.")
@@ -81,10 +83,15 @@ class ModelManager:
 
         with self.lock:
             key = f"{size}_{model_type}"
-            if self.model and self.current_model_type == key:
-                logger.debug(f"Model {key} already loaded.")
-                return self.model
+
+            # 1. Check if model is in cache (LRU hit)
+            if key in self.models:
+                logger.info(f"⚡ Bolt: Model cache hit for {key}. Reusing existing instance.")
+                # Move to end to mark as most recently used
+                self.models.move_to_end(key)
+                return self.models[key]
                 
+            # 2. Resolve model name
             if model_type == "VoiceDesign":
                 model_name = MODELS["1.7B_VoiceDesign"]
             elif model_type == "CustomVoice":
@@ -100,28 +107,31 @@ class ModelManager:
                 logger.critical(f"Model {model_name} NOT FOUND. Initialization failed.")
                 raise FileNotFoundError(f"Model {model_name} not found.")
 
-            logger.info(f"Loading Qwen-TTS model: {model_name} on {self.device}")
-            if self.model:
-                logger.info(f"Unloading previous model: {self.current_model_type}")
-                del self.model
+            # 3. Handle cache eviction if full
+            if len(self.models) >= self.cache_size:
+                oldest_key, oldest_model = self.models.popitem(last=False)
+                logger.info(f"⚡ Bolt: Evicting LRU model from cache: {oldest_key}")
+                del oldest_model
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
-                
+
+            # 4. Load the new model
+            logger.info(f"Loading Qwen-TTS model: {model_name} on {self.device}")
             try:
-                self.model = _Qwen3TTSModel.from_pretrained(
+                model = _Qwen3TTSModel.from_pretrained(
                     str(model_path), 
                     device_map=self.device,
                     torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
                     local_files_only=True
                 )
-                logger.info("Model loaded successfully.")
+                self.models[key] = model
+                logger.info(f"Model {key} loaded successfully and added to cache.")
+                return model
             except Exception as e:
                 logger.critical(f"CRITICAL ERROR loading model: {e}")
                 import traceback
                 traceback.print_exc()
                 raise e
-            self.current_model_type = key
-            return self.model
 
 # Global instance
 manager = ModelManager()
