@@ -1,0 +1,16 @@
+name: Auto merge Jule PR
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    if: github.actor == 'google-labs-jules'
+
+    steps:
+      - name: Enable auto merge
+        run: gh pr merge ${{ github.event.pull_request.number }} --auto --squash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
