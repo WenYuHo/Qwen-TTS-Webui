@@ -1,10 +1,10 @@
 import pytest
 from fastapi.testclient import TestClient
-from src.server import app
+from server import app
 import os
 import shutil
 from pathlib import Path
-from src.backend.config import SHARED_ASSETS_DIR
+from backend.config import SHARED_ASSETS_DIR
 
 client = TestClient(app)
 

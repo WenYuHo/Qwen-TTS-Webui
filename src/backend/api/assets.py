@@ -24,15 +24,25 @@ async def list_assets():
 @router.post("/upload")
 async def upload_asset(file: UploadFile = File(...)):
     """Upload a new shared asset."""
-    file_path = SHARED_ASSETS_DIR / file.filename
+    # Security: Sanitize filename to prevent path traversal
+    safe_filename = Path(file.filename).name
+    if not safe_filename or safe_filename in [".", ".."]:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    file_path = SHARED_ASSETS_DIR / safe_filename
+
+    if not validate_safe_path(file_path, SHARED_ASSETS_DIR):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
     try:
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-        logger.info(f"Asset uploaded: {file.filename}")
-        return {"message": f"Asset {file.filename} uploaded successfully"}
+        logger.info(f"Asset uploaded: {safe_filename}")
+        return {"message": f"Asset {safe_filename} uploaded successfully"}
     except Exception as e:
-        logger.error(f"Failed to upload asset {file.filename}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Failed to upload asset {safe_filename}: {e}", exc_info=True)
+        # Security: Generic error message to avoid leaking internal details
+        raise HTTPException(status_code=500, detail="Failed to upload asset")
 
 @router.delete("/{filename}")
 async def delete_asset(filename: str):
