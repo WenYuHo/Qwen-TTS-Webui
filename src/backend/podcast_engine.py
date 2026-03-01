@@ -133,14 +133,18 @@ class PodcastEngine:
         return text
     def get_speaker_embedding(self, profile: Dict[str, str]) -> torch.Tensor:
         """Extract speaker embedding for any profile."""
-        # Check caches first to avoid expensive extraction and model switches
+        # ⚡ Bolt: Check caches first to avoid expensive extraction and model switches
+        # Unified cache check: prompt_cache and clone_embedding_cache should be in sync
         if profile["type"] == "preset":
             name = profile["value"].lower()
             if name in self.preset_embeddings:
                 return self.preset_embeddings[name]
         elif profile.get("type") == "clone":
-            if profile["value"] in self.clone_embedding_cache:
-                return self.clone_embedding_cache[profile["value"]]
+            cache_key = profile["value"]
+            if cache_key in self.prompt_cache:
+                return self.prompt_cache[cache_key][0].ref_spk_embedding
+            if cache_key in self.clone_embedding_cache:
+                return self.clone_embedding_cache[cache_key]
 
         model = get_model("Base")
 
@@ -149,15 +153,20 @@ class PodcastEngine:
             self.preset_embeddings[profile["value"].lower()] = emb
             return emb
         elif profile.get("type") == "clone":
-            resolved = self._resolve_paths(profile["value"])
+            cache_key = profile["value"]
+            resolved = self._resolve_paths(cache_key)
             # Handle Video for cloning if needed
             clone_path = str(resolved[0])
             if VideoEngine.is_video(clone_path):
                 clone_path = self._extract_audio_with_cache(clone_path)
 
+            logger.info(f"⚡ Bolt: Extracting embedding for {cache_key} (via get_speaker_embedding)")
             prompt = model.create_voice_clone_prompt(ref_audio=clone_path, x_vector_only_mode=True)
             emb = prompt[0].ref_spk_embedding
-            self.clone_embedding_cache[profile["value"]] = emb
+
+            # Sync unified caches
+            self.prompt_cache[cache_key] = prompt
+            self.clone_embedding_cache[cache_key] = emb
             return emb
         return None
 
@@ -188,10 +197,8 @@ class PodcastEngine:
                 cache_key = profile["value"]
 
                 if cache_key in self.prompt_cache:
-                    logger.debug(f"Using cached prompt for {cache_key}")
+                    logger.debug(f"⚡ Bolt: Using cached prompt for {cache_key}")
                     prompt = self.prompt_cache[cache_key]
-                    if model is None:
-                        model = get_model("Base")
                 else:
                     try:
                         resolved_paths = self._resolve_paths(profile["value"])
@@ -215,31 +222,42 @@ class PodcastEngine:
                         if VideoEngine.is_video(ref_audio):
                             ref_audio = self._extract_audio_with_cache(ref_audio)
 
-                    logger.info(f"Extracting voice clone prompt for {cache_key}...")
+                    logger.info(f"⚡ Bolt: Extracting voice clone prompt for {cache_key} (via generate_segment)")
                     prompt = model.create_voice_clone_prompt(ref_audio=ref_audio, x_vector_only_mode=True)
                     self.prompt_cache[cache_key] = prompt
 
+                if model is None:
+                    model = get_model("Base")
                 wavs, sr = model.generate_voice_clone(
                     text=text,
                     language=language,
                     voice_clone_prompt=prompt,
                 )
             elif profile.get("type") == "mix":
-                mix_configs = json.loads(profile["value"])
-                mixed_emb = self._compute_mixed_embedding(mix_configs)
+                # ⚡ Bolt: Use unified prompt cache for mixed voices too
+                cache_key = f"mix:{profile['value']}"
+                if cache_key in self.prompt_cache:
+                    logger.debug(f"⚡ Bolt: Using cached prompt for {cache_key}")
+                    prompt = self.prompt_cache[cache_key]
+                else:
+                    mix_configs = json.loads(profile["value"])
+                    mixed_emb = self._compute_mixed_embedding(mix_configs)
+                    # Use list format for generate_voice_clone compat
+                    prompt = [VoiceClonePromptItem(
+                        ref_code=None,
+                        ref_spk_embedding=mixed_emb,
+                        x_vector_only_mode=True,
+                        icl_mode=False,
+                        ref_text=None
+                    )]
+                    self.prompt_cache[cache_key] = prompt
 
                 if model is None:
                     model = get_model("Base")
-                voice_clone_prompt = {
-                    "ref_spk_embedding": [mixed_emb],
-                    "x_vector_only_mode": [True],
-                    "icl_mode": [False],
-                    "ref_code": [None]
-                }
                 wavs, sr = model.generate_voice_clone(
                     text=text,
                     language=language,
-                    voice_clone_prompt=voice_clone_prompt
+                    voice_clone_prompt=prompt
                 )
             else:
                 raise ValueError(f"Unknown speaker type: {profile['type']}")
@@ -363,32 +381,37 @@ class PodcastEngine:
                 elif mtype == "VoiceDesign":
                     batch_instructs.append(profile["value"])
                 elif mtype == "Base":
-                    # Handle Clone vs Mix for Base model
-                    if profile.get("type") == "clone":
-                        cache_key = profile["value"]
-                        if cache_key in self.prompt_cache:
-                            batch_prompts.append(self.prompt_cache[cache_key][0])
-                        else:
+                    # ⚡ Bolt: Use unified prompt cache for both Clone and Mix in batch mode
+                    ptype = profile.get("type")
+                    cache_key = profile["value"] if ptype == "clone" else f"mix:{profile['value']}"
+
+                    if cache_key in self.prompt_cache:
+                        batch_prompts.append(self.prompt_cache[cache_key][0])
+                    else:
+                        if ptype == "clone":
                             # Extraction needed (similar to generate_segment logic)
                             resolved = self._resolve_paths(profile["value"])
                             ref_audio = str(resolved[0])
                             if VideoEngine.is_video(ref_audio):
                                 ref_audio = self._extract_audio_with_cache(ref_audio)
 
+                            logger.info(f"⚡ Bolt: Extracting voice clone prompt for {cache_key} (via batch)")
                             prompt = group_model.create_voice_clone_prompt(ref_audio=ref_audio, x_vector_only_mode=True)
                             self.prompt_cache[cache_key] = prompt
                             batch_prompts.append(prompt[0])
-                    elif profile.get("type") == "mix":
-                        mix_configs = json.loads(profile["value"])
-                        mixed_emb = self._compute_mixed_embedding(mix_configs)
-                        # Create prompt item manually for Mix
-                        batch_prompts.append(VoiceClonePromptItem(
-                            ref_code=None,
-                            ref_spk_embedding=mixed_emb,
-                            x_vector_only_mode=True,
-                            icl_mode=False,
-                            ref_text=None
-                        ))
+                        elif ptype == "mix":
+                            mix_configs = json.loads(profile["value"])
+                            mixed_emb = self._compute_mixed_embedding(mix_configs)
+                            # Create prompt item manually for Mix and cache it
+                            prompt = [VoiceClonePromptItem(
+                                ref_code=None,
+                                ref_spk_embedding=mixed_emb,
+                                x_vector_only_mode=True,
+                                icl_mode=False,
+                                ref_text=None
+                            )]
+                            self.prompt_cache[cache_key] = prompt
+                            batch_prompts.append(prompt[0])
 
             try:
                 # Execute batch synthesis
