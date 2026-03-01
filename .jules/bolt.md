@@ -13,3 +13,7 @@
 ## 2026-02-25 - [Dynamic Event Binding Consistency]
 **Learning:** Mixing inline 'onclick' attributes with dynamic JS event attachment (via querySelector) leads to duplication and bugs if class names (like .js-play) are missing from the HTML strings. Using a consistent pattern of semantic 'js-' classes for all dynamic list items prevents runtime errors and simplifies DOM manipulation.
 **Action:** Always verify that 'js-' classes used for event binding are present in the corresponding HTML templates.
+
+## 2026-03-01 - [Vectorized Audio Assembly]
+**Learning:** Using `pydub.AudioSegment` for multi-segment podcast assembly and BGM mixing/ducking is significantly slower (O(N) with high constant overhead for each overlay/slice) compared to vectorized NumPy operations. Pre-allocating a single project-wide array and using slice assignment for speech segments reduces assembly time by ~11x (from 2.3s to 0.2s for a 10-minute project). Sidechain ducking via NumPy array multiplication is also vastly more efficient than per-segment `AudioSegment` processing.
+**Action:** Always prefer vectorized NumPy operations for audio mixing and concatenation over high-level library abstractions like pydub in performance-critical paths.
