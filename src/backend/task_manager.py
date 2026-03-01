@@ -1,7 +1,7 @@
 import uuid
 import threading
 import time
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from .config import logger
 
 class TaskStatus:
@@ -9,10 +9,13 @@ class TaskStatus:
     PROCESSING = "processing"
     COMPLETED = "completed"
     FAILED = "failed"
+    CANCELLED = "cancelled"
 
 class TaskManager:
     def __init__(self):
         self.tasks: Dict[str, Dict[str, Any]] = {}
+        self.threads: Dict[str, threading.Thread] = {}
+        self.stop_events: Dict[str, threading.Event] = {}
         self.lock = threading.Lock()
 
     def create_task(self, task_type: str, metadata: Optional[Dict[str, Any]] = None) -> str:
@@ -31,8 +34,44 @@ class TaskManager:
                 "updated_at": time.time(),
                 "metadata": metadata or {}
             }
+            self.stop_events[task_id] = threading.Event()
         logger.info(f"Task created: {task_id} ({task_type})")
         return task_id
+
+    def register_thread(self, task_id: str, thread: threading.Thread):
+        """Register the thread running the task."""
+        with self.lock:
+            self.threads[task_id] = thread
+
+    def get_stop_event(self, task_id: str) -> Optional[threading.Event]:
+        """Get the stop event for a task."""
+        with self.lock:
+            return self.stop_events.get(task_id)
+
+    def is_cancelled(self, task_id: str) -> bool:
+        """Check if a task has been cancelled."""
+        event = self.get_stop_event(task_id)
+        return event.is_set() if event else False
+
+    def cancel_task(self, task_id: str) -> bool:
+        """Cancel a running task."""
+        with self.lock:
+            if task_id not in self.tasks:
+                return False
+
+            task = self.tasks[task_id]
+            if task["status"] in [TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.CANCELLED]:
+                return False
+
+            task["status"] = TaskStatus.CANCELLED
+            task["message"] = "Task cancelled by user"
+            task["updated_at"] = time.time()
+
+            if task_id in self.stop_events:
+                self.stop_events[task_id].set()
+
+            logger.info(f"Task cancelled: {task_id}")
+            return True
 
     def update_task(self, task_id: str, status: Optional[str] = None, progress: Optional[int] = None, 
                     message: Optional[str] = None, result: Any = None, error: Optional[str] = None):
@@ -43,6 +82,11 @@ class TaskManager:
                 return
 
             task = self.tasks[task_id]
+
+            # Don't update if already cancelled
+            if task["status"] == TaskStatus.CANCELLED:
+                return
+
             if status:
                 task["status"] = status
             if progress is not None:
@@ -63,6 +107,11 @@ class TaskManager:
         with self.lock:
             return self.tasks.get(task_id)
 
+    def list_tasks(self) -> List[Dict[str, Any]]:
+        """List all tasks."""
+        with self.lock:
+            return [ {k: v for k, v in t.items() if k != "result"} for t in self.tasks.values() ]
+
     def cleanup_old_tasks(self, max_age_seconds: int = 3600):
         """Remove tasks older than max_age_seconds."""
         now = time.time()
@@ -70,6 +119,8 @@ class TaskManager:
             to_delete = [tid for tid, t in self.tasks.items() if now - t["created_at"] > max_age_seconds]
             for tid in to_delete:
                 del self.tasks[tid]
+                self.threads.pop(tid, None)
+                self.stop_events.pop(tid, None)
         if to_delete:
             logger.info(f"Cleaned up {len(to_delete)} old tasks")
 

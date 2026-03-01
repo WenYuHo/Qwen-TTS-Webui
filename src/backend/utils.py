@@ -1,6 +1,7 @@
 import io
 import soundfile as sf
 import numpy as np
+from pathlib import Path
 
 def numpy_to_wav_bytes(waveform, sample_rate):
     """Converts a numpy waveform to a WAV-formatted BytesIO object."""
@@ -13,12 +14,11 @@ def numpy_to_wav_bytes(waveform, sample_rate):
     buffer.seek(0)
     return buffer
 
-def validate_safe_path(base_dir, relative_path):
-    """Ensures the relative path does not escape the base directory."""
-    import os
-    from pathlib import Path
-    base = Path(base_dir).resolve()
-    full_path = (base / relative_path).resolve()
-    if not full_path.is_relative_to(base):
-        raise ValueError("Invalid path: path escapes base directory")
-    return full_path
+def validate_safe_path(full_path, base_dir):
+    """Ensures the full_path is inside base_dir."""
+    try:
+        base = Path(base_dir).resolve()
+        full = Path(full_path).resolve()
+        return full.is_relative_to(base)
+    except Exception:
+        return False

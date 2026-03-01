@@ -113,3 +113,7 @@ VIDEO_DIR = PROJECTS_DIR / "videos"
 VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 VOICE_IMAGES_DIR = PROJECTS_DIR / "voice_images"
 VOICE_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+
+# Shared assets for BGM/SFX
+SHARED_ASSETS_DIR = BASE_DIR / "shared_assets"
+SHARED_ASSETS_DIR.mkdir(parents=True, exist_ok=True)
