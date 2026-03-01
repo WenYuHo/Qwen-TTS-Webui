@@ -49,3 +49,12 @@ Run `./start.sh` or `python3 src/server.py`. The server runs on port 8080 by def
 
 ## Deployment
 Logs are written to `logs/studio.log`. The `logs/` directory and `projects/*.json` are excluded from git to prevent leaking user data or runtime state.
+
+## Workflow Automation
+- **Option 3 (Direct Push to Main):** When explicitly requested by the user for faster iterations, Jules is authorized to push directly to the `main` branch.
+- **Workflow Steps:**
+  1. `git checkout main`
+  2. `git pull origin main`
+  3. `git merge <feature-branch>` (or `git add .` if working directly on main)
+  4. `git commit -m "Jule automated update"`
+  5. `git push origin main`
