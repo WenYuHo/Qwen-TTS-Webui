@@ -7,7 +7,7 @@ on:
 jobs:
   automerge:
     runs-on: ubuntu-latest
-    if: github.actor == 'google-labs-jules'
+    if: github.actor == 'WenYuHo'
 
     steps:
       - name: Enable auto merge
