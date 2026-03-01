@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Enable auto merge
-        run: gh pr merge ${{ github.event.pull_request.number }} --auto --squash
+      - name: Enable auto merge and delete branch
+        run: gh pr merge ${{ github.event.pull_request.number }} --auto --squash --delete-branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
