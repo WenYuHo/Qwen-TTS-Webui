@@ -44,3 +44,7 @@
 ## 2026-03-01 - [Transcription and Translation Caching]
 **Learning:** Redundant transcription (via Whisper) and translation (via GoogleTranslator API) in dubbing and S2S workflows add significant unnecessary latency and API cost. Using a cache key based on file metadata (path, size, mtime) for transcription and (text, target_lang) for translation provides a ~5-10x speedup for repeated operations on the same assets.
 **Action:** Always utilize the `transcription_cache` and `translation_cache` in the `PodcastEngine` before performing these expensive operations.
+
+## 2026-03-01 - [Unified Inference Cache for Mixed/Cloned Voices]
+**Learning:** Cloned voices used within "Mix" profiles were previously extracted independently from direct clones, doubling the ML overhead for projects that utilize both. Unifying the `prompt_cache` and `clone_embedding_cache` ensures that a single extraction benefit all downstream users of that asset. Additionally, caching full `VoiceClonePromptItem` objects for mixed voices (using a `mix:` prefix) eliminates redundant JSON parsing and vector arithmetic during batch synthesis.
+**Action:** Always check for existing `VoiceClonePromptItem` in the unified cache before triggering a new extraction or mix calculation.
