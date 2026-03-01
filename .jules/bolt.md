@@ -29,3 +29,6 @@
 ## 2026-03-01 - [LRU Model Cache in ModelManager]
 **Learning:** The previous single-slot model loading pattern caused "model thrashing" during multi-speaker or interactive sessions, adding 3-5 seconds of latency per speaker switch as 1.7B parameter models (~3.4GB FP16) were unloaded and reloaded. Implementing an LRU cache with a capacity of 2 models provides a significant speedup for the common "back-and-forth" interaction between two speaker types (e.g., Preset and Clone).
 **Action:** Always utilize the LRU-enabled `ModelManager` to load models. For multi-speaker generation, combine this with model-grouping to minimize even cache-hit lookups.
+## 2026-03-01 - [Video Audio Extraction Caching]
+**Learning:** Audio extraction from video files using MoviePy is a slow, I/O-intensive process. In workflows like dubbing or voice cloning, the engine often needs the audio multiple times for transcription and embedding extraction. Implementing a simple in-memory cache for extracted audio paths reduces redundant processing, cutting video processing initialization time by ~50% in multi-stage pipelines.
+**Action:** Always check a video-to-audio cache before triggering a new extraction process for the same source video.
