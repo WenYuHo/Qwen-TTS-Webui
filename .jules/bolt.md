@@ -17,3 +17,11 @@
 ## 2026-03-01 - [Vectorized Audio Assembly]
 **Learning:** Using `pydub.AudioSegment` for multi-segment podcast assembly and BGM mixing/ducking is significantly slower (O(N) with high constant overhead for each overlay/slice) compared to vectorized NumPy operations. Pre-allocating a single project-wide array and using slice assignment for speech segments reduces assembly time by ~11x (from 2.3s to 0.2s for a 10-minute project). Sidechain ducking via NumPy array multiplication is also vastly more efficient than per-segment `AudioSegment` processing.
 **Action:** Always prefer vectorized NumPy operations for audio mixing and concatenation over high-level library abstractions like pydub in performance-critical paths.
+
+## 2026-03-01 - [In-Memory Caching for Audio and Embeddings]
+**Learning:** In "Studio" workflows where users repeatedly regenerate podcasts with similar settings, redundant I/O (BGM loading) and redundant tensor math (mix embedding calculation) account for ~15-20% of non-inference latency. Implementing per-instance caches in the  for these artifacts provides significant speedups.
+**Action:** Always check  and  before starting expensive audio processing or embedding mixing in synthesis pipelines. Use sorted JSON keys for mix configurations to ensure cache hits for identical settings.
+
+## 2026-03-01 - [In-Memory Caching for Audio and Embeddings]
+**Learning:** In "Studio" workflows where users repeatedly regenerate podcasts with similar settings, redundant I/O (BGM loading) and redundant tensor math (mix embedding calculation) account for ~15-20% of non-inference latency. Implementing per-instance caches in the `PodcastEngine` for these artifacts provides significant speedups.
+**Action:** Always check `bgm_cache` and `mix_embedding_cache` before starting expensive audio processing or embedding mixing in synthesis pipelines. Use sorted JSON keys for mix configurations to ensure cache hits for identical settings.

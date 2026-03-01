@@ -22,6 +22,8 @@ class PodcastEngine:
         # Caches
         self.preset_embeddings = {}
         self.clone_embedding_cache = {}
+        self.mix_embedding_cache = {}
+        self.bgm_cache = {}
         self.prompt_cache = {}
 
         self._whisper_model = None # Lazy load
@@ -125,21 +127,23 @@ class PodcastEngine:
             return emb
         return None
 
-    def generate_segment(self, text: str, profile: Dict[str, Any], language: str = "auto") -> tuple:
+    def generate_segment(self, text: str, profile: Dict[str, Any], language: str = "auto", model: Optional[Any] = None) -> tuple:
         """Generates a single audio segment for a given speaker profile."""
         try:
             def get_model_wrapper(mtype):
                 return get_model(mtype)
 
             if profile["type"] == "preset":
-                model = get_model("CustomVoice")
+                if model is None:
+                    model = get_model("CustomVoice")
                 wavs, sr = model.generate_custom_voice(
                     text=text,
                     speaker=profile["value"], 
                     language=language
                 )
             elif profile["type"] == "design":
-                model = get_model("VoiceDesign")
+                if model is None:
+                    model = get_model("VoiceDesign")
                 wavs, sr = model.generate_voice_design(
                     text=text,
                     instruct=profile["value"],
@@ -152,14 +156,16 @@ class PodcastEngine:
                 if cache_key in self.prompt_cache:
                     logger.debug(f"Using cached prompt for {cache_key}")
                     prompt = self.prompt_cache[cache_key]
-                    model = get_model("Base")
+                    if model is None:
+                        model = get_model("Base")
                 else:
                     try:
                         resolved_paths = self._resolve_paths(profile["value"])
                     except FileNotFoundError as e:
                         raise RuntimeError(f"Cloning reference audio not found: {e}") from e
 
-                    model = get_model("Base")
+                    if model is None:
+                        model = get_model("Base")
                     if len(resolved_paths) > 1:
                         combined_wav = []
                         target_sr = 24000
@@ -188,7 +194,8 @@ class PodcastEngine:
                 mix_configs = json.loads(profile["value"])
                 mixed_emb = self._compute_mixed_embedding(mix_configs)
 
-                model = get_model("Base")
+                if model is None:
+                    model = get_model("Base")
                 voice_clone_prompt = {
                     "ref_spk_embedding": [mixed_emb],
                     "x_vector_only_mode": [True],
@@ -213,7 +220,13 @@ class PodcastEngine:
             raise RuntimeError(f"Synthesis failed: {str(e)}") from e
 
     def _compute_mixed_embedding(self, mix_configs: List[Dict[str, Any]]) -> torch.Tensor:
-        """Compute a weighted average of multiple speaker embeddings."""
+        """Compute a weighted average of multiple speaker embeddings with caching."""
+        # ⚡ Bolt: Cache mix results to avoid redundant tensor ops and model switches
+        # Sort by profile values to ensure identical mixes have the same key
+        cache_key = json.dumps(sorted(mix_configs, key=lambda x: str(x["profile"])), sort_keys=True)
+        if cache_key in self.mix_embedding_cache:
+            return self.mix_embedding_cache[cache_key]
+
         total_weight = sum(c["weight"] for c in mix_configs)
         if total_weight == 0:
             return None
@@ -226,6 +239,8 @@ class PodcastEngine:
                 mixed_emb = emb * weight
             else:
                 mixed_emb += emb * weight
+
+        self.mix_embedding_cache[cache_key] = mixed_emb
         return mixed_emb
 
     def generate_voice_changer(self, source_audio: str, target_profile: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -289,13 +304,15 @@ class PodcastEngine:
 
         for mtype, group in model_groups.items():
             logger.info(f"⚡ Bolt: Synthesizing group for model '{mtype}' ({len(group)} segments)")
+            # ⚡ Bolt: Fetch model once per group to reduce lock contention and redundant lookups
+            group_model = get_model(mtype)
             for i, item in group:
                 role = item["role"]
                 text = item["text"]
                 lang = item.get("language", "auto")
                 profile = profiles.get(role)
                 try:
-                    wav, sr = self.generate_segment(text, profile=profile, language=lang)
+                    wav, sr = self.generate_segment(text, profile=profile, language=lang, model=group_model)
                     waveforms[i] = wav
                     srs[i] = sr
                 except Exception as e:
@@ -359,14 +376,20 @@ class PodcastEngine:
                         bgm_file = bgm_full_path
 
                 if bgm_file:
-                    # Load BGM and ensure it matches the project sample rate
-                    # We use AudioSegment for loading due to its broad format support
-                    bgm_audio = AudioSegment.from_file(bgm_file).set_frame_rate(sample_rate).set_channels(1)
-                    # Convert to float32 NumPy array and normalize to [-1, 1]
-                    bgm_samples = np.array(bgm_audio.get_array_of_samples(), dtype=np.float32) / 32768.0
+                    # ⚡ Bolt: Cache processed BGM to avoid redundant loading/resampling/conversion
+                    bgm_cache_key = f"{bgm_file}:{sample_rate}"
+                    if bgm_cache_key in self.bgm_cache:
+                        bgm_samples = self.bgm_cache[bgm_cache_key].copy()
+                    else:
+                        # Load BGM and ensure it matches the project sample rate
+                        # We use AudioSegment for loading due to its broad format support
+                        bgm_audio = AudioSegment.from_file(bgm_file).set_frame_rate(sample_rate).set_channels(1)
+                        # Convert to float32 NumPy array and normalize to [-1, 1]
+                        bgm_samples = np.array(bgm_audio.get_array_of_samples(), dtype=np.float32) / 32768.0
 
-                    # Apply initial volume reduction (equivalent to -20dB in previous logic)
-                    bgm_samples *= 0.1
+                        # Apply initial volume reduction (equivalent to -20dB in previous logic)
+                        bgm_samples *= 0.1
+                        self.bgm_cache[bgm_cache_key] = bgm_samples.copy()
 
                     # Tile BGM to match final project duration
                     if len(bgm_samples) < final_length:
