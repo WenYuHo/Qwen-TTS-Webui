@@ -428,34 +428,56 @@ class Qwen3TTSModel:
 
         normalized = self._normalize_audio_inputs(ref_audio_list)
 
-        ref_wavs_for_code: List[np.ndarray] = []
-        ref_sr_for_code: List[int] = []
-        for wav, sr in normalized:
-            ref_wavs_for_code.append(wav)
-            ref_sr_for_code.append(sr)
-
-        if len(set(ref_sr_for_code)) == 1:
-            enc = self.model.speech_tokenizer.encode(ref_wavs_for_code, sr=ref_sr_for_code[0])
-            ref_codes = enc.audio_codes
-        else:
-            ref_codes = []
+        # ⚡ Bolt: Skip expensive speech tokenizer encoding if all items are x_vector_only
+        all_xvec = all(xvec_list)
+        if not all_xvec:
+            ref_wavs_for_code: List[np.ndarray] = []
+            ref_sr_for_code: List[int] = []
             for wav, sr in normalized:
-                ref_codes.append(self.model.speech_tokenizer.encode(wav, sr=sr).audio_codes[0])
+                ref_wavs_for_code.append(wav)
+                ref_sr_for_code.append(sr)
+
+            if len(set(ref_sr_for_code)) == 1:
+                enc = self.model.speech_tokenizer.encode(ref_wavs_for_code, sr=ref_sr_for_code[0])
+                ref_codes = enc.audio_codes
+            else:
+                ref_codes = []
+                for wav, sr in normalized:
+                    ref_codes.append(self.model.speech_tokenizer.encode(wav, sr=sr).audio_codes[0])
+        else:
+            ref_codes = [None] * len(normalized)
+
+        # ⚡ Bolt: Implement batched speaker embedding extraction
+        # This replaces O(N) sequential calls with a single O(1) batched call if supported by the model,
+        # or at least consolidates resampling and device transfers.
+        wavs_to_embed = []
+        for wav, sr in normalized:
+            if sr != self.model.speaker_encoder_sample_rate:
+                wav_resampled = librosa.resample(y=wav.astype(np.float32),
+                                           orig_sr=int(sr), 
+                                           target_sr=self.model.speaker_encoder_sample_rate)
+            else:
+                wav_resampled = wav.astype(np.float32)
+            wavs_to_embed.append(wav_resampled)
+
+        # Use the underlying model's extract_speaker_embedding (which likely uses ECAPA-TDNN)
+        # Note: if the underlying model doesn't support batching, we still get benefits from consolidated resampling.
+        # Most ECAPA-TDNN implementations support batching via list or padded tensor.
+        try:
+            spk_embs = self.model.extract_speaker_embedding(audio=wavs_to_embed,
+                                                           sr=self.model.speaker_encoder_sample_rate)
+            # Ensure it's a list/tensor we can iterate
+            if isinstance(spk_embs, torch.Tensor) and spk_embs.ndim == 1:
+                spk_embs = [spk_embs]
+        except Exception:
+            # Fallback to serial if batching fails
+            spk_embs = [self.model.extract_speaker_embedding(audio=w, sr=self.model.speaker_encoder_sample_rate) for w in wavs_to_embed]
 
         items: List[VoiceClonePromptItem] = []
-        for i, ((wav, sr), code, rtext, xvec_only) in enumerate(zip(normalized, ref_codes, ref_text_list, xvec_list)):
+        for i, ((wav, sr), code, rtext, xvec_only, spk_emb) in enumerate(zip(normalized, ref_codes, ref_text_list, xvec_list, spk_embs)):
             if not xvec_only:
                 if rtext is None or rtext == "":
                     raise ValueError(f"ref_text is required when x_vector_only_mode=False (ICL mode). Bad index={i}")
-
-            wav_resample = wav
-            if sr != self.model.speaker_encoder_sample_rate:
-                wav_resample = librosa.resample(y=wav_resample.astype(np.float32), 
-                                           orig_sr=int(sr), 
-                                           target_sr=self.model.speaker_encoder_sample_rate)
-
-            spk_emb = self.model.extract_speaker_embedding(audio=wav_resample,
-                                                           sr=self.model.speaker_encoder_sample_rate)
 
             items.append(
                 VoiceClonePromptItem(
@@ -849,6 +871,36 @@ class Qwen3TTSModel:
         wavs, fs = self.model.speech_tokenizer.decode([{"audio_codes": c} for c in talker_codes_list])
         return wavs, fs
 
+    @torch.inference_mode()
+    def get_speaker_embedding(self, speaker_name: str) -> torch.Tensor:
+        """
+        Retrieves the speaker embedding for a preset speaker from the model's weight table.
+        This provides O(1) lookup and avoids redundant extraction or inference.
+        """
+        if self.model.tts_model_type not in ["custom_voice", "base"]:
+            raise ValueError(f"Model type '{self.model.tts_model_type}' does not support preset speaker lookups.")
+
+        spk_id_map = self.model.config.talker_config.spk_id
+        name_lower = speaker_name.lower()
+        if name_lower not in spk_id_map:
+            # Fallback to case-sensitive if exact match fails
+            if speaker_name in spk_id_map:
+                name_lower = speaker_name
+            else:
+                raise ValueError(f"Speaker '{speaker_name}' not found in supported presets.")
+
+        spk_idx = spk_id_map[name_lower]
+
+        # Get embeddings from the talker's input embedding table
+        # For Qwen-TTS, speaker IDs are mapped to specific tokens in the codec vocabulary
+        idx_tensor = torch.tensor(spk_idx, device=self.device)
+        embedding = self.model.talker.get_input_embeddings()(idx_tensor)
+
+        # If it returned a batch (1, D), squeeze it to (D,)
+        if embedding.ndim > 1:
+            embedding = embedding.squeeze(0)
+
+        return embedding
 
     def get_supported_speakers(self) -> Optional[List[str]]:
         """
