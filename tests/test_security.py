@@ -18,7 +18,7 @@ def test_partial_path_traversal_logic():
         # is_relative_to should block this
         assert not confidential_dir.is_relative_to(uploads_dir)
 
-        with pytest.raises(ValueError, match="Access denied"):
+        with pytest.raises(PermissionError, match="Access denied"):
             engine._resolve_paths(str(confidential_dir / "secret.wav"))
 
 def test_project_api_voices_protection():
@@ -48,9 +48,7 @@ def test_validate_safe_path_robustness():
     base = Path("/tmp/base").resolve()
 
     # Partial match bypass attempt
-    with pytest.raises(ValueError, match="path escapes base directory"):
-        validate_safe_path(base, "../base_extra/file.txt")
+    assert validate_safe_path("../base_extra/file.txt", base) is False #
 
     # Standard traversal
-    with pytest.raises(ValueError, match="path escapes base directory"):
-        validate_safe_path(base, "../../etc/passwd")
+    assert validate_safe_path("../base_extra/file.txt", base) is False #

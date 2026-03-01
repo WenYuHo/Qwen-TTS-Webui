@@ -17,9 +17,9 @@ def test_index_html_contains_new_elements():
 def test_style_css_contains_new_styles():
     with open("src/static/style.css", "r") as f:
         content = f.read()
-    assert '.asset-card' in content
-    assert '.drag-over' in content
-    assert '.task-item' in content
+    assert ".brutalist-overlay" in content
+    assert ".nav-item.active" in content
+    assert "font-family: var(--font-display)" in content
 
 def test_app_js_contains_new_functions():
     with open("src/static/app.js", "r") as f:
