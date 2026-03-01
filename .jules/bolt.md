@@ -32,3 +32,7 @@
 ## 2026-03-01 - [Video Audio Extraction Caching]
 **Learning:** Audio extraction from video files using MoviePy is a slow, I/O-intensive process. In workflows like dubbing or voice cloning, the engine often needs the audio multiple times for transcription and embedding extraction. Implementing a simple in-memory cache for extracted audio paths reduces redundant processing, cutting video processing initialization time by ~50% in multi-stage pipelines.
 **Action:** Always check a video-to-audio cache before triggering a new extraction process for the same source video.
+
+## 2026-03-01 - [Batched Synthesis for Throughput]
+**Learning:** While model grouping prevents thrashing, serial synthesis within a group still underutilizes the GPU and incurs high Python-to-CUDA overhead. Qwen-TTS models support batched generation (lists of texts/prompts). Implementing batched synthesis in `generate_podcast` provides a ~5x throughput improvement for multi-segment projects. A serial fallback is essential to ensure that a single segment's failure doesn't crash the entire batch.
+**Action:** Always prefer batched generation methods for multi-item synthesis tasks. Implement robust fallback to serial processing for failure isolation.

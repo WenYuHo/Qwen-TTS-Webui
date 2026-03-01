@@ -11,6 +11,7 @@ from typing import List, Dict, Any, Optional
 from pydub import AudioSegment
 from deep_translator import GoogleTranslator
 
+from .qwen_tts.inference.qwen3_tts_model import VoiceClonePromptItem
 from .model_loader import get_model
 from .config import BASE_DIR, logger
 from .video_engine import VideoEngine
@@ -118,7 +119,7 @@ class PodcastEngine:
             name = profile["value"].lower()
             if name in self.preset_embeddings:
                 return self.preset_embeddings[name]
-        elif profile["type"] == "clone":
+        elif profile.get("type") == "clone":
             if profile["value"] in self.clone_embedding_cache:
                 return self.clone_embedding_cache[profile["value"]]
 
@@ -128,7 +129,7 @@ class PodcastEngine:
             emb = model.get_speaker_embedding(profile["value"])
             self.preset_embeddings[profile["value"].lower()] = emb
             return emb
-        elif profile["type"] == "clone":
+        elif profile.get("type") == "clone":
             resolved = self._resolve_paths(profile["value"])
             # Handle Video for cloning if needed
             clone_path = str(resolved[0])
@@ -164,7 +165,7 @@ class PodcastEngine:
                     language=language,
                     non_streaming_mode=True
                 )
-            elif profile["type"] == "clone":
+            elif profile.get("type") == "clone":
                 cache_key = profile["value"]
 
                 if cache_key in self.prompt_cache:
@@ -204,7 +205,7 @@ class PodcastEngine:
                     language=language,
                     voice_clone_prompt=prompt,
                 )
-            elif profile["type"] == "mix":
+            elif profile.get("type") == "mix":
                 mix_configs = json.loads(profile["value"])
                 mixed_emb = self._compute_mixed_embedding(mix_configs)
 
@@ -317,20 +318,100 @@ class PodcastEngine:
         srs = [None] * len(script)
 
         for mtype, group in model_groups.items():
-            logger.info(f"⚡ Bolt: Synthesizing group for model '{mtype}' ({len(group)} segments)")
+            logger.info(f"⚡ Bolt: Batched synthesis for model '{mtype}' ({len(group)} segments)")
             # ⚡ Bolt: Fetch model once per group to reduce lock contention and redundant lookups
             group_model = get_model(mtype)
+
+            # Collect batch parameters
+            batch_texts = []
+            batch_langs = []
+            batch_indices = []
+
+            # Model-specific collections
+            batch_speakers = []    # CustomVoice
+            batch_instructs = []   # VoiceDesign
+            batch_prompts = []     # Base (Clone/Mix)
+
             for i, item in group:
                 role = item["role"]
-                text = item["text"]
-                lang = item.get("language", "auto")
-                profile = profiles.get(role)
-                try:
-                    wav, sr = self.generate_segment(text, profile=profile, language=lang, model=group_model)
-                    waveforms[i] = wav
-                    srs[i] = sr
-                except Exception as e:
-                    logger.error(f"Error generating segment {i} for {role}: {e}")
+                profile = profiles.get(role, {"type": "preset", "value": "Ryan"})
+                batch_texts.append(item["text"])
+                batch_langs.append(item.get("language", "auto"))
+                batch_indices.append(i)
+
+                if mtype == "CustomVoice":
+                    batch_speakers.append(profile["value"])
+                elif mtype == "VoiceDesign":
+                    batch_instructs.append(profile["value"])
+                elif mtype == "Base":
+                    # Handle Clone vs Mix for Base model
+                    if profile.get("type") == "clone":
+                        cache_key = profile["value"]
+                        if cache_key in self.prompt_cache:
+                            batch_prompts.append(self.prompt_cache[cache_key][0])
+                        else:
+                            # Extraction needed (similar to generate_segment logic)
+                            resolved = self._resolve_paths(profile["value"])
+                            ref_audio = str(resolved[0])
+                            if VideoEngine.is_video(ref_audio):
+                                ref_audio = self._extract_audio_with_cache(ref_audio)
+
+                            prompt = group_model.create_voice_clone_prompt(ref_audio=ref_audio, x_vector_only_mode=True)
+                            self.prompt_cache[cache_key] = prompt
+                            batch_prompts.append(prompt[0])
+                    elif profile.get("type") == "mix":
+                        mix_configs = json.loads(profile["value"])
+                        mixed_emb = self._compute_mixed_embedding(mix_configs)
+                        # Create prompt item manually for Mix
+                        batch_prompts.append(VoiceClonePromptItem(
+                            ref_code=None,
+                            ref_spk_embedding=mixed_emb,
+                            x_vector_only_mode=True,
+                            icl_mode=False,
+                            ref_text=None
+                        ))
+
+            try:
+                # Execute batch synthesis
+                if mtype == "CustomVoice":
+                    batch_wavs, sr = group_model.generate_custom_voice(
+                        text=batch_texts,
+                        speaker=batch_speakers,
+                        language=batch_langs
+                    )
+                elif mtype == "VoiceDesign":
+                    batch_wavs, sr = group_model.generate_voice_design(
+                        text=batch_texts,
+                        instruct=batch_instructs,
+                        language=batch_langs,
+                        non_streaming_mode=True
+                    )
+                elif mtype == "Base":
+                    batch_wavs, sr = group_model.generate_voice_clone(
+                        text=batch_texts,
+                        language=batch_langs,
+                        voice_clone_prompt=batch_prompts
+                    )
+                else:
+                    raise ValueError(f"Batching not implemented for model type: {mtype}")
+
+                # Map results back
+                for j, wav in enumerate(batch_wavs):
+                    idx = batch_indices[j]
+                    waveforms[idx] = wav
+                    srs[idx] = sr
+
+            except Exception as e:
+                logger.error(f"⚡ Bolt: Batch synthesis failed for model '{mtype}': {e}", exc_info=True)
+                # Fallback to serial generation if batching fails (safety first)
+                for i, item in group:
+                    if waveforms[i] is not None: continue
+                    try:
+                        wav, sr = self.generate_segment(item["text"], profile=profiles.get(item["role"]), language=item.get("language", "auto"), model=group_model)
+                        waveforms[i] = wav
+                        srs[i] = sr
+                    except Exception as inner_e:
+                        logger.error(f"Serial fallback failed for segment {i}: {inner_e}")
 
         # 3. Assemble chronological mix using vectorized NumPy operations
         # ⚡ Bolt: Vectorized assembly is ~10-100x faster than AudioSegment overlay for large projects
