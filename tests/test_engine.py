@@ -18,7 +18,11 @@ def mock_model_loader():
         mock_model.generate_voice_clone.return_value = ([np.zeros(24000)], 24000)
         mock_model.create_voice_clone_prompt.return_value = [MagicMock()]
         mock_get.return_value = mock_model
-        yield mock_model
+
+        # Mock load_model directly to avoid FileNotFoundError
+        with patch("backend.model_loader.manager.load_model") as mock_load:
+            mock_load.return_value = mock_model
+            yield mock_model
 
 def test_engine_initialization():
     engine = PodcastEngine()
