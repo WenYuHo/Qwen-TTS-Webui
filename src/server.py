@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pathlib import Path
 
-from backend.api import voices, generation, projects, tasks, models
+from backend.api import voices, generation, projects, tasks, models, assets
 from backend import server_state
 from backend.config import logger
 
@@ -25,6 +25,7 @@ app.include_router(generation.router)
 app.include_router(projects.router)
 app.include_router(tasks.router)
 app.include_router(models.router)
+app.include_router(assets.router)
 
 # Health check
 @app.get("/api/health")

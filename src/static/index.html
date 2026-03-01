@@ -26,6 +26,9 @@
                     <i class="fas fa-language" aria-hidden="true"></i> Dubbing & S2S
                 </button>
                 <button class="nav-item" onclick="switchView('system')" aria-pressed="false">
+                <button class="nav-item" onclick="switchView('assets')" aria-pressed="false">
+                    <i class="fas fa-folder-open" aria-hidden="true"></i> Asset Library
+                </button>
                     <i class="fas fa-microchip" aria-hidden="true"></i> System
                 </button>
             </nav>
@@ -147,6 +150,26 @@
                 </div>
             </div>
 
+
+            <!-- View: Asset Library -->
+            <div id="assets-view" class="view-container">
+                <div class="view-header">
+                    <div class="view-title">
+                        <h1 tabindex="-1">Shared Asset Library</h1>
+                        <p>Manage background music and sound effects for the team.</p>
+                    </div>
+                    <div>
+                        <input type="file" id="asset-upload-input" style="display:none" onchange="uploadAsset(this)">
+                        <button class="btn btn-primary" onclick="document.getElementById('asset-upload-input').click()">
+                            <i class="fas fa-upload"></i> Upload Asset
+                        </button>
+                    </div>
+                </div>
+                <div id="asset-library-grid" class="grid-2" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+                    <!-- Assets will be listed here -->
+                </div>
+            </div>
+
             <!-- View: Project Studio -->
             <div id="projects-view" class="view-container">
                 <div class="view-header">
@@ -159,6 +182,7 @@
                             <option value="">(New Project)</option>
                         </select>
                         <button class="btn btn-secondary btn-sm" onclick="loadProject()"><i class="fas fa-folder-open"></i> Load</button>
+                        <button class="btn btn-secondary btn-sm" onclick="exportStudioBundle()"><i class="fas fa-file-archive"></i> Export Bundle</button>
                         <button class="btn btn-primary btn-sm" onclick="saveProject()"><i class="fas fa-save"></i> Save</button>
                     </div>
                 </div>
@@ -200,6 +224,15 @@ Bob: Hi Alice, how are you today?"></textarea>
                             </select>
                         </div>
 
+                        <div class="control-group">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <label class="label" for="ducking-range">Auto-Ducking</label>
+                                <span id="ducking-val" style="font-size:0.8rem; opacity:0.7;">0%</span>
+                            </div>
+                            <input type="range" id="ducking-range" min="0" max="100" value="0" style="width:100%" oninput="document.getElementById('ducking-val').innerText = this.value + '%' ">
+                        </div>
+
+
                         <button class="btn btn-primary" style="width:100%; padding:20px;" onclick="generatePodcast()">
                             <i class="fas fa-microphone"></i> PRODUCE FINAL
                         </button>
@@ -207,6 +240,19 @@ Bob: Hi Alice, how are you today?"></textarea>
                         <button class="btn btn-secondary btn-sm" style="width:100%; margin-top:12px;" onclick="batchSynthesize()">
                             Synthesize All Blocks
                         </button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <h2 style="font-size: 1.1rem;">Live Task Monitor</h2>
+                            <button class="btn btn-secondary btn-sm" onclick="clearCompletedTasks()" style="padding: 4px 8px; font-size: 0.7rem;"><i class="fas fa-broom"></i> Clear Finished</button>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="refreshTasks()"><i class="fas fa-sync"></i> Refresh</button>
+                    </div>
+                    <div id="task-monitor-list" style="display:flex; flex-direction:column; gap:12px;">
+                        <div class="card" style="border-style:dashed; opacity:0.6; text-align:center;">No active tasks</div>
                     </div>
                 </div>
             </div>
@@ -238,6 +284,15 @@ Bob: Hi Alice, how are you today?"></textarea>
                                 <option value="es">Spanish</option>
                             </select>
                         </div>
+
+                        <div class="control-group">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <label class="label" for="ducking-range">Auto-Ducking</label>
+                                <span id="ducking-val" style="font-size:0.8rem; opacity:0.7;">0%</span>
+                            </div>
+                            <input type="range" id="ducking-range" min="0" max="100" value="0" style="width:100%" oninput="document.getElementById('ducking-val').innerText = this.value + '%' ">
+                        </div>
+
                         <button class="btn btn-primary" style="width:100%" onclick="startDubbing()">
                             <i class="fas fa-magic"></i> Start Dubbing
                         </button>
@@ -255,6 +310,15 @@ Bob: Hi Alice, how are you today?"></textarea>
                             <label class="label" for="s2s-target-voice">Target Voice</label>
                             <select id="s2s-target-voice" class="btn btn-secondary btn-sm" style="width:100%"></select>
                         </div>
+
+                        <div class="control-group">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <label class="label" for="ducking-range">Auto-Ducking</label>
+                                <span id="ducking-val" style="font-size:0.8rem; opacity:0.7;">0%</span>
+                            </div>
+                            <input type="range" id="ducking-range" min="0" max="100" value="0" style="width:100%" oninput="document.getElementById('ducking-val').innerText = this.value + '%' ">
+                        </div>
+
                         <div class="control-group">
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                                 <input type="checkbox" id="s2s-preserve" checked>
@@ -264,6 +328,19 @@ Bob: Hi Alice, how are you today?"></textarea>
                         <button class="btn btn-primary" style="width:100%" onclick="startVoiceChanger()">
                             <i class="fas fa-arrows-rotate"></i> Change Voice
                         </button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <h2 style="font-size: 1.1rem;">Live Task Monitor</h2>
+                            <button class="btn btn-secondary btn-sm" onclick="clearCompletedTasks()" style="padding: 4px 8px; font-size: 0.7rem;"><i class="fas fa-broom"></i> Clear Finished</button>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="refreshTasks()"><i class="fas fa-sync"></i> Refresh</button>
+                    </div>
+                    <div id="task-monitor-list" style="display:flex; flex-direction:column; gap:12px;">
+                        <div class="card" style="border-style:dashed; opacity:0.6; text-align:center;">No active tasks</div>
                     </div>
                 </div>
             </div>
@@ -290,6 +367,19 @@ Bob: Hi Alice, how are you today?"></textarea>
                         <div id="system-stats" style="color:var(--text-secondary); font-size:0.9rem;">
                             Loading system stats...
                         </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <h2 style="font-size: 1.1rem;">Live Task Monitor</h2>
+                            <button class="btn btn-secondary btn-sm" onclick="clearCompletedTasks()" style="padding: 4px 8px; font-size: 0.7rem;"><i class="fas fa-broom"></i> Clear Finished</button>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="refreshTasks()"><i class="fas fa-sync"></i> Refresh</button>
+                    </div>
+                    <div id="task-monitor-list" style="display:flex; flex-direction:column; gap:12px;">
+                        <div class="card" style="border-style:dashed; opacity:0.6; text-align:center;">No active tasks</div>
                     </div>
                 </div>
             </div>
