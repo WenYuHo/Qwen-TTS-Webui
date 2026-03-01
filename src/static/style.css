@@ -451,6 +451,15 @@ input[type="range"]::-webkit-slider-thumb {
     margin-bottom: 24px;
 }
 
+.empty-state-grid {
+    grid-column: 1 / -1;
+}
+
+#assets-view.drag-over {
+    border: 4px dashed var(--accent);
+    background: rgba(204, 255, 0, 0.05);
+}
+
 /* Glitch Effect on Hover for primary stuff */
 @keyframes glitch {
     0% { transform: translate(0); }
