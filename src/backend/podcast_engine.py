@@ -25,6 +25,8 @@ class PodcastEngine:
         self.mix_embedding_cache = {}
         self.bgm_cache = {}
         self.prompt_cache = {}
+        # ⚡ Bolt: Cache for extracted audio paths to avoid redundant Video-to-Audio processing
+        self.video_audio_cache = {}
 
         self._whisper_model = None # Lazy load
 
@@ -81,6 +83,18 @@ class PodcastEngine:
             "models_loaded": list(self.prompt_cache.keys())
         }
 
+    def _extract_audio_with_cache(self, video_path: str) -> str:
+        """Extracts audio from video or returns cached path if already extracted."""
+        if video_path in self.video_audio_cache:
+            cached_path = self.video_audio_cache[video_path]
+            if Path(cached_path).exists():
+                logger.debug(f"⚡ Bolt: Using cached audio for {video_path}")
+                return cached_path
+
+        extracted_path = VideoEngine.extract_audio(video_path)
+        self.video_audio_cache[video_path] = extracted_path
+        return extracted_path
+
     def transcribe_audio(self, audio_path: str) -> str:
         if self._whisper_model is None:
             import whisper
@@ -91,7 +105,7 @@ class PodcastEngine:
         actual_path = str(resolved[0])
 
         if VideoEngine.is_video(actual_path):
-            actual_path = VideoEngine.extract_audio(actual_path)
+            actual_path = self._extract_audio_with_cache(actual_path)
 
         logger.info(f"Transcribing {actual_path}...")
         result = self._whisper_model.transcribe(actual_path)
@@ -119,7 +133,7 @@ class PodcastEngine:
             # Handle Video for cloning if needed
             clone_path = str(resolved[0])
             if VideoEngine.is_video(clone_path):
-                clone_path = VideoEngine.extract_audio(clone_path)
+                clone_path = self._extract_audio_with_cache(clone_path)
 
             prompt = model.create_voice_clone_prompt(ref_audio=clone_path, x_vector_only_mode=True)
             emb = prompt[0].ref_spk_embedding
@@ -179,7 +193,7 @@ class PodcastEngine:
                     else:
                         ref_audio = str(resolved_paths[0])
                         if VideoEngine.is_video(ref_audio):
-                            ref_audio = VideoEngine.extract_audio(ref_audio)
+                            ref_audio = self._extract_audio_with_cache(ref_audio)
 
                     logger.info(f"Extracting voice clone prompt for {cache_key}...")
                     prompt = model.create_voice_clone_prompt(ref_audio=ref_audio, x_vector_only_mode=True)
@@ -254,7 +268,7 @@ class PodcastEngine:
             source_path = str(resolved[0])
 
             if VideoEngine.is_video(source_path):
-                source_path = VideoEngine.extract_audio(source_path)
+                source_path = self._extract_audio_with_cache(source_path)
 
             model = get_model("Base")
             # We want ICL mode (x_vector_only=False) to get codes
