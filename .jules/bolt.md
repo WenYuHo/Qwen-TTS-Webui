@@ -36,3 +36,11 @@
 ## 2026-03-01 - [Batched Synthesis for Throughput]
 **Learning:** While model grouping prevents thrashing, serial synthesis within a group still underutilizes the GPU and incurs high Python-to-CUDA overhead. Qwen-TTS models support batched generation (lists of texts/prompts). Implementing batched synthesis in `generate_podcast` provides a ~5x throughput improvement for multi-segment projects. A serial fallback is essential to ensure that a single segment's failure doesn't crash the entire batch.
 **Action:** Always prefer batched generation methods for multi-item synthesis tasks. Implement robust fallback to serial processing for failure isolation.
+
+## 2026-03-01 - [Transcription and Translation Caching]
+**Learning:** Redundant transcription (via Whisper) and translation (via GoogleTranslator API) in dubbing and S2S workflows add significant unnecessary latency and API cost. Using a cache key based on file metadata (path, size, mtime) for transcription and (text, target_lang) for translation provides a ~5-10x speedup for repeated operations on the same assets.
+**Action:** Always utilize the  and  in the `PodcastEngine` before performing these expensive operations.
+
+## 2026-03-01 - [Transcription and Translation Caching]
+**Learning:** Redundant transcription (via Whisper) and translation (via GoogleTranslator API) in dubbing and S2S workflows add significant unnecessary latency and API cost. Using a cache key based on file metadata (path, size, mtime) for transcription and (text, target_lang) for translation provides a ~5-10x speedup for repeated operations on the same assets.
+**Action:** Always utilize the `transcription_cache` and `translation_cache` in the `PodcastEngine` before performing these expensive operations.

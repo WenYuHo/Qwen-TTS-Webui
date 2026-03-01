@@ -27,6 +27,9 @@ class PodcastEngine:
         self.bgm_cache = {}
         self.prompt_cache = {}
         # ⚡ Bolt: Cache for extracted audio paths to avoid redundant Video-to-Audio processing
+        # ⚡ Bolt: Caches for transcription and translation to avoid redundant processing
+        self.transcription_cache = {}
+        self.translation_cache = {}
         self.video_audio_cache = {}
 
         self._whisper_model = None # Lazy load
@@ -97,21 +100,37 @@ class PodcastEngine:
         return extracted_path
 
     def transcribe_audio(self, audio_path: str) -> str:
-        if self._whisper_model is None:
-            import whisper
-            logger.info("Loading Whisper model...")
-            self._whisper_model = whisper.load_model("base")
-
         resolved = self._resolve_paths(audio_path)
         actual_path = str(resolved[0])
 
         if VideoEngine.is_video(actual_path):
             actual_path = self._extract_audio_with_cache(actual_path)
 
+        # ⚡ Bolt: Cache transcription based on file path, size, and mtime to avoid redundant Whisper runs
+        try:
+            path_obj = Path(actual_path)
+            if path_obj.exists():
+                stat = path_obj.stat()
+                cache_key = f"{actual_path}:{stat.st_size}:{stat.st_mtime}"
+                if cache_key in self.transcription_cache:
+                    logger.debug(f"⚡ Bolt: Using cached transcription for {actual_path}")
+                    return self.transcription_cache[cache_key]
+            else:
+                cache_key = None
+        except Exception:
+            cache_key = None
+
+        if self._whisper_model is None:
+            import whisper
+            logger.info("Loading Whisper model...")
+            self._whisper_model = whisper.load_model("base")
+
         logger.info(f"Transcribing {actual_path}...")
         result = self._whisper_model.transcribe(actual_path)
-        return result["text"]
-
+        text = result["text"]
+        if cache_key:
+            self.transcription_cache[cache_key] = text
+        return text
     def get_speaker_embedding(self, profile: Dict[str, str]) -> torch.Tensor:
         """Extract speaker embedding for any profile."""
         # Check caches first to avoid expensive extraction and model switches
@@ -521,10 +540,17 @@ class PodcastEngine:
             # 1. Transcribe (Handles Video automatically)
             text = self.transcribe_audio(audio_path)
 
-            # 2. Translate
-            logger.info(f"Translating to {target_lang}...")
+            # 2. Translate with caching
+            # ⚡ Bolt: Cache translation to avoid redundant API calls to Google Translator
             trans_lang = 'zh-CN' if target_lang == 'zh' else target_lang
-            translated_text = GoogleTranslator(source='auto', target=trans_lang).translate(text)
+            trans_cache_key = f"{text}:{trans_lang}"
+            if trans_cache_key in self.translation_cache:
+                logger.debug(f"⚡ Bolt: Using cached translation for {target_lang}")
+                translated_text = self.translation_cache[trans_cache_key]
+            else:
+                logger.info(f"Translating to {target_lang}...")
+                translated_text = GoogleTranslator(source='auto', target=trans_lang).translate(text)
+                self.translation_cache[trans_cache_key] = translated_text
             logger.info(f"Translated: {translated_text[:50]}...")
 
             # 3. Clone original voice for synthesis (Handles Video automatically)
