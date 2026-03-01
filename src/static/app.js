@@ -130,7 +130,7 @@ function pollTask(taskId) {
 async function loadAssets() {
     const grid = document.getElementById('asset-library-grid');
     if (!grid) return;
-    grid.innerHTML = '<div class="empty-state empty-state-grid"><h3>Loading assets...</h3></div>';
+    grid.innerHTML = '<div class="empty-state empty-state-grid"><h3><i class="fas fa-spinner fa-spin"></i> Loading assets...</h3></div>';
 
     try {
         const resp = await fetch('/api/assets/');
@@ -158,8 +158,8 @@ async function loadAssets() {
                         <span style="font-size:0.8rem; color:var(--text-secondary);">${(asset.size / 1024 / 1024).toFixed(2)} MB</span>
                     </div>
                     <div style="display:flex; gap:8px;">
-                        ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}')" title="Play"><i class="fas fa-play"></i></button>` : ''}
-                        <button class="btn btn-danger btn-sm" onclick="deleteAsset('${asset.name}')" title="Delete"><i class="fas fa-trash"></i></button>
+                        ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}')" title="Play" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
+                        <button class="btn btn-danger btn-sm" onclick="deleteAsset('${asset.name}')" title="Delete" aria-label="Delete ${asset.name}"><i class="fas fa-trash" aria-hidden="true"></i></button>
                     </div>
                 </div>
             `;
@@ -234,19 +234,16 @@ function playAsset(name) {
 // --- Task Monitor ---
 
 async function refreshTasks() {
-    const grid = document.getElementById('task-monitor-list');
-    if (!grid) return;
+    const grids = document.querySelectorAll('.js-task-monitor-list');
+    if (grids.length === 0) return;
 
     try {
         const resp = await fetch('/api/tasks/');
         const tasks = await resp.json();
 
-        if (tasks.length === 0) {
-            grid.innerHTML = '<div class="card" style="border-style:dashed; opacity:0.6; text-align:center;">No active tasks</div>';
-            return;
-        }
-
-        grid.innerHTML = tasks.sort((a,b) => b.created_at - a.created_at).map(task => `
+        const content = tasks.length === 0
+            ? '<div class="card" style="border-style:dashed; opacity:0.6; text-align:center;">No active tasks</div>'
+            : tasks.sort((a,b) => b.created_at - a.created_at).map(task => `
             <div class="card task-item" style="border-left: 4px solid ${getTaskColor(task.status)};">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
                     <div>
@@ -256,13 +253,13 @@ async function refreshTasks() {
                         </div>
                         <div style="font-size:0.75rem; color:var(--text-secondary);">ID: ${task.id.split('-')[0]}... • ${new Date(task.created_at * 1000).toLocaleTimeString()}</div>
                     </div>
-                    <button class="btn btn-danger btn-sm" onclick="cancelTask('${task.id}')" ${['completed', 'failed', 'cancelled'].includes(task.status) ? 'disabled' : ''} style="padding: 4px 8px; font-size: 0.7rem;">
-                        <i class="fas fa-times"></i> Cancel
+                    <button class="btn btn-danger btn-sm" onclick="cancelTask('${task.id}')" ${['completed', 'failed', 'cancelled'].includes(task.status) ? 'disabled' : ''} style="padding: 4px 8px; font-size: 0.7rem;" aria-label="Cancel task">
+                        <i class="fas fa-times" aria-hidden="true"></i> Cancel
                     </button>
                 </div>
 
-                <div class="progress-bar-container" style="height:6px; margin-bottom:8px;">
-                    <div class="progress-bar-fill" style="width:${task.progress}%;"></div>
+                <div class="progress-bar-container" style="height:6px; margin-bottom:8px;" aria-label="Progress bar">
+                    <div class="progress-bar-fill" style="width:${task.progress}%;" aria-valuenow="${task.progress}" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
 
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -271,6 +268,8 @@ async function refreshTasks() {
                 </div>
             </div>
         `).join('');
+
+        grids.forEach(grid => { grid.innerHTML = content; });
     } catch (err) { console.error("Failed to load tasks", err); }
 }
 
@@ -294,7 +293,7 @@ async function cancelTask(id) {
 }
 
 setInterval(() => {
-    if (state.currentView === 'system') refreshTasks();
+    if (['projects', 'dubbing', 'system'].includes(state.currentView)) refreshTasks();
 }, 5000);
 
 // --- Project Studio Features ---
