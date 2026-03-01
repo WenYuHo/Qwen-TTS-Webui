@@ -100,6 +100,7 @@ class PodcastEngine:
         return extracted_path
 
     def transcribe_audio(self, audio_path: str) -> str:
+        """Transcribe audio or video file with caching."""
         resolved = self._resolve_paths(audio_path)
         actual_path = str(resolved[0])
 
@@ -131,28 +132,33 @@ class PodcastEngine:
         if cache_key:
             self.transcription_cache[cache_key] = text
         return text
-    def get_speaker_embedding(self, profile: Dict[str, str]) -> torch.Tensor:
-        """Extract speaker embedding for any profile."""
+    def get_speaker_embedding(self, profile: Dict[str, str], model: Optional[Any] = None) -> torch.Tensor:
+        """Extract speaker embedding for any profile, with optional pre-loaded model."""
         # ⚡ Bolt: Check caches first to avoid expensive extraction and model switches
         # Unified cache check: prompt_cache and clone_embedding_cache should be in sync
-        if profile["type"] == "preset":
+        ptype = profile.get("type")
+        if ptype == "preset":
             name = profile["value"].lower()
             if name in self.preset_embeddings:
                 return self.preset_embeddings[name]
-        elif profile.get("type") == "clone":
+        elif ptype == "clone":
             cache_key = profile["value"]
             if cache_key in self.prompt_cache:
                 return self.prompt_cache[cache_key][0].ref_spk_embedding
             if cache_key in self.clone_embedding_cache:
                 return self.clone_embedding_cache[cache_key]
 
-        model = get_model("Base")
+        # ⚡ Bolt: Reuse passed model to avoid redundant ModelManager lookups
+        if model is None:
+            # Preset lookups are fast even on CustomVoice model; Clones need Base model
+            mtype = "Base" if ptype == "clone" else "CustomVoice"
+            model = get_model(mtype)
 
-        if profile["type"] == "preset":
+        if ptype == "preset":
             emb = model.get_speaker_embedding(profile["value"])
             self.preset_embeddings[profile["value"].lower()] = emb
             return emb
-        elif profile.get("type") == "clone":
+        elif ptype == "clone":
             cache_key = profile["value"]
             resolved = self._resolve_paths(cache_key)
             # Handle Video for cloning if needed
@@ -271,8 +277,8 @@ class PodcastEngine:
             logger.error(f"Synthesis failed: {e}", exc_info=True)
             raise RuntimeError(f"Synthesis failed: {str(e)}") from e
 
-    def _compute_mixed_embedding(self, mix_configs: List[Dict[str, Any]]) -> torch.Tensor:
-        """Compute a weighted average of multiple speaker embeddings with caching."""
+    def _compute_mixed_embedding(self, mix_configs: List[Dict[str, Any]], model: Optional[Any] = None) -> torch.Tensor:
+        """Compute a weighted average of multiple speaker embeddings with caching and optional model reuse."""
         # ⚡ Bolt: Cache mix results to avoid redundant tensor ops and model switches
         # Sort by profile values to ensure identical mixes have the same key
         cache_key = json.dumps(sorted(mix_configs, key=lambda x: str(x["profile"])), sort_keys=True)
@@ -285,7 +291,8 @@ class PodcastEngine:
 
         mixed_emb = None
         for config in mix_configs:
-            emb = self.get_speaker_embedding(config["profile"])
+            # ⚡ Bolt: Pass model down to avoid redundant lookups
+            emb = self.get_speaker_embedding(config["profile"], model=model)
             weight = config["weight"] / total_weight
             if mixed_emb is None:
                 mixed_emb = emb * weight
@@ -342,13 +349,62 @@ class PodcastEngine:
 
         # 1. Pre-map indices to model types for grouping to prevent model thrashing
         model_groups = {} # model_type -> list of (index, item)
+        clones_to_extract = {} # cache_key -> profile (for Base model batch extraction)
+
         for i, item in enumerate(script):
             role = item["role"]
             profile = profiles.get(role, {"type": "preset", "value": "Ryan"})
+            ptype = profile.get("type")
             mtype = self._get_model_type_for_profile(profile)
+
             if mtype not in model_groups:
                 model_groups[mtype] = []
             model_groups[mtype].append((i, item))
+
+            # ⚡ Bolt: Identify missing cloned voices for batched extraction later
+            if ptype == "clone":
+                cache_key = profile["value"]
+                if cache_key not in self.prompt_cache:
+                    clones_to_extract[cache_key] = profile
+            elif ptype == "mix":
+                # For mixed voices, we might need to extract component clones
+                mix_configs = json.loads(profile["value"])
+                for config in mix_configs:
+                    sub_profile = config["profile"]
+                    if sub_profile.get("type") == "clone":
+                        sub_cache_key = sub_profile["value"]
+                        if sub_cache_key not in self.prompt_cache:
+                            clones_to_extract[sub_cache_key] = sub_profile
+
+        # ⚡ Bolt: Perform batched voice clone prompt extraction for all unique missing clones
+        # This leverages the optimized batched extraction in Qwen3TTSModel
+        if clones_to_extract:
+            logger.info(f"⚡ Bolt: Batched prompt extraction for {len(clones_to_extract)} unique clones")
+            base_model = get_model("Base")
+
+            ref_audios = []
+            cache_keys = []
+
+            for cache_key, profile in clones_to_extract.items():
+                resolved = self._resolve_paths(profile["value"])
+                ref_audio = str(resolved[0])
+                if VideoEngine.is_video(ref_audio):
+                    ref_audio = self._extract_audio_with_cache(ref_audio)
+
+                # Note: We don't handle multi-path pro-cloning in the batch extraction yet for simplicity
+                # but single-path (most common) is fully batched.
+                ref_audios.append(ref_audio)
+                cache_keys.append(cache_key)
+
+            try:
+                # Optimized batched call
+                prompts = base_model.create_voice_clone_prompt(ref_audio=ref_audios, x_vector_only_mode=True)
+                for cache_key, prompt in zip(cache_keys, prompts):
+                    self.prompt_cache[cache_key] = [prompt]
+                    # Also sync embedding cache
+                    self.clone_embedding_cache[cache_key] = prompt.ref_spk_embedding
+            except Exception as e:
+                logger.error(f"⚡ Bolt: Batched extraction failed, will fallback to individual: {e}")
 
         # 2. Batch synthesis by model type to minimize switches
         waveforms = [None] * len(script)
@@ -383,11 +439,13 @@ class PodcastEngine:
                 elif mtype == "Base":
                     # ⚡ Bolt: Use unified prompt cache for both Clone and Mix in batch mode
                     ptype = profile.get("type")
-                    cache_key = profile["value"] if ptype == "clone" else f"mix:{profile['value']}"
+                    val = profile.get("value")
+                    cache_key = val if ptype == "clone" else f"mix:{val}"
 
-                    if cache_key in self.prompt_cache:
+                    if val is not None and cache_key in self.prompt_cache:
                         batch_prompts.append(self.prompt_cache[cache_key][0])
                     else:
+                        # Should mostly be handled by the pre-extraction step now, but fallback provided
                         if ptype == "clone":
                             # Extraction needed (similar to generate_segment logic)
                             resolved = self._resolve_paths(profile["value"])
@@ -395,13 +453,14 @@ class PodcastEngine:
                             if VideoEngine.is_video(ref_audio):
                                 ref_audio = self._extract_audio_with_cache(ref_audio)
 
-                            logger.info(f"⚡ Bolt: Extracting voice clone prompt for {cache_key} (via batch)")
+                            logger.info(f"⚡ Bolt: Individual extraction for {cache_key} (batch synthesis fallback)")
                             prompt = group_model.create_voice_clone_prompt(ref_audio=ref_audio, x_vector_only_mode=True)
                             self.prompt_cache[cache_key] = prompt
                             batch_prompts.append(prompt[0])
                         elif ptype == "mix":
                             mix_configs = json.loads(profile["value"])
-                            mixed_emb = self._compute_mixed_embedding(mix_configs)
+                            # ⚡ Bolt: Pass group_model to avoid redundant lookups
+                            mixed_emb = self._compute_mixed_embedding(mix_configs, model=group_model)
                             # Create prompt item manually for Mix and cache it
                             prompt = [VoiceClonePromptItem(
                                 ref_code=None,
