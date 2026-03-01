@@ -53,8 +53,9 @@ def _ensure_qwen_tts():
 
 class ModelManager:
     def __init__(self):
-        self.model = None
-        self.current_model_type = None
+        self.models = {}
+        self.lru_order = []  # list of keys, most recent at the end
+        self.max_models = 2
         self.device = self._get_best_device()
         self.lock = threading.Lock()
         
@@ -81,9 +82,14 @@ class ModelManager:
 
         with self.lock:
             key = f"{size}_{model_type}"
-            if self.model and self.current_model_type == key:
-                logger.debug(f"Model {key} already loaded.")
-                return self.model
+
+            # ⚡ Bolt: Check LRU cache for existing model
+            if key in self.models:
+                logger.debug(f"Model {key} found in LRU cache.")
+                # Move to end of LRU list (mark as most recently used)
+                self.lru_order.remove(key)
+                self.lru_order.append(key)
+                return self.models[key]
                 
             if model_type == "VoiceDesign":
                 model_name = MODELS["1.7B_VoiceDesign"]
@@ -100,28 +106,34 @@ class ModelManager:
                 logger.critical(f"Model {model_name} NOT FOUND. Initialization failed.")
                 raise FileNotFoundError(f"Model {model_name} not found.")
 
-            logger.info(f"Loading Qwen-TTS model: {model_name} on {self.device}")
-            if self.model:
-                logger.info(f"Unloading previous model: {self.current_model_type}")
-                del self.model
+            # ⚡ Bolt: If at capacity, evict the least recently used model
+            if len(self.models) >= self.max_models:
+                oldest_key = self.lru_order.pop(0)
+                logger.info(f"⚡ Bolt: LRU Cache full. Evicting model: {oldest_key}")
+                old_model = self.models.pop(oldest_key)
+                del old_model
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
-                
+
+            logger.info(f"Loading Qwen-TTS model: {model_name} on {self.device}")
             try:
-                self.model = _Qwen3TTSModel.from_pretrained(
+                model = _Qwen3TTSModel.from_pretrained(
                     str(model_path), 
                     device_map=self.device,
                     torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
                     local_files_only=True
                 )
-                logger.info("Model loaded successfully.")
+                logger.info(f"Model {key} loaded successfully.")
+
+                # ⚡ Bolt: Store in LRU cache
+                self.models[key] = model
+                self.lru_order.append(key)
+                return model
             except Exception as e:
                 logger.critical(f"CRITICAL ERROR loading model: {e}")
                 import traceback
                 traceback.print_exc()
                 raise e
-            self.current_model_type = key
-            return self.model
 
 # Global instance
 manager = ModelManager()

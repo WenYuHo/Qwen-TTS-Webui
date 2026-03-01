@@ -25,3 +25,7 @@
 ## 2026-03-01 - [In-Memory Caching for Audio and Embeddings]
 **Learning:** In "Studio" workflows where users repeatedly regenerate podcasts with similar settings, redundant I/O (BGM loading) and redundant tensor math (mix embedding calculation) account for ~15-20% of non-inference latency. Implementing per-instance caches in the `PodcastEngine` for these artifacts provides significant speedups.
 **Action:** Always check `bgm_cache` and `mix_embedding_cache` before starting expensive audio processing or embedding mixing in synthesis pipelines. Use sorted JSON keys for mix configurations to ensure cache hits for identical settings.
+
+## 2026-03-01 - [LRU Model Cache in ModelManager]
+**Learning:** The previous single-slot model loading pattern caused "model thrashing" during multi-speaker or interactive sessions, adding 3-5 seconds of latency per speaker switch as 1.7B parameter models (~3.4GB FP16) were unloaded and reloaded. Implementing an LRU cache with a capacity of 2 models provides a significant speedup for the common "back-and-forth" interaction between two speaker types (e.g., Preset and Clone).
+**Action:** Always utilize the LRU-enabled `ModelManager` to load models. For multi-speaker generation, combine this with model-grouping to minimize even cache-hit lookups.
