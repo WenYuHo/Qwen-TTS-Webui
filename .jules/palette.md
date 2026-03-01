@@ -13,3 +13,7 @@
 ## 2025-06-25 - [Clean Event Binding and Robust Empty States]
 **Learning:** When generating dynamic lists using `innerHTML`, separating the HTML structure from the event logic by using semantic selector classes (e.g., `.js-action`) for JavaScript-based binding is much cleaner and less error-prone than interpolating complex `onclick` strings. Additionally, empty states should be designed to match the parent container's layout; for grids, use `grid-column: 1 / -1` to ensure the empty state spans the full width and provides a centered, balanced appearance.
 **Action:** Use semantic JS-only classes for event binding in dynamic templates. Always ensure empty states in grid layouts use column spanning for better visual balance.
+
+## 2026-03-01 - [Multi-View Component Synchronization]
+**Learning:** In a multi-view Single Page Application (SPA) where shared components (like a Task Monitor) appear across different views, using IDs for these components prevents reliable simultaneous updates. Converting these to class-based selectors (e.g., `.js-task-monitor-list`) and using `querySelectorAll` in the update logic ensures that state remains consistent across all views without requiring a view-switch to trigger a refresh.
+**Action:** Use class-based selectors for shared UI components that exist in multiple DOM branches. Implement global update functions that target all instances of these classes.
