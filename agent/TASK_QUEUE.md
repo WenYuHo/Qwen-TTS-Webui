@@ -2,15 +2,16 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Testing & Reliability
-1. [ ] **Unit Test Expansion:** Create automated tests for `AudioPostProcessor`, `AuditManager`, and `StorageManager` in a new `tests/test_system_utils.py` file.
+### Tier 1: Performance & Reliability
+1. [ ] **True Streaming:** Refactor `PodcastEngine` to support generator-based streaming for real-time synthesis during long script production.
 2. [ ] **Model Checkpoint Tests:** Add a diagnostic test to verify that downloaded LTX checkpoints are valid safetensors/pth files.
 
-### Tier 2: Performance & Polish
-1. [ ] **True Streaming:** Refactor `PodcastEngine` to support generator-based streaming for real-time synthesis.
-2. [ ] **Scene Search AI:** Upgrade keyword-based search to use a small LLM or embedding-based search.
+### Tier 2: Governance & Search
+1. [ ] **Scene Search AI:** Upgrade keyword-based search to use a small LLM or embedding-based search for better LTX-Video prompt suggestions.
+2. [ ] **Error UI:** Create a specialized "Error Boundary" component in the UI to handle and display synthesis failures gracefully.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Create **automated unit tests** for `AudioPostProcessor`, `AuditManager`, and `StorageManager`.
 - [x] Create **CONTRIBUTING.md** with framework and design system guidelines.
 - [x] Apply **Technoid Brutalist UI Unification** to all views.
 - [x] Implement **Video Preview Modal** with integrated subtitle overlay support.

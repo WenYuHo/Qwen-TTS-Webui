@@ -6,6 +6,7 @@ numpy
 python-multipart
 pydub
 librosa
+scipy
 transformers==5.2.0
 accelerate
 einops
