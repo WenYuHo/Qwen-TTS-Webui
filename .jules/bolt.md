@@ -56,3 +56,7 @@
 ## 2026-03-02 - [Transcription and Translation Caching]
 **Learning:** Redundant transcription (via Whisper) and translation (via GoogleTranslator API) in dubbing workflows can add significant latency and cost. Implementing a persistent in-memory cache for these operations provides a 5-10x speedup for repeated tasks. To prevent memory leaks, caches should use MD5-hashed keys for large text and implement a size-bounding policy (e.g., clearing after 1000 entries).
 **Action:** Always integrate high-latency ML or network operations with a bounded, content-keyed cache.
+
+## 2026-03-02 - [High-Performance Regex Multi-Replacement]
+**Learning:** In text preprocessing layers (like PhonemeManager), performing sequential regex substitutions in an O(N) loop (where N is the number of overrides) results in O(N*M) complexity (M=text length) and incurs significant Python-to-C overhead for each call. Combining all patterns into a single alternation regex (`|`) allows for a single-pass O(M) substitution.
+**Action:** Use single-pass combined regex patterns for multi-string replacement tasks. Sort patterns by length descending to ensure correct matching of overlapping terms.
