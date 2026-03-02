@@ -55,10 +55,21 @@ def test_studio_navigation():
         page.click("button:has-text('ACKNOWLEDGE')")
         expect(help_modal).not_to_be_visible()
 
-        # 8. Return to Voice Studio
-        print("Returning to Voice Studio...")
+        # 8. Return to Voice Studio and verify components
+        print("Returning to Voice Studio and verifying components...")
         page.click("#nav-speech", force=True)
         expect(page.locator("#speech-view")).to_be_visible()
+        expect(page.locator("h2:has-text('Voice Design')")).to_be_visible()
+        expect(page.locator("h2:has-text('Voice Cloning')")).to_be_visible()
+        expect(page.locator("h2:has-text('Voice Mixer')")).to_be_visible()
+        expect(page.locator("#voice-library-grid")).to_be_visible()
+
+        # 9. Test Dubbing View
+        print("Testing Dubbing & S2S view...")
+        page.click("#nav-dubbing", force=True)
+        expect(page.locator("#dubbing-view")).to_be_visible()
+        expect(page.locator("h2:has-text('Dubbing (Translation)')")).to_be_visible()
+        expect(page.locator("h2:has-text('Voice Changer (S2S)')")).to_be_visible()
         
         browser.close()
 

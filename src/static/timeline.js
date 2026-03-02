@@ -103,3 +103,5 @@ const TimelineManager = {
         return '#' + "00000".substring(0, 6 - c.length) + c + "80"; // 50% opacity
     }
 };
+
+window.TimelineManager = TimelineManager;

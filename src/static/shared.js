@@ -175,7 +175,6 @@ function parseScript(text) {
     const flush = () => {
         if (currentRole && currentText.length > 0) {
             const rawText = currentText.join('\n').trim();
-            // Look for emotional instructions in brackets like [whispered]
             const instructRegex = /\[(.+?)\]/;
             const match = rawText.match(instructRegex);
             let instruct = null;
@@ -183,7 +182,6 @@ function parseScript(text) {
 
             if (match) {
                 instruct = match[1];
-                // Remove the bracketed instruction from the synthesis text
                 cleanText = rawText.replace(instructRegex, '').trim();
             }
 
@@ -196,7 +194,8 @@ function parseScript(text) {
         currentText = [];
     };
 
-    const roleRegex = /^\[(.+?)\]:(.*)/;
+    // Support both "Alice: ..." and "[Alice]: ..."
+    const roleRegex = /^(?:\[)?([^\]:]+)(?:\])?\s*:\s*(.*)/;
     lines.forEach(line => {
         const match = line.match(roleRegex);
         if (match) {
@@ -210,3 +209,27 @@ function parseScript(text) {
     flush();
     return script;
 }
+
+// Global Exposure
+Object.assign(window, {
+    CanvasManager,
+    parseScript,
+    TaskPoller,
+    UIHeartbeat,
+    SpeakerStore,
+    escapeHTML,
+    getVoicePreview,
+    getAllProfiles: async () => {
+        const [libRes, speakerRes] = await Promise.all([
+            fetch('/api/voice/library'),
+            fetch('/api/voice/speakers')
+        ]);
+        const libData = await libRes.json();
+        const speakerData = await speakerRes.json();
+        
+        const profiles = {};
+        speakerData.presets.forEach(p => profiles[p] = { type: 'preset', value: p });
+        libData.voices.forEach(v => profiles[v.name] = v.profile);
+        return profiles;
+    }
+});

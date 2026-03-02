@@ -4,6 +4,7 @@ import { AssetManager } from './assets.js';
 import { SystemManager } from './system.js';
 import { ProductionManager } from './production.js';
 import { VoiceLabManager } from './voicelab.js';
+import { DubbingManager } from './dubbing.js';
 import { VideoModal, HelpManager } from './ui_components.js';
 
 const state = {
@@ -75,6 +76,9 @@ function performSwitch(view) {
         navBtn.setAttribute('aria-pressed', 'true');
     }
 
+    if (view === 'speech') {
+        VoiceLabManager.loadVoiceLibrary();
+    }
     if (view === 'assets') {
         AssetManager.loadAssets();
         AssetManager.setupDragAndDrop();
@@ -86,11 +90,16 @@ function performSwitch(view) {
         SystemManager.loadSubTabState();
         SystemManager.refreshResourceStats();
     }
+    if (view === 'dubbing') {
+        DubbingManager.setupS2SRecording();
+    }
 }
 
 // Global exposure
 Object.assign(window, {
     switchView,
+    startDubbing: DubbingManager.startDubbing.bind(DubbingManager),
+    startVoiceChanger: DubbingManager.startVoiceChanger.bind(DubbingManager),
     loadAssets: AssetManager.loadAssets,
     uploadAsset: AssetManager.uploadAsset,
     deleteAsset: AssetManager.deleteAsset,
@@ -111,6 +120,32 @@ Object.assign(window, {
     playDesignPreview: VoiceLabManager.playDesignPreview.bind(VoiceLabManager),
     playClonePreview: VoiceLabManager.playClonePreview.bind(VoiceLabManager),
     playMixPreview: VoiceLabManager.playMixPreview.bind(VoiceLabManager),
+    saveDesignedVoice: () => {
+        const name = prompt("Enter a name for this voice:");
+        if (name) VoiceLabManager.saveVoice(name, { type: 'design', value: document.getElementById('design-prompt').value });
+    },
+    saveClonedVoice: () => {
+        const name = prompt("Enter a name for this voice:");
+        if (name) VoiceLabManager.saveVoice(name, { type: 'clone', value: window.state.voicelab.lastClonedPath });
+    },
+    saveMixedVoice: async () => {
+        const name = prompt("Enter a name for this voice:");
+        if (name) {
+            const vA = document.getElementById('mix-voice-a').value;
+            const vB = document.getElementById('mix-voice-b').value;
+            const wA = parseInt(document.getElementById('mix-weight-a').value || 50) / 100;
+            const wB = parseInt(document.getElementById('mix-weight-b').value || 50) / 100;
+            
+            const allProfiles = await window.getAllProfiles();
+            const mixConfig = [
+                { profile: allProfiles[vA], weight: wA },
+                { profile: allProfiles[vB], weight: wB }
+            ];
+            VoiceLabManager.saveVoice(name, { type: 'mix', value: JSON.stringify(mixConfig) });
+        }
+    },
+    previewVoice: VoiceLabManager.previewVoice.bind(VoiceLabManager),
+    deleteVoice: VoiceLabManager.deleteVoice.bind(VoiceLabManager),
     addPhonemeOverride: SystemManager.addPhonemeOverride.bind(SystemManager),
     removePhonemeOverride: SystemManager.removePhonemeOverride.bind(SystemManager),
     importPhonemes: SystemManager.importPhonemes.bind(SystemManager),
@@ -128,6 +163,9 @@ Object.assign(window, {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    VoiceLabManager.loadVoiceLibrary();
+    UIHeartbeat.start();
+    CanvasManager.load();
     setInterval(() => {
         if (['projects', 'dubbing', 'system'].includes(state.currentView)) TaskManager.refreshTasks();
         if (state.currentView === 'system') SystemManager.refreshResourceStats();

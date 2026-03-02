@@ -37,7 +37,7 @@ export const ProductionManager = {
         }
 
         if (script.length === 0) return Notification.show("Script is empty", "warn");
-        const profiles = window.getAllProfiles();
+        const profiles = await window.getAllProfiles();
 
         try {
             if (statusText) statusText.innerText = videoEnabled ? "Generating Narrated Video..." : "Producing Podcast...";

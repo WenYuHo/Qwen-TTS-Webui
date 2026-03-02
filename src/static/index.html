@@ -101,14 +101,23 @@
                     <div class="card-brutalist">
                         <h2 style="margin-bottom:16px; font-size: 1.2rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;">Voice Mixer</h2>
                         <div class="control-group">
-                            <span class="label-industrial">Base Voice A</span>
-                            <select id="mix-voice-a" class="btn btn-secondary btn-sm" style="width:100%"></select>
+                            <div style="display:flex; justify-content:space-between;"><span class="label-industrial">Base Voice A</span><span id="weight-a-val" class="volt-text">50%</span></div>
+                            <select id="mix-voice-a" class="btn btn-secondary btn-sm" style="width:100%; margin-bottom:8px;"></select>
+                            <input type="range" id="mix-weight-a" min="0" max="100" value="50" style="width:100%" oninput="document.getElementById('weight-a-val').innerText = this.value + '%' ">
                         </div>
                         <div class="control-group">
-                            <span class="label-industrial">Base Voice B</span>
-                            <select id="mix-voice-b" class="btn btn-secondary btn-sm" style="width:100%"></select>
+                            <div style="display:flex; justify-content:space-between;"><span class="label-industrial">Base Voice B</span><span id="weight-b-val" class="volt-text">50%</span></div>
+                            <select id="mix-voice-b" class="btn btn-secondary btn-sm" style="width:100%; margin-bottom:8px;"></select>
+                            <input type="range" id="mix-weight-b" min="0" max="100" value="50" style="width:100%" oninput="document.getElementById('weight-b-val').innerText = this.value + '%' ">
                         </div>
                         <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="testVoiceMix(this)">MIX & PREVIEW</button>
+                        <div id="mix-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.4); border:1px solid var(--accent); padding: 12px;">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <button class="btn btn-secondary btn-sm" onclick="playMixPreview()"><i class="fas fa-play"></i></button>
+                                <span id="mix-status" class="volt-text" style="font-size:0.8rem; font-weight:700;">READY</span>
+                                <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="saveMixedVoice()">SAVE</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -377,7 +386,7 @@
 
             <!-- Footer Status -->
             <footer class="footer-status">
-                <div class="heartbeat-dot" id="heartbeat"></div>
+                <div class="heartbeat-dot" id="heartbeat-dot"></div>
                 <span id="status-text">Engine Ready</span>
                 <div style="flex:1"></div>
                 <audio id="main-audio-player" controls style="height: 32px; width: 300px;"></audio>
