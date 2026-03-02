@@ -88,14 +88,24 @@ def validate_request(request: PodcastRequest):
 
 @router.post("/segment")
 async def generate_segment(request: PodcastRequest, background_tasks: BackgroundTasks):
-    validate_request(request)
+    try:
+        validate_request(request)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
     task_id = server_state.task_manager.create_task("segment_generation", {"role": request.script[0].role})
     background_tasks.add_task(run_synthesis_task, task_id, False, request)
     return {"task_id": task_id, "status": server_state.TaskStatus.PENDING}
 
 @router.post("/podcast")
 async def generate_podcast(request: PodcastRequest, background_tasks: BackgroundTasks):
-    validate_request(request)
+    try:
+        validate_request(request)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
     
     if request.stream:
         try:

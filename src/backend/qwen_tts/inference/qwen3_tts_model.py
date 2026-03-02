@@ -287,13 +287,25 @@ class Qwen3TTSModel:
         return f"<|im_start|>user\n{instruct}<|im_end|>\n"
 
     def _tokenize_texts(self, texts: List[str]) -> List[torch.Tensor]:
-        input_ids = []
-        for text in texts:
-            input = self.processor(text=text, return_tensors="pt", padding=True)
-            input_id = input["input_ids"].to(self.device)
-            input_id = input_id.unsqueeze(0) if input_id.dim() == 1 else input_id
-            input_ids.append(input_id)
-        return input_ids
+        """
+        Tokenize a list of texts into a list of tensors.
+        ⚡ Bolt: Uses batched tokenization to reduce Python overhead.
+        """
+        if not texts:
+            return []
+        # Batched tokenization is significantly faster than a loop
+        encodings = self.processor(text=texts, return_tensors="pt", padding=True)
+        input_ids = encodings["input_ids"].to(self.device)
+        attention_mask = encodings["attention_mask"].to(self.device)
+
+        output = []
+        for i in range(len(texts)):
+            # Remove padding tokens to maintain compatibility with model indexing logic
+            # which expects exact sequence starts/ends for specific roles.
+            mask = attention_mask[i] == 1
+            seq_ids = input_ids[i][mask].unsqueeze(0)
+            output.append(seq_ids)
+        return output
 
     def _merge_generate_kwargs(
         self,

@@ -21,7 +21,7 @@ class ScriptLine(BaseModel):
     pause_after: Optional[float] = 0.5
 
 class PodcastRequest(BaseModel):
-    profiles: Dict[str, Dict[str, Any]]
+    profiles: List[SpeakerProfile]
     script: List[ScriptLine]
     bgm_mood: Optional[str] = None
     ducking_level: Optional[float] = 0.0
