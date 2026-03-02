@@ -165,25 +165,44 @@ class SuggestionRequest(BaseModel):
 
 @router.post("/suggest")
 async def suggest_video_scene(request: SuggestionRequest):
-    """Simple keyword-based prompt suggestion for LTX-Video."""
+    """Upgraded 'Creative Director' logic for LTX-Video prompt suggestions."""
     text = request.text.lower()
-    suggestion = "A cinematic, high-detail scene matching the story."
     
-    keywords = {
-        "rain": "A cinematic shot of heavy rain falling on a city street at night, neon lights reflecting in puddles, high detail.",
-        "forest": "A lush, green forest with sunlight filtering through the leaves, a peaceful atmosphere, ultra-realistic.",
-        "cyberpunk": "A futuristic cyberpunk city with towering skyscrapers, flying vehicles, and vibrant neon signs.",
-        "ocean": "A vast, blue ocean with gentle waves lapping against a white sandy beach, clear sky.",
-        "space": "A breathtaking view of a nebula in deep space, stars twinkling, vibrant colors.",
-        "mystery": "A dark, misty alleyway with a single flickering lamppost, a sense of suspense.",
-        "tech": "A high-tech laboratory with glowing screens and advanced machinery, clean and modern."
+    # Cinematic components
+    atmospheres = {
+        "happy": "vibrant, cheerful atmosphere",
+        "mystery": "misty, suspenseful atmosphere with deep shadows",
+        "sad": "melancholic, somber mood with muted colors",
+        "tech": "high-tech, futuristic lab setting, clean aesthetic",
+        "dark": "gritty, ominous tone",
+        "nature": "lush, organic environment, peaceful",
+        "cyberpunk": "neon-drenched cyberpunk aesthetic, high-contrast"
     }
     
-    for kw, prompt in keywords.items():
+    actions = {
+        "run": "dynamic motion, fast-paced movement",
+        "talk": "subtle character gestures, focused close-up",
+        "rain": "heavy rain falling, water reflections on surfaces",
+        "forest": "gentle wind blowing through trees",
+        "space": "starship drifting through a colorful nebula",
+        "city": "bustling urban life, moving vehicles"
+    }
+    
+    # Default suggestion
+    atmosphere = "cinematic, high-detail"
+    action_desc = "static shot with subtle environmental motion"
+    
+    for kw, desc in atmospheres.items():
         if kw in text:
-            suggestion = prompt
+            atmosphere = desc
             break
             
+    for kw, desc in actions.items():
+        if kw in text:
+            action_desc = desc
+            break
+            
+    suggestion = f"A high-quality, {atmosphere} scene featuring {action_desc}, ultra-realistic, 4k, cinematic lighting."
     return {"suggestion": suggestion}
 
 @router.post("/narrated")

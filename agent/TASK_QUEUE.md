@@ -2,15 +2,16 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Intelligence & Search
-1. [ ] **Scene Search AI Upgrade:** Upgrade the keyword-based search to use a small LLM or embedding-based search for better LTX-Video prompt suggestions.
-2. [ ] **Auto-Documentation:** Implement a script to automatically update `conductor/tech-stack.md` based on `requirements.txt` changes.
+### Tier 1: Governance & Automation
+1. [ ] **Auto-Documentation:** Implement a script to automatically update `conductor/tech-stack.md` based on `requirements.txt` changes.
+2. [ ] **Performance Profiling:** Integrate `cProfile` into the engine to identify bottleneck functions.
 
-### Tier 2: Performance & Polish
-1. [ ] **Performance Profiling:** Integrate `cProfile` into the engine to identify bottleneck functions.
-2. [ ] **UI Animation:** Add subtle entry/exit animations to view transitions for a more fluid "Technoid" feel.
+### Tier 2: UI & UX
+1. [ ] **UI Animation:** Add subtle entry/exit animations to view transitions for a more fluid "Technoid" feel.
+2. [ ] **Toast Notifications:** Replace standard `alert()` calls with a non-blocking toast notification system.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Upgrade **Scene Search AI** with cinematic prompt templates and component extraction.
 - [x] Create **API Load Testing** utility (`tools/api_load_test.py`).
 - [x] Create **Model Checkpoint Tests** (integrity and existence checks).
 - [x] Refactor and unify setup/start into **studio.bat** and **studio.sh**.
@@ -24,7 +25,6 @@
 - [x] Implement **Resource Monitoring** (CPU/RAM/GPU) in System Manager.
 - [x] Implement **Generation Audit Log** (audit.json) for transparency.
 - [x] Implement **Audio Effects** (EQ & Reverb) for atmospheric polish.
-- [x] Implement **Scene Search** keyword-based prompt suggestions for LTX-Video.
 - [x] Implement **Parallel Streaming Synthesis** with look-ahead for ultra-low latency.
 - [x] Implement **Persistent System Settings** (settings.json).
 - [x] Implement **Phoneme Editor Bulk Import** (JSON).
