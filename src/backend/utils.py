@@ -1,5 +1,6 @@
 import io
 import json
+import re
 import soundfile as sf
 import numpy as np
 import time
@@ -30,6 +31,23 @@ class PhonemeManager:
     def __init__(self):
         self.file_path = PROJECTS_DIR / "phonemes.json"
         self.overrides = self._load()
+        self.combined_pattern = None
+        self.word_map = {}
+        self._compile_combined()
+
+    def _compile_combined(self):
+        """Pre-compile a single combined regex pattern for high-performance single-pass replacement."""
+        if not self.overrides:
+            self.combined_pattern = None
+            self.word_map = {}
+            return
+
+        # Sort words by length descending to ensure longest matches are tried first
+        sorted_words = sorted(self.overrides.keys(), key=len, reverse=True)
+        self.word_map = {word.lower(): word for word in self.overrides}
+
+        pattern_str = r'\b(' + '|'.join(re.escape(w) for w in sorted_words) + r')\b'
+        self.combined_pattern = re.compile(pattern_str, re.IGNORECASE)
 
     def _load(self):
         if not self.file_path.exists():
@@ -42,19 +60,24 @@ class PhonemeManager:
 
     def save(self, overrides):
         self.overrides = overrides
+        self._compile_combined()
         with open(self.file_path, "w", encoding="utf-8") as f:
             json.dump(self.overrides, f, indent=2, ensure_ascii=False)
 
     def apply(self, text: str) -> str:
         """Replace words in text with their phonetic equivalents."""
-        if not self.overrides:
+        if not self.overrides or not self.combined_pattern:
             return text
-        modified_text = text
-        for word, phonetic in self.overrides.items():
-            import re
-            pattern = re.compile(r'\b' + re.escape(word) + r'\b', re.IGNORECASE)
-            modified_text = pattern.sub(phonetic, modified_text)
-        return modified_text
+
+        def _replacer(match):
+            # ⚡ Bolt: Use O(1) dictionary lookup within a single-pass regex substitution
+            word = match.group(0).lower()
+            original_word = self.word_map.get(word)
+            if original_word:
+                return self.overrides.get(original_word, match.group(0))
+            return match.group(0)
+
+        return self.combined_pattern.sub(_replacer, text)
 
 phoneme_manager = PhonemeManager()
 
