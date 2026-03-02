@@ -2,16 +2,17 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Performance & UX
-1. [ ] **Performance Profiling:** Integrate `cProfile` results into a new "Performance" sub-tab in the System view.
-2. [ ] **UI Animation:** Add subtle entry/exit animations to view transitions for a more fluid "Technoid" feel.
+### Tier 1: UI & UX
+1. [ ] **UI Animation:** Add subtle entry/exit animations to view transitions for a more fluid "Technoid" feel.
+2. [ ] **Toast Notifications:** Replace standard `alert()` calls with a non-blocking toast notification system.
 
 ### Tier 2: Governance & Search
 1. [ ] **Error UI:** Create a specialized "Error Boundary" component in the UI to handle and display synthesis failures gracefully.
 2. [ ] **Help System:** Add an inline "Help" overlay for each view explaining the available controls.
 
 ## Completed (Mar 2026 Refactor)
-- [x] Implement **True Streaming** for podcast production (line-by-line playback).
+- [x] Implement **Performance Profiling Integration** (Benchmark sub-tab).
+- [x] Implement **True Streaming** for podcast production.
 - [x] Create **automated unit tests** for system utilities.
 - [x] Implement **Auto-Documentation** script for tech stack synchronization.
 - [x] Upgrade **Scene Search AI** with cinematic prompt templates.

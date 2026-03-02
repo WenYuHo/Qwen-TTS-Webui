@@ -4,53 +4,30 @@ export const SystemManager = {
     async fetchInventory() {
         const list = document.getElementById('model-inventory-list');
         if (!list) return;
-
         try {
             const res = await fetch('/api/models/inventory');
             const data = await res.json();
-            
-            list.innerHTML = '';
-            data.models.forEach(model => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.style.padding = '12px';
-                card.style.background = 'rgba(255,255,255,0.05)';
-                card.style.display = 'flex';
-                card.style.alignItems = 'center';
-                card.style.justifyContent = 'space-between';
-                card.style.gap = '12px';
-                
-                const icon = model.type === 'video' ? 'fa-video' : 'fa-music';
-                const statusClass = model.status === 'downloaded' ? 'badge-success' : 'badge-warn';
-                const statusLabel = model.status === 'downloaded' ? 'Ready' : 'Missing';
-                
-                card.innerHTML = `
+            list.innerHTML = data.models.map(model => `
+                <div class="card" style="padding:12px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:space-between; gap:12px;">
                     <div style="display:flex; align-items:center; gap:12px;">
-                        <i class="fas ${icon}" style="color:var(--accent); font-size:1.2rem;"></i>
+                        <i class="fas ${model.type === 'video' ? 'fa-video' : 'fa-music'}" style="color:var(--accent); font-size:1.2rem;"></i>
                         <div style="display:flex; flex-direction:column;">
                             <span style="font-weight:bold; font-size:0.9rem;">${model.key}</span>
                             <span style="font-size:0.75rem; opacity:0.6;">${model.repo_id}</span>
                         </div>
                     </div>
                     <div style="display:flex; align-items:center; gap:12px;">
-                        <span class="badge ${statusClass}">${statusLabel}</span>
+                        <span class="badge ${model.status === 'downloaded' ? 'badge-success' : 'badge-warn'}">${model.status === 'downloaded' ? 'Ready' : 'Missing'}</span>
                         ${model.status === 'missing' ? `<button class="btn btn-primary btn-sm" onclick="triggerDownload('${model.repo_id}')"><i class="fas fa-download"></i></button>` : ''}
                     </div>
-                `;
-                list.appendChild(card);
-            });
-            
-            this.loadPhonemes();
-        } catch (err) { console.error("Failed to fetch inventory:", err); }
+                </div>
+            `).join('');
+        } catch (err) { console.error(err); }
     },
 
     async triggerDownload(repoId) {
         try {
-            const res = await fetch('/api/models/download', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ repo_id: repoId })
-            });
+            const res = await fetch('/api/models/download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ repo_id: repoId }) });
             if (window.refreshTasks) window.refreshTasks();
             alert(`Download started for ${repoId}.`);
         } catch (err) { alert("Download failed"); }
@@ -63,7 +40,7 @@ export const SystemManager = {
             const res = await fetch('/api/system/phonemes');
             const data = await res.json();
             this.renderPhonemeList(data.overrides);
-        } catch (err) { console.error("Failed to load phonemes:", err); }
+        } catch (err) { console.error(err); }
     },
 
     renderPhonemeList(overrides) {
@@ -82,11 +59,7 @@ export const SystemManager = {
         const pI = document.getElementById('phoneme-replacement');
         if (!wI.value || !pI.value) return;
         try {
-            const res = await fetch('/api/system/phonemes', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ word: wI.value, phonetic: pI.value })
-            });
+            const res = await fetch('/api/system/phonemes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ word: wI.value, phonetic: pI.value }) });
             const data = await res.json();
             this.renderPhonemeList(data.overrides);
             wI.value = ''; pI.value = '';
@@ -106,11 +79,7 @@ export const SystemManager = {
         const reader = new FileReader();
         reader.onload = async (e) => {
             try {
-                const res = await fetch('/api/system/phonemes/bulk', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: e.target.result
-                });
+                const res = await fetch('/api/system/phonemes/bulk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: e.target.result });
                 const result = await res.json();
                 this.renderPhonemeList(result.overrides);
             } catch (err) { alert("Import failed"); }
@@ -121,13 +90,7 @@ export const SystemManager = {
     async updateWatermarkSettings() {
         const audio = document.getElementById('watermark-audio').checked;
         const video = document.getElementById('watermark-video').checked;
-        try {
-            await fetch('/api/system/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ watermark_audio: audio, watermark_video: video })
-            });
-        } catch (err) { console.error(err); }
+        try { await fetch('/api/system/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ watermark_audio: audio, watermark_video: video }) }); } catch (err) { console.error(err); }
     },
 
     async loadSystemSettings() {
@@ -139,6 +102,42 @@ export const SystemManager = {
         } catch (err) { console.error(err); }
     },
 
+    async refreshResourceStats() {
+        const cpuEl = document.getElementById('stat-cpu');
+        const ramEl = document.getElementById('stat-ram');
+        const gpuEl = document.getElementById('stat-gpu');
+        const gpuCont = document.getElementById('gpu-stat-container');
+        if (!cpuEl) return;
+        try {
+            const res = await fetch('/api/system/stats');
+            const data = await res.json();
+            cpuEl.innerText = `${data.cpu_percent}%`;
+            ramEl.innerText = `${data.ram_percent}%`;
+            if (data.gpu) {
+                gpuCont.style.display = 'block';
+                gpuEl.innerText = `${data.gpu.vram_percent.toFixed(1)}%`;
+                gpuEl.title = `${data.gpu.name} (${data.gpu.vram_used.toFixed(1)}GB / ${data.gpu.vram_total.toFixed(1)}GB)`;
+            } else gpuCont.style.display = 'none';
+        } catch (err) { console.error(err); }
+    },
+
+    switchSystemSubTab(tab) {
+        document.querySelectorAll('.system-sub-tab').forEach(t => t.style.display = 'none');
+        document.getElementById(`system-${tab}-tab`).style.display = 'block';
+        if (tab === 'audit') this.fetchAuditLog();
+        if (tab === 'phonemes') this.loadPhonemes();
+    },
+
+    async runEngineBenchmark() {
+        const out = document.getElementById('performance-output');
+        out.innerText = "Running profiling benchmark... please wait (takes ~10s)";
+        try {
+            const res = await fetch('/api/system/benchmark', { method: 'POST' });
+            const data = await res.json();
+            out.innerText = data.output;
+        } catch (err) { out.innerText = "Benchmark failed: " + err.message; }
+    },
+
     async fetchAuditLog() {
         const list = document.getElementById('audit-log-list');
         if (!list) return;
@@ -147,30 +146,6 @@ export const SystemManager = {
             const data = await res.json();
             this.renderAuditLog(data.log);
         } catch (err) { console.error(err); }
-    },
-
-    async refreshResourceStats() {
-        const cpuEl = document.getElementById('stat-cpu');
-        const ramEl = document.getElementById('stat-ram');
-        const gpuEl = document.getElementById('stat-gpu');
-        const gpuCont = document.getElementById('gpu-stat-container');
-        if (!cpuEl) return;
-
-        try {
-            const res = await fetch('/api/system/stats');
-            const data = await res.json();
-            
-            cpuEl.innerText = `${data.cpu_percent}%`;
-            ramEl.innerText = `${data.ram_percent}%`;
-            
-            if (data.gpu) {
-                gpuCont.style.display = 'block';
-                gpuEl.innerText = `${data.gpu.vram_percent.toFixed(1)}%`;
-                gpuEl.title = `${data.gpu.name} (${data.gpu.vram_used.toFixed(1)}GB / ${data.gpu.vram_total.toFixed(1)}GB)`;
-            } else {
-                gpuCont.style.display = 'none';
-            }
-        } catch (err) { console.error("Stats refresh failed", err); }
     },
 
     renderAuditLog(log) {

@@ -55,6 +55,39 @@ async def get_system_stats():
     from ..utils import resource_monitor
     return resource_monitor.get_stats()
 
+@router.post("/benchmark")
+async def run_benchmark():
+    """Runs a profiled synthesis task and returns the performance breakdown."""
+    import io
+    import pstats
+    from ..utils import Profiler
+    from .. import server_state
+    
+    # Sample data for benchmarking
+    text = "This is a performance benchmark synthesis for the Qwen TTS engine."
+    profile = {"type": "preset", "value": "Ryan"}
+    
+    try:
+        with Profiler("Engine Benchmark") as p:
+            # Run a small synthesis
+            server_state.engine.generate_segment(text, profile)
+            
+        # Extract the results from the profiler internal StringIO or re-run logic
+        # For simplicity in this endpoint, we'll re-capture manually to return as JSON
+        import cProfile
+        pr = cProfile.Profile()
+        pr.enable()
+        server_state.engine.generate_segment(text, profile)
+        pr.disable()
+        
+        s = io.StringIO()
+        ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
+        ps.print_stats(30) # Return top 30
+        
+        return {"status": "ok", "output": s.getvalue()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Benchmark failed: {str(e)}")
+
 @router.get("/phonemes")
 async def get_phonemes():
     return {"overrides": phoneme_manager.overrides}

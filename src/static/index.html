@@ -443,71 +443,85 @@ Bob: Hi Alice, how are you today?"></textarea>
                     </div>
                 </div>
 
-                <div class="grid-2">
-                    <div class="card-brutalist">
-                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-color:var(--accent);">Model Inventory</h2>
-                        <div id="model-inventory-list" style="display:flex; flex-direction:column; gap:12px;">
-                            <!-- Models will be listed here -->
+                <div class="header" style="border-bottom: 2px solid var(--accent); padding: 12px 24px; display: flex; gap: 16px; background:rgba(255,255,255,0.02); margin-bottom:24px;">
+                    <button class="btn btn-secondary btn-sm" onclick="switchSystemSubTab('inventory')">INVENTORY</button>
+                    <button class="btn btn-secondary btn-sm" onclick="switchSystemSubTab('phonemes')">PHONEMES</button>
+                    <button class="btn btn-secondary btn-sm" onclick="switchSystemSubTab('performance')">PERFORMANCE</button>
+                    <button class="btn btn-secondary btn-sm" onclick="switchSystemSubTab('audit')">AUDIT LOG</button>
+                </div>
+
+                <div id="system-inventory-tab" class="system-sub-tab">
+                    <div class="grid-2">
+                        <div class="card-brutalist">
+                            <h2 style="margin-bottom:16px; font-size: 1.1rem; border-color:var(--accent);">Model Inventory</h2>
+                            <div id="model-inventory-list" style="display:flex; flex-direction:column; gap:12px;">
+                                <!-- Models -->
+                            </div>
+                        </div>
+                        <div class="card-brutalist">
+                            <h2 style="margin-bottom:16px; font-size: 1.1rem; border-color:var(--accent);">System Resources</h2>
+                            <div id="resource-stats" class="status-grid">
+                                <div class="status-item">
+                                    <span class="label-industrial">CPU Load</span>
+                                    <span id="stat-cpu" class="status-val volt-text">--%</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="label-industrial">RAM Usage</span>
+                                    <span id="stat-ram" class="status-val volt-text">--%</span>
+                                </div>
+                                <div class="status-item" id="gpu-stat-container" style="display:none;">
+                                    <span class="label-industrial">GPU VRAM</span>
+                                    <span id="stat-gpu" class="status-val volt-text">--%</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="card-brutalist">
+                <div id="system-phonemes-tab" class="system-sub-tab" style="display:none;">
+                    <div class="card-brutalist" style="max-width:800px;">
                         <h2 style="margin-bottom:16px; font-size: 1.1rem; border-color:var(--accent);">Phoneme Editor</h2>
                         <span class="label-industrial">Custom Pronunciation Fixes</span>
                         <div class="control-group" style="display:flex; gap:8px; margin-bottom:16px;">
                             <input type="text" id="phoneme-word" placeholder="Word" style="flex:1; padding:8px; border-color:var(--accent);">
                             <input type="text" id="phoneme-replacement" placeholder="Phonetic" style="flex:1; padding:8px; border-color:var(--accent);">
-                            <button class="btn btn-primary btn-sm" onclick="addPhonemeOverride()" title="Add Override"><i class="fas fa-plus"></i></button>
+                            <button class="btn btn-primary btn-sm" onclick="addPhonemeOverride()"><i class="fas fa-plus"></i></button>
                             <input type="file" id="phoneme-import-file" style="display:none" onchange="importPhonemes(this)">
                             <button class="btn btn-secondary btn-sm" onclick="document.getElementById('phoneme-import-file').click()" title="Bulk Import"><i class="fas fa-file-import"></i></button>
                         </div>
-                        <div id="phoneme-list" style="max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
-                            <!-- Phonemes will be listed here -->
+                        <div id="phoneme-list" style="max-height:400px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
+                            <!-- Phonemes -->
                         </div>
                     </div>
+                </div>
 
+                <div id="system-performance-tab" class="system-sub-tab" style="display:none;">
                     <div class="card-brutalist">
-                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-color:var(--accent);">System Resources</h2>
-                        <div id="resource-stats" class="status-grid">
-                            <div class="status-item">
-                                <span class="label-industrial">CPU Load</span>
-                                <span id="stat-cpu" class="status-val volt-text">--%</span>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                            <div>
+                                <h2 style="font-size: 1.1rem; border-color:var(--accent); margin:0;">Engine Performance</h2>
+                                <p style="font-size:0.75rem; opacity:0.6;">Profile synthesis bottlenecks and function calls.</p>
                             </div>
-                            <div class="status-item">
-                                <span class="label-industrial">RAM Usage</span>
-                                <span id="stat-ram" class="status-val volt-text">--%</span>
-                            </div>
-                            <div class="status-item" id="gpu-stat-container" style="display:none;">
-                                <span class="label-industrial">GPU VRAM</span>
-                                <span id="stat-gpu" class="status-val volt-text">--%</span>
-                            </div>
+                            <button class="btn btn-primary" onclick="runEngineBenchmark()"><i class="fas fa-bolt"></i> RUN BENCHMARK</button>
                         </div>
+                        <pre id="performance-output" style="background:#000; padding:20px; font-family:var(--font-mono); font-size:0.7rem; color:var(--accent); border:1px solid var(--border); max-height:500px; overflow:auto;">
+Click benchmark to start analysis...
+                        </pre>
                     </div>
+                </div>
 
+                <div id="system-audit-tab" class="system-sub-tab" style="display:none;">
                     <div class="card-brutalist">
-                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-color:var(--accent);">AI Safety & Safety</h2>
-                        <div class="control-group" style="margin-bottom:0;">
-                            <label style="display:flex; align-items:center; gap:12px; cursor:pointer; margin-bottom:12px; font-family:var(--font-mono); font-size:0.8rem;">
-                                <input type="checkbox" id="watermark-audio" checked onchange="updateWatermarkSettings()">
-                                <span class="volt-text">Audible Watermark (TTS)</span>
-                            </label>
-                            <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-family:var(--font-mono); font-size:0.8rem;">
-                                <input type="checkbox" id="watermark-video" checked onchange="updateWatermarkSettings()">
-                                <span class="volt-text">Visible Watermark (Video)</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="card-brutalist" style="grid-column: 1 / -1;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
                             <h2 style="font-size: 1.1rem; border-color:var(--accent); margin:0;">Generation Audit Log</h2>
                             <button class="btn btn-secondary btn-sm" onclick="fetchAuditLog()"><i class="fas fa-sync"></i> Refresh</button>
                         </div>
-                        <div id="audit-log-list" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
-                            <!-- Audit records will be listed here -->
+                        <div id="audit-log-list" style="max-height:500px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
+                            <!-- Audit -->
                         </div>
                     </div>
                 </div>
+            </div>
 
                 <div class="card" style="margin-top:24px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">

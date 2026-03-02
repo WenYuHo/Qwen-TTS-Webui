@@ -143,6 +143,8 @@ Object.assign(window, {
     updateWatermarkSettings: SystemManager.updateWatermarkSettings.bind(SystemManager),
     fetchAuditLog: SystemManager.fetchAuditLog.bind(SystemManager),
     refreshResourceStats: SystemManager.refreshResourceStats.bind(SystemManager),
+    switchSystemSubTab: SystemManager.switchSystemSubTab.bind(SystemManager),
+    runEngineBenchmark: SystemManager.runEngineBenchmark.bind(SystemManager),
     showVideoPreview: VideoModal.show.bind(VideoModal),
     hideVideoModal: VideoModal.hide.bind(VideoModal),
     setupDragAndDrop: AssetManager.setupDragAndDrop
