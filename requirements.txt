@@ -23,3 +23,10 @@ beautifulsoup4
 huggingface_hub
 moviepy
 Pillow
+
+# --- Optional: Video Generation (LTX-Video) ---
+# Install these separately or via studio.bat
+ltx-pipelines
+diffusers
+opencv-python
+tqdm

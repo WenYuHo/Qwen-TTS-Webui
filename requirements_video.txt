@@ -1,7 +1,0 @@
-# Optional Video Generation Dependencies
-ltx-pipelines
-diffusers
-opencv-python
-tqdm
-moviepy
-Pillow

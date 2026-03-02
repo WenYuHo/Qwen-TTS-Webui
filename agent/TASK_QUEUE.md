@@ -2,21 +2,24 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Governance & Reliability
-1. [ ] **Unit Test expansion:** Create automated tests for `AudioPostProcessor`, `AuditManager`, and `StorageManager` in a new `tests/test_system_utils.py` file.
-2. [ ] **Model Checkpoint Tests:** Add a diagnostic test to verify that downloaded LTX checkpoints are valid safetensors/pth files.
+### Tier 1: Testing & Reliability
+1. [ ] **Model Checkpoint Tests:** Add a diagnostic test to verify that downloaded LTX checkpoints are valid safetensors/pth files.
+2. [ ] **API Load Testing:** Create a script to simulate concurrent generation requests and measure response times.
 
-### Tier 2: Performance & Search
-1. [ ] **True Streaming:** Refactor `PodcastEngine` to support generator-based streaming for real-time synthesis.
-2. [ ] **Scene Search AI:** Upgrade keyword-based search to use a small LLM or embedding-based search for better suggestions.
+### Tier 2: Governance & Automation
+1. [ ] **Auto-Documentation:** Implement a script to automatically update `conductor/tech-stack.md` based on `requirements.txt` changes.
+2. [ ] **Performance Profiling:** Integrate `cProfile` into the engine to identify bottleneck functions in the synthesis pipeline.
 
 ## Completed (Mar 2026 Refactor)
-- [x] Apply **Technoid Brutalist UI Unification** to all views (Voice, Project, Asset, Dubbing, System).
-- [x] Implement **Video Preview Modal** with integrated subtitle overlay support.
+- [x] Refactor and unify setup/start into **studio.bat** and **studio.sh**.
+- [x] Consolidate video dependencies into a single **requirements.txt**.
+- [x] Create **automated unit tests** for system utilities.
+- [x] Create **CONTRIBUTING.md** with framework and design guidelines.
+- [x] Apply **Technoid Brutalist UI Unification** to all views.
+- [x] Implement **Video Preview Modal** with subtitle support.
 - [x] Implement **Project Search** (Filter) for voices, assets, and projects.
-- [x] Implement **Auto-Cleanup** background thread for stale files (7-day retention).
+- [x] Implement **Auto-Cleanup** background thread for stale files.
 - [x] Implement **Resource Monitoring** (CPU/RAM/GPU) in System Manager.
-- [x] Apply **Technoid Brutalist Polish** to the System view UI.
 - [x] Implement **Generation Audit Log** (audit.json) for transparency.
 - [x] Implement **Audio Effects** (EQ & Reverb) for atmospheric polish.
 - [x] Implement **Scene Search** keyword-based prompt suggestions for LTX-Video.
@@ -25,20 +28,20 @@
 - [x] Implement **Phoneme Editor Bulk Import** (JSON).
 - [x] Implement **AI Watermarking** (Audible & Visible).
 - [x] Implement **LTX-Video Advanced Tuning** (Guidance, Steps, Seed).
-- [x] Implement **Dual-Track Streaming TTS** for low-latency (~100ms) previews.
-- [x] Implement **Phoneme Editor** UI and backend for custom pronunciation fixes.
+- [x] Implement **Dual-Track Streaming TTS** for low-latency previews.
+- [x] Implement **Phoneme Editor** UI and backend.
 - [x] Implement **Subtitle Generation** (.srt) for narrated videos.
-- [x] Implement **Instruction Brackets** support for emotional cues in scripts.
-- [x] Document the `TaskManager` class in `src/backend/task_manager.py`.
-- [x] Add type hints to `src/backend/podcast_engine.py` methods.
-- [x] Standardize error handling in `src/backend/api/voices.py` using centralized logger.
+- [x] Implement **Instruction Brackets** support for emotional cues.
+- [x] Document the `TaskManager` class.
+- [x] Add type hints to `PodcastEngine` methods.
+- [x] Standardize error handling in `voices.py`.
 - [x] Refactor `src/static/app.js` into modular ES files.
-- [x] Update `conductor/product.md` with "Technoid Brutalist" design direction and LTX features.
+- [x] Update `conductor/product.md`.
 - [x] Create missing `README.md` for `src/backend/qwen_tts/core/`.
-- [x] Implement Unified Model Inventory UI (Qwen + LTX).
-- [x] Integrate Video Generation (LTX) into Project Studio workflow.
-- [x] Enhance `setup_env.bat` with CUDA detection.
+- [x] Implement Unified Model Inventory UI.
+- [x] Integrate Video Generation (LTX) into workflow.
+- [x] Enhance environment setup with CUDA detection.
 - [x] Cleaned stale logs, projects, and dummy uploads.
 
 ## Awaiting Human Feedback
-- Should we move `setup_env.sh` and `start.sh` into a `bin/` or `scripts/` folder? (Standard practice vs ease of use).
+- (All current structural feedback addressed)
