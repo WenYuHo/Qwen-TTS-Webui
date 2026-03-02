@@ -432,47 +432,45 @@ Bob: Hi Alice, how are you today?"></textarea>
                 </div>
 
                 <div class="grid-2">
-                    <div class="card">
-                        <h2 style="margin-bottom:16px; font-size: 1.1rem;">Model Inventory</h2>
+                    <div class="card-brutalist">
+                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-color:var(--accent);">Model Inventory</h2>
                         <div id="model-inventory-list" style="display:flex; flex-direction:column; gap:12px;">
                             <!-- Models will be listed here -->
                         </div>
                     </div>
 
-                    <div class="card">
-                        <h2 style="margin-bottom:16px; font-size: 1.1rem;">Phoneme Editor (Custom Pronunciation)</h2>
-                        <div class="control-group" style="display:flex; gap:8px;">
-                            <input type="text" id="phoneme-word" placeholder="Word (e.g. Qwen)" style="flex:1;">
-                            <input type="text" id="phoneme-replacement" placeholder="Phonetic (e.g. Kwen)" style="flex:1;">
+                    <div class="card-brutalist">
+                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-color:var(--accent);">Phoneme Editor</h2>
+                        <span class="label-industrial">Custom Pronunciation Fixes</span>
+                        <div class="control-group" style="display:flex; gap:8px; margin-bottom:16px;">
+                            <input type="text" id="phoneme-word" placeholder="Word" style="flex:1; padding:8px; border-color:var(--accent);">
+                            <input type="text" id="phoneme-replacement" placeholder="Phonetic" style="flex:1; padding:8px; border-color:var(--accent);">
                             <button class="btn btn-primary btn-sm" onclick="addPhonemeOverride()" title="Add Override"><i class="fas fa-plus"></i></button>
                             <input type="file" id="phoneme-import-file" style="display:none" onchange="importPhonemes(this)">
-                            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('phoneme-import-file').click()" title="Bulk Import JSON"><i class="fas fa-file-import"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('phoneme-import-file').click()" title="Bulk Import"><i class="fas fa-file-import"></i></button>
                         </div>
-                        <div id="phoneme-list" style="margin-top:16px; max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
+                        <div id="phoneme-list" style="max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
                             <!-- Phonemes will be listed here -->
                         </div>
                     </div>
 
-                    <div class="card">
-                        <h2 style="margin-bottom:16px; font-size: 1.1rem;">AI Safety & Watermarking</h2>
-                        <div class="control-group">
-                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:12px;">
+                    <div class="card-brutalist">
+                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-color:var(--accent);">AI Safety & Safety</h2>
+                        <div class="control-group" style="margin-bottom:0;">
+                            <label style="display:flex; align-items:center; gap:12px; cursor:pointer; margin-bottom:12px; font-family:var(--font-mono); font-size:0.8rem;">
                                 <input type="checkbox" id="watermark-audio" checked onchange="updateWatermarkSettings()">
-                                <span class="label" style="margin:0;">Include Audible Watermark (TTS)</span>
+                                <span class="volt-text">Audible Watermark (TTS)</span>
                             </label>
-                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-family:var(--font-mono); font-size:0.8rem;">
                                 <input type="checkbox" id="watermark-video" checked onchange="updateWatermarkSettings()">
-                                <span class="label" style="margin:0;">Overlay Visible Watermark (Video)</span>
+                                <span class="volt-text">Visible Watermark (Video)</span>
                             </label>
                         </div>
-                        <p style="font-size:0.75rem; opacity:0.6; margin-top:12px;">
-                            Watermarking helps identify AI-generated content for transparency and compliance.
-                        </p>
                     </div>
 
-                    <div class="card" style="grid-column: 1 / -1;">
+                    <div class="card-brutalist" style="grid-column: 1 / -1;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                            <h2 style="font-size: 1.1rem;">Generation Audit Log</h2>
+                            <h2 style="font-size: 1.1rem; border-color:var(--accent); margin:0;">Generation Audit Log</h2>
                             <button class="btn btn-secondary btn-sm" onclick="fetchAuditLog()"><i class="fas fa-sync"></i> Refresh</button>
                         </div>
                         <div id="audit-log-list" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">

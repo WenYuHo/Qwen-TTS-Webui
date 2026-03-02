@@ -2,15 +2,16 @@
 
 ## Prioritized Backlog
 
-### Tier 1: UI & UX Polish
-1. [ ] **Technoid Brutalist Polish:** Refine the new System and Production cards with Volt accents, sharp 2px borders, and multi-layered shadows.
-2. [ ] **Resource Monitoring:** Add a "CPU/GPU Load" indicator to the System view footer.
+### Tier 1: System Monitoring & UX
+1. [ ] **Resource Monitoring:** Add a "CPU/GPU Load" indicator to the System view footer.
+2. [ ] **Auto-Cleanup:** Implement a background thread to prune stale `uploads/` and `projects/generated_videos/` older than 7 days.
 
 ### Tier 2: Governance & Maintenance
-1. [ ] **Auto-Cleanup:** Implement a background thread to prune stale `uploads/` and `projects/generated_videos/` older than 7 days.
-2. [ ] **Documentation:** Add a `CONTRIBUTING.md` file explaining the Conductor framework and modular JS structure for future developers.
+1. [ ] **Documentation Refinement:** Add a `CONTRIBUTING.md` file explaining the Conductor framework and modular JS structure for future developers.
+2. [ ] **Unit Test Expansion:** Create automated tests for the new `AudioPostProcessor` and `AuditManager` classes.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Apply **Technoid Brutalist Polish** to the System view UI.
 - [x] Implement **Generation Audit Log** (audit.json) for transparency.
 - [x] Implement **Audio Effects** (EQ & Reverb) for atmospheric polish.
 - [x] Implement **Scene Search** keyword-based prompt suggestions for LTX-Video.

@@ -522,3 +522,66 @@ input[type="range"]::-webkit-slider-thumb {
     animation: scanlineFlicker 10s linear infinite;
     pointer-events: none;
 }
+
+/* --- Technoid Brutalist Extensions --- */
+
+.card-brutalist {
+    background: var(--bg-card);
+    border: 2px solid var(--accent);
+    box-shadow: 4px 4px 0px #000, 8px 8px 0px var(--accent-glow);
+    padding: 24px;
+    transition: all 0.1s;
+}
+
+.card-brutalist:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px #000, 12px 12px 0px var(--accent-glow);
+}
+
+.volt-text {
+    color: var(--accent);
+    text-shadow: 0 0 8px var(--accent-glow);
+}
+
+.badge-status {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    font-size: 0.65rem;
+    border: 1px solid currentColor;
+    letter-spacing: 1px;
+}
+
+.badge-success { color: var(--success); }
+.badge-warn { color: #f59e0b; }
+.badge-danger { color: var(--danger); }
+
+.label-industrial {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.status-item {
+    border-left: 2px solid var(--border);
+    padding-left: 12px;
+}
+
+.status-val {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+}
