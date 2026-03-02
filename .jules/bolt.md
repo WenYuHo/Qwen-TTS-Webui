@@ -48,3 +48,7 @@
 ## 2026-03-01 - [Unified Inference Cache for Mixed/Cloned Voices]
 **Learning:** Cloned voices used within "Mix" profiles were previously extracted independently from direct clones, doubling the ML overhead for projects that utilize both. Unifying the `prompt_cache` and `clone_embedding_cache` ensures that a single extraction benefit all downstream users of that asset. Additionally, caching full `VoiceClonePromptItem` objects for mixed voices (using a `mix:` prefix) eliminates redundant JSON parsing and vector arithmetic during batch synthesis.
 **Action:** Always check for existing `VoiceClonePromptItem` in the unified cache before triggering a new extraction or mix calculation.
+
+## 2026-03-01 - [Mel Spectrogram Caching]
+**Learning:** The `mel_spectrogram` function, critical for speaker embedding extraction, was repeatedly generating Mel filterbanks and Hann windows on every call, then transferring them from CPU to GPU. Implementing module-level global caching for these tensors provides a ~5.6x speedup (from 23ms to 4ms on CPU) for the function itself.
+**Action:** Cache static mathematical components (filters, windows, kernels) in frequently-called ML preprocessing functions, ensuring the cache key includes the target `device` to avoid cross-device tensor errors.
