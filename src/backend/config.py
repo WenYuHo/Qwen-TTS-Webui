@@ -2,6 +2,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from typing import Optional
 from dotenv import load_dotenv
 
 # Load .env file
@@ -117,3 +118,46 @@ VOICE_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 # Shared assets for BGM/SFX
 SHARED_ASSETS_DIR = BASE_DIR / "shared_assets"
 SHARED_ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+
+# --- LTX Video Generation Config ---
+VIDEO_OUTPUT_DIR = PROJECTS_DIR / "generated_videos"
+VIDEO_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+LTX_MODELS_PATH = MODELS_PATH / "LTX-Video"
+
+def is_ltx_available() -> bool:
+    """Check if any LTX model checkpoints are present."""
+    if not LTX_MODELS_PATH.exists():
+        return False
+    # Check for either LTX-2 (checkpoint + gemma) or LTX-Video (safetensors)
+    return (find_ltx_model("checkpoint") is not None and find_ltx_model("gemma_dir") is not None) or \
+           find_ltx_model("ltxv_checkpoint") is not None
+
+def find_ltx_model(key: str) -> Optional[Path]:
+    """Resolve specific LTX model components within LTX_MODELS_PATH."""
+    if not LTX_MODELS_PATH.exists():
+        return None
+        
+    patterns = {
+        "checkpoint": "**/ltx2_distill_checkpoint.pth",
+        "gemma_dir": "**/gemma_2b_distill",
+        "spatial_upsampler": "**/ltx2_spatial_upsampler.pth",
+        "distilled_lora": "**/ltx2_distilled_lora.safetensors",
+        "ltxv_checkpoint": "**/ltx-video-2b-v0.9.safetensors", # Smallest model
+    }
+    
+    if key not in patterns:
+        return None
+        
+    matches = list(LTX_MODELS_PATH.glob(patterns[key]))
+    if matches:
+        # Return the first match (usually there should only be one)
+        return matches[0]
+        
+    # Also check if it's a directory (for gemma_dir)
+    if key == "gemma_dir":
+        for p in LTX_MODELS_PATH.rglob("*"):
+            if p.is_dir() and p.name == "gemma_2b_distill":
+                return p
+                
+    return None

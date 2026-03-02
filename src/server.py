@@ -5,6 +5,11 @@ from fastapi.responses import FileResponse
 from pathlib import Path
 
 from backend.api import voices, generation, projects, tasks, models, assets
+try:
+    from backend.api import video
+except ImportError:
+    video = None
+
 from backend import server_state
 from backend.config import logger
 
@@ -26,6 +31,8 @@ app.include_router(projects.router)
 app.include_router(tasks.router)
 app.include_router(models.router)
 app.include_router(assets.router)
+if video:
+    app.include_router(video.router)
 
 # Health check
 @app.get("/api/health")
