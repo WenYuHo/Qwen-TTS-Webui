@@ -54,8 +54,22 @@ def run_video_generation_task(task_id: str, request: VideoGenerationRequest):
         )
 
 
+def _generate_srt(text: str, duration_sec: float) -> str:
+    """Simple SRT generator for a single block of text."""
+    def format_time(seconds: float) -> str:
+        ms = int((seconds % 1) * 1000)
+        s = int(seconds % 60)
+        m = int((seconds // 60) % 60)
+        h = int(seconds // 3600)
+        return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
+
+    start = format_time(0)
+    end = format_time(duration_sec)
+    return f"1\n{start} --> {end}\n{text}\n"
+
+
 def run_narrated_video_task(task_id: str, request: NarratedVideoRequest):
-    """Background task for narrated video (TTS + video combined)."""
+    """Background task for narrated video (TTS + video combined) with subtitle generation."""
     try:
         video_engine = _get_video_engine()
         tts_engine = server_state.engine
@@ -74,6 +88,8 @@ def run_narrated_video_task(task_id: str, request: NarratedVideoRequest):
             profile=profile,
         )
 
+        duration = len(wav) / sr
+
         server_state.task_manager.update_task(
             task_id, progress=40, message="Generating video..."
         )
@@ -87,11 +103,24 @@ def run_narrated_video_task(task_id: str, request: NarratedVideoRequest):
             height=request.height,
         )
 
+        # 3. Generate and save SRT
+        try:
+            video_filename = result.get("video_path")
+            if video_filename:
+                srt_content = _generate_srt(request.narration_text, duration)
+                srt_path = VIDEO_OUTPUT_DIR / f"{Path(video_filename).stem}.srt"
+                with open(srt_path, "w", encoding="utf-8") as f:
+                    f.write(srt_content)
+                result["srt_path"] = srt_path.name
+                logger.info(f"Generated subtitles: {srt_path.name}")
+        except Exception as srt_err:
+            logger.error(f"Failed to generate SRT: {srt_err}")
+
         server_state.task_manager.update_task(
             task_id,
             status=server_state.TaskStatus.COMPLETED,
             progress=100,
-            message="Narrated video ready",
+            message="Narrated video ready with subtitles",
             result=result,
         )
     except Exception as e:

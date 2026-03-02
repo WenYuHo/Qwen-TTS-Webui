@@ -3,14 +3,15 @@
 ## Prioritized Backlog
 
 ### Tier 1: Feature Expansion
-1. [ ] **Subtitle Generation:** Add a feature to automatically generate and export `.srt` or `.vtt` files for narrated videos.
+1. [ ] **Phoneme Editor:** Create a UI component to fix mispronunciations using phonetic inputs.
 
 ### Tier 2: Refinement
-1. [ ] Create a UI component for a "Phoneme Editor" to fix mispronunciations using phonetic inputs.
-2. [ ] Refactor the synthesis engine to support Dual-Track streaming for ~100ms latency previews.
-3. [ ] Add sliders for Guidance Scale, Inference Steps, and Seed selection in the Video Generation panel.
+1. [ ] Refactor the synthesis engine to support Dual-Track streaming for ~100ms latency previews.
+2. [ ] Add sliders for Guidance Scale, Inference Steps, and Seed selection in the Video Generation panel.
+3. [ ] Integrate AI watermarking (audible or metadata) for compliance with transparency standards.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Implement **Subtitle Generation** (.srt) for narrated videos.
 - [x] Implement **Instruction Brackets** support for emotional cues in scripts.
 - [x] Document the `TaskManager` class in `src/backend/task_manager.py`.
 - [x] Add type hints to `src/backend/podcast_engine.py` methods.
