@@ -623,13 +623,15 @@ class Qwen3TTSModel:
 
         ref_ids = None
         if ref_texts_for_ids is not None:
-            ref_ids = []
-            for i, rt in enumerate(ref_texts_for_ids):
-                if rt is None or rt == "":
-                    ref_ids.append(None)
-                else:
-                    ref_tok = self._tokenize_texts([self._build_ref_text(rt)])[0]
-                    ref_ids.append(ref_tok)
+            # ⚡ Bolt: Batched tokenization for reference texts
+            non_empty_indices = [i for i, rt in enumerate(ref_texts_for_ids) if rt and rt != ""]
+            ref_ids = [None] * len(ref_texts_for_ids)
+
+            if non_empty_indices:
+                non_empty_texts = [self._build_ref_text(ref_texts_for_ids[i]) for i in non_empty_indices]
+                tokenized = self._tokenize_texts(non_empty_texts)
+                for idx, tok in zip(non_empty_indices, tokenized):
+                    ref_ids[idx] = tok
 
         gen_kwargs = self._merge_generate_kwargs(**kwargs)
 
@@ -740,12 +742,14 @@ class Qwen3TTSModel:
 
         input_ids = self._tokenize_texts([self._build_assistant_text(t) for t in texts])
 
-        instruct_ids: List[Optional[torch.Tensor]] = []
-        for ins in instructs:
-            if ins is None or ins == "":
-                instruct_ids.append(None)
-            else:
-                instruct_ids.append(self._tokenize_texts([self._build_instruct_text(ins)])[0])
+        # ⚡ Bolt: Batched tokenization for instructions
+        instruct_ids: List[Optional[torch.Tensor]] = [None] * len(instructs)
+        non_empty_indices = [i for i, ins in enumerate(instructs) if ins and ins != ""]
+        if non_empty_indices:
+            non_empty_texts = [self._build_instruct_text(instructs[i]) for i in non_empty_indices]
+            tokenized = self._tokenize_texts(non_empty_texts)
+            for idx, tok in zip(non_empty_indices, tokenized):
+                instruct_ids[idx] = tok
 
         gen_kwargs = self._merge_generate_kwargs(**kwargs)
 
@@ -850,12 +854,14 @@ class Qwen3TTSModel:
 
         input_ids = self._tokenize_texts([self._build_assistant_text(t) for t in texts])
 
-        instruct_ids: List[Optional[torch.Tensor]] = []
-        for ins in instructs:
-            if ins is None or ins == "":
-                instruct_ids.append(None)
-            else:
-                instruct_ids.append(self._tokenize_texts([self._build_instruct_text(ins)])[0])
+        # ⚡ Bolt: Batched tokenization for instructions
+        instruct_ids: List[Optional[torch.Tensor]] = [None] * len(instructs)
+        non_empty_indices = [i for i, ins in enumerate(instructs) if ins and ins != ""]
+        if non_empty_indices:
+            non_empty_texts = [self._build_instruct_text(instructs[i]) for i in non_empty_indices]
+            tokenized = self._tokenize_texts(non_empty_texts)
+            for idx, tok in zip(non_empty_indices, tokenized):
+                instruct_ids[idx] = tok
 
         gen_kwargs = self._merge_generate_kwargs(**kwargs)
 

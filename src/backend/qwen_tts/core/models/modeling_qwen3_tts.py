@@ -189,8 +189,9 @@ class AttentiveStatisticsPooling(nn.Module):
         total = mask.sum(dim=2, keepdim=True)
 
         mean, std = self._compute_statistics(hidden_states, mask / total)
-        mean = mean.unsqueeze(2).repeat(1, 1, seq_length)
-        std = std.unsqueeze(2).repeat(1, 1, seq_length)
+        # ⚡ Bolt: Use .expand() instead of .repeat() to avoid unnecessary memory copies
+        mean = mean.unsqueeze(2).expand(-1, -1, seq_length)
+        std = std.unsqueeze(2).expand(-1, -1, seq_length)
         attention = torch.cat([hidden_states, mean, std], dim=1)
 
         # Apply layers

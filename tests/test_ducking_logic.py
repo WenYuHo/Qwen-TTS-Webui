@@ -22,6 +22,8 @@ def engine():
             self.shared_assets_dir.mkdir(exist_ok=True)
             self.bgm_cache = {}
             self.mix_embedding_cache = {}
+            self.prompt_cache = {}
+            self.clone_embedding_cache = {}
 
         def generate_segment(self, text, profile=None, language="auto", model=None):
             # Return 1s of 0.1 amplitude (some dialogue)

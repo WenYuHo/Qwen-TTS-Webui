@@ -612,7 +612,8 @@ class PodcastEngine:
         # Final normalization to prevent clipping
         max_val = np.max(np.abs(final_wav))
         if max_val > 1.0:
-            final_wav = final_wav / max_val
+            # ⚡ Bolt: Use in-place division to avoid extra array allocation
+            final_wav /= max_val
 
         return {"waveform": final_wav, "sample_rate": sample_rate}
 
