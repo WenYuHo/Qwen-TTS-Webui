@@ -4,7 +4,7 @@ import json
 import numpy as np
 import pytest
 from pathlib import Path
-from src.backend.utils import AudioPostProcessor, AuditManager, StorageManager
+from src.backend.utils import AudioPostProcessor, AuditManager, StorageManager, Profiler, ResourceMonitor
 
 def test_audio_post_processor_eq():
     # Create dummy waveform
@@ -76,3 +76,16 @@ def test_storage_manager(tmp_path):
     
     assert f_new.exists()
     assert not f_old.exists()
+
+def test_profiler():
+    # Test that profiler runs without error
+    with Profiler("Test Profiler"):
+        time.sleep(0.1)
+        x = [i**2 for i in range(1000)]
+
+def test_resource_monitor():
+    stats = ResourceMonitor.get_stats()
+    assert "cpu_percent" in stats
+    assert "ram_percent" in stats
+    assert isinstance(stats["cpu_percent"], (int, float))
+    assert isinstance(stats["ram_percent"], (int, float))

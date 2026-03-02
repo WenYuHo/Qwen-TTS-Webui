@@ -2,15 +2,16 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Resilience & Automation
-1. [ ] **Unit Test Expansion:** Create automated tests for the new `Profiler` and `ResourceMonitor` classes in `tests/test_system_utils.py`.
+### Tier 1: Intelligence & Search
+1. [ ] **Scene Search AI Upgrade:** Enhance the prompt suggestion logic with better cinematic components and action extraction.
 2. [ ] **Error UI Refinement:** Enhance the `ErrorDisplay` component to include a "Copy Log" button for easier troubleshooting.
 
-### Tier 2: Intelligence & Features
-1. [ ] **Scene Search AI Upgrade:** Enhance the prompt suggestion logic with better cinematic components and action extraction.
-2. [ ] **Sub-Tab Autosave:** Ensure that the active system sub-tab (Inventory, Phonemes, etc.) is preserved across page refreshes.
+### Tier 2: Performance & Automation
+1. [ ] **Sub-Tab Autosave:** Ensure that the active system sub-tab (Inventory, Phonemes, etc.) is preserved across page refreshes.
+2. [ ] **Auto-Cleanup Stats:** Add a "Last Cleanup" timestamp and "Total Files Pruned" metric to the System Resources view.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Expand **automated unit tests** to cover Profiler, ResourceMonitor, and StorageManager.
 - [x] Apply **Technoid Brutalist UI Unification** across all Studio views.
 - [x] Implement **Help System** with context-sensitive command reference.
 - [x] Implement **Toast Notifications** (non-blocking) replacing all `alert()` calls.
