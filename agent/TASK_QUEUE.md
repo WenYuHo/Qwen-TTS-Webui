@@ -3,14 +3,15 @@
 ## Prioritized Backlog
 
 ### Tier 1: Advanced Features & UX
-1. [ ] **Generator-Based Streaming:** Refactor `Qwen3TTSModel` and `PodcastEngine` to support true token-by-token or chunk-by-chunk generator streaming for ultra-low latency.
-2. [ ] **Scene Search:** Implement script-keyword-based prompt suggestions for LTX-Video generation.
+1. [ ] **Scene Search:** Implement script-keyword-based prompt suggestions for LTX-Video generation.
+2. [ ] **Audio Effects:** Add a simple EQ and Reverb control to the Production sidebar for atmospheric polish.
 
 ### Tier 2: Governance & Integration
 1. [ ] **Audit Log:** Create a system-wide audit log for all generation tasks (TTS, Video, Dubbing) stored in `projects/audit.json`.
 2. [ ] **UI Polish:** Implement "Technoid Brutalist" style improvements to the new System and Production cards.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Implement **Parallel Streaming Synthesis** with look-ahead for ultra-low latency previews.
 - [x] Implement **Persistent System Settings** (settings.json).
 - [x] Implement **Phoneme Editor Bulk Import** (JSON).
 - [x] Implement **AI Watermarking** (Audible & Visible).

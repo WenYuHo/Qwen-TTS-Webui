@@ -17,10 +17,14 @@ from .config import BASE_DIR, logger
 from .video_engine import VideoEngine
 from .utils import phoneme_manager
 
+from concurrent.futures import ThreadPoolExecutor
+import queue
+
 class PodcastEngine:
     def __init__(self):
         self.upload_dir = Path("uploads").resolve()
         self.upload_dir.mkdir(parents=True, exist_ok=True)
+        self.executor = ThreadPoolExecutor(max_workers=4)
         # Caches
         self.preset_embeddings = {}
         self.clone_embedding_cache = {}
@@ -339,28 +343,36 @@ class PodcastEngine:
     def stream_synthesize(self, text: str, profile: Dict[str, Any], language: str = "auto", instruct: Optional[str] = None):
         """
         Yields audio chunks for the given text and profile to support low-latency previews.
-        Uses a simple sentence-based chunking strategy for the 'Dual-Track' streaming feel.
+        Uses a parallel look-ahead strategy to synthesize chunks while yielding in order.
         """
         import re
-        # Split text into small chunks (sentences or phrases)
+        # 1. Split text into chunks
         chunks = re.split(r'([.!?。！？\n]+)', text)
         processed_chunks = []
         for i in range(0, len(chunks)-1, 2):
             c = chunks[i] + chunks[i+1]
-            if c.strip():
-                processed_chunks.append(c.strip())
+            if c.strip(): processed_chunks.append(c.strip())
         if len(chunks) % 2 == 1 and chunks[-1].strip():
             processed_chunks.append(chunks[-1].strip())
 
         if not processed_chunks:
             processed_chunks = [text]
 
+        # 2. Map chunks to futures for parallel execution
+        # We limit max_workers to prevent OOM on small GPUs
+        futures = []
         for chunk_text in processed_chunks:
+            # We must pass required context to the executor
+            f = self.executor.submit(self.generate_segment, chunk_text, profile, language, None, instruct)
+            futures.append(f)
+
+        # 3. Yield results in order as they complete
+        for f in futures:
             try:
-                wav, sr = self.generate_segment(chunk_text, profile, language=language, instruct=instruct)
+                wav, sr = f.result()
                 yield wav, sr
             except Exception as e:
-                logger.error(f"Streaming chunk failed: {e}")
+                logger.error(f"Streaming chunk future failed: {e}")
                 continue
 
     def generate_voice_changer(self, source_audio: str, target_profile: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
