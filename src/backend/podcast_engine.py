@@ -104,6 +104,30 @@ class PodcastEngine:
         self.video_audio_cache[video_path] = extracted_path
         return extracted_path
 
+    def stream_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None, ducking_level: float = 0.0, eq_preset: str = "flat", reverb_level: float = 0.0):
+        """
+        Yields synthesized audio blocks sequentially for low-latency podcast playback.
+        BGM and Ducking are not applied in this mode (designed for rapid preview).
+        """
+        for item in script:
+            try:
+                role = item["role"]
+                profile = profiles.get(role, {"type": "preset", "value": "Ryan"})
+                # Apply phonetic overrides
+                text = phoneme_manager.apply(item["text"])
+                
+                # Synthesis
+                wav, sr = self.generate_segment(text, profile, language=item.get("language", "auto"), instruct=item.get("instruct"))
+                
+                # Apply effects
+                wav = AudioPostProcessor.apply_eq(wav, sr, preset=eq_preset)
+                wav = AudioPostProcessor.apply_reverb(wav, sr, intensity=reverb_level)
+                
+                yield wav, sr, item
+            except Exception as e:
+                logger.error(f"Streaming podcast block failed: {e}")
+                continue
+
     def transcribe_audio(self, audio_path: str) -> str:
         """Transcribe audio or video file with caching."""
         resolved = self._resolve_paths(audio_path)

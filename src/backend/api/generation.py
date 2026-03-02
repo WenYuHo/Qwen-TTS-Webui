@@ -96,6 +96,26 @@ async def generate_segment(request: PodcastRequest, background_tasks: Background
 @router.post("/podcast")
 async def generate_podcast(request: PodcastRequest, background_tasks: BackgroundTasks):
     validate_request(request)
+    
+    if request.stream:
+        try:
+            # Map profiles similarly to run_synthesis_task
+            profiles_map = {p["role"]: {"type": p["type"], "value": p["value"]} for p in request.profiles}
+            
+            def audio_stream():
+                for wav, sr, item in server_state.engine.stream_podcast(
+                    script=[line.model_dump() for line in request.script],
+                    profiles=profiles_map,
+                    eq_preset=request.eq_preset or "flat",
+                    reverb_level=request.reverb_level or 0.0
+                ):
+                    yield numpy_to_wav_bytes(wav, sr).read()
+            
+            return StreamingResponse(audio_stream(), media_type="audio/wav")
+        except Exception as e:
+            logger.error(f"Streaming podcast failed: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail="Streaming podcast failed")
+
     task_id = server_state.task_manager.create_task("podcast_generation", {"segments": len(request.script)})
     background_tasks.add_task(run_synthesis_task, task_id, True, request)
     return {"task_id": task_id, "status": server_state.TaskStatus.PENDING}

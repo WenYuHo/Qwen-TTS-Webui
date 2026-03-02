@@ -27,6 +27,7 @@ class PodcastRequest(BaseModel):
     ducking_level: Optional[float] = 0.0
     eq_preset: Optional[str] = "flat"
     reverb_level: Optional[float] = 0.0
+    stream: Optional[bool] = False
 
 class S2SRequest(BaseModel):
     source_audio: str
