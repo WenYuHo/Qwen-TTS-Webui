@@ -111,19 +111,28 @@ class PodcastEngine:
         actual_path = str(resolved[0])
         if VideoEngine.is_video(actual_path):
             actual_path = self._extract_audio_with_cache(actual_path)
-        try:
-            path_obj = Path(actual_path)
-            if path_obj.exists():
+
+        path_obj = Path(actual_path)
+        cache_key = None
+        if path_obj.exists():
+            try:
                 stat = path_obj.stat()
                 cache_key = f"{actual_path}:{stat.st_size}:{stat.st_mtime}"
                 if cache_key in self.transcription_cache:
                     return self.transcription_cache[cache_key]
-        except Exception: pass
+            except Exception: pass
         if self._whisper_model is None:
             import whisper
             self._whisper_model = whisper.load_model("base")
         result = self._whisper_model.transcribe(actual_path)
         text = result["text"]
+        if cache_key:
+            try:
+                # ⚡ Bolt: Simple cache size management
+                if len(self.transcription_cache) > 1000:
+                    self.transcription_cache.clear()
+                self.transcription_cache[cache_key] = text
+            except Exception: pass
         return text
 
     def get_speaker_embedding(self, profile: Dict[str, str], model: Optional[Any] = None) -> Optional[torch.Tensor]:
@@ -389,6 +398,19 @@ class PodcastEngine:
     def dub_audio(self, audio_path: str, target_lang: str) -> Optional[Dict[str, Any]]:
         text = self.transcribe_audio(audio_path)
         trans_lang = 'zh-CN' if target_lang == 'zh' else target_lang
-        translated_text = GoogleTranslator(source='auto', target=trans_lang).translate(text)
+
+        # ⚡ Bolt: Cache translation results with hashed keys to avoid redundant API calls and save memory
+        import hashlib
+        text_hash = hashlib.md5(text.encode('utf-8')).hexdigest()
+        cache_key = f"{text_hash}:{trans_lang}"
+
+        if cache_key in self.translation_cache:
+            translated_text = self.translation_cache[cache_key]
+        else:
+            if len(self.translation_cache) > 1000:
+                self.translation_cache.clear()
+            translated_text = GoogleTranslator(source='auto', target=trans_lang).translate(text)
+            self.translation_cache[cache_key] = translated_text
+
         wav, sr = self.generate_segment(translated_text, profile={"type": "clone", "value": audio_path}, language=target_lang)
         return {"waveform": wav, "sample_rate": sr, "text": translated_text}
