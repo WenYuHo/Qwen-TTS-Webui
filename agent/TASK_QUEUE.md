@@ -2,16 +2,18 @@
 
 ## Prioritized Backlog
 
-### Tier 1: System Refinement
-1. [ ] **Phoneme Editor Refinement:** Add a "Bulk Import" feature for phonetic dictionaries.
-2. [ ] **Persistent Settings:** Refactor `api/system.py` to persist `SystemSettings` to a JSON file.
+### Tier 1: Advanced Features & UX
+1. [ ] **Generator-Based Streaming:** Refactor `Qwen3TTSModel` and `PodcastEngine` to support true token-by-token or chunk-by-chunk generator streaming for ultra-low latency.
+2. [ ] **Scene Search:** Implement script-keyword-based prompt suggestions for LTX-Video generation.
 
-### Tier 2: Performance & UX
-1. [ ] Refactor the synthesis engine to support true generator-based streaming for even lower latency.
-2. [ ] Implement "Scene Search" for LTX-Video to suggest prompts based on script keywords.
+### Tier 2: Governance & Integration
+1. [ ] **Audit Log:** Create a system-wide audit log for all generation tasks (TTS, Video, Dubbing) stored in `projects/audit.json`.
+2. [ ] **UI Polish:** Implement "Technoid Brutalist" style improvements to the new System and Production cards.
 
 ## Completed (Mar 2026 Refactor)
-- [x] Implement **AI Watermarking** (Audible & Visible) for AI-generated content.
+- [x] Implement **Persistent System Settings** (settings.json).
+- [x] Implement **Phoneme Editor Bulk Import** (JSON).
+- [x] Implement **AI Watermarking** (Audible & Visible).
 - [x] Implement **LTX-Video Advanced Tuning** (Guidance, Steps, Seed).
 - [x] Implement **Dual-Track Streaming TTS** for low-latency (~100ms) previews.
 - [x] Implement **Phoneme Editor** UI and backend for custom pronunciation fixes.

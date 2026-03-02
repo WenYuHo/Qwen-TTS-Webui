@@ -132,6 +132,7 @@ Object.assign(window, {
     playMixPreview: VoiceLabManager.playMixPreview.bind(VoiceLabManager),
     addPhonemeOverride: SystemManager.addPhonemeOverride.bind(SystemManager),
     removePhonemeOverride: SystemManager.removePhonemeOverride.bind(SystemManager),
+    importPhonemes: SystemManager.importPhonemes.bind(SystemManager),
     updateWatermarkSettings: SystemManager.updateWatermarkSettings.bind(SystemManager),
     setupDragAndDrop: AssetManager.setupDragAndDrop
 });

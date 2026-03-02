@@ -122,6 +122,29 @@ export const SystemManager = {
         }
     },
 
+    async importPhonemes(input) {
+        if (!input.files || input.files.length === 0) return;
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                const res = await fetch('/api/system/phonemes/bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                this.renderPhonemeList(result.overrides);
+                alert("Phonemes imported successfully");
+            } catch (err) {
+                console.error("Bulk import failed:", err);
+                alert("Failed to import phonemes. Ensure file is valid JSON.");
+            }
+        };
+        reader.readAsText(file);
+    },
+
     async updateWatermarkSettings() {
         const audio = document.getElementById('watermark-audio').checked;
         const video = document.getElementById('watermark-video').checked;

@@ -417,7 +417,9 @@ Bob: Hi Alice, how are you today?"></textarea>
                         <div class="control-group" style="display:flex; gap:8px;">
                             <input type="text" id="phoneme-word" placeholder="Word (e.g. Qwen)" style="flex:1;">
                             <input type="text" id="phoneme-replacement" placeholder="Phonetic (e.g. Kwen)" style="flex:1;">
-                            <button class="btn btn-primary btn-sm" onclick="addPhonemeOverride()"><i class="fas fa-plus"></i></button>
+                            <button class="btn btn-primary btn-sm" onclick="addPhonemeOverride()" title="Add Override"><i class="fas fa-plus"></i></button>
+                            <input type="file" id="phoneme-import-file" style="display:none" onchange="importPhonemes(this)">
+                            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('phoneme-import-file').click()" title="Bulk Import JSON"><i class="fas fa-file-import"></i></button>
                         </div>
                         <div id="phoneme-list" style="margin-top:16px; max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
                             <!-- Phonemes will be listed here -->
