@@ -95,6 +95,44 @@ class LTXVideoEngine:
             else:
                 raise RuntimeError("Failed to resolve an LTX model path.")
 
+    def _apply_video_watermark(self, video_path: str):
+        """Overlays a subtle 'AI Generated' text watermark using OpenCV."""
+        try:
+            from ..api.system import _settings
+            if not _settings.watermark_video:
+                return
+            
+            import cv2
+            cap = cv2.VideoCapture(video_path)
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            
+            # Temporary output path
+            temp_path = video_path.replace(".mp4", "_wm.mp4")
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            out = cv2.VideoWriter(temp_path, fourcc, fps, (w, h))
+            
+            while cap.isOpened():
+                ret, frame = cap.read()
+                if not ret:
+                    break
+                
+                # Overlay text
+                text = "AI Generated"
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                cv2.putText(frame, text, (w - 150, h - 20), font, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+                out.write(frame)
+                
+            cap.release()
+            out.release()
+            
+            # Replace original with watermarked
+            import os
+            os.replace(temp_path, video_path)
+        except Exception as e:
+            logger.error(f"Failed to apply video watermark: {e}")
+
     def generate_video(
         self,
         prompt: str,
@@ -131,6 +169,9 @@ class LTXVideoEngine:
             pipeline_kwargs["seed"] = seed
 
         self._pipeline(**pipeline_kwargs)
+        
+        # Apply watermark
+        self._apply_video_watermark(str(output_path))
 
         logger.info(f"Video generated: {output_path}")
         return {"path": str(output_path), "filename": filename}

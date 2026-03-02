@@ -66,6 +66,7 @@ function switchView(view) {
     if (view === 'system') {
         TaskManager.refreshTasks();
         SystemManager.fetchInventory();
+        SystemManager.loadSystemSettings();
     }
 }
 
@@ -131,6 +132,7 @@ Object.assign(window, {
     playMixPreview: VoiceLabManager.playMixPreview.bind(VoiceLabManager),
     addPhonemeOverride: SystemManager.addPhonemeOverride.bind(SystemManager),
     removePhonemeOverride: SystemManager.removePhonemeOverride.bind(SystemManager),
+    updateWatermarkSettings: SystemManager.updateWatermarkSettings.bind(SystemManager),
     setupDragAndDrop: AssetManager.setupDragAndDrop
 });
 

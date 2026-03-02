@@ -2,15 +2,16 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Advanced Features
-1. [ ] **AI Watermarking:** Integrate visible/audible watermarking or metadata for compliance with transparency standards.
-2. [ ] **Phoneme Editor Refinement:** Add a "Bulk Import" feature for phonetic dictionaries.
+### Tier 1: System Refinement
+1. [ ] **Phoneme Editor Refinement:** Add a "Bulk Import" feature for phonetic dictionaries.
+2. [ ] **Persistent Settings:** Refactor `api/system.py` to persist `SystemSettings` to a JSON file.
 
 ### Tier 2: Performance & UX
 1. [ ] Refactor the synthesis engine to support true generator-based streaming for even lower latency.
 2. [ ] Implement "Scene Search" for LTX-Video to suggest prompts based on script keywords.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Implement **AI Watermarking** (Audible & Visible) for AI-generated content.
 - [x] Implement **LTX-Video Advanced Tuning** (Guidance, Steps, Seed).
 - [x] Implement **Dual-Track Streaming TTS** for low-latency (~100ms) previews.
 - [x] Implement **Phoneme Editor** UI and backend for custom pronunciation fixes.

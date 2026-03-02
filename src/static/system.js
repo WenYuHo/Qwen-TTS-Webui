@@ -122,6 +122,39 @@ export const SystemManager = {
         }
     },
 
+    async updateWatermarkSettings() {
+        const audio = document.getElementById('watermark-audio').checked;
+        const video = document.getElementById('watermark-video').checked;
+
+        try {
+            await fetch('/api/system/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ watermark_audio: audio, watermark_video: video })
+            });
+            console.log("Watermark settings updated");
+        } catch (err) {
+            console.error("Failed to update settings:", err);
+        }
+    },
+
+    async loadSystemSettings() {
+        try {
+            const res = await fetch('/api/system/settings');
+            const data = await res.json();
+
+            if (document.getElementById('watermark-audio')) {
+                document.getElementById('watermark-audio').checked = data.watermark_audio;
+            }
+            if (document.getElementById('watermark-video')) {
+                document.getElementById('watermark-video').checked = data.watermark_video;
+            }
+        } catch (err) {
+            console.error("Failed to load settings:", err);
+        }
+    }
+    };
+
     async triggerDownload(repoId) {
         try {
             const res = await fetch('/api/models/download', {

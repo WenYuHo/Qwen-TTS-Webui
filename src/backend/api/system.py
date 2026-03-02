@@ -8,6 +8,23 @@ class PhonemeOverride(BaseModel):
     word: str
     phonetic: str
 
+class SystemSettings(BaseModel):
+    watermark_audio: bool = True
+    watermark_video: bool = True
+
+# In-memory settings for now (could be persisted to file later)
+_settings = SystemSettings()
+
+@router.get("/settings")
+async def get_settings():
+    return _settings
+
+@router.post("/settings")
+async def update_settings(settings: SystemSettings):
+    global _settings
+    _settings = settings
+    return {"status": "ok", "settings": _settings}
+
 @router.get("/phonemes")
 async def get_phonemes():
     return {"overrides": phoneme_manager.overrides}

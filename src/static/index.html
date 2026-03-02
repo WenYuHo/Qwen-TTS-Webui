@@ -423,6 +423,23 @@ Bob: Hi Alice, how are you today?"></textarea>
                             <!-- Phonemes will be listed here -->
                         </div>
                     </div>
+
+                    <div class="card">
+                        <h2 style="margin-bottom:16px; font-size: 1.1rem;">AI Safety & Watermarking</h2>
+                        <div class="control-group">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:12px;">
+                                <input type="checkbox" id="watermark-audio" checked onchange="updateWatermarkSettings()">
+                                <span class="label" style="margin:0;">Include Audible Watermark (TTS)</span>
+                            </label>
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                <input type="checkbox" id="watermark-video" checked onchange="updateWatermarkSettings()">
+                                <span class="label" style="margin:0;">Overlay Visible Watermark (Video)</span>
+                            </label>
+                        </div>
+                        <p style="font-size:0.75rem; opacity:0.6; margin-top:12px;">
+                            Watermarking helps identify AI-generated content for transparency and compliance.
+                        </p>
+                    </div>
                 </div>
 
                 <div class="card" style="margin-top:24px;">

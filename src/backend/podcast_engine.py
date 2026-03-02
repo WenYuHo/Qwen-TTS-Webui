@@ -177,9 +177,33 @@ class PodcastEngine:
             return emb
         return None
 
+    def _apply_audio_watermark(self, wav: np.ndarray, sr: int) -> np.ndarray:
+        """Appends a subtle, inaudible high-frequency tone as a digital watermark."""
+        try:
+            from .api.system import _settings
+            if not _settings.watermark_audio:
+                return wav
+            
+            # Create a 0.1s 20kHz tone (mostly inaudible to humans but detectable)
+            duration = 0.1
+            t = np.linspace(0, duration, int(sr * duration), False)
+            tone = 0.05 * np.sin(2 * np.pi * 20000 * t)
+            
+            # Fade in/out to avoid clicks
+            fade = int(sr * 0.01)
+            tone[:fade] *= np.linspace(0, 1, fade)
+            tone[-fade:] *= np.linspace(1, 0, fade)
+            
+            return np.concatenate([wav, tone])
+        except Exception:
+            return wav
+
     def generate_segment(self, text: str, profile: Dict[str, Any], language: str = "auto", model: Optional[Any] = None, instruct: Optional[str] = None) -> tuple[np.ndarray, int]:
         """Generates a single audio segment for a given speaker profile with optional emotional instructions."""
         try:
+            # Apply phonetic overrides
+            text = phoneme_manager.apply(text)
+            
             # Priority: explicitly passed instruct > profile['instruct']
             final_instruct = instruct or profile.get("instruct")
 
@@ -280,7 +304,8 @@ class PodcastEngine:
             if not wavs:
                 raise RuntimeError("Engine returned no waveforms")
 
-            return wavs[0], sr
+            final_wav = self._apply_audio_watermark(wavs[0], sr)
+            return final_wav, sr
             
         except Exception as e:
             logger.error(f"Synthesis failed: {e}", exc_info=True)
