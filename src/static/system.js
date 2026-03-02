@@ -125,9 +125,18 @@ export const SystemManager = {
 
     switchSystemSubTab(tab) {
         document.querySelectorAll('.system-sub-tab').forEach(t => t.style.display = 'none');
-        document.getElementById(`system-${tab}-tab`).style.display = 'block';
+        const target = document.getElementById(`system-${tab}-tab`);
+        if (target) {
+            target.style.display = 'block';
+            localStorage.setItem('system_active_subtab', tab);
+        }
         if (tab === 'audit') this.fetchAuditLog();
         if (tab === 'phonemes') this.loadPhonemes();
+    },
+
+    loadSubTabState() {
+        const saved = localStorage.getItem('system_active_subtab');
+        if (saved) this.switchSystemSubTab(saved);
     },
 
     async runEngineBenchmark() {

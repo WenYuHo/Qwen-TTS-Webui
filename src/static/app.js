@@ -85,7 +85,7 @@ function performSwitch(view) {
         TaskManager.refreshTasks();
         SystemManager.fetchInventory();
         SystemManager.loadSystemSettings();
-        SystemManager.fetchAuditLog();
+        SystemManager.loadSubTabState();
         SystemManager.refreshResourceStats();
     }
 }
