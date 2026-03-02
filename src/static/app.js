@@ -4,6 +4,7 @@ import { AssetManager } from './assets.js';
 import { SystemManager } from './system.js';
 import { ProductionManager } from './production.js';
 import { VoiceLabManager } from './voicelab.js';
+import { VideoModal } from './ui_components.js';
 
 const state = {
     currentView: 'speech',
@@ -142,6 +143,8 @@ Object.assign(window, {
     updateWatermarkSettings: SystemManager.updateWatermarkSettings.bind(SystemManager),
     fetchAuditLog: SystemManager.fetchAuditLog.bind(SystemManager),
     refreshResourceStats: SystemManager.refreshResourceStats.bind(SystemManager),
+    showVideoPreview: VideoModal.show.bind(VideoModal),
+    hideVideoModal: VideoModal.hide.bind(VideoModal),
     setupDragAndDrop: AssetManager.setupDragAndDrop
 });
 

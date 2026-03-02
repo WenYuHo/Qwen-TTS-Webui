@@ -2,15 +2,15 @@
 
 ## Prioritized Backlog
 
-### Tier 1: UI & Video
-1. [ ] **Video Preview Modal:** Create a specialized modal for playing generated narrated videos with subtitle overlay support.
-2. [ ] **UI Style Unification:** Apply "Technoid Brutalist" styles to the Voice Studio, Asset Library, and Project Studio views.
+### Tier 1: UI Unification
+1. [ ] **UI Style Unification:** Apply "Technoid Brutalist" styles (Volt accents, sharp 2px borders, status-val readouts) to the Voice Studio, Asset Library, and Project Studio views for a cohesive high-performance aesthetic.
 
 ### Tier 2: Governance & Automation
 1. [ ] **Documentation:** Add a `CONTRIBUTING.md` file explaining the Conductor framework and modular JS structure.
 2. [ ] **Unit Test Expansion:** Create automated tests for the new `AudioPostProcessor`, `AuditManager`, and `StorageManager`.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Implement **Video Preview Modal** with integrated subtitle overlay support.
 - [x] Implement **Project Search** (Filter) for voices, assets, and projects.
 - [x] Implement **Auto-Cleanup** background thread for stale files (7-day retention).
 - [x] Implement **Resource Monitoring** (CPU/RAM/GPU) in System Manager.
