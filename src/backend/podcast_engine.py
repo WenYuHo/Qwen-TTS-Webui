@@ -311,6 +311,33 @@ class PodcastEngine:
         self.mix_embedding_cache[cache_key] = mixed_emb
         return mixed_emb
 
+    def stream_synthesize(self, text: str, profile: Dict[str, Any], language: str = "auto", instruct: Optional[str] = None):
+        """
+        Yields audio chunks for the given text and profile to support low-latency previews.
+        Uses a simple sentence-based chunking strategy for the 'Dual-Track' streaming feel.
+        """
+        import re
+        # Split text into small chunks (sentences or phrases)
+        chunks = re.split(r'([.!?。！？\n]+)', text)
+        processed_chunks = []
+        for i in range(0, len(chunks)-1, 2):
+            c = chunks[i] + chunks[i+1]
+            if c.strip():
+                processed_chunks.append(c.strip())
+        if len(chunks) % 2 == 1 and chunks[-1].strip():
+            processed_chunks.append(chunks[-1].strip())
+
+        if not processed_chunks:
+            processed_chunks = [text]
+
+        for chunk_text in processed_chunks:
+            try:
+                wav, sr = self.generate_segment(chunk_text, profile, language=language, instruct=instruct)
+                yield wav, sr
+            except Exception as e:
+                logger.error(f"Streaming chunk failed: {e}")
+                continue
+
     def generate_voice_changer(self, source_audio: str, target_profile: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Preserve prosody of source while changing voice to target."""
         try:

@@ -1,13 +1,35 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi.responses import StreamingResponse
 from .. import server_state
 from ..utils import numpy_to_wav_bytes
 from ..dub_logic import run_dub_task
 from ..s2s_logic import run_s2s_task
-from .schemas import PodcastRequest, S2SRequest, DubRequest
+from .schemas import PodcastRequest, S2SRequest, DubRequest, StreamingSynthesisRequest
 from ..config import logger
 import io
 
 router = APIRouter(prefix="/api/generate", tags=["generation"])
+
+@router.post("/stream")
+async def stream_synthesis(request: StreamingSynthesisRequest):
+    """
+    Stream audio chunks for low-latency preview.
+    """
+    try:
+        def audio_generator():
+            # Minimal WAV header for the stream might be needed depending on the client
+            # but for simplicity we yield raw WAV bytes from each chunk.
+            for wav, sr in server_state.engine.stream_synthesize(
+                text=request.text,
+                profile=request.profile,
+                language=request.language or "auto"
+            ):
+                yield numpy_to_wav_bytes(wav, sr).read()
+
+        return StreamingResponse(audio_generator(), media_type="audio/wav")
+    except Exception as e:
+        logger.error(f"Streaming synthesis failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Streaming synthesis failed")
 
 def run_synthesis_task(task_id: str, is_podcast: bool, request_data: PodcastRequest):
     try:

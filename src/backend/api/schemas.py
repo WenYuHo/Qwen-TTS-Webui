@@ -34,6 +34,12 @@ class DubRequest(BaseModel):
     source_audio: str
     target_lang: str
 
+class StreamingSynthesisRequest(BaseModel):
+    text: str
+    profile: Dict[str, Any]
+    language: Optional[str] = "auto"
+    instruct: Optional[str] = None
+
 class ProjectBlock(BaseModel):
     id: str
     role: str

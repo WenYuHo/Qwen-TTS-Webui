@@ -3,6 +3,7 @@ import { TaskManager } from './task_manager.js';
 import { AssetManager } from './assets.js';
 import { SystemManager } from './system.js';
 import { ProductionManager } from './production.js';
+import { VoiceLabManager } from './voicelab.js';
 
 const state = {
     currentView: 'speech',
@@ -21,6 +22,7 @@ const state = {
         audioChunks: []
     }
 };
+window.state = state;
 
 function escapeHTML(str) {
     const p = document.createElement('p');
@@ -121,6 +123,12 @@ Object.assign(window, {
     exportStudioBundle: ProductionManager.exportStudioBundle,
     generatePodcast: ProductionManager.generatePodcast,
     triggerDownload: SystemManager.triggerDownload,
+    testVoiceDesign: VoiceLabManager.testVoiceDesign.bind(VoiceLabManager),
+    testVoiceClone: VoiceLabManager.testVoiceClone.bind(VoiceLabManager),
+    testVoiceMix: VoiceLabManager.testVoiceMix.bind(VoiceLabManager),
+    playDesignPreview: VoiceLabManager.playDesignPreview.bind(VoiceLabManager),
+    playClonePreview: VoiceLabManager.playClonePreview.bind(VoiceLabManager),
+    playMixPreview: VoiceLabManager.playMixPreview.bind(VoiceLabManager),
     addPhonemeOverride: SystemManager.addPhonemeOverride.bind(SystemManager),
     removePhonemeOverride: SystemManager.removePhonemeOverride.bind(SystemManager),
     setupDragAndDrop: AssetManager.setupDragAndDrop
