@@ -178,5 +178,14 @@ export const VoiceLabManager = {
             player.src = window.state.voicelab.lastMixedPath;
             player.play();
         }
+    },
+
+    filterVoiceLibrary() {
+        const query = document.getElementById('voice-search').value.toLowerCase();
+        const cards = document.querySelectorAll('#voice-library-grid .voice-card');
+        cards.forEach(card => {
+            const name = card.querySelector('strong')?.innerText.toLowerCase() || '';
+            card.style.display = name.includes(query) ? 'flex' : 'none';
+        });
     }
 };

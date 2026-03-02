@@ -103,5 +103,14 @@ export const AssetManager = {
     playAsset(name) {
         const audio = new Audio(`/api/assets/download/${name}`);
         audio.play();
+    },
+
+    filterAssets() {
+        const query = document.getElementById('asset-search').value.toLowerCase();
+        const cards = document.querySelectorAll('#asset-library-grid .asset-card');
+        cards.forEach(card => {
+            const name = card.querySelector('strong')?.innerText.toLowerCase() || '';
+            card.style.display = name.includes(query) ? 'flex' : 'none';
+        });
     }
 };

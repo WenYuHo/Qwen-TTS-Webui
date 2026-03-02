@@ -145,8 +145,12 @@
                 </div>
 
                 <div class="view-header" style="margin-top: 48px;">
-                    <div class="view-title">
+                    <div class="view-title" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
                         <h2 tabindex="-1">My Voice Library</h2>
+                        <div style="width:300px; position:relative;">
+                            <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.5;"></i>
+                            <input type="text" id="voice-search" placeholder="Filter voices..." style="padding: 8px 8px 8px 36px; font-size:0.8rem; border-radius:4px;" oninput="filterVoiceLibrary()">
+                        </div>
                     </div>
                 </div>
                 <div id="voice-library-grid" class="grid-2" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
@@ -158,9 +162,15 @@
             <!-- View: Asset Library -->
             <div id="assets-view" class="view-container">
                 <div class="view-header">
-                    <div class="view-title">
-                        <h1 tabindex="-1">Shared Asset Library</h1>
-                        <p>Manage background music and sound effects for the team.</p>
+                    <div class="view-title" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                        <div>
+                            <h1 tabindex="-1">Shared Asset Library</h1>
+                            <p>Manage background music and sound effects.</p>
+                        </div>
+                        <div style="width:300px; position:relative;">
+                            <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.5;"></i>
+                            <input type="text" id="asset-search" placeholder="Filter assets..." style="padding: 8px 8px 8px 36px; font-size:0.8rem; border-radius:4px;" oninput="filterAssets()">
+                        </div>
                     </div>
                     <div>
                         <input type="file" id="asset-upload-input" style="display:none" onchange="uploadAsset(this)">
@@ -181,7 +191,11 @@
                         <h1 tabindex="-1">Project Studio</h1>
                         <p>Create multi-character stories and audio dramas.</p>
                     </div>
-                    <div style="display:flex; gap:12px;">
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <div style="width:200px; position:relative;">
+                            <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.5;"></i>
+                            <input type="text" id="project-search" placeholder="Filter projects..." style="padding: 6px 8px 6px 36px; font-size:0.75rem; border-radius:4px;" oninput="filterProjects()">
+                        </div>
                         <select id="project-select" class="btn btn-secondary btn-sm" style="width:160px;" aria-label="Select project">
                             <option value="">(New Project)</option>
                         </select>

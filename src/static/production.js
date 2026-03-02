@@ -134,5 +134,16 @@ export const ProductionManager = {
         } catch (err) {
             console.error("Suggestion failed:", err);
         }
+    },
+
+    filterProjects() {
+        const query = document.getElementById('project-search').value.toLowerCase();
+        const select = document.getElementById('project-select');
+        const options = select.querySelectorAll('option');
+        options.forEach(opt => {
+            if (opt.value === "") return; // Don't filter placeholder
+            const name = opt.innerText.toLowerCase();
+            opt.style.display = name.includes(query) ? 'block' : 'none';
+        });
     }
 };

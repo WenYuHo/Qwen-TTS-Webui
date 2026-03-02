@@ -2,15 +2,16 @@
 
 ## Prioritized Backlog
 
-### Tier 1: UI & Search
-1. [ ] **Project Search:** Add search/filter bars to the "My Voice Library", "Project Studio", and "Asset Library" views.
-2. [ ] **Video Preview Modal:** Create a specialized modal for playing generated narrated videos instead of just a generic player.
+### Tier 1: UI & Video
+1. [ ] **Video Preview Modal:** Create a specialized modal for playing generated narrated videos with subtitle overlay support.
+2. [ ] **UI Style Unification:** Apply "Technoid Brutalist" styles to the Voice Studio, Asset Library, and Project Studio views.
 
-### Tier 2: Governance & Documentation
-1. [ ] **Documentation Refinement:** Add a `CONTRIBUTING.md` file explaining the Conductor framework and modular JS structure.
-2. [ ] **Unit Test Expansion:** Create automated tests for `AudioPostProcessor`, `AuditManager`, and `StorageManager`.
+### Tier 2: Governance & Automation
+1. [ ] **Documentation:** Add a `CONTRIBUTING.md` file explaining the Conductor framework and modular JS structure.
+2. [ ] **Unit Test Expansion:** Create automated tests for the new `AudioPostProcessor`, `AuditManager`, and `StorageManager`.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Implement **Project Search** (Filter) for voices, assets, and projects.
 - [x] Implement **Auto-Cleanup** background thread for stale files (7-day retention).
 - [x] Implement **Resource Monitoring** (CPU/RAM/GPU) in System Manager.
 - [x] Apply **Technoid Brutalist Polish** to the System view UI.
