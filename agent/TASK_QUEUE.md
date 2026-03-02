@@ -2,16 +2,17 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Documentation & Governance
-1. [ ] **CONTRIBUTING.md:** Add a guide explaining the Conductor framework, Technoid Brutalist design tokens, and modular JS structure for future contributors.
-2. [ ] **Unit Test Expansion:** Create automated tests for `AudioPostProcessor`, `AuditManager`, and `StorageManager`.
+### Tier 1: Testing & Reliability
+1. [ ] **Unit Test Expansion:** Create automated tests for `AudioPostProcessor`, `AuditManager`, and `StorageManager` in a new `tests/test_system_utils.py` file.
+2. [ ] **Model Checkpoint Tests:** Add a diagnostic test to verify that downloaded LTX checkpoints are valid safetensors/pth files.
 
 ### Tier 2: Performance & Polish
-1. [ ] **True Streaming:** Refactor `PodcastEngine` to support generator-based streaming for real-time synthesis during long script production.
-2. [ ] **Scene Search AI:** Upgrade the keyword-based search to use a small LLM or embedding-based search for better LTX-Video prompt suggestions.
+1. [ ] **True Streaming:** Refactor `PodcastEngine` to support generator-based streaming for real-time synthesis.
+2. [ ] **Scene Search AI:** Upgrade keyword-based search to use a small LLM or embedding-based search.
 
 ## Completed (Mar 2026 Refactor)
-- [x] Apply **Technoid Brutalist UI Unification** to all views (Voice, Project, Asset, Dubbing).
+- [x] Create **CONTRIBUTING.md** with framework and design system guidelines.
+- [x] Apply **Technoid Brutalist UI Unification** to all views.
 - [x] Implement **Video Preview Modal** with integrated subtitle overlay support.
 - [x] Implement **Project Search** (Filter) for voices, assets, and projects.
 - [x] Implement **Auto-Cleanup** background thread for stale files.
