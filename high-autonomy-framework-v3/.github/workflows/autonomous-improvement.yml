@@ -1,0 +1,26 @@
+name: Autonomous Improvement
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # 3 AM UTC
+  workflow_dispatch:      # Manual trigger for testing
+
+jobs:
+  improve:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Improver Agent
+        # Note: This is a placeholder for the actual Jules invocation
+        # used in this environment.
+        run: |
+          echo "Triggering daily improvement loop..."
+          # jules --agent improver --task-queue agent/TASK_QUEUE.md

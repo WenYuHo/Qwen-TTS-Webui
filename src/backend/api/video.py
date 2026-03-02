@@ -1,6 +1,7 @@
 """Video generation API router — endpoints for LTX-2 video generation."""
 from fastapi import APIRouter, BackgroundTasks
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 from pathlib import Path
 
 from .. import server_state

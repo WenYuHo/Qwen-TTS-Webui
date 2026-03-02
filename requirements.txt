@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 python-dotenv
+sox
 soundfile
 numpy
 python-multipart
@@ -25,8 +26,7 @@ moviepy
 Pillow
 
 # --- Optional: Video Generation (LTX-Video) ---
-# Install these separately or via studio.bat
-ltx-pipelines
+# Install these separately if needed
 diffusers
 opencv-python
 tqdm
