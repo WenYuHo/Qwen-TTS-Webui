@@ -52,3 +52,7 @@
 ## 2026-03-01 - [Mel Spectrogram Caching]
 **Learning:** The `mel_spectrogram` function, critical for speaker embedding extraction, was repeatedly generating Mel filterbanks and Hann windows on every call, then transferring them from CPU to GPU. Implementing module-level global caching for these tensors provides a ~5.6x speedup (from 23ms to 4ms on CPU) for the function itself.
 **Action:** Cache static mathematical components (filters, windows, kernels) in frequently-called ML preprocessing functions, ensuring the cache key includes the target `device` to avoid cross-device tensor errors.
+
+## 2026-03-02 - [Transcription and Translation Caching]
+**Learning:** Redundant transcription (via Whisper) and translation (via GoogleTranslator API) in dubbing workflows can add significant latency and cost. Implementing a persistent in-memory cache for these operations provides a 5-10x speedup for repeated tasks. To prevent memory leaks, caches should use MD5-hashed keys for large text and implement a size-bounding policy (e.g., clearing after 1000 entries).
+**Action:** Always integrate high-latency ML or network operations with a bounded, content-keyed cache.
