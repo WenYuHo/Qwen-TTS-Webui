@@ -132,7 +132,7 @@ class PodcastEngine:
         if cache_key:
             self.transcription_cache[cache_key] = text
         return text
-    def get_speaker_embedding(self, profile: Dict[str, str], model: Optional[Any] = None) -> torch.Tensor:
+    def get_speaker_embedding(self, profile: Dict[str, str], model: Optional[Any] = None) -> Optional[torch.Tensor]:
         """Extract speaker embedding for any profile, with optional pre-loaded model."""
         # ⚡ Bolt: Check caches first to avoid expensive extraction and model switches
         # Unified cache check: prompt_cache and clone_embedding_cache should be in sync
@@ -176,7 +176,7 @@ class PodcastEngine:
             return emb
         return None
 
-    def generate_segment(self, text: str, profile: Dict[str, Any], language: str = "auto", model: Optional[Any] = None) -> tuple:
+    def generate_segment(self, text: str, profile: Dict[str, Any], language: str = "auto", model: Optional[Any] = None) -> tuple[np.ndarray, int]:
         """Generates a single audio segment for a given speaker profile."""
         try:
             def get_model_wrapper(mtype):
@@ -277,7 +277,7 @@ class PodcastEngine:
             logger.error(f"Synthesis failed: {e}", exc_info=True)
             raise RuntimeError(f"Synthesis failed: {str(e)}") from e
 
-    def _compute_mixed_embedding(self, mix_configs: List[Dict[str, Any]], model: Optional[Any] = None) -> torch.Tensor:
+    def _compute_mixed_embedding(self, mix_configs: List[Dict[str, Any]], model: Optional[Any] = None) -> Optional[torch.Tensor]:
         """Compute a weighted average of multiple speaker embeddings with caching and optional model reuse."""
         # ⚡ Bolt: Cache mix results to avoid redundant tensor ops and model switches
         # Sort by profile values to ensure identical mixes have the same key
@@ -344,7 +344,7 @@ class PodcastEngine:
             logger.error(f"Voice changer failed: {e}")
             raise RuntimeError(f"Voice changer failed: {e}")
 
-    def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None, ducking_level: float = 0.0) -> Dict[str, Any]:
+    def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None, ducking_level: float = 0.0) -> Optional[Dict[str, Any]]:
         sample_rate = 24000
 
         # 1. Pre-map indices to model types for grouping to prevent model thrashing
@@ -617,7 +617,7 @@ class PodcastEngine:
 
         return {"waveform": final_wav, "sample_rate": sample_rate}
 
-    def dub_audio(self, audio_path: str, target_lang: str) -> Dict[str, Any]:
+    def dub_audio(self, audio_path: str, target_lang: str) -> Optional[Dict[str, Any]]:
         """Dub audio by transcribing, translating, and synthesizing."""
         try:
             # 1. Transcribe (Handles Video automatically)
