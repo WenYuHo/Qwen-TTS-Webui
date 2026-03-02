@@ -15,7 +15,7 @@ from .qwen_tts.inference.qwen3_tts_model import VoiceClonePromptItem
 from .model_loader import get_model
 from .config import BASE_DIR, logger
 from .video_engine import VideoEngine
-from .utils import phoneme_manager
+from .utils import phoneme_manager, AudioPostProcessor
 
 from concurrent.futures import ThreadPoolExecutor
 import queue
@@ -417,7 +417,7 @@ class PodcastEngine:
             logger.error(f"Voice changer failed: {e}")
             raise RuntimeError(f"Voice changer failed: {e}")
 
-    def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None, ducking_level: float = 0.0) -> Optional[Dict[str, Any]]:
+    def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None, ducking_level: float = 0.0, eq_preset: str = "flat", reverb_level: float = 0.0) -> Optional[Dict[str, Any]]:
         sample_rate = 24000
 
         # 1. Pre-map indices to model types for grouping to prevent model thrashing
@@ -697,6 +697,10 @@ class PodcastEngine:
         if max_val > 1.0:
             # ⚡ Bolt: Use in-place division to avoid extra array allocation
             final_wav /= max_val
+
+        # 4. Apply Audio Post-Processing (EQ & Reverb)
+        final_wav = AudioPostProcessor.apply_eq(final_wav, sample_rate, preset=eq_preset)
+        final_wav = AudioPostProcessor.apply_reverb(final_wav, sample_rate, intensity=reverb_level)
 
         return {"waveform": final_wav, "sample_rate": sample_rate}
 

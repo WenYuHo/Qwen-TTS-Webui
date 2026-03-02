@@ -6,6 +6,10 @@ export const ProductionManager = {
         const bgm_mood = document.getElementById('bgm-select').value;
         const ducking_level = parseFloat(document.getElementById('ducking-range').value) / 100.0;
         
+        // Audio Effects
+        const eqPreset = document.getElementById('audio-eq').value;
+        const reverbLevel = parseFloat(document.getElementById('audio-reverb').value) / 100.0;
+
         // Video Options
         const videoEnabled = document.getElementById('video-enabled').checked;
         const videoPrompt = document.getElementById('video-prompt').value;

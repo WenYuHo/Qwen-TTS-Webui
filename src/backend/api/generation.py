@@ -40,7 +40,14 @@ def run_synthesis_task(task_id: str, is_podcast: bool, request_data: PodcastRequ
 
         if is_podcast:
             script_data = [line.model_dump() for line in request_data.script]
-            result = server_state.engine.generate_podcast(script_data, profiles=profiles_map, bgm_mood=request_data.bgm_mood, ducking_level=request_data.ducking_level or 0.0)
+            result = server_state.engine.generate_podcast(
+                script_data, 
+                profiles=profiles_map, 
+                bgm_mood=request_data.bgm_mood, 
+                ducking_level=request_data.ducking_level or 0.0,
+                eq_preset=request_data.eq_preset or "flat",
+                reverb_level=request_data.reverb_level or 0.0
+            )
         else:
             line = request_data.script[0]
             profile = profiles_map.get(line.role)

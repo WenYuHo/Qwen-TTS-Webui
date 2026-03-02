@@ -236,6 +236,28 @@ Bob: Hi Alice, how are you today?"></textarea>
                             <input type="range" id="ducking-range" min="0" max="100" value="0" style="width:100%" oninput="document.getElementById('ducking-val').innerText = this.value + '%' ">
                         </div>
 
+                        <span class="label">Audio Post-Processing</span>
+                        <div class="card" style="padding:16px; margin-bottom:24px; background:rgba(255,255,255,0.02);">
+                            <div class="control-group">
+                                <div style="display:flex; justify-content:space-between;">
+                                    <label class="label" style="font-size:0.7rem;">EQ Preset</label>
+                                </div>
+                                <select id="audio-eq" class="btn btn-secondary btn-sm" style="width:100%; font-size:0.7rem; padding:4px;">
+                                    <option value="flat">Flat (Default)</option>
+                                    <option value="broadcast">Radio/Broadcast</option>
+                                    <option value="warm">Warm/Analog</option>
+                                    <option value="bright">Bright/Crisp</option>
+                                </select>
+                            </div>
+                            <div class="control-group" style="margin-bottom:0;">
+                                <div style="display:flex; justify-content:space-between;">
+                                    <label class="label" for="audio-reverb" style="font-size:0.7rem;">Reverb (Atmosphere)</label>
+                                    <span id="reverb-val" style="font-size:0.8rem; opacity:0.7;">0%</span>
+                                </div>
+                                <input type="range" id="audio-reverb" min="0" max="100" value="0" style="width:100%" oninput="document.getElementById('reverb-val').innerText = this.value + '%' ">
+                            </div>
+                        </div>
+
                         <span class="label">Video Generation (Experimental)</span>
                         <div class="card" style="padding:16px; background:rgba(255,255,0,0.05); border-color:rgba(255,255,0,0.2); margin-bottom:24px;">
                             <div class="control-group">

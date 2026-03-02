@@ -55,8 +55,62 @@ class PhonemeManager:
         for word, phonetic in self.overrides.items():
             # Use case-insensitive replacement with word boundaries
             import re
-            pattern = re.compile(re.escape(word), re.IGNORECASE)
+            pattern = re.compile(r'\b' + re.escape(word) + r'\b', re.IGNORECASE)
             modified_text = pattern.sub(phonetic, modified_text)
         return modified_text
 
 phoneme_manager = PhonemeManager()
+
+class AudioPostProcessor:
+    """Applies atmospheric effects like EQ and Reverb to final waveforms."""
+    
+    @staticmethod
+    def apply_eq(wav: np.ndarray, sr: int, preset: str = "flat") -> np.ndarray:
+        """Applies a basic EQ filter based on presets."""
+        if preset == "flat":
+            return wav
+            
+        try:
+            from scipy import signal
+            # Simple 3-band EQ implementation using biquad filters
+            if preset == "broadcast":
+                # Boost bass and high-mids for that radio sound
+                b, a = signal.butter(2, [80 / (sr/2), 5000 / (sr/2)], btype='bandpass')
+                return signal.lfilter(b, a, wav) * 1.5
+            elif preset == "warm":
+                # Low-pass filter to remove harsh highs
+                b, a = signal.butter(2, 3000 / (sr/2), btype='low')
+                return signal.lfilter(b, a, wav)
+            elif preset == "bright":
+                # High-pass filter to emphasize clarity
+                b, a = signal.butter(2, 1000 / (sr/2), btype='high')
+                return signal.lfilter(b, a, wav)
+        except ImportError:
+            return wav
+        return wav
+
+    @staticmethod
+    def apply_reverb(wav: np.ndarray, sr: int, intensity: float = 0.0) -> np.ndarray:
+        """Applies a simple algorithmic reverb (echo-based)."""
+        if intensity <= 0:
+            return wav
+            
+        try:
+            # Simple delay-based reverb (comb filter)
+            delay_samples = int(0.05 * sr) # 50ms delay
+            decay = intensity * 0.4
+            
+            out = wav.copy()
+            # 3-tap simple echo for 'atmospheric' feel
+            for i in range(1, 4):
+                shift = delay_samples * i
+                if shift < len(wav):
+                    out[shift:] += wav[:-shift] * (decay ** i)
+            
+            # Normalize to avoid clipping
+            max_amp = np.max(np.abs(out))
+            if max_amp > 1.0:
+                out /= max_amp
+            return out
+        except Exception:
+            return wav
