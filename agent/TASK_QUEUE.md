@@ -3,8 +3,7 @@
 ## Prioritized Backlog
 
 ### Tier 1: Feature Expansion
-1. [ ] **Instruction Brackets:** Implement support for inline emotional cues like `[whispered]` or `[sarcastic]` in the script editor.
-2. [ ] **Subtitle Generation:** Add a feature to automatically generate and export `.srt` or `.vtt` files for narrated videos.
+1. [ ] **Subtitle Generation:** Add a feature to automatically generate and export `.srt` or `.vtt` files for narrated videos.
 
 ### Tier 2: Refinement
 1. [ ] Create a UI component for a "Phoneme Editor" to fix mispronunciations using phonetic inputs.
@@ -12,6 +11,7 @@
 3. [ ] Add sliders for Guidance Scale, Inference Steps, and Seed selection in the Video Generation panel.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Implement **Instruction Brackets** support for emotional cues in scripts.
 - [x] Document the `TaskManager` class in `src/backend/task_manager.py`.
 - [x] Add type hints to `src/backend/podcast_engine.py` methods.
 - [x] Standardize error handling in `src/backend/api/voices.py` using centralized logger.

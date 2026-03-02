@@ -176,11 +176,11 @@ class PodcastEngine:
             return emb
         return None
 
-    def generate_segment(self, text: str, profile: Dict[str, Any], language: str = "auto", model: Optional[Any] = None) -> tuple[np.ndarray, int]:
-        """Generates a single audio segment for a given speaker profile."""
+    def generate_segment(self, text: str, profile: Dict[str, Any], language: str = "auto", model: Optional[Any] = None, instruct: Optional[str] = None) -> tuple[np.ndarray, int]:
+        """Generates a single audio segment for a given speaker profile with optional emotional instructions."""
         try:
-            def get_model_wrapper(mtype):
-                return get_model(mtype)
+            # Priority: explicitly passed instruct > profile['instruct']
+            final_instruct = instruct or profile.get("instruct")
 
             if profile["type"] == "preset":
                 if model is None:
@@ -188,14 +188,20 @@ class PodcastEngine:
                 wavs, sr = model.generate_custom_voice(
                     text=text,
                     speaker=profile["value"], 
-                    language=language
+                    language=language,
+                    instruct=final_instruct
                 )
             elif profile["type"] == "design":
                 if model is None:
                     model = get_model("VoiceDesign")
+                # VoiceDesign uses the value itself as the instruction, but we can append emotional cues
+                design_instruct = profile["value"]
+                if final_instruct:
+                    design_instruct = f"{design_instruct}, {final_instruct}"
+                
                 wavs, sr = model.generate_voice_design(
                     text=text,
-                    instruct=profile["value"],
+                    instruct=design_instruct,
                     language=language,
                     non_streaming_mode=True
                 )
@@ -238,6 +244,7 @@ class PodcastEngine:
                     text=text,
                     language=language,
                     voice_clone_prompt=prompt,
+                    instruct=final_instruct
                 )
             elif profile.get("type") == "mix":
                 # ⚡ Bolt: Use unified prompt cache for mixed voices too
@@ -263,7 +270,8 @@ class PodcastEngine:
                 wavs, sr = model.generate_voice_clone(
                     text=text,
                     language=language,
-                    voice_clone_prompt=prompt
+                    voice_clone_prompt=prompt,
+                    instruct=final_instruct
                 )
             else:
                 raise ValueError(f"Unknown speaker type: {profile['type']}")

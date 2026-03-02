@@ -174,7 +174,24 @@ function parseScript(text) {
 
     const flush = () => {
         if (currentRole && currentText.length > 0) {
-            script.push({ role: currentRole, text: currentText.join('\n').trim() });
+            const rawText = currentText.join('\n').trim();
+            // Look for emotional instructions in brackets like [whispered]
+            const instructRegex = /\[(.+?)\]/;
+            const match = rawText.match(instructRegex);
+            let instruct = null;
+            let cleanText = rawText;
+
+            if (match) {
+                instruct = match[1];
+                // Remove the bracketed instruction from the synthesis text
+                cleanText = rawText.replace(instructRegex, '').trim();
+            }
+
+            script.push({ 
+                role: currentRole, 
+                text: cleanText,
+                instruct: instruct
+            });
         }
         currentText = [];
     };
