@@ -2,15 +2,16 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Testing & Reliability
-1. [ ] **Model Checkpoint Tests:** Add a diagnostic test to verify that downloaded LTX checkpoints are valid safetensors/pth files.
-2. [ ] **API Load Testing:** Create a script to simulate concurrent generation requests and measure response times.
+### Tier 1: Performance & Search
+1. [ ] **API Load Testing:** Create a script to simulate concurrent generation requests and measure response times.
+2. [ ] **Scene Search AI:** Upgrade keyword-based search to use a small LLM or embedding-based search for better suggestions.
 
 ### Tier 2: Governance & Automation
 1. [ ] **Auto-Documentation:** Implement a script to automatically update `conductor/tech-stack.md` based on `requirements.txt` changes.
-2. [ ] **Performance Profiling:** Integrate `cProfile` into the engine to identify bottleneck functions in the synthesis pipeline.
+2. [ ] **Performance Profiling:** Integrate `cProfile` into the engine to identify bottleneck functions.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Create **Model Checkpoint Tests** (integrity and existence checks).
 - [x] Refactor and unify setup/start into **studio.bat** and **studio.sh**.
 - [x] Consolidate video dependencies into a single **requirements.txt**.
 - [x] Create **automated unit tests** for system utilities.
