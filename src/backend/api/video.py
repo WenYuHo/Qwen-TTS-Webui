@@ -34,6 +34,8 @@ def run_video_generation_task(task_id: str, request: VideoGenerationRequest):
             width=request.width,
             height=request.height,
             num_frames=request.num_frames,
+            guidance_scale=request.guidance_scale,
+            num_inference_steps=request.num_inference_steps,
             seed=request.seed,
         )
 
@@ -101,6 +103,10 @@ def run_narrated_video_task(task_id: str, request: NarratedVideoRequest):
             narration_sr=sr,
             width=request.width,
             height=request.height,
+            num_frames=request.num_frames,
+            guidance_scale=request.guidance_scale,
+            num_inference_steps=request.num_inference_steps,
+            seed=request.seed
         )
 
         # 3. Generate and save SRT

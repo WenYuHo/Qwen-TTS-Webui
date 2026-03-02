@@ -63,3 +63,23 @@ class ProjectData(BaseModel):
 
 class DownloadRequest(BaseModel):
     repo_id: str
+
+class VideoGenerationRequest(BaseModel):
+    prompt: str
+    width: Optional[int] = 768
+    height: Optional[int] = 512
+    num_frames: Optional[int] = 65
+    guidance_scale: Optional[float] = 3.5
+    num_inference_steps: Optional[int] = 30
+    seed: Optional[int] = -1
+
+class NarratedVideoRequest(BaseModel):
+    prompt: str
+    narration_text: str
+    voice_profile: Dict[str, Any]
+    width: Optional[int] = 768
+    height: Optional[int] = 512
+    num_frames: Optional[int] = 65
+    guidance_scale: Optional[float] = 3.5
+    num_inference_steps: Optional[int] = 30
+    seed: Optional[int] = -1

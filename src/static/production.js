@@ -11,6 +11,9 @@ export const ProductionManager = {
         const videoPrompt = document.getElementById('video-prompt').value;
         const [width, height] = document.getElementById('video-res').value.split('x').map(Number);
         const numFrames = parseInt(document.getElementById('video-frames').value);
+        const guidanceScale = parseFloat(document.getElementById('video-guidance').value);
+        const inferenceSteps = parseInt(document.getElementById('video-steps').value);
+        const seed = parseInt(document.getElementById('video-seed').value);
 
         const productionView = document.getElementById('canvas-production-view');
         const isProduction = productionView && productionView.style.display === 'flex';
@@ -46,7 +49,10 @@ export const ProductionManager = {
                         voice_profile: voiceProfile,
                         width: width,
                         height: height,
-                        num_frames: numFrames
+                        num_frames: numFrames,
+                        guidance_scale: guidanceScale,
+                        num_inference_steps: inferenceSteps,
+                        seed: seed
                     })
                 });
                 const data = await res.json();

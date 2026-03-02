@@ -101,6 +101,8 @@ class LTXVideoEngine:
         width: int = 768,
         height: int = 512,
         num_frames: int = 65,
+        guidance_scale: float = 3.5,
+        num_inference_steps: int = 30,
         seed: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Generate a video from a text prompt.
@@ -121,9 +123,11 @@ class LTXVideoEngine:
             "width": width,
             "height": height,
             "num_frames": num_frames,
+            "guidance_scale": guidance_scale,
+            "num_inference_steps": num_inference_steps,
         }
 
-        if seed is not None:
+        if seed is not None and seed != -1:
             pipeline_kwargs["seed"] = seed
 
         self._pipeline(**pipeline_kwargs)
@@ -139,6 +143,8 @@ class LTXVideoEngine:
         width: int = 768,
         height: int = 512,
         num_frames: int = 65,
+        guidance_scale: float = 3.5,
+        num_inference_steps: int = 30,
         seed: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Generate video and combine with narration audio into a single MP4.
@@ -162,6 +168,8 @@ class LTXVideoEngine:
             width=width,
             height=height,
             num_frames=num_frames,
+            guidance_scale=guidance_scale,
+            num_inference_steps=num_inference_steps,
             seed=seed,
         )
 
