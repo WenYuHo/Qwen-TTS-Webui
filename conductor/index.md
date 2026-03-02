@@ -9,6 +9,7 @@
 - [Workflow](./workflow.md)
 - [Code Style Guides](./code_styleguides/)
 - [Agent Improvement & Workflow](./code_styleguides/agent-improvement.md)
+- [API Reference](../API.md)
 
 ## Management
 - [Tracks Registry](./tracks.md)

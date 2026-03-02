@@ -1,6 +1,6 @@
-# Qwen-TTS Podcast Studio (v2.1) 🎙️
+# Qwen-TTS Podcast Studio (v3.0) 🎙️⚡
 
-A standalone, professional web suite for Qwen-TTS production. Create stories, podcasts, and dialogues with custom voices and atmospheric background music.
+A professional, standalone web suite for high-fidelity audio and video production. Create stories, podcasts, and narrated cinematic scenes using **Qwen-TTS** and **LTX-Video**.
 
 ## 🤖 For AI Agents
 
@@ -8,54 +8,53 @@ This repository follows the **Conductor Framework**. Before starting any work, A
 - **Project Index:** [conductor/index.md](conductor/index.md)
 - **Workflow & Rules:** [conductor/workflow.md](conductor/workflow.md)
 - **Agent Style Guide:** [conductor/code_styleguides/agent-improvement.md](conductor/code_styleguides/agent-improvement.md)
-
-Agents should always prioritize the definitions in `conductor/` as the single source of truth for architectural and stylistic decisions.
+- **API Reference:** [API.md](API.md)
 
 ## ✨ Features
 
-- **Professional Dashboard**: Clean 3-column layout (Speakers, Story Canvas, Production).
-- **Hybrid Story Canvas**: Switch between a distraction-free **Draft** and a granular, blocks-based **Production** timeline.
-- **Voice Studio**: 
-  - **Voice Design**: Create voices from text descriptions.
-  - **Voice Cloning**: Clone voices from short 3s audio samples.
-- **Production Timeline**:
-  - **Batch Synthesis**: One-click to generate your entire script.
-  - **Timeline Recovery**: Autosave ensures your dialogue and audio segments survive page refreshes.
-- **Studio Essentials**:
-  - **BGM Mixing**: Layer your podcast with atmospheric moods (Mystery, Tech, Joy, Rain).
-  - **Export/Import**: Backup and share your custom Speaker Library as JSON.
-- **Standalone Power**: Private local virtual environment setup for zero-conflict dependency management.
+- **Multi-Model Studio**: Integrated support for Qwen-TTS (Audio) and LTX-Video (Narrated Video).
+- **Technoid Brutalist UI**: A high-performance, industrial aesthetic with Volt accents and non-blocking interactions.
+- **Voice Lab**: 
+  - **Voice Design**: Create unique voices from text descriptions.
+  - **Pro Cloning**: Clone voices from short 3s audio samples or video files.
+  - **Voice Mixer**: Combine multiple voice profiles with granular weight control.
+- **Production Engine**:
+  - **True Streaming**: Real-time, line-by-line audio synthesis for long scripts.
+  - **Instruction Brackets**: Support for emotional cues like `[whispered]` or `[sarcastic]`.
+  - **Audio Effects**: Integrated EQ presets and algorithmic reverb.
+- **Video Generation**:
+  - **Scene Search**: AI-powered prompt suggestions based on script keywords.
+  - **Narrated Video**: One-click generation of MP4s with audio and SRT subtitles.
+- **System Management**:
+  - **Unified Inventory**: One-click download and health checks for all models.
+  - **Resource Monitor**: Real-time CPU, RAM, and GPU (VRAM) usage tracking.
+  - **Audit Log**: Full transparency for every generation task.
 
 ## 🚀 Getting Started
 
 ### 1. Requirements
 - Python 3.9+
-- Existing Qwen-TTS models (referenced via `.env`)
+- NVIDIA GPU (8GB+ VRAM recommended for Video)
 
-### 2. Installation
-Clone the repository and run the setup script to create a private environment and install AI libraries (Torch, etc.):
+### 2. Installation & Launch
+The **Studio Launcher** handles everything: environment creation, CUDA detection, and dependency installation.
+
 ```bash
-# Double-click or run:
-setup_env.bat
+# Windows:
+studio.bat
+
+# Linux/macOS:
+chmod +x studio.sh
+./studio.sh
 ```
 
-### 3. Configuration
-Copy `.env.example` to `.env` and point to your existing model directory:
-```env
-QWEN_MODELS_DIR=./models
-```
-
-### 4. Usage
-Launch the studio:
-```bash
-start.bat
-```
+### 3. Usage
 Navigate to: `http://localhost:8080`
 
 ## 🛠️ Tech Stack
-- **Backend**: FastAPI, PyTorch (Qwen-TTS).
-- **Frontend**: Vanilla JS (ES6+), CSS3 (Glassmorphism), HTML5.
-- **Audio**: Soundfile, Pydub.
+- **Backend**: FastAPI, PyTorch (Qwen-TTS), LTX-Pipelines.
+- **Frontend**: Vanilla JS (Modular ES6+), CSS3 (Technoid Brutalist).
+- **Audio/Video**: Soundfile, Pydub, MoviePy, OpenCV.
 
 ## 🛡️ License
 Distributed under the MIT License. See `LICENSE` for more information.

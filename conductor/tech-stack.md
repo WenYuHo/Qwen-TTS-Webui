@@ -22,8 +22,8 @@
 ## Python Dependencies
 <!-- DEPENDENCIES_START -->
 - **API:** fastapi, uvicorn, python-multipart
-- **Audio:** soundfile, numpy, pydub, librosa, scipy, torchaudio
-- **AI/ML:** torch, transformers, accelerate, einops, onnxruntime, openai-whisper
+- **Audio:** soundfile, numpy, pydub, librosa, scipy
+- **AI/ML:** transformers, accelerate, einops, onnxruntime, openai-whisper
 - **Video:** ltx-pipelines, diffusers, opencv-python, moviepy, Pillow
 - **Utils:** python-dotenv, psutil, huggingface_hub, deep-translator, beautifulsoup4, tqdm
 - **Testing:** pytest, pytest-asyncio, httpx
