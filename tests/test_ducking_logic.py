@@ -25,7 +25,7 @@ def engine():
             self.prompt_cache = {}
             self.clone_embedding_cache = {}
 
-        def generate_segment(self, text, profile=None, language="auto", model=None):
+        def generate_segment(self, text, profile=None, language="auto", model=None, **kwargs):
             # Return 1s of 0.1 amplitude (some dialogue)
             sr = 24000
             wav = 0.1 * np.ones(sr)
