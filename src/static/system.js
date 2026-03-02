@@ -39,8 +39,86 @@ export const SystemManager = {
                 `;
                 list.appendChild(card);
             });
+            
+            // Also load phonemes when inventory is fetched (on view switch)
+            this.loadPhonemes();
         } catch (err) {
             console.error("Failed to fetch inventory:", err);
+        }
+    },
+
+    async loadPhonemes() {
+        const list = document.getElementById('phoneme-list');
+        if (!list) return;
+
+        try {
+            const res = await fetch('/api/system/phonemes');
+            const data = await res.json();
+            this.renderPhonemeList(data.overrides);
+        } catch (err) {
+            console.error("Failed to load phonemes:", err);
+        }
+    },
+
+    renderPhonemeList(overrides) {
+        const list = document.getElementById('phoneme-list');
+        if (!list) return;
+
+        list.innerHTML = '';
+        Object.entries(overrides).forEach(([word, phonetic]) => {
+            const item = document.createElement('div');
+            item.className = 'card';
+            item.style.padding = '8px 12px';
+            item.style.display = 'flex';
+            item.style.justifyContent = 'space-between';
+            item.style.alignItems = 'center';
+            item.style.fontSize = '0.85rem';
+            item.style.background = 'rgba(255,255,255,0.02)';
+
+            item.innerHTML = `
+                <div>
+                    <strong>${word}</strong> 
+                    <i class="fas fa-arrow-right" style="margin:0 8px; opacity:0.5; font-size:0.7rem;"></i> 
+                    <span style="color:var(--accent)">${phonetic}</span>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="removePhonemeOverride('${word}')" style="padding:2px 6px;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            list.appendChild(item);
+        });
+    },
+
+    async addPhonemeOverride() {
+        const wordInput = document.getElementById('phoneme-word');
+        const phoneticInput = document.getElementById('phoneme-replacement');
+        const word = wordInput.value.trim();
+        const phonetic = phoneticInput.value.trim();
+
+        if (!word || !phonetic) return;
+
+        try {
+            const res = await fetch('/api/system/phonemes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ word, phonetic })
+            });
+            const data = await res.json();
+            this.renderPhonemeList(data.overrides);
+            wordInput.value = '';
+            phoneticInput.value = '';
+        } catch (err) {
+            console.error("Failed to add phoneme:", err);
+        }
+    },
+
+    async removePhonemeOverride(word) {
+        try {
+            const res = await fetch(`/api/system/phonemes/${word}`, { method: 'DELETE' });
+            const data = await res.json();
+            this.renderPhonemeList(data.overrides);
+        } catch (err) {
+            console.error("Failed to remove phoneme:", err);
         }
     },
 

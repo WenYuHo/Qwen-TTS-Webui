@@ -15,6 +15,7 @@ from .qwen_tts.inference.qwen3_tts_model import VoiceClonePromptItem
 from .model_loader import get_model
 from .config import BASE_DIR, logger
 from .video_engine import VideoEngine
+from .utils import phoneme_manager
 
 class PodcastEngine:
     def __init__(self):
@@ -429,9 +430,7 @@ class PodcastEngine:
             batch_indices = []
 
             # Model-specific collections
-            batch_speakers = []    # CustomVoice
-            batch_instructs = []   # VoiceDesign
-            batch_prompts = []     # Base (Clone/Mix)
+            batch_instructs = []   # Common for all
 
             for i, item in group:
                 role = item["role"]
@@ -439,11 +438,21 @@ class PodcastEngine:
                 batch_texts.append(item["text"])
                 batch_langs.append(item.get("language", "auto"))
                 batch_indices.append(i)
+                
+                # Instruction priority: item['instruct'] > profile['instruct']
+                instruct = item.get("instruct") or profile.get("instruct")
+                
+                if mtype == "VoiceDesign":
+                    # For VoiceDesign, the 'instruct' IS the voice description
+                    design_instruct = profile["value"]
+                    if instruct:
+                        design_instruct = f"{design_instruct}, {instruct}"
+                    batch_instructs.append(design_instruct)
+                else:
+                    batch_instructs.append(instruct)
 
                 if mtype == "CustomVoice":
                     batch_speakers.append(profile["value"])
-                elif mtype == "VoiceDesign":
-                    batch_instructs.append(profile["value"])
                 elif mtype == "Base":
                     # ⚡ Bolt: Use unified prompt cache for both Clone and Mix in batch mode
                     ptype = profile.get("type")
@@ -486,7 +495,8 @@ class PodcastEngine:
                     batch_wavs, sr = group_model.generate_custom_voice(
                         text=batch_texts,
                         speaker=batch_speakers,
-                        language=batch_langs
+                        language=batch_langs,
+                        instruct=batch_instructs
                     )
                 elif mtype == "VoiceDesign":
                     batch_wavs, sr = group_model.generate_voice_design(
@@ -499,7 +509,8 @@ class PodcastEngine:
                     batch_wavs, sr = group_model.generate_voice_clone(
                         text=batch_texts,
                         language=batch_langs,
-                        voice_clone_prompt=batch_prompts
+                        voice_clone_prompt=batch_prompts,
+                        instruct=batch_instructs
                     )
                 else:
                     raise ValueError(f"Batching not implemented for model type: {mtype}")

@@ -121,6 +121,8 @@ Object.assign(window, {
     exportStudioBundle: ProductionManager.exportStudioBundle,
     generatePodcast: ProductionManager.generatePodcast,
     triggerDownload: SystemManager.triggerDownload,
+    addPhonemeOverride: SystemManager.addPhonemeOverride.bind(SystemManager),
+    removePhonemeOverride: SystemManager.removePhonemeOverride.bind(SystemManager),
     setupDragAndDrop: AssetManager.setupDragAndDrop
 });
 

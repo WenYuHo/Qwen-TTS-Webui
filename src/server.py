@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pathlib import Path
 
-from backend.api import voices, generation, projects, tasks, models, assets
+from backend.api import voices, generation, projects, tasks, models, assets, system
 try:
     from backend.api import video
 except ImportError:
@@ -31,6 +31,7 @@ app.include_router(projects.router)
 app.include_router(tasks.router)
 app.include_router(models.router)
 app.include_router(assets.router)
+app.include_router(system.router)
 if video:
     app.include_router(video.router)
 

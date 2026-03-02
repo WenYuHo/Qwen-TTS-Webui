@@ -399,9 +399,14 @@ Bob: Hi Alice, how are you today?"></textarea>
                     </div>
 
                     <div class="card">
-                        <h2 style="margin-bottom:16px; font-size: 1.1rem;">System Status</h2>
-                        <div id="system-stats" style="color:var(--text-secondary); font-size:0.9rem;">
-                            Loading system stats...
+                        <h2 style="margin-bottom:16px; font-size: 1.1rem;">Phoneme Editor (Custom Pronunciation)</h2>
+                        <div class="control-group" style="display:flex; gap:8px;">
+                            <input type="text" id="phoneme-word" placeholder="Word (e.g. Qwen)" style="flex:1;">
+                            <input type="text" id="phoneme-replacement" placeholder="Phonetic (e.g. Kwen)" style="flex:1;">
+                            <button class="btn btn-primary btn-sm" onclick="addPhonemeOverride()"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div id="phoneme-list" style="margin-top:16px; max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
+                            <!-- Phonemes will be listed here -->
                         </div>
                     </div>
                 </div>

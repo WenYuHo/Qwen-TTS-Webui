@@ -2,15 +2,15 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Feature Expansion
-1. [ ] **Phoneme Editor:** Create a UI component to fix mispronunciations using phonetic inputs.
+### Tier 1: Performance & UX
+1. [ ] **Streaming TTS:** Refactor the synthesis engine to support Dual-Track streaming for ~100ms latency previews.
+2. [ ] **LTX-Video Advanced Tuning:** Add sliders for Guidance Scale, Inference Steps, and Seed selection in the Video Generation panel.
 
-### Tier 2: Refinement
-1. [ ] Refactor the synthesis engine to support Dual-Track streaming for ~100ms latency previews.
-2. [ ] Add sliders for Guidance Scale, Inference Steps, and Seed selection in the Video Generation panel.
-3. [ ] Integrate AI watermarking (audible or metadata) for compliance with transparency standards.
+### Tier 2: Governance & Safety
+1. [ ] **Watermarking:** Integrate AI watermarking (audible or metadata) for compliance with transparency standards.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Implement **Phoneme Editor** UI and backend for custom pronunciation fixes.
 - [x] Implement **Subtitle Generation** (.srt) for narrated videos.
 - [x] Implement **Instruction Brackets** support for emotional cues in scripts.
 - [x] Document the `TaskManager` class in `src/backend/task_manager.py`.
