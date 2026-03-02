@@ -2,15 +2,16 @@
 
 ## Prioritized Backlog
 
-### Tier 1: UI & UX
-1. [ ] **UI Animation:** Add subtle entry/exit animations to view transitions for a more fluid "Technoid" feel.
-2. [ ] **Toast Notifications:** Replace standard `alert()` calls with a non-blocking toast notification system.
+### Tier 1: UI & Experience
+1. [ ] **Toast Notifications:** Implement a non-blocking "Toast" system to replace standard `alert()` calls for a smoother UX.
+2. [ ] **Error UI:** Create a specialized "Error Boundary" component in the UI to handle and display synthesis failures gracefully.
 
-### Tier 2: Governance & Search
-1. [ ] **Error UI:** Create a specialized "Error Boundary" component in the UI to handle and display synthesis failures gracefully.
+### Tier 2: Governance & Automation
+1. [ ] **Unit Test Expansion:** Create automated tests for the new `Profiler` and `ResourceMonitor` classes.
 2. [ ] **Help System:** Add an inline "Help" overlay for each view explaining the available controls.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Implement **UI Animation** for smooth, fluid view transitions.
 - [x] Implement **Performance Profiling Integration** (Benchmark sub-tab).
 - [x] Implement **True Streaming** for podcast production.
 - [x] Create **automated unit tests** for system utilities.

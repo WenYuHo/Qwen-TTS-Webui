@@ -40,6 +40,23 @@ function renderAvatar(name) {
 }
 
 function switchView(view) {
+    const currentViewEl = document.querySelector('.view-container.active');
+    const targetViewEl = document.getElementById(`${view}-view`);
+    
+    if (currentViewEl && currentViewEl !== targetViewEl) {
+        currentViewEl.classList.add('exiting');
+        currentViewEl.classList.remove('active');
+        
+        setTimeout(() => {
+            currentViewEl.classList.remove('exiting');
+            performSwitch(view);
+        }, 200); // Match exit animation duration
+    } else {
+        performSwitch(view);
+    }
+}
+
+function performSwitch(view) {
     state.currentView = view;
     document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(v => {

@@ -585,3 +585,26 @@ input[type="range"]::-webkit-slider-thumb {
     font-weight: 700;
     font-family: var(--font-mono);
 }
+
+/* --- View Animations --- */
+
+@keyframes viewEnter {
+    from { opacity: 0; transform: translateY(10px); filter: blur(5px); }
+    to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes viewExit {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
+.view-container.active {
+    display: block;
+    animation: viewEnter 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.view-container.exiting {
+    display: block;
+    animation: viewExit 0.2s ease-in forwards;
+    pointer-events: none;
+}
