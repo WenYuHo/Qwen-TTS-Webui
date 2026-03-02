@@ -2,15 +2,16 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Performance & Search
-1. [ ] **API Load Testing:** Create a script to simulate concurrent generation requests and measure response times.
-2. [ ] **Scene Search AI:** Upgrade keyword-based search to use a small LLM or embedding-based search for better suggestions.
+### Tier 1: Intelligence & Search
+1. [ ] **Scene Search AI Upgrade:** Upgrade the keyword-based search to use a small LLM or embedding-based search for better LTX-Video prompt suggestions.
+2. [ ] **Auto-Documentation:** Implement a script to automatically update `conductor/tech-stack.md` based on `requirements.txt` changes.
 
-### Tier 2: Governance & Automation
-1. [ ] **Auto-Documentation:** Implement a script to automatically update `conductor/tech-stack.md` based on `requirements.txt` changes.
-2. [ ] **Performance Profiling:** Integrate `cProfile` into the engine to identify bottleneck functions.
+### Tier 2: Performance & Polish
+1. [ ] **Performance Profiling:** Integrate `cProfile` into the engine to identify bottleneck functions.
+2. [ ] **UI Animation:** Add subtle entry/exit animations to view transitions for a more fluid "Technoid" feel.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Create **API Load Testing** utility (`tools/api_load_test.py`).
 - [x] Create **Model Checkpoint Tests** (integrity and existence checks).
 - [x] Refactor and unify setup/start into **studio.bat** and **studio.sh**.
 - [x] Consolidate video dependencies into a single **requirements.txt**.
