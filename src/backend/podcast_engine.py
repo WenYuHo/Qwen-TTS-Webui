@@ -223,19 +223,44 @@ class PodcastEngine:
 
     def stream_synthesize(self, text: str, profile: Dict[str, Any], language: str = "auto", instruct: Optional[str] = None):
         import re
-        chunks = re.split(r'([.!?。！？\n]+)', text)
-        processed_chunks = []
-        for i in range(0, len(chunks)-1, 2):
-            c = chunks[i] + chunks[i+1]
-            if c.strip(): processed_chunks.append(c.strip())
-        if len(chunks) % 2 == 1 and chunks[-1].strip(): processed_chunks.append(chunks[-1].strip())
-        if not processed_chunks: processed_chunks = [text]
-        futures = [self.executor.submit(self.generate_segment, chunk_text, profile, language, None, instruct) for chunk_text in processed_chunks]
+        
+        # 1. First split by major punctuation
+        initial_chunks = re.split(r'([.!?。！？\n\r]+)', text)
+        sentences = []
+        for i in range(0, len(initial_chunks)-1, 2):
+            s = initial_chunks[i] + initial_chunks[i+1]
+            if s.strip(): sentences.append(s.strip())
+        if len(initial_chunks) % 2 == 1 and initial_chunks[-1].strip():
+            sentences.append(initial_chunks[-1].strip())
+            
+        # 2. Recursive split for long sentences (> 150 chars) to prevent drift
+        final_chunks = []
+        for s in sentences:
+            if len(s) > 150:
+                # Try to split by commas or semi-colons
+                sub = re.split(r'([,;，；])', s)
+                current = ""
+                for part in sub:
+                    if len(current) + len(part) < 150:
+                        current += part
+                    else:
+                        if current: final_chunks.append(current.strip())
+                        current = part
+                if current: final_chunks.append(current.strip())
+            else:
+                final_chunks.append(s)
+
+        if not final_chunks: final_chunks = [text]
+        
+        # 3. Process with higher priority executor
+        futures = [self.executor.submit(self.generate_segment, chunk_text, profile, language, None, instruct) for chunk_text in final_chunks]
         for f in futures:
             try:
                 wav, sr = f.result()
                 yield wav, sr
-            except Exception: continue
+            except Exception as e:
+                logger.error(f"Chunk synthesis failed: {e}")
+                continue
 
     def generate_voice_changer(self, source_audio: str, target_profile: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         text = self.transcribe_audio(source_audio)

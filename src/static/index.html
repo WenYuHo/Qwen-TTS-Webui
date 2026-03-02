@@ -64,7 +64,13 @@
                             <span class="label-industrial">Style Prompt</span>
                             <textarea id="design-prompt" placeholder="A calm, soothing female voice..." style="height: 80px; border-color:var(--accent);"></textarea>
                         </div>
-                        <button class="btn btn-primary" style="width:100%; margin-top:24px; padding:12px;" onclick="testVoiceDesign(this)">
+                        <div class="control-group" style="margin-top: -16px; margin-bottom: 16px;">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                <input type="checkbox" id="stability-boost" checked>
+                                <span class="volt-text" style="font-weight:700; font-size:0.7rem;">STABILITY BOOST</span>
+                            </label>
+                        </div>
+                        <button class="btn btn-primary" style="width:100%; margin-top:8px; padding:12px;" onclick="testVoiceDesign(this)">
                             <i class="fas fa-magic"></i> DESIGN & PREVIEW
                         </button>
                         <div id="design-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.4); border:1px solid var(--accent); padding: 12px;">

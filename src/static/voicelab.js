@@ -4,23 +4,32 @@ import { Notification, ErrorDisplay } from './ui_components.js';
 
 export const VoiceLabManager = {
     async testVoiceDesign(btn) {
-        const prompt = document.getElementById('design-prompt').value;
-        if (!prompt) return Notification.show("Enter a style prompt", "warn");
+        const promptText = document.getElementById('design-prompt').value;
+        const stabilityBoost = document.getElementById('stability-boost').checked;
+        if (!promptText) return Notification.show("Enter a style prompt", "warn");
 
         const container = document.getElementById('design-preview-container');
         const status = document.getElementById('design-status');
         const player = document.getElementById('preview-player');
 
-        container.style.display = 'block';
-        status.innerText = "Designing...";
+        if (container) container.style.display = 'block';
+        if (status) status.innerText = "Designing...";
         btn.disabled = true;
 
         try {
-            const profile = { type: 'design', value: prompt };
+            let finalPrompt = promptText;
+            if (stabilityBoost) {
+                finalPrompt = `${promptText}, stable delivery, clear speech, consistent tone, no distortion`;
+            }
+
+            const profile = { type: 'design', value: finalPrompt };
             const res = await fetch('/api/generate/stream', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: "This is a preview of your designed voice.", profile: profile })
+                body: JSON.stringify({ 
+                    text: "This is a preview of the voice you designed. It should sound consistent from start to finish.", 
+                    profile: profile 
+                })
             });
 
             if (!res.ok) throw new Error("Design preview failed");
