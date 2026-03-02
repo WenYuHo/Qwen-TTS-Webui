@@ -45,6 +45,11 @@ async def update_settings(settings: SystemSettings):
     save_settings(_settings)
     return {"status": "ok", "settings": _settings}
 
+@router.get("/audit")
+async def get_audit_log():
+    from ..utils import audit_manager
+    return {"log": audit_manager.get_log()}
+
 @router.get("/phonemes")
 async def get_phonemes():
     return {"overrides": phoneme_manager.overrides}

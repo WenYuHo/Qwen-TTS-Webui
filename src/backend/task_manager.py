@@ -156,6 +156,14 @@ class TaskManager:
             
             task["updated_at"] = time.time()
         
+        # ⚡ Bolt: Log terminal states to Audit Log
+        if status in [TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.CANCELLED]:
+            try:
+                from .utils import audit_manager
+                audit_manager.log_event(task["type"], task["metadata"], status)
+            except Exception:
+                pass # Prevent audit logging from crashing the task
+        
         logger.debug(f"Task updated: {task_id} - {status} ({progress}%)")
 
     def get_task(self, task_id: str) -> Optional[Dict[str, Any]]:

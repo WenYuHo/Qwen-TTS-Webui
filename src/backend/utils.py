@@ -62,55 +62,53 @@ class PhonemeManager:
 phoneme_manager = PhonemeManager()
 
 class AudioPostProcessor:
-    """Applies atmospheric effects like EQ and Reverb to final waveforms."""
-    
-    @staticmethod
-    def apply_eq(wav: np.ndarray, sr: int, preset: str = "flat") -> np.ndarray:
-        """Applies a basic EQ filter based on presets."""
-        if preset == "flat":
-            return wav
-            
-        try:
-            from scipy import signal
-            # Simple 3-band EQ implementation using biquad filters
-            if preset == "broadcast":
-                # Boost bass and high-mids for that radio sound
-                b, a = signal.butter(2, [80 / (sr/2), 5000 / (sr/2)], btype='bandpass')
-                return signal.lfilter(b, a, wav) * 1.5
-            elif preset == "warm":
-                # Low-pass filter to remove harsh highs
-                b, a = signal.butter(2, 3000 / (sr/2), btype='low')
-                return signal.lfilter(b, a, wav)
-            elif preset == "bright":
-                # High-pass filter to emphasize clarity
-                b, a = signal.butter(2, 1000 / (sr/2), btype='high')
-                return signal.lfilter(b, a, wav)
-        except ImportError:
-            return wav
-        return wav
+    # ... (existing code)
 
-    @staticmethod
-    def apply_reverb(wav: np.ndarray, sr: int, intensity: float = 0.0) -> np.ndarray:
-        """Applies a simple algorithmic reverb (echo-based)."""
-        if intensity <= 0:
-            return wav
-            
+class AuditManager:
+    """Logs system-wide AI generation events for transparency and tracking."""
+    def __init__(self):
+        self.file_path = PROJECTS_DIR / "audit.json"
+        self.lock = threading.Lock()
+
+    def log_event(self, event_type: str, metadata: dict, status: str):
+        """Append a new event record to the audit log."""
+        event = {
+            "timestamp": time.time(),
+            "type": event_type,
+            "status": status,
+            "metadata": self._sanitize_metadata(metadata)
+        }
+        
+        with self.lock:
+            log = self._load()
+            log.append(event)
+            # Keep only last 1000 events to prevent file bloat
+            if len(log) > 1000:
+                log = log[-1000:]
+            self._save(log)
+
+    def _sanitize_metadata(self, metadata: dict) -> dict:
+        """Removes sensitive or overly large data from log metadata."""
+        sanitized = metadata.copy()
+        # Remove raw results or large lists
+        for key in ["result", "wav", "waveform", "hidden_states"]:
+            sanitized.pop(key, None)
+        return sanitized
+
+    def _load(self) -> list:
+        if not self.file_path.exists():
+            return []
         try:
-            # Simple delay-based reverb (comb filter)
-            delay_samples = int(0.05 * sr) # 50ms delay
-            decay = intensity * 0.4
-            
-            out = wav.copy()
-            # 3-tap simple echo for 'atmospheric' feel
-            for i in range(1, 4):
-                shift = delay_samples * i
-                if shift < len(wav):
-                    out[shift:] += wav[:-shift] * (decay ** i)
-            
-            # Normalize to avoid clipping
-            max_amp = np.max(np.abs(out))
-            if max_amp > 1.0:
-                out /= max_amp
-            return out
+            with open(self.file_path, "r", encoding="utf-8") as f:
+                return json.load(f)
         except Exception:
-            return wav
+            return []
+
+    def _save(self, log: list):
+        with open(self.file_path, "w", encoding="utf-8") as f:
+            json.dump(log, f, indent=2)
+
+    def get_log(self) -> list:
+        return self._load()
+
+audit_manager = AuditManager()

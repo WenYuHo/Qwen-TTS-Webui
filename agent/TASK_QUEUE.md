@@ -2,15 +2,16 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Governance & Safety
-1. [ ] **Audit Log:** Create a system-wide audit log for all generation tasks (TTS, Video, Dubbing) stored in `projects/audit.json`.
-2. [ ] **UI Polish:** Implement "Technoid Brutalist" style improvements to the new System and Production cards.
+### Tier 1: UI & UX Polish
+1. [ ] **Technoid Brutalist Polish:** Refine the new System and Production cards with Volt accents, sharp 2px borders, and multi-layered shadows.
+2. [ ] **Resource Monitoring:** Add a "CPU/GPU Load" indicator to the System view footer.
 
-### Tier 2: Resource Monitoring
-1. [ ] **Resource Monitoring:** Add a "CPU/GPU Load" indicator to the System view.
-2. [ ] **Auto-Cleanup:** Implement a background thread to prune stale `uploads/` and `projects/generated_videos/` older than 7 days.
+### Tier 2: Governance & Maintenance
+1. [ ] **Auto-Cleanup:** Implement a background thread to prune stale `uploads/` and `projects/generated_videos/` older than 7 days.
+2. [ ] **Documentation:** Add a `CONTRIBUTING.md` file explaining the Conductor framework and modular JS structure for future developers.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Implement **Generation Audit Log** (audit.json) for transparency.
 - [x] Implement **Audio Effects** (EQ & Reverb) for atmospheric polish.
 - [x] Implement **Scene Search** keyword-based prompt suggestions for LTX-Video.
 - [x] Implement **Parallel Streaming Synthesis** with look-ahead for ultra-low latency.

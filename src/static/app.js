@@ -67,6 +67,7 @@ function switchView(view) {
         TaskManager.refreshTasks();
         SystemManager.fetchInventory();
         SystemManager.loadSystemSettings();
+        SystemManager.fetchAuditLog();
     }
 }
 
@@ -135,6 +136,7 @@ Object.assign(window, {
     removePhonemeOverride: SystemManager.removePhonemeOverride.bind(SystemManager),
     importPhonemes: SystemManager.importPhonemes.bind(SystemManager),
     updateWatermarkSettings: SystemManager.updateWatermarkSettings.bind(SystemManager),
+    fetchAuditLog: SystemManager.fetchAuditLog.bind(SystemManager),
     setupDragAndDrop: AssetManager.setupDragAndDrop
 });
 
