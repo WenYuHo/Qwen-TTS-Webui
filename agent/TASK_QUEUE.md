@@ -2,16 +2,17 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Intelligence & Search
-1. [ ] **Scene Search AI Upgrade:** Enhance the prompt suggestion logic with better cinematic components and action extraction.
-2. [ ] **Error UI Refinement:** Enhance the `ErrorDisplay` component to include a "Copy Log" button for easier troubleshooting.
+### Tier 1: Performance & UX
+1. [ ] **Sub-Tab Autosave:** Ensure that the active system sub-tab (Inventory, Phonemes, etc.) is preserved across page refreshes using `localStorage`.
+2. [ ] **Scene Search AI Upgrade:** Enhance the prompt suggestion logic with better cinematic components and action extraction.
 
-### Tier 2: Performance & Automation
-1. [ ] **Sub-Tab Autosave:** Ensure that the active system sub-tab (Inventory, Phonemes, etc.) is preserved across page refreshes.
-2. [ ] **Auto-Cleanup Stats:** Add a "Last Cleanup" timestamp and "Total Files Pruned" metric to the System Resources view.
+### Tier 2: Governance & Search
+1. [ ] **Auto-Cleanup Stats:** Add a "Last Cleanup" timestamp and "Total Files Pruned" metric to the System Resources view.
+2. [ ] **API Documentation:** Create an OpenAPI/Swagger UI endpoint or a static `API.md` documenting all endpoints.
 
 ## Completed (Mar 2026 Refactor)
-- [x] Expand **automated unit tests** to cover Profiler, ResourceMonitor, and StorageManager.
+- [x] Refine **Error UI** with a "Copy Trace" button for troubleshooting.
+- [x] Expand **automated unit tests** to cover system utilities.
 - [x] Apply **Technoid Brutalist UI Unification** across all Studio views.
 - [x] Implement **Help System** with context-sensitive command reference.
 - [x] Implement **Toast Notifications** (non-blocking) replacing all `alert()` calls.

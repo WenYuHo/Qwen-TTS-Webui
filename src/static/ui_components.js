@@ -142,13 +142,29 @@ export const ErrorDisplay = {
             <div style="font-size:0.75rem; color:#ffb3c1; margin-bottom:12px; line-height:1.4;">
                 ${detail}
             </div>
-            <div style="font-size:0.6rem; background:#000; padding:8px; font-family:var(--font-mono); color:var(--danger); border:1px solid #330008; max-height:100px; overflow:auto;">
-                TRACE: ${new Date().toISOString()} | API_ERR_500
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#000; padding:8px; border:1px solid #330008;">
+                <div id="error-trace-text" style="font-size:0.6rem; font-family:var(--font-mono); color:var(--danger); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:280px;">
+                    TRACE: ${new Date().toISOString()} | ${detail}
+                </div>
+                <button class="btn btn-secondary btn-sm" style="padding:2px 8px; font-size:0.6rem;" onclick="copyErrorTrace(this)">COPY</button>
             </div>
         `;
 
         container.prepend(errorModal);
     }
+};
+
+window.copyErrorTrace = (btn) => {
+    const trace = document.getElementById('error-trace-text').innerText;
+    navigator.clipboard.writeText(trace).then(() => {
+        const original = btn.innerText;
+        btn.innerText = "COPIED!";
+        btn.style.color = "var(--success)";
+        setTimeout(() => {
+            btn.innerText = original;
+            btn.style.color = "";
+        }, 2000);
+    });
 };
 
 export const HelpManager = {
