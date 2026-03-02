@@ -1,4 +1,5 @@
 // --- System & Model Management Module ---
+import { Notification } from './ui_components.js';
 
 export const SystemManager = {
     async fetchInventory() {
@@ -29,8 +30,8 @@ export const SystemManager = {
         try {
             const res = await fetch('/api/models/download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ repo_id: repoId }) });
             if (window.refreshTasks) window.refreshTasks();
-            alert(`Download started for ${repoId}.`);
-        } catch (err) { alert("Download failed"); }
+            Notification.show(`Download started: ${repoId}`, "info");
+        } catch (err) { Notification.show("Download failed", "error"); }
     },
 
     async loadPhonemes() {
@@ -82,7 +83,8 @@ export const SystemManager = {
                 const res = await fetch('/api/system/phonemes/bulk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: e.target.result });
                 const result = await res.json();
                 this.renderPhonemeList(result.overrides);
-            } catch (err) { alert("Import failed"); }
+                Notification.show("Phonemes imported", "success");
+            } catch (err) { Notification.show("Import failed", "error"); }
         };
         reader.readAsText(input.files[0]);
     },

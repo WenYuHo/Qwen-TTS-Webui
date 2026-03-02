@@ -1,10 +1,11 @@
 // --- Voice Lab (Design, Clone, Mix) Module ---
 import { TaskManager } from './task_manager.js';
+import { Notification } from './ui_components.js';
 
 export const VoiceLabManager = {
     async testVoiceDesign(btn) {
         const prompt = document.getElementById('design-prompt').value;
-        if (!prompt) return alert("Please enter a style prompt.");
+        if (!prompt) return Notification.show("Enter a style prompt", "warn");
 
         const container = document.getElementById('design-preview-container');
         const status = document.getElementById('design-status');
@@ -39,8 +40,10 @@ export const VoiceLabManager = {
             const fullBlob = new Blob(chunks, { type: 'audio/wav' });
             window.state.voicelab.lastDesignedPath = URL.createObjectURL(fullBlob);
             status.innerText = "Ready";
+            Notification.show("Design preview ready", "success");
         } catch (err) {
             status.innerText = "Error";
+            Notification.show("Design failed", "error");
             console.error(err);
         } finally {
             btn.disabled = false;
@@ -50,7 +53,7 @@ export const VoiceLabManager = {
     async testVoiceClone(btn) {
         const fileInput = document.getElementById('clone-file');
         if (!window.state.voicelab.lastClonedPath && !fileInput.files.length) {
-            return alert("Please upload or record reference audio first.");
+            return Notification.show("Reference audio required", "warn");
         }
 
         const container = document.getElementById('clone-preview-container');
@@ -95,8 +98,10 @@ export const VoiceLabManager = {
             const fullBlob = new Blob(chunks, { type: 'audio/wav' });
             window.state.voicelab.lastClonedPath = URL.createObjectURL(fullBlob);
             status.innerText = "Ready";
+            Notification.show("Clone preview ready", "success");
         } catch (err) {
             status.innerText = "Error";
+            Notification.show("Cloning failed", "error");
             console.error(err);
         } finally {
             btn.disabled = false;
@@ -109,7 +114,7 @@ export const VoiceLabManager = {
         const wA = parseInt(document.getElementById('mix-weight-a').value) / 100;
         const wB = parseInt(document.getElementById('mix-weight-b').value) / 100;
 
-        if (!vA || !vB) return alert("Select two voices to mix.");
+        if (!vA || !vB) return Notification.show("Select two voices to mix", "warn");
 
         const container = document.getElementById('mix-preview-container');
         const status = document.getElementById('mix-status');
@@ -148,8 +153,10 @@ export const VoiceLabManager = {
             const fullBlob = new Blob(chunks, { type: 'audio/wav' });
             window.state.voicelab.lastMixedPath = URL.createObjectURL(fullBlob);
             status.innerText = "Ready";
+            Notification.show("Mix preview ready", "success");
         } catch (err) {
             status.innerText = "Error";
+            Notification.show("Mixing failed", "error");
             console.error(err);
         } finally {
             btn.disabled = false;

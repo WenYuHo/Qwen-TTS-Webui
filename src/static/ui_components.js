@@ -77,8 +77,41 @@ export const VideoModal = {
 
 export const Notification = {
     show(message, type = 'info') {
-        // Simple alert for now, can be upgraded to a toast later
-        console.log(`[${type.toUpperCase()}] ${message}`);
-        // toast implementation here...
+        const container = document.getElementById('toast-container');
+        if (!container) {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+            return;
+        }
+
+        const toast = document.createElement('div');
+        toast.className = `card-brutalist toast toast-${type}`;
+        toast.style.padding = '12px 20px';
+        toast.style.minWidth = '250px';
+        toast.style.pointerEvents = 'auto';
+        toast.style.animation = 'viewEnter 0.3s ease-out';
+        toast.style.display = 'flex';
+        toast.style.alignItems = 'center';
+        toast.style.gap = '12px';
+        toast.style.boxShadow = '4px 4px 0px #000';
+
+        const icons = {
+            info: 'fa-info-circle',
+            success: 'fa-check-circle',
+            warn: 'fa-exclamation-triangle',
+            error: 'fa-times-circle'
+        };
+
+        toast.innerHTML = `
+            <i class="fas ${icons[type] || 'fa-bell'}" style="font-size:1.1rem;"></i>
+            <div style="flex:1; font-size:0.85rem; font-weight:700; font-family:var(--font-mono);">${message.toUpperCase()}</div>
+        `;
+
+        container.appendChild(toast);
+
+        // Auto-dismiss
+        setTimeout(() => {
+            toast.style.animation = 'viewExit 0.3s ease-in forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
     }
 };

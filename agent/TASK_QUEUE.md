@@ -2,15 +2,16 @@
 
 ## Prioritized Backlog
 
-### Tier 1: UI & Experience
-1. [ ] **Toast Notifications:** Implement a non-blocking "Toast" system to replace standard `alert()` calls for a smoother UX.
-2. [ ] **Error UI:** Create a specialized "Error Boundary" component in the UI to handle and display synthesis failures gracefully.
-
-### Tier 2: Governance & Automation
-1. [ ] **Unit Test Expansion:** Create automated tests for the new `Profiler` and `ResourceMonitor` classes.
+### Tier 1: Resilience & UX
+1. [ ] **Error UI:** Create a specialized "Error Boundary" component in the UI to handle and display synthesis failures with technical logs.
 2. [ ] **Help System:** Add an inline "Help" overlay for each view explaining the available controls.
 
+### Tier 2: Governance & Search
+1. [ ] **Unit Test Expansion:** Create automated tests for the new `Profiler` and `ResourceMonitor` classes.
+2. [ ] **Performance Polish:** Add a "Clear Cache" button to the System view to purge the `PodcastEngine` in-memory caches.
+
 ## Completed (Mar 2026 Refactor)
+- [x] Implement **Toast Notifications** (non-blocking) replacing all `alert()` calls.
 - [x] Implement **UI Animation** for smooth, fluid view transitions.
 - [x] Implement **Performance Profiling Integration** (Benchmark sub-tab).
 - [x] Implement **True Streaming** for podcast production.

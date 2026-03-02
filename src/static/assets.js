@@ -1,4 +1,5 @@
 // --- Asset Management Module ---
+import { Notification } from './ui_components.js';
 
 export const AssetManager = {
     async loadAssets() {
@@ -87,8 +88,10 @@ export const AssetManager = {
 
         try {
             const resp = await fetch('/api/assets/upload', { method: 'POST', body: formData });
-            if (resp.ok) this.loadAssets();
-            else alert("Upload failed");
+            if (resp.ok) {
+                this.loadAssets();
+                Notification.show("Asset uploaded", "success");
+            } else Notification.show("Upload failed", "error");
         } catch (err) { console.error("Upload error", err); }
     },
 
@@ -96,7 +99,10 @@ export const AssetManager = {
         if (!confirm(`Delete ${name}?`)) return;
         try {
             const resp = await fetch(`/api/assets/${name}`, { method: 'DELETE' });
-            if (resp.ok) this.loadAssets();
+            if (resp.ok) {
+                this.loadAssets();
+                Notification.show("Asset deleted", "success");
+            }
         } catch (err) { console.error("Delete error", err); }
     },
 

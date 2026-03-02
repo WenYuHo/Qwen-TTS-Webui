@@ -608,3 +608,25 @@ input[type="range"]::-webkit-slider-thumb {
     animation: viewExit 0.2s ease-in forwards;
     pointer-events: none;
 }
+
+/* --- Toast Notifications --- */
+
+.toast {
+    background: #000;
+    color: #fff;
+    min-width: 280px;
+    padding: 16px 24px;
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 6px 6px 0px #000;
+    pointer-events: auto;
+}
+
+.toast-info { border-color: var(--accent); }
+.toast-success { border-color: var(--success); color: var(--success); }
+.toast-warn { border-color: #f59e0b; color: #f59e0b; }
+.toast-error { border-color: var(--danger); color: var(--danger); }
+
+.toast i { font-size: 1.2rem; }

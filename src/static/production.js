@@ -1,4 +1,5 @@
 // --- Production & Studio Module ---
+import { Notification } from './ui_components.js';
 
 export const ProductionManager = {
     async generatePodcast() {
@@ -35,7 +36,7 @@ export const ProductionManager = {
             script = window.parseScript(document.getElementById('script-editor').value);
         }
 
-        if (script.length === 0) return alert("Script is empty.");
+        if (script.length === 0) return Notification.show("Script is empty", "warn");
         const profiles = window.getAllProfiles();
 
         try {
@@ -63,7 +64,7 @@ export const ProductionManager = {
                 const data = await res.json();
                 if (data.error) throw new Error(data.error);
                 
-                alert("Video generation task created. Check the Task List.");
+                Notification.show("Video generation task created", "success");
                 if (window.refreshTasks) window.refreshTasks();
                 return;
             }
@@ -125,7 +126,7 @@ export const ProductionManager = {
     async exportStudioBundle() {
         const projectSelect = document.getElementById('project-select');
         const projectName = projectSelect.value;
-        if (!projectName) return alert("Please select and save a project first.");
+        if (!projectName) return Notification.show("Select a project first", "warn");
 
         try {
             const resp = await fetch(`/api/projects/${projectName}/export`);
@@ -139,7 +140,8 @@ export const ProductionManager = {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-        } catch (err) { alert(`Failed to export bundle: ${err.message}`); }
+            Notification.show("Bundle exported", "success");
+        } catch (err) { Notification.show("Export failed", "error"); }
     },
 
     async suggestVideoScene() {
@@ -153,7 +155,7 @@ export const ProductionManager = {
             textToAnalyze = document.getElementById('script-editor').value.split('\n')[0];
         }
 
-        if (!textToAnalyze) return alert("Write some script first to get a suggestion.");
+        if (!textToAnalyze) return Notification.show("Script is empty", "warn");
 
         try {
             const res = await fetch('/api/video/suggest', {
@@ -163,6 +165,7 @@ export const ProductionManager = {
             });
             const data = await res.json();
             document.getElementById('video-prompt').value = data.suggestion;
+            Notification.show("Suggestion generated", "success");
         } catch (err) {
             console.error("Suggestion failed:", err);
         }
