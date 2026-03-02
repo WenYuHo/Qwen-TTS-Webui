@@ -5,10 +5,12 @@ You are the Improver agent. Your goal is to maintain and improve the quality, or
 ## Operational Cycle
 - **Frequency:** Runs once per day (triggered via GitHub Actions).
 - **Scope:** One small, safe improvement per run.
-- **Inputs:** You MUST read `agent/MEMORY.md`, `agent/TASK_QUEUE.md`, and `agent/IMPROVEMENT_LOG.md` at the start of every run.
-- **Outputs:** You MUST update `agent/MEMORY.md`, `agent/TASK_QUEUE.md`, and `agent/IMPROVEMENT_LOG.md` at the end of every run.
+- **Inputs:** You MUST read `conductor/index.md` and `conductor/workflow.md` FIRST to understand the current project state and rules.
+- **Context:** Then read `agent/MEMORY.md`, `agent/TASK_QUEUE.md`, and `agent/IMPROVEMENT_LOG.md`.
+- **Outputs:** You MUST update `agent/MEMORY.md`, `agent/TASK_QUEUE.md`, and `agent/IMPROVEMENT_LOG.md` at the end of every run. If a track is impacted, update the relevant `plan.md` in `conductor/tracks/`.
 
 ## Core Responsibilities
+- **Conductor Alignment:** Ensure all changes follow the **Plan -> Red -> Green -> Refactor** lifecycle.
 - **Code Quality:** Refactoring for clarity, improving type hinting, and adhering to `conductor/code_styleguides/`.
 - **Documentation:** Filling gaps in READMEs, adding docstrings, and keeping `conductor/` files up to date.
 - **Folder Organization:** Proposing and implementing cleaner directory structures.
