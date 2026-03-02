@@ -2,16 +2,17 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Advanced Features & UX
-1. [ ] **Scene Search:** Implement script-keyword-based prompt suggestions for LTX-Video generation.
-2. [ ] **Audio Effects:** Add a simple EQ and Reverb control to the Production sidebar for atmospheric polish.
+### Tier 1: Performance & Polish
+1. [ ] **Audio Effects:** Add EQ and Reverb controls to the Production sidebar for atmospheric polish.
+2. [ ] **UI Refinement:** Transition new cards to the "Technoid Brutalist" style (Volt accents, sharp shadows).
 
-### Tier 2: Governance & Integration
+### Tier 2: Governance & Safety
 1. [ ] **Audit Log:** Create a system-wide audit log for all generation tasks (TTS, Video, Dubbing) stored in `projects/audit.json`.
-2. [ ] **UI Polish:** Implement "Technoid Brutalist" style improvements to the new System and Production cards.
+2. [ ] **Resource Monitoring:** Add a "CPU/GPU Load" indicator to the System view.
 
 ## Completed (Mar 2026 Refactor)
-- [x] Implement **Parallel Streaming Synthesis** with look-ahead for ultra-low latency previews.
+- [x] Implement **Scene Search** keyword-based prompt suggestions for LTX-Video.
+- [x] Implement **Parallel Streaming Synthesis** with look-ahead for ultra-low latency.
 - [x] Implement **Persistent System Settings** (settings.json).
 - [x] Implement **Phoneme Editor Bulk Import** (JSON).
 - [x] Implement **AI Watermarking** (Audible & Visible).

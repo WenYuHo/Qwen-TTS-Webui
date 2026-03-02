@@ -104,5 +104,31 @@ export const ProductionManager = {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         } catch (err) { alert(`Failed to export bundle: ${err.message}`); }
+    },
+
+    async suggestVideoScene() {
+        const draftView = document.getElementById('canvas-draft-view');
+        const productionView = document.getElementById('canvas-production-view');
+        let textToAnalyze = "";
+
+        if (productionView && productionView.style.display === 'flex' && window.CanvasManager.blocks.length > 0) {
+            textToAnalyze = window.CanvasManager.blocks[0].text;
+        } else {
+            textToAnalyze = document.getElementById('script-editor').value.split('\n')[0];
+        }
+
+        if (!textToAnalyze) return alert("Write some script first to get a suggestion.");
+
+        try {
+            const res = await fetch('/api/video/suggest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: textToAnalyze })
+            });
+            const data = await res.json();
+            document.getElementById('video-prompt').value = data.suggestion;
+        } catch (err) {
+            console.error("Suggestion failed:", err);
+        }
     }
 };

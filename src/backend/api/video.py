@@ -160,6 +160,32 @@ async def generate_video(request: VideoGenerationRequest, background_tasks: Back
     return {"task_id": task_id, "status": server_state.TaskStatus.PENDING}
 
 
+class SuggestionRequest(BaseModel):
+    text: str
+
+@router.post("/suggest")
+async def suggest_video_scene(request: SuggestionRequest):
+    """Simple keyword-based prompt suggestion for LTX-Video."""
+    text = request.text.lower()
+    suggestion = "A cinematic, high-detail scene matching the story."
+    
+    keywords = {
+        "rain": "A cinematic shot of heavy rain falling on a city street at night, neon lights reflecting in puddles, high detail.",
+        "forest": "A lush, green forest with sunlight filtering through the leaves, a peaceful atmosphere, ultra-realistic.",
+        "cyberpunk": "A futuristic cyberpunk city with towering skyscrapers, flying vehicles, and vibrant neon signs.",
+        "ocean": "A vast, blue ocean with gentle waves lapping against a white sandy beach, clear sky.",
+        "space": "A breathtaking view of a nebula in deep space, stars twinkling, vibrant colors.",
+        "mystery": "A dark, misty alleyway with a single flickering lamppost, a sense of suspense.",
+        "tech": "A high-tech laboratory with glowing screens and advanced machinery, clean and modern."
+    }
+    
+    for kw, prompt in keywords.items():
+        if kw in text:
+            suggestion = prompt
+            break
+            
+    return {"suggestion": suggestion}
+
 @router.post("/narrated")
 async def generate_narrated_video(request: NarratedVideoRequest, background_tasks: BackgroundTasks):
     """Generate a narrated video (TTS audio + LTX-2 video combined)."""

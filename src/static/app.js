@@ -123,6 +123,7 @@ Object.assign(window, {
     clearCompletedTasks: TaskManager.clearCompletedTasks,
     exportStudioBundle: ProductionManager.exportStudioBundle,
     generatePodcast: ProductionManager.generatePodcast,
+    suggestVideoScene: ProductionManager.suggestVideoScene.bind(ProductionManager),
     triggerDownload: SystemManager.triggerDownload,
     testVoiceDesign: VoiceLabManager.testVoiceDesign.bind(VoiceLabManager),
     testVoiceClone: VoiceLabManager.testVoiceClone.bind(VoiceLabManager),
