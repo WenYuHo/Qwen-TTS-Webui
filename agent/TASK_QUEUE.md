@@ -3,7 +3,7 @@
 ## Prioritized Backlog
 
 ### Tier 1: Performance & UX
-1. [ ] **Performance Profiling:** Integrate `cProfile` into the engine to identify bottleneck functions.
+1. [ ] **Performance Profiling:** Integrate `cProfile` results into a new "Performance" sub-tab in the System view.
 2. [ ] **UI Animation:** Add subtle entry/exit animations to view transitions for a more fluid "Technoid" feel.
 
 ### Tier 2: Governance & Search
@@ -11,13 +11,14 @@
 2. [ ] **Help System:** Add an inline "Help" overlay for each view explaining the available controls.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Implement **True Streaming** for podcast production (line-by-line playback).
+- [x] Create **automated unit tests** for system utilities.
 - [x] Implement **Auto-Documentation** script for tech stack synchronization.
 - [x] Upgrade **Scene Search AI** with cinematic prompt templates.
 - [x] Create **API Load Testing** utility (`tools/api_load_test.py`).
 - [x] Create **Model Checkpoint Tests** (integrity and existence checks).
 - [x] Refactor and unify setup/start into **studio.bat** and **studio.sh**.
 - [x] Consolidate video dependencies into a single **requirements.txt**.
-- [x] Create **automated unit tests** for system utilities.
 - [x] Create **CONTRIBUTING.md** with framework and design guidelines.
 - [x] Apply **Technoid Brutalist UI Unification** to all views.
 - [x] Implement **Video Preview Modal** with subtitle support.

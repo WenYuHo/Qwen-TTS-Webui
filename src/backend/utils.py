@@ -209,6 +209,26 @@ class StorageManager:
         if pruned_count > 0:
             logger.info(f"StorageManager: Pruned {pruned_count} stale files.")
 
+class Profiler:
+    """Context manager for profiling code blocks using cProfile."""
+    def __init__(self, name: str):
+        self.name = name
+        import cProfile
+        self.profiler = cProfile.Profile()
+
+    def __enter__(self):
+        self.profiler.enable()
+        return self
+
+    def __exit__(self, *args):
+        self.profiler.disable()
+        import pstats
+        import io
+        s = io.StringIO()
+        ps = pstats.Stats(self.profiler, stream=s).sort_stats('cumulative')
+        ps.print_stats(20) # Top 20 functions
+        logger.info(f"--- Profiling Result: {self.name} ---\n{s.getvalue()}")
+
 audit_manager = AuditManager()
 resource_monitor = ResourceMonitor()
 storage_manager = StorageManager()

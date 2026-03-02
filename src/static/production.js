@@ -5,6 +5,7 @@ export const ProductionManager = {
         const statusText = document.getElementById('status-badge');
         const bgm_mood = document.getElementById('bgm-select').value;
         const ducking_level = parseFloat(document.getElementById('ducking-range').value) / 100.0;
+        const streamEnabled = document.getElementById('stream-podcast').checked;
         
         // Audio Effects
         const eqPreset = document.getElementById('audio-eq').value;
@@ -70,11 +71,42 @@ export const ProductionManager = {
             const res = await fetch('/api/generate/podcast', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ profiles, script, bgm_mood, ducking_level })
+                body: JSON.stringify({ 
+                    profiles, 
+                    script, 
+                    bgm_mood, 
+                    ducking_level, 
+                    eq_preset: eqPreset, 
+                    reverb_level: reverbLevel,
+                    stream: streamEnabled
+                })
             });
+
             if (!res.ok) throw new Error("Podcast request failed");
+
+            if (streamEnabled) {
+                const reader = res.body.getReader();
+                const player = document.getElementById('main-audio-player');
+                const chunks = [];
+                
+                if (statusText) statusText.innerText = "Streaming Playback...";
+                
+                while(true) {
+                    const {done, value} = await reader.read();
+                    if (done) break;
+                    chunks.push(value);
+                    
+                    if (chunks.length === 1) {
+                        const blob = new Blob([value], { type: 'audio/wav' });
+                        player.src = URL.createObjectURL(blob);
+                        player.play();
+                    }
+                }
+                if (statusText) statusText.innerText = "Stream Complete";
+                return;
+            }
+
             const data = await res.json();
-            
             if (window.TaskPoller) {
                 const blob = await window.TaskPoller.poll(data.task_id, (task) => {
                     if (statusText) statusText.innerText = `Producing: ${task.progress}% - ${task.message}`;
