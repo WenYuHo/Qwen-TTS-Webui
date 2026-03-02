@@ -295,9 +295,38 @@ input:focus, textarea:focus, select:focus {
     background: #050505;
 }
 
-/* Avatar - Pixelated/Brutalist style */
-.avatar {
-    width: 44px;
+/* Empty States */
+.empty-state {
+    padding: 48px;
+    text-align: center;
+    background: rgba(255,255,255,0.02);
+    border: 2px dashed var(--border);
+    color: var(--text-secondary);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    color: var(--accent);
+}
+
+.empty-state-grid {
+    grid-column: 1 / -1;
+}
+
+/* Badges */
+.badge {
+    padding: 4px 12px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    border: 1px solid currentColor;
+}
+
+.badge-success { color: var(--success); }
+.badge-warn { color: var(--accent); }
+.badge-error { color: var(--danger); }
     height: 44px;
     display: flex;
     align-items: center;

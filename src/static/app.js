@@ -164,6 +164,7 @@ Object.assign(window, {
 
 document.addEventListener('DOMContentLoaded', () => {
     VoiceLabManager.loadVoiceLibrary();
+    SystemManager.fetchInventory();
     UIHeartbeat.start();
     CanvasManager.load();
     setInterval(() => {

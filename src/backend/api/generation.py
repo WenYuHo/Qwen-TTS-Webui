@@ -34,7 +34,13 @@ async def stream_synthesis(request: StreamingSynthesisRequest):
 def run_synthesis_task(task_id: str, is_podcast: bool, request_data: PodcastRequest):
     try:
         server_state.task_manager.update_task(task_id, status=server_state.TaskStatus.PROCESSING, progress=10, message="Initializing engine")
-        profiles_map = {p["role"]: {"type": p["type"], "value": p["value"]} for p in request_data.profiles}
+        
+        # profiles is now a Dict[str, VoiceProfile] from the client
+        if isinstance(request_data.profiles, dict):
+            profiles_map = request_data.profiles
+        else:
+            # Fallback for old list-based format if any
+            profiles_map = {p["role"]: {"type": p["type"], "value": p["value"]} for p in request_data.profiles}
 
         server_state.task_manager.update_task(task_id, progress=30, message="Loading models and starting inference")
 
@@ -99,8 +105,11 @@ async def generate_podcast(request: PodcastRequest, background_tasks: Background
     
     if request.stream:
         try:
-            # Map profiles similarly to run_synthesis_task
-            profiles_map = {p["role"]: {"type": p["type"], "value": p["value"]} for p in request.profiles}
+            # profiles is now a Dict[str, VoiceProfile]
+            if isinstance(request.profiles, dict):
+                profiles_map = request.profiles
+            else:
+                profiles_map = {p["role"]: {"type": p["type"], "value": p["value"]} for p in request.profiles}
             
             def audio_stream():
                 for wav, sr, item in server_state.engine.stream_podcast(
