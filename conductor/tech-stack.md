@@ -14,9 +14,20 @@
 - **Performance Monitoring:** `psutil`-based system resource tracking (CPU/MEM utilization).
 
 ## Frontend
-- **Frameworks:** Vanilla JavaScript (ES6+), CSS3 (Glassmorphism), HTML5.
-- **Design Philosophy:** Classic Studio aesthetic with modern tactile elements.
+- **Frameworks:** Vanilla JavaScript (ES6+), CSS3 (Technoid Brutalist), HTML5.
+- **Architecture:** Modular ES Modules (`task_manager.js`, `assets.js`, etc.).
+- **Design Philosophy:** **Technoid Brutalist** (Onyx/Volt palette, sharp borders, multi-layered shadows).
 - **Interactions:** Asynchronous API communication with the backend.
+
+## Python Dependencies
+<!-- DEPENDENCIES_START -->
+- **API:** fastapi, uvicorn, python-multipart
+- **Audio:** soundfile, numpy, pydub, librosa, scipy, torchaudio
+- **AI/ML:** torch, transformers, accelerate, einops, onnxruntime, openai-whisper
+- **Video:** ltx-pipelines, diffusers, opencv-python, moviepy, Pillow
+- **Utils:** python-dotenv, psutil, huggingface_hub, deep-translator, beautifulsoup4, tqdm
+- **Testing:** pytest, pytest-asyncio, httpx
+<!-- DEPENDENCIES_END -->
 
 ## Infrastructure & Testing
 - **Package Management:** `pip` with a virtual environment (`.venv`).
