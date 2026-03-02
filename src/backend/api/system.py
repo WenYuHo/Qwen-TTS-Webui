@@ -91,6 +91,21 @@ async def run_benchmark():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Benchmark failed: {str(e)}")
 
+@router.post("/cache/clear")
+async def clear_cache():
+    """Manually triggers cache and temporary file cleanup."""
+    from ..utils import storage_manager
+    try:
+        pruned_count = storage_manager.purge_cache()
+        return {
+            "status": "ok",
+            "message": f"Successfully cleared {pruned_count} temporary files and purged engine cache.",
+            "pruned_count": pruned_count,
+            "storage_stats": storage_manager.get_stats()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Cache clear failed: {str(e)}")
+
 @router.get("/phonemes")
 async def get_phonemes():
     return {"overrides": phoneme_manager.overrides}

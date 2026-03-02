@@ -20,19 +20,19 @@
                 <span>Qwen-TTS Studio</span>
             </div>
             <nav class="sidebar-nav">
-                <button class="nav-item active" onclick="switchView('speech')" aria-pressed="true">
+                <button id="nav-speech" class="nav-item active" onclick="console.log('Voice Studio click'); switchView('speech')" aria-pressed="true">
                     <i class="fas fa-comment-dots" aria-hidden="true"></i> Voice Studio
                 </button>
-                <button class="nav-item" onclick="switchView('projects')" aria-pressed="false">
+                <button id="nav-projects" class="nav-item" onclick="console.log('Project Studio click'); switchView('projects')" aria-pressed="false">
                     <i class="fas fa-layer-group" aria-hidden="true"></i> Project Studio
                 </button>
-                <button class="nav-item" onclick="switchView('dubbing')" aria-pressed="false">
+                <button id="nav-dubbing" class="nav-item" onclick="console.log('Dubbing click'); switchView('dubbing')" aria-pressed="false">
                     <i class="fas fa-language" aria-hidden="true"></i> Dubbing & S2S
                 </button>
-                <button class="nav-item" onclick="switchView('assets')" aria-pressed="false">
+                <button id="nav-assets" class="nav-item" onclick="console.log('Assets click'); switchView('assets')" aria-pressed="false">
                     <i class="fas fa-folder-open" aria-hidden="true"></i> Asset Library
                 </button>
-                <button class="nav-item" onclick="switchView('system')" aria-pressed="false">
+                <button id="nav-system" class="nav-item" onclick="console.log('System click'); switchView('system')" aria-pressed="false">
                     <i class="fas fa-microchip" aria-hidden="true"></i> System
                 </button>
             </nav>
@@ -213,8 +213,31 @@
                                 </div>
                                 <textarea id="video-prompt" placeholder="Scene..." style="height: 50px; font-size: 0.75rem; border-color: var(--accent); background: rgba(0,0,0,0.3); color: white;"></textarea>
                                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px;">
-                                    <input type="number" id="video-guidance" value="3.5" step="0.5" class="btn btn-secondary btn-sm" style="width:100%; padding:4px;">
-                                    <input type="number" id="video-steps" value="30" step="1" class="btn btn-secondary btn-sm" style="width:100%; padding:4px;">
+                                    <div class="control-group" style="margin-bottom:0;">
+                                        <span class="label-industrial" style="font-size:0.6rem;">Res</span>
+                                        <select id="video-res" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
+                                            <option value="768x512">768x512</option>
+                                            <option value="512x512">512x512</option>
+                                        </select>
+                                    </div>
+                                    <div class="control-group" style="margin-bottom:0;">
+                                        <span class="label-industrial" style="font-size:0.6rem;">Frames</span>
+                                        <input type="number" id="video-frames" value="24" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
+                                    </div>
+                                </div>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px;">
+                                    <div class="control-group" style="margin-bottom:0;">
+                                        <span class="label-industrial" style="font-size:0.6rem;">Guidance</span>
+                                        <input type="number" id="video-guidance" value="3.5" step="0.5" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
+                                    </div>
+                                    <div class="control-group" style="margin-bottom:0;">
+                                        <span class="label-industrial" style="font-size:0.6rem;">Steps</span>
+                                        <input type="number" id="video-steps" value="30" step="1" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
+                                    </div>
+                                </div>
+                                <div class="control-group" style="margin-top:8px; margin-bottom:0;">
+                                    <span class="label-industrial" style="font-size:0.6rem;">Seed</span>
+                                    <input type="number" id="video-seed" value="-1" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
                                 </div>
                             </div>
                         </div>
@@ -226,6 +249,66 @@
                             </label>
                         </div>
                         <button class="btn btn-primary" style="width:100%; padding:16px;" onclick="generatePodcast()">PRODUCE FINAL</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: Dubbing -->
+            <div id="dubbing-view" class="view-container">
+                <div class="view-header">
+                    <div class="view-title" style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
+                        <div>
+                            <h1>DUBBING & S2S</h1>
+                            <p>Translate audio or perform expressive voice conversion.</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="showHelp()"><i class="fas fa-question-circle"></i> HELP</button>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="card-brutalist">
+                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;">Dubbing (Translation)</h2>
+                        <div class="control-group">
+                            <span class="label-industrial">Source File</span>
+                            <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" onclick="document.getElementById('dub-file').click()">
+                                <i class="fas fa-file-video"></i> UPLOAD FILE
+                            </button>
+                            <input type="file" id="dub-file" accept="video/*,audio/*" style="display:none">
+                        </div>
+                        <div class="control-group">
+                            <span class="label-industrial">Target Language</span>
+                            <select id="dub-lang" style="border-color:var(--accent);">
+                                <option value="en">English</option>
+                                <option value="zh">Chinese</option>
+                                <option value="ja">Japanese</option>
+                                <option value="es">Spanish</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="startDubbing()">
+                            <i class="fas fa-magic"></i> START DUBBING
+                        </button>
+                    </div>
+
+                    <div class="card-brutalist">
+                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;">Voice Changer (S2S)</h2>
+                        <div class="control-group">
+                            <span class="label-industrial">Source Audio</span>
+                            <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" id="s2s-record-btn">
+                                <i class="fas fa-circle"></i> RECORD AUDIO
+                            </button>
+                        </div>
+                        <div class="control-group">
+                            <span class="label-industrial">Target Voice</span>
+                            <select id="s2s-target-voice" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);"></select>
+                        </div>
+                        <div class="control-group">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                <input type="checkbox" id="s2s-preserve" checked>
+                                <span class="volt-text" style="font-weight:700; font-size:0.75rem;">PRESERVE PROSODY</span>
+                            </label>
+                        </div>
+                        <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="startVoiceChanger()">
+                            <i class="fas fa-arrows-rotate"></i> CHANGE VOICE
+                        </button>
                     </div>
                 </div>
             </div>
@@ -254,6 +337,9 @@
                             <div class="status-item"><span class="label-industrial">CPU</span><span id="stat-cpu" class="status-val volt-text">--%</span></div>
                             <div class="status-item"><span class="label-industrial">RAM</span><span id="stat-ram" class="status-val volt-text">--%</span></div>
                             <div class="status-item" id="gpu-stat-container" style="display:none;"><span class="label-industrial">VRAM</span><span id="stat-gpu" class="status-val volt-text">--%</span></div>
+                            <button class="btn btn-secondary btn-sm" style="width:100%; margin-top:16px; border-color:var(--danger); color:var(--danger);" onclick="clearCache()">
+                                <i class="fas fa-broom"></i> CLEAR CACHE
+                            </button>
                             </div>
                             <div class="status-grid" style="margin-top:24px; border-top:1px solid var(--border); padding-top:16px;">
                             <div class="status-item">

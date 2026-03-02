@@ -77,7 +77,7 @@ def test_podcast_100_segment_limit():
     """Script > 100 segments should be rejected"""
     script = [{"role": "Ryan", "text": "Hi"}] * 101
     payload = {
-        "profiles": [{"role": "Ryan", "type": "preset", "value": "Ryan"}],
+        "profiles": {"Ryan": {"type": "preset", "value": "Ryan"}},
         "script": script
     }
     response = client.post("/api/generate/podcast", json=payload)
@@ -89,7 +89,7 @@ def test_segment_100_limit():
     """Segment endpoint also enforces the limit"""
     script = [{"role": "Ryan", "text": "Hi"}] * 101
     payload = {
-        "profiles": [{"role": "Ryan", "type": "preset", "value": "Ryan"}],
+        "profiles": {"Ryan": {"type": "preset", "value": "Ryan"}},
         "script": script
     }
     response = client.post("/api/generate/segment", json=payload)
@@ -101,7 +101,7 @@ def test_text_length_validation():
     """Text > 5000 chars should be rejected"""
     long_text = "a" * 5001
     payload = {
-        "profiles": [{"role": "Ryan", "type": "preset", "value": "Ryan"}],
+        "profiles": {"Ryan": {"type": "preset", "value": "Ryan"}},
         "script": [{"role": "Ryan", "text": long_text}]
     }
     response = client.post("/api/generate/segment", json=payload)
@@ -112,7 +112,7 @@ def test_text_length_validation():
 def test_podcast_empty_script():
     """Empty script should be rejected"""
     payload = {
-        "profiles": [{"role": "Ryan", "type": "preset", "value": "Ryan"}],
+        "profiles": {"Ryan": {"type": "preset", "value": "Ryan"}},
         "script": []
     }
     response = client.post("/api/generate/podcast", json=payload)
@@ -123,7 +123,7 @@ def test_podcast_empty_script():
 def test_generate_segment_calls_engine():
     """Verify that generate_segment returns a task ID"""
     payload = {
-        "profiles": [{"role": "ryan", "type": "preset", "value": "ryan"}],
+        "profiles": {"ryan": {"type": "preset", "value": "ryan"}},
         "script": [{"role": "ryan", "text": "Hello"}]
     }
     response = client.post("/api/generate/segment", json=payload)

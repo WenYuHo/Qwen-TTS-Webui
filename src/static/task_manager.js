@@ -19,7 +19,7 @@ export const TaskManager = {
                                 <strong style="font-size:0.9rem;">${task.type.split('_').join(' ').toUpperCase()}</strong>
                                 <span class="task-badge task-badge-${task.status}">${task.status}</span>
                             </div>
-                            <div style="font-size:0.75rem; color:var(--text-secondary);">ID: ${task.id.split('-')[0]}... • ${new Date(task.created_at * 1000).toLocaleTimeString()}</div>
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">ID: ${task.id.split('-')[0]}... - ${new Date(task.created_at * 1000).toLocaleTimeString()}</div>
                         </div>
                         <button class="btn btn-danger btn-sm" onclick="cancelTask('${task.id}')" ${['completed', 'failed', 'cancelled'].includes(task.status) ? 'disabled' : ''} style="padding: 4px 8px; font-size: 0.7rem;" aria-label="Cancel task">
                             <i class="fas fa-times" aria-hidden="true"></i> Cancel

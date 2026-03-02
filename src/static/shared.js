@@ -81,7 +81,7 @@ async function getVoicePreview(profile) {
     // Cache key based on profile values (type and value/instruct)
     const cacheKey = `${profile.type}:${profile.value}`;
     if (previewCache.has(cacheKey)) {
-        console.log(`⚡ Bolt: Using cached preview for ${profile.role}`);
+        console.log(`[BOLT] Using cached preview for ${profile.role}`);
         return previewCache.get(cacheKey);
     }
 

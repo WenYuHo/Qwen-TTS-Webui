@@ -25,24 +25,16 @@ const state = {
 };
 window.state = state;
 
-function escapeHTML(str) {
-    const p = document.createElement('p');
-    p.textContent = str;
-    return p.innerHTML;
-}
-
-function renderAvatar(name) {
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B59B6'];
-    const color = colors[(name || '').length % colors.length];
-    const safeName = escapeHTML(name || '');
-    const initial = (name && name.length > 0) ? escapeHTML(name[0].toUpperCase()) : '?';
-    return `<div class="avatar" style="background:${color}" title="${safeName}" aria-label="Avatar for ${safeName}">${initial}</div>`;
-}
-
 function switchView(view) {
+    console.log("switchView triggered for:", view);
     const currentViewEl = document.querySelector('.view-container.active');
     const targetViewEl = document.getElementById(`${view}-view`);
     
+    if (!targetViewEl) {
+        console.error("Target view element not found:", `${view}-view`);
+        return;
+    }
+
     if (currentViewEl && currentViewEl !== targetViewEl) {
         currentViewEl.classList.add('exiting');
         currentViewEl.classList.remove('active');
@@ -50,15 +42,21 @@ function switchView(view) {
         setTimeout(() => {
             currentViewEl.classList.remove('exiting');
             performSwitch(view);
-        }, 200); // Match exit animation duration
+        }, 200); 
     } else {
         performSwitch(view);
     }
 }
 
 function performSwitch(view) {
+    console.log("performSwitch execution for:", view);
     state.currentView = view;
-    document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
+    
+    document.querySelectorAll('.view-container').forEach(v => {
+        v.classList.remove('active');
+        v.classList.remove('exiting');
+    });
+    
     document.querySelectorAll('.nav-item').forEach(v => {
         v.classList.remove('active');
         v.setAttribute('aria-pressed', 'false');
@@ -67,11 +65,11 @@ function performSwitch(view) {
     const targetView = document.getElementById(`${view}-view`);
     if (targetView) {
         targetView.classList.add('active');
-        const heading = targetView.querySelector('h1');
+        const heading = targetView.querySelector('h1') || targetView.querySelector('h2');
         if (heading) heading.focus();
     }
 
-    const navBtn = document.querySelector(`button[onclick*="${view}"]`);
+    const navBtn = document.getElementById(`nav-${view}`);
     if (navBtn) {
         navBtn.classList.add('active');
         navBtn.setAttribute('aria-pressed', 'true');
@@ -90,50 +88,9 @@ function performSwitch(view) {
     }
 }
 
-async function startDubbing() {
-    const fileInput = document.getElementById('dub-file');
-    const langSelect = document.getElementById('dub-lang');
-    const statusText = document.getElementById('status-text') || document.getElementById('status-badge');
-
-    const file = fileInput.files[0];
-    if (!file) return alert("Please upload a file first.");
-
-    if (statusText) statusText.innerText = "Initiating Dubbing...";
-
-    try {
-        const formData = new FormData();
-        formData.append('file', file);
-        const uploadRes = await fetch('/api/voice/upload', { method: 'POST', body: formData });
-        const uploadData = await uploadRes.json();
-        const path = uploadData.filename;
-        
-        const res = await fetch('/api/generate/dub', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ source_audio: path, target_lang: langSelect.value })
-        });
-        const data = await res.json();
-        TaskManager.pollTask(data.task_id, async (taskData) => {
-            const audioRes = await fetch(`/api/tasks/${data.task_id}/result`);
-            const blob = await audioRes.blob();
-            const url = URL.createObjectURL(blob);
-            const player = document.getElementById('main-audio-player');
-            if (player) {
-                player.src = url;
-                player.play();
-            }
-            alert("Dubbing Complete!");
-        });
-    } catch (err) {
-        if (statusText) statusText.innerText = "Dubbing Error";
-        console.error(err);
-    }
-}
-
-// Global exposure for legacy HTML event handlers
+// Global exposure
 Object.assign(window, {
     switchView,
-    startDubbing,
     loadAssets: AssetManager.loadAssets,
     uploadAsset: AssetManager.uploadAsset,
     deleteAsset: AssetManager.deleteAsset,
@@ -161,6 +118,8 @@ Object.assign(window, {
     fetchAuditLog: SystemManager.fetchAuditLog.bind(SystemManager),
     refreshResourceStats: SystemManager.refreshResourceStats.bind(SystemManager),
     switchSystemSubTab: SystemManager.switchSystemSubTab.bind(SystemManager),
+    loadSubTabState: SystemManager.loadSubTabState.bind(SystemManager),
+    clearCache: SystemManager.clearCache.bind(SystemManager),
     runEngineBenchmark: SystemManager.runEngineBenchmark.bind(SystemManager),
     showVideoPreview: VideoModal.show.bind(VideoModal),
     hideVideoModal: VideoModal.hide.bind(VideoModal),
@@ -168,7 +127,6 @@ Object.assign(window, {
     setupDragAndDrop: AssetManager.setupDragAndDrop
 });
 
-// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => {
         if (['projects', 'dubbing', 'system'].includes(state.currentView)) TaskManager.refreshTasks();

@@ -159,6 +159,19 @@ export const SystemManager = {
         } catch (err) { out.innerText = "Benchmark failed: " + err.message; }
     },
 
+    async clearCache() {
+        if (!confirm("Clear all temporary generation files and engine caches?")) return;
+        try {
+            const res = await fetch('/api/system/cache/clear', { method: 'POST' });
+            const data = await res.json();
+            Notification.show(data.message, "success");
+            this.refreshResourceStats();
+        } catch (err) {
+            Notification.show("Failed to clear cache", "error");
+            console.error(err);
+        }
+    },
+
     async fetchAuditLog() {
         const list = document.getElementById('audit-log-list');
         if (!list) return;

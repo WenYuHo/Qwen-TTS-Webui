@@ -214,6 +214,39 @@ class StorageManager:
         if pruned_count > 0:
             logger.info(f"StorageManager: Pruned {pruned_count} stale files.")
 
+    def purge_cache(self):
+        """Manually clear all temporary generation artifacts and engine caches."""
+        pruned_count = 0
+        for target_dir in self.targets:
+            if not target_dir.exists():
+                continue
+            for item in target_dir.iterdir():
+                if item.is_file() and not item.name.startswith("."):
+                    try:
+                        item.unlink()
+                        pruned_count += 1
+                    except Exception as e:
+                        logger.error(f"Failed to purge {item}: {e}")
+        
+        # Clear engine in-memory caches if accessible
+        try:
+            from . import server_state
+            if hasattr(server_state, "engine") and server_state.engine:
+                if hasattr(server_state.engine, "clear_cache"):
+                    server_state.engine.clear_cache()
+            
+            # Clear CUDA cache if applicable
+            import torch
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except Exception as e:
+            logger.error(f"Failed to clear engine/CUDA cache: {e}")
+
+        self.last_cleanup_time = time.time()
+        self.total_pruned_count += pruned_count
+        logger.info(f"StorageManager: Manual purge complete. Cleared {pruned_count} files.")
+        return pruned_count
+
     def get_stats(self) -> dict:
         return {
             "last_cleanup": self.last_cleanup_time,

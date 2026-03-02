@@ -167,52 +167,61 @@ class SuggestionRequest(BaseModel):
 @router.post("/suggest")
 async def suggest_video_scene(request: SuggestionRequest):
     """
-    Upgraded 'Prompt Architect' logic for LTX-Video.
-    Combines atmosphere, lighting, and camera shots for professional results.
+    Advanced 'Contextual Architect' logic for LTX-Video.
+    Analyzes script text to construct professional, multi-layered cinematic prompts.
     """
+    import random
     text = request.text.lower()
     
-    # 1. Component Libraries
+    # 1. Multi-Layer Component Libraries
     atmospheres = {
-        "mystery": "suspenseful, misty atmosphere, dark cinematic colors",
-        "happy": "vibrant, cheerful mood, warm saturation",
-        "sad": "melancholic, somber tone, muted and desaturated",
-        "tech": "futuristic high-tech lab, sterile and clean, neon glows",
-        "cyberpunk": "gritty cyberpunk aesthetic, rain-slicked surfaces",
-        "nature": "lush, organic environment, sun-dappled",
-        "dream": "surreal, dreamy quality, soft focus, ethereal"
+        "noir": "film noir aesthetic, high contrast, moody, rainy city streets, deep shadows",
+        "cyberpunk": "cyberpunk neon-lit environment, high-tech low-life, rainy reflections",
+        "mystery": "suspenseful, misty atmosphere, dim volumetric lighting, dark cinematic tones",
+        "adventure": "epic adventure mood, vast landscape, heroic lighting, vibrant colors",
+        "sci-fi": "futuristic sci-fi interior, sterile surfaces, pulsating blue lights, high-tech",
+        "horror": "eerie horror setting, flickering lights, claustrophobic framing, decaying textures",
+        "nature": "serene natural environment, soft sunlight, lush vegetation, 8k nature photography",
+        "dream": "surreal dreamscape, ethereal light, floating particles, soft focus, otherworldly",
+        "industrial": "gritty industrial factory, steam vents, rusted metal, warm orange sparks"
     }
     
-    lightings = {
-        "dark": "low-key lighting, deep shadows",
-        "bright": "high-key lighting, well-lit",
-        "night": "nocturnal lighting, cool moonlight",
-        "sunset": "golden hour lighting, long shadows",
-        "indoor": "soft volumetric lighting, atmospheric",
-        "neon": "colorful neon lighting, dramatic reflections"
-    }
+    lightings = [
+        "cinematic volumetric lighting", "dramatic Rembrandt lighting", "soft golden hour glow",
+        "harsh top-down industrial light", "cool moonlight with deep shadows", "vibrant neon backlighting",
+        "natural diffused window light", "flickering candlelight with warm tones"
+    ]
     
-    shots = {
-        "talk": "close-up portrait shot, shallow depth of field",
-        "walk": "medium tracking shot, cinematic movement",
-        "city": "wide establishing shot, urban skyline",
-        "forest": "low-angle ground shot, looking up through leaves",
-        "space": "majestic cinematic wide shot, vastness of space"
-    }
+    shots = [
+        "close-up cinematic portrait shot", "wide establishing shot with deep perspective",
+        "dynamic low-angle heroic shot", "overhead bird's-eye view", "medium tracking shot, smooth motion",
+        "shallow depth of field, bokeh background", "extreme close-up on details"
+    ]
+    
+    motions = [
+        "slow cinematic camera zoom", "steady pan across the scene", "subtle handheld camera shake",
+        "dolly-in towards the subject", "static composition with flowing environment elements"
+    ]
 
-    # 2. Select Components (with variety)
-    import random
-    selected_atmosphere = next((v for k, v in atmospheres.items() if k in text), "cinematic, high-detail")
-    selected_lighting = next((v for k, v in lightings.items() if k in text), "realistic lighting")
-    selected_shot = next((v for k, v in shots.items() if k in text), "cinematic composition")
+    # 2. Architect the suggestion
+    # Find matching atmosphere or use default
+    atmosphere = "cinematic masterpiece"
+    for key, val in atmospheres.items():
+        if key in text:
+            atmosphere = val
+            break
+            
+    lighting = random.choice(lightings)
+    shot = random.choice(shots)
+    motion = random.choice(motions)
     
-    styles = ["highly detailed", "4k resolution", "masterpiece", "photorealistic", "award-winning cinematography"]
-    style_suffix = random.choice(styles)
+    styles = ["photorealistic", "highly detailed", "4k", "8k", "unreal engine 5 render style", "kodak portra 400 aesthetic"]
+    style = random.choice(styles)
 
-    # 3. Architect the Prompt
-    suggestion = f"A {selected_atmosphere} scene, {selected_shot}, featuring {selected_lighting}, {style_suffix}, high-quality texture, realistic motion."
+    # 3. Construct Final Prompt
+    prompt = f"{shot} of {text[:150]}, {atmosphere}, {lighting}, {motion}, {style}, professional color grading, high-quality textures."
     
-    return {"suggestion": suggestion}
+    return {"suggestion": prompt}
 
 @router.post("/narrated")
 async def generate_narrated_video(request: NarratedVideoRequest, background_tasks: BackgroundTasks):

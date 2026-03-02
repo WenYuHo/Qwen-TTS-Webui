@@ -41,12 +41,9 @@ export const VideoModal = {
     setupSubtitles(video, container, srtText) {
         const parseSRT = (data) => {
             const items = [];
-            const blocks = data.split('
-
-');
+            const blocks = data.split('\n\n');
             blocks.forEach(block => {
-                const lines = block.split('
-');
+                const lines = block.split('\n');
                 if (lines.length >= 3) {
                     const times = lines[1].split(' --> ');
                     items.push({
