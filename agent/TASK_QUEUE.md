@@ -2,17 +2,19 @@
 
 ## Prioritized Backlog
 
-### Tier 1: UI Unification
-1. [ ] **UI Style Unification:** Apply "Technoid Brutalist" styles (Volt accents, sharp 2px borders, status-val readouts) to the Voice Studio, Asset Library, and Project Studio views for a cohesive high-performance aesthetic.
+### Tier 1: Documentation & Governance
+1. [ ] **CONTRIBUTING.md:** Add a guide explaining the Conductor framework, Technoid Brutalist design tokens, and modular JS structure for future contributors.
+2. [ ] **Unit Test Expansion:** Create automated tests for `AudioPostProcessor`, `AuditManager`, and `StorageManager`.
 
-### Tier 2: Governance & Automation
-1. [ ] **Documentation:** Add a `CONTRIBUTING.md` file explaining the Conductor framework and modular JS structure.
-2. [ ] **Unit Test Expansion:** Create automated tests for the new `AudioPostProcessor`, `AuditManager`, and `StorageManager`.
+### Tier 2: Performance & Polish
+1. [ ] **True Streaming:** Refactor `PodcastEngine` to support generator-based streaming for real-time synthesis during long script production.
+2. [ ] **Scene Search AI:** Upgrade the keyword-based search to use a small LLM or embedding-based search for better LTX-Video prompt suggestions.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Apply **Technoid Brutalist UI Unification** to all views (Voice, Project, Asset, Dubbing).
 - [x] Implement **Video Preview Modal** with integrated subtitle overlay support.
 - [x] Implement **Project Search** (Filter) for voices, assets, and projects.
-- [x] Implement **Auto-Cleanup** background thread for stale files (7-day retention).
+- [x] Implement **Auto-Cleanup** background thread for stale files.
 - [x] Implement **Resource Monitoring** (CPU/RAM/GPU) in System Manager.
 - [x] Apply **Technoid Brutalist Polish** to the System view UI.
 - [x] Implement **Generation Audit Log** (audit.json) for transparency.
