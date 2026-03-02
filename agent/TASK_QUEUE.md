@@ -2,18 +2,19 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Intelligence & Search
-1. [ ] **Scene Search AI Upgrade:** Enhance the prompt suggestion logic with better cinematic components and action extraction.
-2. [ ] **Auto-Cleanup Stats:** Add a "Last Cleanup" timestamp and "Total Files Pruned" metric to the System Resources view.
+### Tier 1: System Monitoring & UX
+1. [ ] **Auto-Cleanup Stats:** Add a "Last Cleanup" timestamp and "Total Files Pruned" metric to the System Resources view footer.
+2. [ ] **API Documentation:** Create an OpenAPI/Swagger UI endpoint or a static `API.md` documenting all endpoints.
 
-### Tier 2: Governance & Automation
-1. [ ] **API Documentation:** Create an OpenAPI/Swagger UI endpoint or a static `API.md` documenting all endpoints.
+### Tier 2: Performance & Automation
+1. [ ] **Unit Test Expansion:** Create automated tests for the new `Profiler` and `ResourceMonitor` classes.
 2. [ ] **Performance Polish:** Add a "Clear Cache" button to the System view to purge the `PodcastEngine` in-memory caches.
 
 ## Completed (Mar 2026 Refactor)
-- [x] Implement **Sub-Tab Autosave** for the System view using `localStorage`.
+- [x] Upgrade **Scene Search AI** with multi-layered Prompt Architect logic.
+- [x] Implement **Sub-Tab Autosave** for the System view.
 - [x] Refine **Error UI** with a "Copy Trace" button for troubleshooting.
-- [x] Expand **automated unit tests** to cover Profiler, ResourceMonitor, and StorageManager.
+- [x] Expand **automated unit tests** to cover system utilities.
 - [x] Apply **Technoid Brutalist UI Unification** across all Studio views.
 - [x] Implement **Help System** with context-sensitive command reference.
 - [x] Implement **Toast Notifications** (non-blocking) replacing all `alert()` calls.
@@ -30,7 +31,6 @@
 - [x] Implement **Resource Monitoring** (CPU/RAM/GPU) in System Manager.
 - [x] Implement **Generation Audit Log** (audit.json) for transparency.
 - [x] Implement **Audio Effects** (EQ & Reverb) for atmospheric polish.
-- [x] Implement **Scene Search** keyword-based prompt suggestions for LTX-Video.
 - [x] Implement **Parallel Streaming Synthesis** with look-ahead for ultra-low latency.
 - [x] Implement **Persistent System Settings** (settings.json).
 - [x] Implement **Phoneme Editor Bulk Import** (JSON).
