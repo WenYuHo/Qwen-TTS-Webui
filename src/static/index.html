@@ -254,7 +254,19 @@
                             <div class="status-item"><span class="label-industrial">CPU</span><span id="stat-cpu" class="status-val volt-text">--%</span></div>
                             <div class="status-item"><span class="label-industrial">RAM</span><span id="stat-ram" class="status-val volt-text">--%</span></div>
                             <div class="status-item" id="gpu-stat-container" style="display:none;"><span class="label-industrial">VRAM</span><span id="stat-gpu" class="status-val volt-text">--%</span></div>
-                        </div></div>
+                            </div>
+                            <div class="status-grid" style="margin-top:24px; border-top:1px solid var(--border); padding-top:16px;">
+                            <div class="status-item">
+                                <span class="label-industrial">Last Cleanup</span>
+                                <span id="stat-cleanup" class="status-val volt-text" style="font-size:0.8rem;">NEVER</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="label-industrial">Files Pruned</span>
+                                <span id="stat-pruned" class="status-val volt-text">0</span>
+                            </div>
+                            </div>
+                            </div>
+
                     </div>
                 </div>
                 <div id="system-phonemes-tab" class="system-sub-tab" style="display:none;">

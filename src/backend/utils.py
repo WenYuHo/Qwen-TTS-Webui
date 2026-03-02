@@ -175,6 +175,8 @@ class StorageManager:
         ]
         self._stop_event = threading.Event()
         self._thread = None
+        self.last_cleanup_time = 0
+        self.total_pruned_count = 0
 
     def start(self):
         if self._thread and self._thread.is_alive():
@@ -206,8 +208,18 @@ class StorageManager:
                             pruned_count += 1
                     except Exception as e:
                         logger.error(f"Failed to prune {item}: {e}")
+        
+        self.last_cleanup_time = now
+        self.total_pruned_count += pruned_count
         if pruned_count > 0:
             logger.info(f"StorageManager: Pruned {pruned_count} stale files.")
+
+    def get_stats(self) -> dict:
+        return {
+            "last_cleanup": self.last_cleanup_time,
+            "total_pruned": self.total_pruned_count,
+            "retention_days": self.max_age_days
+        }
 
 class Profiler:
     """Context manager for profiling code blocks using cProfile."""

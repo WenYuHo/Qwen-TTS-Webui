@@ -52,8 +52,10 @@ async def get_audit_log():
 
 @router.get("/stats")
 async def get_system_stats():
-    from ..utils import resource_monitor
-    return resource_monitor.get_stats()
+    from ..utils import resource_monitor, storage_manager
+    stats = resource_monitor.get_stats()
+    stats["storage"] = storage_manager.get_stats()
+    return stats
 
 @router.post("/benchmark")
 async def run_benchmark():

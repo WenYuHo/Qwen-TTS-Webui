@@ -109,18 +109,28 @@ export const SystemManager = {
         const ramEl = document.getElementById('stat-ram');
         const gpuEl = document.getElementById('stat-gpu');
         const gpuCont = document.getElementById('gpu-stat-container');
+        const cleanupEl = document.getElementById('stat-cleanup');
+        const prunedEl = document.getElementById('stat-pruned');
         if (!cpuEl) return;
+
         try {
             const res = await fetch('/api/system/stats');
             const data = await res.json();
+            
             cpuEl.innerText = `${data.cpu_percent}%`;
             ramEl.innerText = `${data.ram_percent}%`;
+            
             if (data.gpu) {
                 gpuCont.style.display = 'block';
                 gpuEl.innerText = `${data.gpu.vram_percent.toFixed(1)}%`;
                 gpuEl.title = `${data.gpu.name} (${data.gpu.vram_used.toFixed(1)}GB / ${data.gpu.vram_total.toFixed(1)}GB)`;
             } else gpuCont.style.display = 'none';
-        } catch (err) { console.error(err); }
+
+            if (data.storage && cleanupEl && prunedEl) {
+                cleanupEl.innerText = data.storage.last_cleanup ? new Date(data.storage.last_cleanup * 1000).toLocaleTimeString() : 'NEVER';
+                prunedEl.innerText = data.storage.total_pruned;
+            }
+        } catch (err) { console.error("Stats refresh failed", err); }
     },
 
     switchSystemSubTab(tab) {
