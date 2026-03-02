@@ -2,6 +2,15 @@
 
 A standalone, professional web suite for Qwen-TTS production. Create stories, podcasts, and dialogues with custom voices and atmospheric background music.
 
+## 🤖 For AI Agents
+
+This repository follows the **Conductor Framework**. Before starting any work, AI agents MUST read the following:
+- **Project Index:** [conductor/index.md](conductor/index.md)
+- **Workflow & Rules:** [conductor/workflow.md](conductor/workflow.md)
+- **Agent Style Guide:** [conductor/code_styleguides/agent-improvement.md](conductor/code_styleguides/agent-improvement.md)
+
+Agents should always prioritize the definitions in `conductor/` as the single source of truth for architectural and stylistic decisions.
+
 ## ✨ Features
 
 - **Professional Dashboard**: Clean 3-column layout (Speakers, Story Canvas, Production).
