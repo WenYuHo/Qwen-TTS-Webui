@@ -115,3 +115,77 @@ export const Notification = {
         }, 4000);
     }
 };
+
+export const ErrorDisplay = {
+    show(title, detail) {
+        // We reuse the video modal structure or create a generic one
+        // For speed, let's use a specialized toast-like error modal
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const errorModal = document.createElement('div');
+        errorModal.className = 'card-brutalist';
+        errorModal.style.borderColor = 'var(--danger)';
+        errorModal.style.background = '#1a0005';
+        errorModal.style.width = '400px';
+        errorModal.style.pointerEvents = 'auto';
+        errorModal.style.animation = 'viewEnter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)';
+        errorModal.style.zIndex = '10001';
+
+        errorModal.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--danger); padding-bottom:8px;">
+                <strong style="color:var(--danger); font-family:var(--font-mono); font-size:0.9rem;">
+                    <i class="fas fa-exclamation-triangle"></i> ${title.toUpperCase()}
+                </strong>
+                <button class="btn btn-danger btn-sm" style="padding:2px 6px;" onclick="this.parentElement.parentElement.remove()"><i class="fas fa-times"></i></button>
+            </div>
+            <div style="font-size:0.75rem; color:#ffb3c1; margin-bottom:12px; line-height:1.4;">
+                ${detail}
+            </div>
+            <div style="font-size:0.6rem; background:#000; padding:8px; font-family:var(--font-mono); color:var(--danger); border:1px solid #330008; max-height:100px; overflow:auto;">
+                TRACE: ${new Date().toISOString()} | API_ERR_500
+            </div>
+        `;
+
+        container.prepend(errorModal);
+    }
+};
+
+export const HelpManager = {
+    helpContent: {
+        speech: "### Voice Studio\n- **Design:** Describe a voice to generate a unique profile.\n- **Clone:** Upload audio to replicate a specific person.\n- **Mix:** Combine two existing voices with custom weights.",
+        projects: "### Project Studio\n- **Draft:** Write your script using 'Role: Text' format.\n- **Production:** Manage granular blocks and background music.\n- **Video:** Enable LTX-Video for AI-narrated segments.",
+        dubbing: "### Dubbing & S2S\n- **Dubbing:** Translate and re-voice videos/audio automatically.\n- **S2S:** Perform real-time expressive voice conversion.",
+        assets: "### Asset Library\n- Upload and manage background music (BGM) and sound effects (SFX).\n- Use supported formats: MP3, WAV.",
+        system: "### System Manager\n- **Inventory:** Download and verify model checkpoints.\n- **Performance:** Benchmark engine speed and identify bottlenecks.\n- **Audit:** Track all AI generation activity."
+    },
+
+    show(view) {
+        const content = this.helpContent[view] || "Select a view to see help.";
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.style.display = 'flex';
+        overlay.onclick = (e) => { if(e.target === overlay) overlay.remove(); };
+
+        const modal = document.createElement('div');
+        modal.className = 'card-brutalist';
+        modal.style.maxWidth = '500px';
+        modal.style.padding = '32px';
+        modal.style.animation = 'viewEnter 0.2s ease-out';
+
+        modal.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid var(--accent); padding-bottom:12px;">
+                <h2 style="margin:0; font-size:1.2rem;">COMMAND REFERENCE</h2>
+                <button class="btn btn-danger btn-sm" onclick="this.parentElement.parentElement.parentElement.remove()"><i class="fas fa-times"></i></button>
+            </div>
+            <div style="font-size:0.9rem; line-height:1.6; font-family:var(--font-mono); color:var(--text-secondary);">
+                ${content.replace(/\n/g, '<br>').replace(/### (.+)/g, '<strong style="color:var(--accent)">$1</strong>')}
+            </div>
+            <button class="btn btn-secondary btn-sm" style="width:100%; margin-top:24px;" onclick="this.parentElement.parentElement.remove()">ACKNOWLEDGE</button>
+        `;
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+    }
+};

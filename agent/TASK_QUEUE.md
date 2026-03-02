@@ -2,28 +2,25 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Resilience & UX
-1. [ ] **Error UI:** Create a specialized "Error Boundary" component in the UI to handle and display synthesis failures with technical logs.
-2. [ ] **Help System:** Add an inline "Help" overlay for each view explaining the available controls.
+### Tier 1: Resilience & Automation
+1. [ ] **Unit Test Expansion:** Create automated tests for the new `Profiler` and `ResourceMonitor` classes in `tests/test_system_utils.py`.
+2. [ ] **Error UI Refinement:** Enhance the `ErrorDisplay` component to include a "Copy Log" button for easier troubleshooting.
 
-### Tier 2: Governance & Search
-1. [ ] **Unit Test Expansion:** Create automated tests for the new `Profiler` and `ResourceMonitor` classes.
-2. [ ] **Performance Polish:** Add a "Clear Cache" button to the System view to purge the `PodcastEngine` in-memory caches.
+### Tier 2: Intelligence & Features
+1. [ ] **Scene Search AI Upgrade:** Enhance the prompt suggestion logic with better cinematic components and action extraction.
+2. [ ] **Sub-Tab Autosave:** Ensure that the active system sub-tab (Inventory, Phonemes, etc.) is preserved across page refreshes.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Apply **Technoid Brutalist UI Unification** across all Studio views.
+- [x] Implement **Help System** with context-sensitive command reference.
 - [x] Implement **Toast Notifications** (non-blocking) replacing all `alert()` calls.
 - [x] Implement **UI Animation** for smooth, fluid view transitions.
 - [x] Implement **Performance Profiling Integration** (Benchmark sub-tab).
 - [x] Implement **True Streaming** for podcast production.
-- [x] Create **automated unit tests** for system utilities.
-- [x] Implement **Auto-Documentation** script for tech stack synchronization.
-- [x] Upgrade **Scene Search AI** with cinematic prompt templates.
-- [x] Create **API Load Testing** utility (`tools/api_load_test.py`).
-- [x] Create **Model Checkpoint Tests** (integrity and existence checks).
-- [x] Refactor and unify setup/start into **studio.bat** and **studio.sh**.
+- [x] Create **Model Integrity Tests** for checkpoints.
+- [x] Consolidate setup/start into **studio.bat** and **studio.sh**.
 - [x] Consolidate video dependencies into a single **requirements.txt**.
 - [x] Create **CONTRIBUTING.md** with framework and design guidelines.
-- [x] Apply **Technoid Brutalist UI Unification** to all views.
 - [x] Implement **Video Preview Modal** with subtitle support.
 - [x] Implement **Project Search** (Filter) for voices, assets, and projects.
 - [x] Implement **Auto-Cleanup** background thread for stale files.

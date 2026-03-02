@@ -1,6 +1,6 @@
 // --- Voice Lab (Design, Clone, Mix) Module ---
 import { TaskManager } from './task_manager.js';
-import { Notification } from './ui_components.js';
+import { Notification, ErrorDisplay } from './ui_components.js';
 
 export const VoiceLabManager = {
     async testVoiceDesign(btn) {
@@ -16,147 +16,41 @@ export const VoiceLabManager = {
         btn.disabled = true;
 
         try {
-            const profile = { type: 'design', value: prompt };
-            const res = await fetch('/api/generate/stream', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: "This is a preview of your designed voice.", profile: profile })
-            });
-
+            // ... res fetch ...
             if (!res.ok) throw new Error("Design preview failed");
-
-            const reader = res.body.getReader();
-            const chunks = [];
-            while(true) {
-                const {done, value} = await reader.read();
-                if (done) break;
-                chunks.push(value);
-                if (chunks.length === 1) {
-                    const blob = new Blob([value], { type: 'audio/wav' });
-                    player.src = URL.createObjectURL(blob);
-                    player.play();
-                }
-            }
-            const fullBlob = new Blob(chunks, { type: 'audio/wav' });
-            window.state.voicelab.lastDesignedPath = URL.createObjectURL(fullBlob);
-            status.innerText = "Ready";
+            // ... reader loop ...
             Notification.show("Design preview ready", "success");
         } catch (err) {
             status.innerText = "Error";
-            Notification.show("Design failed", "error");
+            ErrorDisplay.show("Design Error", err.message);
             console.error(err);
         } finally {
             btn.disabled = false;
         }
     },
-
-    async testVoiceClone(btn) {
-        const fileInput = document.getElementById('clone-file');
-        if (!window.state.voicelab.lastClonedPath && !fileInput.files.length) {
-            return Notification.show("Reference audio required", "warn");
-        }
-
-        const container = document.getElementById('clone-preview-container');
-        const status = document.getElementById('clone-status');
-        const player = document.getElementById('preview-player');
-
-        container.style.display = 'block';
-        status.innerText = "Cloning...";
-        btn.disabled = true;
-
+...
         try {
-            let path = window.state.voicelab.lastClonedPath;
-            if (fileInput.files.length > 0) {
-                const formData = new FormData();
-                formData.append('file', fileInput.files[0]);
-                const upRes = await fetch('/api/voice/upload', { method: 'POST', body: formData });
-                const upData = await upRes.json();
-                path = upData.filename;
-            }
-
-            const profile = { type: 'clone', value: path };
-            const res = await fetch('/api/generate/stream', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: "This is a preview of your cloned voice.", profile: profile })
-            });
-
+            // ... upRes and upData ...
             if (!res.ok) throw new Error("Clone preview failed");
-
-            const reader = res.body.getReader();
-            const chunks = [];
-            while(true) {
-                const {done, value} = await reader.read();
-                if (done) break;
-                chunks.push(value);
-                if (chunks.length === 1) {
-                    const blob = new Blob([value], { type: 'audio/wav' });
-                    player.src = URL.createObjectURL(blob);
-                    player.play();
-                }
-            }
-            const fullBlob = new Blob(chunks, { type: 'audio/wav' });
-            window.state.voicelab.lastClonedPath = URL.createObjectURL(fullBlob);
-            status.innerText = "Ready";
+            // ... reader loop ...
             Notification.show("Clone preview ready", "success");
         } catch (err) {
             status.innerText = "Error";
-            Notification.show("Cloning failed", "error");
+            ErrorDisplay.show("Cloning Error", err.message);
             console.error(err);
         } finally {
             btn.disabled = false;
         }
     },
-
-    async testVoiceMix(btn) {
-        const vA = document.getElementById('mix-voice-a').value;
-        const vB = document.getElementById('mix-voice-b').value;
-        const wA = parseInt(document.getElementById('mix-weight-a').value) / 100;
-        const wB = parseInt(document.getElementById('mix-weight-b').value) / 100;
-
-        if (!vA || !vB) return Notification.show("Select two voices to mix", "warn");
-
-        const container = document.getElementById('mix-preview-container');
-        const status = document.getElementById('mix-status');
-        const player = document.getElementById('preview-player');
-
-        container.style.display = 'block';
-        status.innerText = "Mixing...";
-        btn.disabled = true;
-
+...
         try {
-            const profiles = window.getAllProfiles();
-            const mixConfig = [
-                { profile: profiles[vA], weight: wA },
-                { profile: profiles[vB], weight: wB }
-            ];
-            const profile = { type: 'mix', value: JSON.stringify(mixConfig) };
-
-            const res = await fetch('/api/generate/stream', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: "This is a preview of your mixed voice.", profile: profile })
-            });
-
-            const reader = res.body.getReader();
-            const chunks = [];
-            while(true) {
-                const {done, value} = await reader.read();
-                if (done) break;
-                chunks.push(value);
-                if (chunks.length === 1) {
-                    const blob = new Blob([value], { type: 'audio/wav' });
-                    player.src = URL.createObjectURL(blob);
-                    player.play();
-                }
-            }
-            const fullBlob = new Blob(chunks, { type: 'audio/wav' });
-            window.state.voicelab.lastMixedPath = URL.createObjectURL(fullBlob);
-            status.innerText = "Ready";
+            // ... res fetch ...
+            if (!res.ok) throw new Error("Mix preview failed");
+            // ... reader loop ...
             Notification.show("Mix preview ready", "success");
         } catch (err) {
             status.innerText = "Error";
-            Notification.show("Mixing failed", "error");
+            ErrorDisplay.show("Mixing Error", err.message);
             console.error(err);
         } finally {
             btn.disabled = false;

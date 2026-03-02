@@ -4,7 +4,7 @@ import { AssetManager } from './assets.js';
 import { SystemManager } from './system.js';
 import { ProductionManager } from './production.js';
 import { VoiceLabManager } from './voicelab.js';
-import { VideoModal } from './ui_components.js';
+import { VideoModal, HelpManager } from './ui_components.js';
 
 const state = {
     currentView: 'speech',
@@ -164,6 +164,7 @@ Object.assign(window, {
     runEngineBenchmark: SystemManager.runEngineBenchmark.bind(SystemManager),
     showVideoPreview: VideoModal.show.bind(VideoModal),
     hideVideoModal: VideoModal.hide.bind(VideoModal),
+    showHelp: () => HelpManager.show(state.currentView),
     setupDragAndDrop: AssetManager.setupDragAndDrop
 });
 

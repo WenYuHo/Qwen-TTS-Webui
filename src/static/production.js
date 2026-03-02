@@ -1,5 +1,5 @@
 // --- Production & Studio Module ---
-import { Notification } from './ui_components.js';
+import { Notification, ErrorDisplay } from './ui_components.js';
 
 export const ProductionManager = {
     async generatePodcast() {
@@ -119,7 +119,7 @@ export const ProductionManager = {
             }
         } catch (err) {
             if (statusText) statusText.innerText = "Production Failed";
-            alert(`Error: ${err.message}`);
+            ErrorDisplay.show("Production Error", err.message);
         }
     },
 

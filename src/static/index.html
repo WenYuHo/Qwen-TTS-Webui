@@ -47,9 +47,12 @@
             <!-- View: Voice Studio -->
             <div id="speech-view" class="view-container active">
                 <div class="view-header">
-                    <div class="view-title">
-                        <h1 tabindex="-1">Voice Studio</h1>
-                        <p>Design, clone, and mix unique AI voices.</p>
+                    <div class="view-title" style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
+                        <div>
+                            <h1 tabindex="-1">Voice Studio</h1>
+                            <p>Design, clone, and mix unique AI voices.</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="showHelp()"><i class="fas fa-question-circle"></i> HELP</button>
                     </div>
                 </div>
 
@@ -59,29 +62,14 @@
                         <h2 style="margin-bottom:16px; font-size: 1.2rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;">Voice Design</h2>
                         <div class="control-group">
                             <span class="label-industrial">Style Prompt</span>
-                            <textarea id="design-prompt" placeholder="A calm, soothing female voice with a slight British accent..." style="height: 80px; border-color:var(--accent);"></textarea>
+                            <textarea id="design-prompt" placeholder="A calm, soothing female voice..." style="height: 80px; border-color:var(--accent);"></textarea>
                         </div>
-
-                        <div class="sliders">
-                            <div class="slider-item">
-                                <span class="label-industrial">Gender</span>
-                                <input type="range" id="design-gender" min="0" max="100" value="50">
-                                <span style="font-size:0.7rem; font-family:var(--font-mono); width:50px; text-align:right;">M / F</span>
-                            </div>
-                            <div class="slider-item">
-                                <span class="label-industrial">Age</span>
-                                <input type="range" id="design-age" min="0" max="100" value="30">
-                                <span style="font-size:0.7rem; font-family:var(--font-mono); width:50px; text-align:right;">Y / O</span>
-                            </div>
-                        </div>
-
                         <button class="btn btn-primary" style="width:100%; margin-top:24px; padding:12px;" onclick="testVoiceDesign(this)">
                             <i class="fas fa-magic"></i> DESIGN & PREVIEW
                         </button>
-
                         <div id="design-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.4); border:1px solid var(--accent); padding: 12px;">
                             <div style="display:flex; align-items:center; gap:12px;">
-                                <button class="btn btn-secondary btn-sm" onclick="playDesignPreview()" aria-label="Play design preview" title="Play Preview"><i class="fas fa-play"></i></button>
+                                <button class="btn btn-secondary btn-sm" onclick="playDesignPreview()"><i class="fas fa-play"></i></button>
                                 <span id="design-status" class="volt-text" style="font-size:0.8rem; font-weight:700;">READY</span>
                                 <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="saveDesignedVoice()">SAVE</button>
                             </div>
@@ -94,24 +82,15 @@
                         <div class="control-group">
                             <span class="label-industrial">Reference Audio</span>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                                <button class="btn btn-secondary" onclick="document.getElementById('clone-file').click()">
-                                    <i class="fas fa-upload"></i> UPLOAD
-                                </button>
-                                <button class="btn btn-danger" id="clone-record-btn">
-                                    <i class="fas fa-circle"></i> RECORD
-                                </button>
+                                <button class="btn btn-secondary" onclick="document.getElementById('clone-file').click()">UPLOAD</button>
+                                <button class="btn btn-danger" id="clone-record-btn">RECORD</button>
                             </div>
-                            <input type="file" id="clone-file" accept="audio/*" multiple style="display:none" onchange="handleCloneUpload(this.files)">
-                            <p id="clone-filename" style="font-size:0.7rem; font-family:var(--font-mono); color:var(--text-secondary); margin-top:8px;">NO FILE SELECTED</p>
+                            <input type="file" id="clone-file" accept="audio/*" style="display:none">
                         </div>
-
-                        <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="testVoiceClone(this)">
-                            <i class="fas fa-clone"></i> CLONE & PREVIEW
-                        </button>
-
+                        <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="testVoiceClone(this)">CLONE & PREVIEW</button>
                         <div id="clone-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.4); border:1px solid var(--accent); padding: 12px;">
                             <div style="display:flex; align-items:center; gap:12px;">
-                                <button class="btn btn-secondary btn-sm" onclick="playClonePreview()" aria-label="Play clone preview" title="Play Preview"><i class="fas fa-play"></i></button>
+                                <button class="btn btn-secondary btn-sm" onclick="playClonePreview()"><i class="fas fa-play"></i></button>
                                 <span id="clone-status" class="volt-text" style="font-size:0.8rem; font-weight:700;">READY</span>
                                 <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="saveClonedVoice()">SAVE</button>
                             </div>
@@ -123,313 +102,130 @@
                         <h2 style="margin-bottom:16px; font-size: 1.2rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;">Voice Mixer</h2>
                         <div class="control-group">
                             <span class="label-industrial">Base Voice A</span>
-                            <select id="mix-voice-a" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);"></select>
-                            <input type="range" id="mix-weight-a" min="0" max="100" value="50" style="margin-top:8px; width:100%">
+                            <select id="mix-voice-a" class="btn btn-secondary btn-sm" style="width:100%"></select>
                         </div>
                         <div class="control-group">
                             <span class="label-industrial">Base Voice B</span>
-                            <select id="mix-voice-b" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);"></select>
-                            <input type="range" id="mix-weight-b" min="0" max="100" value="50" style="margin-top:8px; width:100%">
+                            <select id="mix-voice-b" class="btn btn-secondary btn-sm" style="width:100%"></select>
                         </div>
-                        <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="testVoiceMix(this)">
-                            <i class="fas fa-flask"></i> MIX & PREVIEW
-                        </button>
-                        <div id="mix-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.4); border:1px solid var(--accent); padding: 12px;">
-                            <div style="display:flex; align-items:center; gap:12px;">
-                                <button class="btn btn-secondary btn-sm" onclick="playMixPreview()" aria-label="Play mix preview" title="Play Preview"><i class="fas fa-play"></i></button>
-                                <span id="mix-status" class="volt-text" style="font-size:0.8rem; font-weight:700;">READY</span>
-                                <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="saveMixedVoice()">SAVE</button>
-                            </div>
-                        </div>
+                        <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="testVoiceMix(this)">MIX & PREVIEW</button>
                     </div>
                 </div>
 
                 <div class="view-header" style="margin-top: 48px;">
                     <div class="view-title" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                        <h2 tabindex="-1" class="volt-text">MY VOICE LIBRARY</h2>
+                        <h2 class="volt-text">MY VOICE LIBRARY</h2>
                         <div style="width:300px; position:relative;">
                             <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.5; color:var(--accent)"></i>
                             <input type="text" id="voice-search" placeholder="Filter voices..." style="padding: 8px 8px 8px 36px; font-size:0.8rem; border:2px solid var(--accent); background:rgba(0,0,0,0.3); color:white;" oninput="filterVoiceLibrary()">
                         </div>
                     </div>
                 </div>
-                <div id="voice-library-grid" class="grid-2" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
-                    <!-- Library voices -->
-                </div>
+                <div id="voice-library-grid" class="grid-2" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));"></div>
             </div>
-
 
             <!-- View: Asset Library -->
             <div id="assets-view" class="view-container">
                 <div class="view-header">
-                    <div class="view-title" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                    <div class="view-title" style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
                         <div>
-                            <h1 tabindex="-1">Asset Library</h1>
+                            <h1>ASSET LIBRARY</h1>
                             <p>Manage shared media assets.</p>
                         </div>
-                        <div style="width:300px; position:relative;">
-                            <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.5; color:var(--accent)"></i>
-                            <input type="text" id="asset-search" placeholder="Filter assets..." style="padding: 8px 8px 8px 36px; font-size:0.8rem; border:2px solid var(--accent); background:rgba(0,0,0,0.3); color:white;" oninput="filterAssets()">
+                        <div style="display:flex; gap:16px;">
+                            <div style="width:200px; position:relative;">
+                                <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.5; color:var(--accent)"></i>
+                                <input type="text" id="asset-search" placeholder="Search..." style="padding: 6px 8px 6px 36px; font-size:0.75rem; border:2px solid var(--accent); background:rgba(0,0,0,0.3); color:white;" oninput="filterAssets()">
+                            </div>
+                            <button class="btn btn-primary btn-sm" onclick="document.getElementById('asset-upload-input').click()">UPLOAD</button>
+                            <button class="btn btn-secondary btn-sm" onclick="showHelp()">HELP</button>
                         </div>
                     </div>
-                    <div>
-                        <input type="file" id="asset-upload-input" style="display:none" onchange="uploadAsset(this)">
-                        <button class="btn btn-primary" onclick="document.getElementById('asset-upload-input').click()">
-                            <i class="fas fa-upload"></i> UPLOAD ASSET
-                        </button>
-                    </div>
+                    <input type="file" id="asset-upload-input" style="display:none" onchange="uploadAsset(this)">
                 </div>
-                <div id="asset-library-grid" class="grid-2" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
-                    <!-- Assets will be listed here -->
-                </div>
+                <div id="asset-library-grid" class="grid-2"></div>
             </div>
 
             <!-- View: Project Studio -->
             <div id="projects-view" class="view-container">
                 <div class="view-header">
-                    <div class="view-title">
-                        <h1 tabindex="-1">Project Studio</h1>
-                        <p>Create multi-character stories and audio dramas.</p>
-                    </div>
-                    <div style="display:flex; gap:12px; align-items:center;">
-                        <div style="width:200px; position:relative;">
-                            <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.5; color:var(--accent)"></i>
-                            <input type="text" id="project-search" placeholder="Filter projects..." style="padding: 6px 8px 6px 36px; font-size:0.75rem; border:2px solid var(--accent); background:rgba(0,0,0,0.3); color:white;" oninput="filterProjects()">
+                    <div class="view-title" style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
+                        <div>
+                            <h1>PROJECT STUDIO</h1>
+                            <p>Create multi-character audio dramas.</p>
                         </div>
-                        <select id="project-select" class="btn btn-secondary btn-sm" style="width:160px; border-color:var(--accent);" aria-label="Select project">
-                            <option value="">(New Project)</option>
-                        </select>
-                        <button class="btn btn-secondary btn-sm" onclick="loadProject()"><i class="fas fa-folder-open"></i> LOAD</button>
-                        <button class="btn btn-secondary btn-sm" onclick="exportStudioBundle()"><i class="fas fa-file-archive"></i> EXPORT</button>
-                        <button class="btn btn-primary btn-sm" onclick="saveProject()"><i class="fas fa-save"></i> SAVE</button>
+                        <div style="display:flex; gap:12px; align-items:center;">
+                            <div style="width:180px; position:relative;">
+                                <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.5; color:var(--accent)"></i>
+                                <input type="text" id="project-search" placeholder="Search..." style="padding: 6px 8px 6px 36px; font-size:0.75rem; border:2px solid var(--accent); background:rgba(0,0,0,0.3); color:white;" oninput="filterProjects()">
+                            </div>
+                            <select id="project-select" class="btn btn-secondary btn-sm" style="width:140px; border-color:var(--accent);"><option value="">(New)</option></select>
+                            <button class="btn btn-secondary btn-sm" onclick="loadProject()">LOAD</button>
+                            <button class="btn btn-primary btn-sm" onclick="saveProject()">SAVE</button>
+                            <button class="btn btn-secondary btn-sm" onclick="showHelp()">HELP</button>
+                        </div>
                     </div>
                 </div>
 
                 <div class="canvas-layout">
-                    <div class="card-brutalist canvas-editor-container" style="padding:0;">
+                    <div class="card-brutalist canvas-editor-container" style="padding:0; overflow:hidden;">
                         <div class="header" style="border-bottom: 2px solid var(--accent); padding: 12px 24px; display: flex; gap: 16px; background:rgba(255,255,255,0.02);">
                             <button class="btn btn-secondary btn-sm" onclick="toggleCanvasView('draft')">DRAFT</button>
                             <button class="btn btn-secondary btn-sm" onclick="toggleCanvasView('production')">PRODUCTION</button>
-                            <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="promoteToProduction()">PROMOTE TO BLOCKS</button>
+                            <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="promoteToProduction()">PROMOTE</button>
                         </div>
-
                         <div id="canvas-draft-view" style="flex:1; display:flex;">
-                            <textarea id="script-editor" style="border:none;" placeholder="Alice: Hello there!
-Bob: Hi Alice, how are you today?"></textarea>
+                            <textarea id="script-editor" style="border:none; padding:24px; font-family:var(--font-mono); font-size:0.9rem;" placeholder="Alice: Hello!"></textarea>
                         </div>
-
                         <div id="canvas-production-view" style="flex:1; display:none; flex-direction:column;">
-                            <div id="timeline-viz" style="height:120px; border-bottom:1px solid var(--border); padding:10px; display:none;">
-                                <div id="waveform" style="height:80px;"></div>
-                                <div id="waveform-timeline"></div>
-                            </div>
-                            <div id="blocks-container" class="blocks-container">
-                                <!-- Dynamic Blocks -->
-                            </div>
+                            <div id="blocks-container" class="blocks-container" style="padding:20px;"></div>
                         </div>
                     </div>
 
                     <div class="card-brutalist sidebar-controls">
-                        <span class="label-industrial">Production Settings</span>
+                        <span class="label-industrial">SETTINGS</span>
                         <div class="control-group">
-                            <span class="label-industrial">BGM Mood</span>
-                            <select id="bgm-select" style="border-color:var(--accent);">
-                                <option value="">None</option>
-                                <option value="mystery">Mystery</option>
-                                <option value="tech">Tech</option>
-                                <option value="joy">Joyful</option>
-                                <option value="rain">Rain</option>
-                            </select>
+                            <span class="label-industrial">BGM</span>
+                            <select id="bgm-select" style="border-color:var(--accent);"><option value="">None</option></select>
                         </div>
-
                         <div class="control-group">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span class="label-industrial">Auto-Ducking</span>
-                                <span id="ducking-val" class="volt-text" style="font-size:0.8rem;">0%</span>
-                            </div>
+                            <div style="display:flex; justify-content:space-between;"><span class="label-industrial">Ducking</span><span id="ducking-val" class="volt-text">0%</span></div>
                             <input type="range" id="ducking-range" min="0" max="100" value="0" style="width:100%" oninput="document.getElementById('ducking-val').innerText = this.value + '%' ">
                         </div>
-
-                        <span class="label-industrial">Audio Processing</span>
-                        <div class="card" style="padding:16px; margin-bottom:24px; background:rgba(0,0,0,0.3); border:1px solid var(--accent);">
-                            <div class="control-group">
-                                <span class="label-industrial">EQ Preset</span>
-                                <select id="audio-eq" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);">
-                                    <option value="flat">Flat (Default)</option>
-                                    <option value="broadcast">Radio/Broadcast</option>
-                                    <option value="warm">Warm/Analog</option>
-                                    <option value="bright">Bright/Crisp</option>
-                                </select>
-                            </div>
-                            <div class="control-group" style="margin-bottom:0;">
-                                <div style="display:flex; justify-content:space-between;">
-                                    <span class="label-industrial">Reverb</span>
-                                    <span id="reverb-val" class="volt-text" style="font-size:0.8rem;">0%</span>
-                                </div>
-                                <input type="range" id="audio-reverb" min="0" max="100" value="0" style="width:100%" oninput="document.getElementById('reverb-val').innerText = this.value + '%' ">
-                            </div>
+                        
+                        <span class="label-industrial">EFFECTS</span>
+                        <div class="card" style="padding:12px; margin-bottom:20px; background:rgba(0,0,0,0.3); border:1px solid var(--accent);">
+                            <select id="audio-eq" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);"><option value="flat">Flat</option><option value="broadcast">Radio</option></select>
+                            <div style="display:flex; justify-content:space-between; margin-top:12px;"><span class="label-industrial">Reverb</span><span id="reverb-val" class="volt-text">0%</span></div>
+                            <input type="range" id="audio-reverb" min="0" max="100" value="0" style="width:100%" oninput="document.getElementById('reverb-val').innerText = this.value + '%' ">
                         </div>
 
-                        <span class="label-industrial">Video Engine</span>
-                        <div class="card" style="padding:16px; background:rgba(204,255,0,0.05); border:1px solid var(--accent); margin-bottom:24px;">
-                            <div class="control-group">
-                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                                    <input type="checkbox" id="video-enabled" onchange="document.getElementById('video-options').style.display = this.checked ? 'block' : 'none'">
-                                    <span class="volt-text" style="font-weight:700; font-size:0.75rem;">ENABLE LTX-VIDEO</span>
-                                </label>
-                            </div>
-                            <div id="video-options" style="display:none; margin-top:12px;">
-                                <div class="control-group">
-                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                        <span class="label-industrial">Scene Prompt</span>
-                                        <button class="btn btn-secondary btn-sm" style="padding:2px 8px; font-size:0.6rem;" onclick="suggestVideoScene()">
-                                            <i class="fas fa-sparkles"></i> SUGGEST
-                                        </button>
-                                    </div>
-                                    <textarea id="video-prompt" placeholder="Cinematic description..." style="height: 60px; font-size: 0.8rem; border-color: var(--accent); background: rgba(0,0,0,0.3); color: white;"></textarea>
+                        <span class="label-industrial">VIDEO ENGINE</span>
+                        <div class="card" style="padding:12px; background:rgba(204,255,0,0.05); border:1px solid var(--accent); margin-bottom:20px;">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:8px;">
+                                <input type="checkbox" id="video-enabled" onchange="document.getElementById('video-options').style.display = this.checked ? 'block' : 'none'">
+                                <span class="volt-text" style="font-weight:700; font-size:0.7rem;">ENABLE VIDEO</span>
+                            </label>
+                            <div id="video-options" style="display:none;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                    <span class="label-industrial">PROMPT</span>
+                                    <button class="btn btn-secondary btn-sm" style="padding:2px 6px; font-size:0.6rem;" onclick="suggestVideoScene()">SUGGEST</button>
                                 </div>
-                                <!-- ... rest of video options ... -->
-                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
-                                    <div class="control-group">
-                                        <label class="label" style="font-size:0.7rem;">Guidance Scale</label>
-                                        <input type="number" id="video-guidance" value="3.5" step="0.5" min="1" max="20" class="btn btn-secondary btn-sm" style="width:100%; text-align:left;">
-                                    </div>
-                                    <div class="control-group">
-                                        <label class="label" style="font-size:0.7rem;">Inference Steps</label>
-                                        <input type="number" id="video-steps" value="30" step="1" min="1" max="100" class="btn btn-secondary btn-sm" style="width:100%; text-align:left;">
-                                    </div>
-                                </div>
-                                <div class="control-group" style="margin-bottom:12px;">
-                                    <label class="label" style="font-size:0.7rem;">Seed (-1 for random)</label>
-                                    <input type="number" id="video-seed" value="-1" step="1" class="btn btn-secondary btn-sm" style="width:100%; text-align:left;">
-                                </div>
-                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                                    <div class="control-group">
-                                        <label class="label" style="font-size:0.7rem;">Resolution</label>
-                                        <select id="video-res" class="btn btn-secondary btn-sm" style="width:100%; font-size:0.7rem; padding:4px;">
-                                            <option value="768x512">768x512</option>
-                                            <option value="512x512">512x512</option>
-                                        </select>
-                                    </div>
-                                    <div class="control-group">
-                                        <label class="label" style="font-size:0.7rem;">Frames</label>
-                                        <select id="video-frames" class="btn btn-secondary btn-sm" style="width:100%; font-size:0.7rem; padding:4px;">
-                                            <option value="65">65 (Short)</option>
-                                            <option value="121">121 (Long)</option>
-                                        </select>
-                                    </div>
+                                <textarea id="video-prompt" placeholder="Scene..." style="height: 50px; font-size: 0.75rem; border-color: var(--accent); background: rgba(0,0,0,0.3); color: white;"></textarea>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px;">
+                                    <input type="number" id="video-guidance" value="3.5" step="0.5" class="btn btn-secondary btn-sm" style="width:100%; padding:4px;">
+                                    <input type="number" id="video-steps" value="30" step="1" class="btn btn-secondary btn-sm" style="width:100%; padding:4px;">
                                 </div>
                             </div>
                         </div>
-
 
                         <div class="control-group">
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                                 <input type="checkbox" id="stream-podcast" checked>
-                                <span class="volt-text" style="font-weight:700; font-size:0.75rem;">ENABLE STREAMING PLAYBACK</span>
+                                <span class="volt-text" style="font-size:0.65rem;">STREAMING PLAYBACK</span>
                             </label>
                         </div>
-
-                        <button class="btn btn-primary" style="width:100%; padding:20px;" onclick="generatePodcast()">
-                            <i class="fas fa-microphone"></i> PRODUCE FINAL
-                        </button>
-
-                        <button class="btn btn-secondary btn-sm" style="width:100%; margin-top:12px;" onclick="batchSynthesize()">
-                            Synthesize All Blocks
-                        </button>
-                    </div>
-                </div>
-
-                <div class="card" style="margin-top:24px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <h2 style="font-size: 1.1rem;">Live Task Monitor</h2>
-                            <button class="btn btn-secondary btn-sm" onclick="clearCompletedTasks()" style="padding: 4px 8px; font-size: 0.7rem;"><i class="fas fa-broom"></i> Clear Finished</button>
-                        </div>
-                        <button class="btn btn-secondary btn-sm" onclick="refreshTasks()"><i class="fas fa-sync"></i> Refresh</button>
-                    </div>
-                    <div class="js-task-monitor-list" style="display:flex; flex-direction:column; gap:12px;">
-                        <div class="card" style="border-style:dashed; opacity:0.6; text-align:center;">No active tasks</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- View: Dubbing -->
-            <div id="dubbing-view" class="view-container">
-                <div class="view-header">
-                    <div class="view-title">
-                        <h1 tabindex="-1">DUBBING & S2S</h1>
-                        <p>Translate audio or perform expressive voice conversion.</p>
-                    </div>
-                </div>
-                <div class="grid-2">
-                    <div class="card-brutalist">
-                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;">Dubbing (Translation)</h2>
-                        <div class="control-group">
-                            <span class="label-industrial">Source File</span>
-                            <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" onclick="document.getElementById('dub-file').click()">
-                                <i class="fas fa-file-video"></i> UPLOAD FILE
-                            </button>
-                            <input type="file" id="dub-file" accept="video/*,audio/*" style="display:none">
-                        </div>
-                        <div class="control-group">
-                            <span class="label-industrial">Target Language</span>
-                            <select id="dub-lang" style="border-color:var(--accent);">
-                                <option value="en">English</option>
-                                <option value="zh">Chinese</option>
-                                <option value="ja">Japanese</option>
-                                <option value="es">Spanish</option>
-                            </select>
-                        </div>
-
-                        <div class="control-group">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span class="label-industrial">Auto-Ducking</span>
-                                <span id="ducking-val-dub" class="volt-text" style="font-size:0.8rem;">0%</span>
-                            </div>
-                            <input type="range" id="ducking-range-dub" min="0" max="100" value="0" style="width:100%" oninput="document.getElementById('ducking-val-dub').innerText = this.value + '%' ">
-                        </div>
-
-                        <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="startDubbing()">
-                            <i class="fas fa-magic"></i> START DUBBING
-                        </button>
-                    </div>
-
-                    <div class="card-brutalist">
-                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;">Voice Changer (S2S)</h2>
-                        <div class="control-group">
-                            <span class="label-industrial">Source Audio</span>
-                            <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" id="s2s-record-btn">
-                                <i class="fas fa-circle"></i> RECORD AUDIO
-                            </button>
-                        </div>
-                        <div class="control-group">
-                            <span class="label-industrial">Target Voice</span>
-                            <select id="s2s-target-voice" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);"></select>
-                        </div>
-
-                        <div class="control-group">
-                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                                <input type="checkbox" id="s2s-preserve" checked>
-                                <span class="volt-text" style="font-weight:700; font-size:0.75rem;">PRESERVE PROSODY</span>
-                            </label>
-                        </div>
-                        <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="startVoiceChanger()">
-                            <i class="fas fa-arrows-rotate"></i> CHANGE VOICE
-                        </button>
-                    </div>
-                </div>
-
-                <div class="card" style="margin-top:24px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <h2 style="font-size: 1.1rem;">Live Task Monitor</h2>
-                            <button class="btn btn-secondary btn-sm" onclick="clearCompletedTasks()" style="padding: 4px 8px; font-size: 0.7rem;"><i class="fas fa-broom"></i> Clear Finished</button>
-                        </div>
-                        <button class="btn btn-secondary btn-sm" onclick="refreshTasks()"><i class="fas fa-sync"></i> Refresh</button>
-                    </div>
-                    <div class="js-task-monitor-list" style="display:flex; flex-direction:column; gap:12px;">
-                        <div class="card" style="border-style:dashed; opacity:0.6; text-align:center;">No active tasks</div>
+                        <button class="btn btn-primary" style="width:100%; padding:16px;" onclick="generatePodcast()">PRODUCE FINAL</button>
                     </div>
                 </div>
             </div>
@@ -437,112 +233,56 @@ Bob: Hi Alice, how are you today?"></textarea>
             <!-- View: System -->
             <div id="system-view" class="view-container">
                 <div class="view-header">
-                    <div class="view-title">
-                        <h1 tabindex="-1">System Manager</h1>
-                        <p>Monitor engine health and manage AI models.</p>
+                    <div class="view-title" style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
+                        <div>
+                            <h1>SYSTEM MANAGER</h1>
+                            <p>Monitor health and hardware.</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="showHelp()">HELP</button>
                     </div>
                 </div>
-
                 <div class="header" style="border-bottom: 2px solid var(--accent); padding: 12px 24px; display: flex; gap: 16px; background:rgba(255,255,255,0.02); margin-bottom:24px;">
                     <button class="btn btn-secondary btn-sm" onclick="switchSystemSubTab('inventory')">INVENTORY</button>
                     <button class="btn btn-secondary btn-sm" onclick="switchSystemSubTab('phonemes')">PHONEMES</button>
                     <button class="btn btn-secondary btn-sm" onclick="switchSystemSubTab('performance')">PERFORMANCE</button>
-                    <button class="btn btn-secondary btn-sm" onclick="switchSystemSubTab('audit')">AUDIT LOG</button>
+                    <button class="btn btn-secondary btn-sm" onclick="switchSystemSubTab('audit')">AUDIT</button>
                 </div>
-
                 <div id="system-inventory-tab" class="system-sub-tab">
                     <div class="grid-2">
-                        <div class="card-brutalist">
-                            <h2 style="margin-bottom:16px; font-size: 1.1rem; border-color:var(--accent);">Model Inventory</h2>
-                            <div id="model-inventory-list" style="display:flex; flex-direction:column; gap:12px;">
-                                <!-- Models -->
-                            </div>
-                        </div>
-                        <div class="card-brutalist">
-                            <h2 style="margin-bottom:16px; font-size: 1.1rem; border-color:var(--accent);">System Resources</h2>
-                            <div id="resource-stats" class="status-grid">
-                                <div class="status-item">
-                                    <span class="label-industrial">CPU Load</span>
-                                    <span id="stat-cpu" class="status-val volt-text">--%</span>
-                                </div>
-                                <div class="status-item">
-                                    <span class="label-industrial">RAM Usage</span>
-                                    <span id="stat-ram" class="status-val volt-text">--%</span>
-                                </div>
-                                <div class="status-item" id="gpu-stat-container" style="display:none;">
-                                    <span class="label-industrial">GPU VRAM</span>
-                                    <span id="stat-gpu" class="status-val volt-text">--%</span>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="card-brutalist"><h2>Inventory</h2><div id="model-inventory-list"></div></div>
+                        <div class="card-brutalist"><h2>Resources</h2><div id="resource-stats" class="status-grid">
+                            <div class="status-item"><span class="label-industrial">CPU</span><span id="stat-cpu" class="status-val volt-text">--%</span></div>
+                            <div class="status-item"><span class="label-industrial">RAM</span><span id="stat-ram" class="status-val volt-text">--%</span></div>
+                            <div class="status-item" id="gpu-stat-container" style="display:none;"><span class="label-industrial">VRAM</span><span id="stat-gpu" class="status-val volt-text">--%</span></div>
+                        </div></div>
                     </div>
                 </div>
-
                 <div id="system-phonemes-tab" class="system-sub-tab" style="display:none;">
-                    <div class="card-brutalist" style="max-width:800px;">
-                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-color:var(--accent);">Phoneme Editor</h2>
-                        <span class="label-industrial">Custom Pronunciation Fixes</span>
-                        <div class="control-group" style="display:flex; gap:8px; margin-bottom:16px;">
-                            <input type="text" id="phoneme-word" placeholder="Word" style="flex:1; padding:8px; border-color:var(--accent);">
-                            <input type="text" id="phoneme-replacement" placeholder="Phonetic" style="flex:1; padding:8px; border-color:var(--accent);">
-                            <button class="btn btn-primary btn-sm" onclick="addPhonemeOverride()"><i class="fas fa-plus"></i></button>
-                            <input type="file" id="phoneme-import-file" style="display:none" onchange="importPhonemes(this)">
-                            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('phoneme-import-file').click()" title="Bulk Import"><i class="fas fa-file-import"></i></button>
+                    <div class="card-brutalist"><h2>Phoneme Editor</h2>
+                        <div class="control-group" style="display:flex; gap:8px;">
+                            <input type="text" id="phoneme-word" placeholder="Word"><input type="text" id="phoneme-replacement" placeholder="Phonetic">
+                            <button class="btn btn-primary" onclick="addPhonemeOverride()">+</button>
                         </div>
-                        <div id="phoneme-list" style="max-height:400px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
-                            <!-- Phonemes -->
-                        </div>
+                        <div id="phoneme-list"></div>
                     </div>
                 </div>
-
                 <div id="system-performance-tab" class="system-sub-tab" style="display:none;">
                     <div class="card-brutalist">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-                            <div>
-                                <h2 style="font-size: 1.1rem; border-color:var(--accent); margin:0;">Engine Performance</h2>
-                                <p style="font-size:0.75rem; opacity:0.6;">Profile synthesis bottlenecks and function calls.</p>
-                            </div>
-                            <button class="btn btn-primary" onclick="runEngineBenchmark()"><i class="fas fa-bolt"></i> RUN BENCHMARK</button>
-                        </div>
-                        <pre id="performance-output" style="background:#000; padding:20px; font-family:var(--font-mono); font-size:0.7rem; color:var(--accent); border:1px solid var(--border); max-height:500px; overflow:auto;">
-Click benchmark to start analysis...
-                        </pre>
+                        <div style="display:flex; justify-content:space-between; align-items:center;"><h2>Engine Performance</h2><button class="btn btn-primary" onclick="runEngineBenchmark()">BENCHMARK</button></div>
+                        <pre id="performance-output" style="background:#000; padding:20px; color:var(--accent); font-size:0.7rem;"></pre>
                     </div>
                 </div>
-
                 <div id="system-audit-tab" class="system-sub-tab" style="display:none;">
-                    <div class="card-brutalist">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                            <h2 style="font-size: 1.1rem; border-color:var(--accent); margin:0;">Generation Audit Log</h2>
-                            <button class="btn btn-secondary btn-sm" onclick="fetchAuditLog()"><i class="fas fa-sync"></i> Refresh</button>
-                        </div>
-                        <div id="audit-log-list" style="max-height:500px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
-                            <!-- Audit -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-                <div class="card" style="margin-top:24px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <h2 style="font-size: 1.1rem;">Live Task Monitor</h2>
-                            <button class="btn btn-secondary btn-sm" onclick="clearCompletedTasks()" style="padding: 4px 8px; font-size: 0.7rem;"><i class="fas fa-broom"></i> Clear Finished</button>
-                        </div>
-                        <button class="btn btn-secondary btn-sm" onclick="refreshTasks()"><i class="fas fa-sync"></i> Refresh</button>
-                    </div>
-                    <div class="js-task-monitor-list" style="display:flex; flex-direction:column; gap:12px;">
-                        <div class="card" style="border-style:dashed; opacity:0.6; text-align:center;">No active tasks</div>
-                    </div>
+                    <div class="card-brutalist"><h2>Audit Log</h2><div id="audit-log-list"></div></div>
                 </div>
             </div>
 
             <!-- Footer Status -->
             <footer class="footer-status">
-                <div class="heartbeat-dot" id="heartbeat" aria-hidden="true"></div>
-                <span id="status-text" aria-live="polite">Engine Ready</span>
+                <div class="heartbeat-dot" id="heartbeat"></div>
+                <span id="status-text">Engine Ready</span>
                 <div style="flex:1"></div>
-                <audio id="main-audio-player" controls style="height: 32px; width: 300px;" aria-label="Main Audio Player"></audio>
+                <audio id="main-audio-player" controls style="height: 32px; width: 300px;"></audio>
             </footer>
         </main>
     </div>
@@ -550,22 +290,21 @@ Click benchmark to start analysis...
     <!-- Modals -->
     <div id="video-modal" class="modal-overlay" style="display:none;" onclick="if(event.target === this) hideVideoModal()">
         <div class="card-brutalist modal-content" style="max-width:900px; width:95%; padding:0; overflow:hidden;">
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; border-bottom:2px solid var(--accent); background:rgba(255,255,255,0.02);">
-                <h2 id="video-modal-title" style="font-size:1.1rem; margin:0;">Video Preview</h2>
-                <button class="btn btn-danger btn-sm" onclick="hideVideoModal()"><i class="fas fa-times"></i></button>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; border-bottom:2px solid var(--accent);">
+                <h2 id="video-modal-title">Video Preview</h2><button class="btn btn-danger btn-sm" onclick="hideVideoModal()">X</button>
             </div>
-            <div style="background:#000; display:flex; justify-content:center; align-items:center; min-height:400px; position:relative;">
-                <video id="video-modal-player" controls style="max-width:100%; max-height:70vh;"></video>
-                <div id="video-subtitle-overlay" style="position:absolute; bottom:15%; left:0; right:0; text-align:center; pointer-events:none; text-shadow: 2px 2px 4px #000; font-weight:700; padding:0 40px; color:#fff;"></div>
+            <div style="background:#000; position:relative; min-height:400px; display:flex; justify-content:center;">
+                <video id="video-modal-player" controls style="max-width:100%;"></video>
+                <div id="video-subtitle-overlay" style="position:absolute; bottom:15%; color:#fff; font-weight:700;"></div>
             </div>
-            <div style="padding:16px 24px; display:flex; justify-content:flex-end; gap:12px; background:rgba(255,255,255,0.02); border-top:1px solid var(--border);">
-                <a id="video-modal-download" href="#" download class="btn btn-primary btn-sm"><i class="fas fa-download"></i> Download MP4</a>
-                <button class="btn btn-secondary btn-sm" onclick="hideVideoModal()">Close</button>
+            <div style="padding:16px 24px; display:flex; justify-content:flex-end; gap:12px;">
+                <a id="video-modal-download" href="#" download class="btn btn-primary btn-sm">DOWNLOAD</a>
+                <button class="btn btn-secondary btn-sm" onclick="hideVideoModal()">CLOSE</button>
             </div>
         </div>
     </div>
 
-    <!-- Hidden Elements -->
+    <!-- Toast -->
     <div id="toast-container" style="position:fixed; bottom:80px; right:24px; z-index:10000; display:flex; flex-direction:column; gap:12px; pointer-events:none;"></div>
     <audio id="preview-player" style="display:none"></audio>
 
