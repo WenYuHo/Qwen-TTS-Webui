@@ -359,6 +359,11 @@ class Qwen3TTSSpeakerEncoder(torch.nn.Module):
 def dynamic_range_compression_torch(x, C=1, clip_val=1e-5):
     return torch.log(torch.clamp(x, min=clip_val) * C)
 
+# ⚡ Bolt: Global caches for mel filterbanks and Hann windows to reduce CPU-to-GPU transfers
+# and redundant computation in the speaker embedding extraction path.
+_mel_basis_cache = {}
+_hann_window_cache = {}
+
 def mel_spectrogram(
     y: torch.Tensor,
     n_fft: int,
@@ -395,12 +400,24 @@ def mel_spectrogram(
 
     device = y.device
 
-    mel = librosa_mel_fn(
-        sr=sampling_rate, n_fft=n_fft, n_mels=num_mels, fmin=fmin, fmax=fmax
-    )
+    # ⚡ Bolt: Cache mel basis to avoid librosa filter generation and device transfers on every call
+    # Keyed by spectrogram parameters and device to ensure compatibility.
+    cache_key = (n_fft, num_mels, sampling_rate, fmin, fmax, device)
+    if cache_key in _mel_basis_cache:
+        mel_basis = _mel_basis_cache[cache_key]
+    else:
+        mel = librosa_mel_fn(
+            sr=sampling_rate, n_fft=n_fft, n_mels=num_mels, fmin=fmin, fmax=fmax
+        )
+        mel_basis = torch.from_numpy(mel).float().to(device)
+        _mel_basis_cache[cache_key] = mel_basis
 
-    mel_basis = torch.from_numpy(mel).float().to(device)
-    hann_window = torch.hann_window(win_size).to(device)
+    # ⚡ Bolt: Cache Hann window to avoid redundant window generation on the target device
+    if (win_size, device) in _hann_window_cache:
+        hann_window = _hann_window_cache[(win_size, device)]
+    else:
+        hann_window = torch.hann_window(win_size).to(device)
+        _hann_window_cache[(win_size, device)] = hann_window
 
     padding = (n_fft - hop_size) // 2
     y = torch.nn.functional.pad(
