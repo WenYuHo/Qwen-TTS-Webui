@@ -236,6 +236,38 @@ Bob: Hi Alice, how are you today?"></textarea>
                             <input type="range" id="ducking-range" min="0" max="100" value="0" style="width:100%" oninput="document.getElementById('ducking-val').innerText = this.value + '%' ">
                         </div>
 
+                        <span class="label">Video Generation (Experimental)</span>
+                        <div class="card" style="padding:16px; background:rgba(255,255,0,0.05); border-color:rgba(255,255,0,0.2); margin-bottom:24px;">
+                            <div class="control-group">
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" id="video-enabled" onchange="document.getElementById('video-options').style.display = this.checked ? 'block' : 'none'">
+                                    <span class="label" style="margin:0;">Enable LTX-Video Export</span>
+                                </label>
+                            </div>
+                            <div id="video-options" style="display:none; margin-top:12px;">
+                                <div class="control-group">
+                                    <label class="label" for="video-prompt">Video Scene Prompt</label>
+                                    <textarea id="video-prompt" placeholder="A cinematic scene that matches your story..." style="height: 60px; font-size: 0.8rem; border-color: var(--border); background: rgba(0,0,0,0.2); color: white; width: 100%; border-radius: 4px; padding: 8px;"></textarea>
+                                </div>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                                    <div class="control-group">
+                                        <label class="label" style="font-size:0.7rem;">Resolution</label>
+                                        <select id="video-res" class="btn btn-secondary btn-sm" style="width:100%; font-size:0.7rem; padding:4px;">
+                                            <option value="768x512">768x512</option>
+                                            <option value="512x512">512x512</option>
+                                        </select>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="label" style="font-size:0.7rem;">Frames</label>
+                                        <select id="video-frames" class="btn btn-secondary btn-sm" style="width:100%; font-size:0.7rem; padding:4px;">
+                                            <option value="65">65 (Short)</option>
+                                            <option value="121">121 (Long)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
 
                         <button class="btn btn-primary" style="width:100%; padding:20px;" onclick="generatePodcast()">
                             <i class="fas fa-microphone"></i> PRODUCE FINAL

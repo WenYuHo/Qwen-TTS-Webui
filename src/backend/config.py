@@ -105,6 +105,10 @@ MODELS = {
     "Tokenizer": "Qwen/Qwen3-TTS-Tokenizer-12Hz"
 }
 
+LTX_MODELS = {
+    "LTX_Video_2B": "Lightricks/LTX-Video",  # For checkpoint v0.9
+}
+
 # Data paths
 PROJECTS_DIR = BASE_DIR / "projects"
 PROJECTS_DIR.mkdir(parents=True, exist_ok=True)

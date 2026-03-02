@@ -24,21 +24,33 @@ echo [2/3] Preparing environment...
 call .venv\Scripts\activate
 python -m pip install --upgrade pip
 
-:: 3. Install Dependencies
-echo [3/3] Installing core libraries (including Torch)...
-echo This may take a few minutes (approx 2GB download).
+:: 3. Detect CUDA
+echo Checking for NVIDIA GPU (CUDA)...
+nvidia-smi >nul 2>&1
+if %errorlevel% equ 0 (
+    echo [OK] NVIDIA GPU detected. Installing Torch with CUDA support...
+    pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121
+) else (
+    echo [INFO] No NVIDIA GPU detected or nvidia-smi missing. Installing CPU version...
+    pip install torch torchaudio
+)
+
+:: 4. Install Core Dependencies
+echo [3/4] Installing core libraries...
 pip install -r requirements.txt
 
-:: 4. Optional: Video Generation
+:: 5. Optional: Video Generation
 echo.
 echo ==========================================
-echo OPTIONAL: Video Generation (LTX-2)
+echo OPTIONAL: Video Generation (LTX-Video)
 echo ==========================================
-echo This adds text-to-video capabilities (requires additional ~1GB libs).
+echo This adds text-to-video capabilities.
+echo Requires ~1GB additional downloads and a strong GPU (8GB+ VRAM recommended).
 set /p install_video="Would you like to install video generation dependencies? (y/n): "
 if /i "%install_video%"=="y" (
-    echo Installing LTX-2 requirements...
+    echo Installing LTX-Video requirements...
     pip install -r requirements_video.txt
+    echo [OK] Video dependencies installed.
 ) else (
     echo Skipping video generation setup.
 )

@@ -5,8 +5,6 @@ soundfile
 numpy
 python-multipart
 pydub
-torch
-torchaudio
 librosa
 transformers==5.2.0
 accelerate
@@ -19,7 +17,6 @@ pytest-asyncio
 httpx
 # huggingface_hub is required for download_models logic if used, but we use pre-downloaded
 openai-whisper
-librosa
 deep-translator
 beautifulsoup4
 huggingface_hub
