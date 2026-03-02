@@ -47,7 +47,8 @@ async def voice_mix(request: MixRequest):
             server_state.engine.get_speaker_embedding(item["profile"])
         return {"status": "ok", "message": "Mix configuration validated"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Voice mix validation failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Voice mix validation failed")
 
 @router.post("/preview")
 async def voice_preview(request: SpeakerProfile):
@@ -72,7 +73,7 @@ async def get_library():
         with open(VOICE_LIBRARY_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception as e:
-        logger.error(f"Failed to load voice library: {e}")
+        logger.error(f"Failed to load voice library: {e}", exc_info=True)
         return {"voices": []}
 
 @router.post("/library")
@@ -83,5 +84,5 @@ async def save_library(library: VoiceLibrary):
             f.write(library.model_dump_json())
         return {"status": "saved"}
     except Exception as e:
-        logger.error(f"Failed to save voice library: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Failed to save voice library: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to save voice library")
