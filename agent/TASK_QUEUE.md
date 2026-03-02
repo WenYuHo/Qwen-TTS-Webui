@@ -2,15 +2,16 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Resilience & Automation
-1. [ ] **Unit Test Expansion:** Create automated tests for the new `Profiler` and `ResourceMonitor` classes in `tests/test_system_utils.py` (ensure mocking of `psutil`).
-2. [ ] **Error UI Refinement:** Enhance the `ErrorDisplay` component to include a "Copy Log" button for easier troubleshooting.
+### Tier 1: Resilience & Features
+1. [ ] **Error UI Refinement:** Enhance the `ErrorDisplay` component to include a "Copy Log" button for easier troubleshooting.
+2. [ ] **Scene Search AI Upgrade:** Enhance the prompt suggestion logic with better cinematic components and action extraction.
 
-### Tier 2: Intelligence & Features
-1. [ ] **Scene Search AI Upgrade:** Enhance the prompt suggestion logic with better cinematic components and action extraction.
-2. [ ] **Sub-Tab Autosave:** Ensure that the active system sub-tab (Inventory, Phonemes, etc.) is preserved across page refreshes using `localStorage`.
+### Tier 2: Governance & Search
+1. [ ] **Sub-Tab Autosave:** Ensure that the active system sub-tab (Inventory, Phonemes, etc.) is preserved across page refreshes using `localStorage`.
+2. [ ] **API Documentation:** Create a static `API.md` file documenting all FastAPI endpoints, request schemas, and response formats.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Expand **automated unit tests** to cover system utilities (Profiler, ResourceMonitor, Storage).
 - [x] Implement **Granular Integration Tests** for Voice Lab and System APIs.
 - [x] Apply **Technoid Brutalist UI Unification** across all Studio views.
 - [x] Implement **Help System** with context-sensitive command reference.
