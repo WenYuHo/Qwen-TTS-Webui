@@ -38,7 +38,7 @@ The frontend is modularized using ES Modules in `src/static/`.
 
 ## 4. Backend Standards
 
-- **Modular Routing:** All API endpoints must reside in `src/backend/api/`.
+- **Modular Routing:** All API endpoints must reside in `src/backend/api/`. Refer to [API.md](API.md) for the full list of endpoints.
 - **Engine Logic:** Core synthesis and processing logic must be in `src/backend/engines/` or `src/backend/podcast_engine.py`.
 - **Type Hinting:** Mandatory for all public methods and API schemas.
 - **Pydantic V2:** Use Pydantic V2 conventions (`model_dump()`, etc.) for all data validation.

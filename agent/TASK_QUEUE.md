@@ -2,17 +2,16 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Documentation & Governance
-1. [ ] **API Documentation:** Create a static `API.md` file documenting all FastAPI endpoints, request schemas, and response formats.
-2. [ ] **Unit Test Expansion:** Create automated tests for the new `Profiler` and `ResourceMonitor` classes.
+### Tier 1: Performance & UX
+1. [ ] **Sub-Tab Autosave:** Ensure that the active system sub-tab (Inventory, Phonemes, etc.) is preserved across page refreshes using `localStorage`.
+2. [ ] **Scene Search AI Upgrade:** Enhance the prompt suggestion logic with better cinematic components and action extraction.
 
-### Tier 2: Performance & Intelligence
-1. [ ] **Scene Search AI Upgrade:** Enhance the prompt suggestion logic with better cinematic components and action extraction.
+### Tier 2: Governance & Automation
+1. [ ] **Auto-Cleanup Stats:** Add a "Last Cleanup" timestamp and "Total Files Pruned" metric to the System Resources view.
 2. [ ] **Performance Polish:** Add a "Clear Cache" button to the System view to purge the `PodcastEngine` in-memory caches.
 
 ## Completed (Mar 2026 Refactor)
-- [x] Implement **Auto-Cleanup Stats** (Last Cleanup, Files Pruned) in System view.
-- [x] Implement **Sub-Tab Autosave** for the System view using `localStorage`.
+- [x] Create **API Documentation** (`API.md`) for all FastAPI endpoints.
 - [x] Refine **Error UI** with a "Copy Trace" button for troubleshooting.
 - [x] Expand **automated unit tests** to cover Profiler, ResourceMonitor, and StorageManager.
 - [x] Apply **Technoid Brutalist UI Unification** across all Studio views.
