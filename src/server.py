@@ -51,5 +51,10 @@ async def serve_index():
 if __name__ == "__main__":
     # Ensure logs directory exists
     Path("logs").mkdir(exist_ok=True)
+    
+    # Start background cleanup
+    from backend.utils import storage_manager
+    storage_manager.start()
+    
     logger.info("Starting Qwen-TTS Studio server...")
     uvicorn.run(app, host="0.0.0.0", port=8080)

@@ -2,15 +2,16 @@
 
 ## Prioritized Backlog
 
-### Tier 1: Maintenance & Integration
-1. [ ] **Auto-Cleanup:** Implement a background thread to prune stale `uploads/` and `projects/generated_videos/` older than 7 days.
-2. [ ] **Project Search:** Add a search bar to the "My Voice Library" and "Project Studio" view to filter large lists.
+### Tier 1: UI & Search
+1. [ ] **Project Search:** Add search/filter bars to the "My Voice Library", "Project Studio", and "Asset Library" views.
+2. [ ] **Video Preview Modal:** Create a specialized modal for playing generated narrated videos instead of just a generic player.
 
 ### Tier 2: Governance & Documentation
 1. [ ] **Documentation Refinement:** Add a `CONTRIBUTING.md` file explaining the Conductor framework and modular JS structure.
-2. [ ] **Unit Test Expansion:** Create automated tests for `AudioPostProcessor` and `AuditManager`.
+2. [ ] **Unit Test Expansion:** Create automated tests for `AudioPostProcessor`, `AuditManager`, and `StorageManager`.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Implement **Auto-Cleanup** background thread for stale files (7-day retention).
 - [x] Implement **Resource Monitoring** (CPU/RAM/GPU) in System Manager.
 - [x] Apply **Technoid Brutalist Polish** to the System view UI.
 - [x] Implement **Generation Audit Log** (audit.json) for transparency.

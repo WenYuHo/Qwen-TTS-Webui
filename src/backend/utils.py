@@ -68,32 +68,58 @@ class AuditManager:
     # ... (existing code)
 
 class ResourceMonitor:
-    """Provides real-time CPU, RAM, and GPU usage metrics."""
-    @staticmethod
-    def get_stats() -> dict:
-        import psutil
-        stats = {
-            "cpu_percent": psutil.cpu_percent(),
-            "ram_percent": psutil.virtual_memory().percent,
-            "gpu": None
-        }
+    # ... (existing code)
+
+class StorageManager:
+    """Manages disk space by periodically pruning stale generation artifacts."""
+    def __init__(self, max_age_days: int = 7):
+        from .config import PROJECTS_DIR, BASE_DIR
+        self.max_age_days = max_age_days
+        self.targets = [
+            BASE_DIR / "uploads",
+            PROJECTS_DIR / "generated_videos"
+        ]
+        self._stop_event = threading.Event()
+        self._thread = None
+
+    def start(self):
+        if self._thread and self._thread.is_alive():
+            return
+        self._thread = threading.Thread(target=self._run_loop, daemon=True, name="StorageCleanup")
+        self._thread.start()
+        logger.info(f"StorageManager started: pruning files older than {self.max_age_days} days.")
+
+    def stop(self):
+        self._stop_event.set()
+
+    def _run_loop(self):
+        # Run every 24 hours
+        while not self._stop_event.wait(86400):
+            self.prune()
+
+    def prune(self):
+        """Scan target directories and delete old files."""
+        now = time.time()
+        max_age_seconds = self.max_age_days * 86400
+        pruned_count = 0
         
-        try:
-            import torch
-            if torch.cuda.is_available():
-                # Simple GPU usage via torch
-                gpu_id = torch.cuda.current_device()
-                props = torch.cuda.get_device_properties(gpu_id)
-                stats["gpu"] = {
-                    "name": props.name,
-                    "vram_total": props.total_memory / (1024**3),
-                    "vram_used": torch.cuda.memory_allocated(gpu_id) / (1024**3),
-                    "vram_percent": (torch.cuda.memory_allocated(gpu_id) / props.total_memory) * 100
-                }
-        except Exception:
-            pass
-            
-        return stats
+        for target_dir in self.targets:
+            if not target_dir.exists():
+                continue
+                
+            for item in target_dir.iterdir():
+                if item.is_file():
+                    try:
+                        stat = item.stat()
+                        if now - stat.st_mtime > max_age_seconds:
+                            item.unlink()
+                            pruned_count += 1
+                    except Exception as e:
+                        logger.error(f"Failed to prune {item}: {e}")
+        
+        if pruned_count > 0:
+            logger.info(f"StorageManager: Pruned {pruned_count} stale files.")
 
 audit_manager = AuditManager()
 resource_monitor = ResourceMonitor()
+storage_manager = StorageManager()
