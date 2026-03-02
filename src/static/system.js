@@ -149,6 +149,30 @@ export const SystemManager = {
         } catch (err) { console.error(err); }
     },
 
+    async refreshResourceStats() {
+        const cpuEl = document.getElementById('stat-cpu');
+        const ramEl = document.getElementById('stat-ram');
+        const gpuEl = document.getElementById('stat-gpu');
+        const gpuCont = document.getElementById('gpu-stat-container');
+        if (!cpuEl) return;
+
+        try {
+            const res = await fetch('/api/system/stats');
+            const data = await res.json();
+            
+            cpuEl.innerText = `${data.cpu_percent}%`;
+            ramEl.innerText = `${data.ram_percent}%`;
+            
+            if (data.gpu) {
+                gpuCont.style.display = 'block';
+                gpuEl.innerText = `${data.gpu.vram_percent.toFixed(1)}%`;
+                gpuEl.title = `${data.gpu.name} (${data.gpu.vram_used.toFixed(1)}GB / ${data.gpu.vram_total.toFixed(1)}GB)`;
+            } else {
+                gpuCont.style.display = 'none';
+            }
+        } catch (err) { console.error("Stats refresh failed", err); }
+    },
+
     renderAuditLog(log) {
         const list = document.getElementById('audit-log-list');
         if (!list) return;

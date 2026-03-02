@@ -2,15 +2,16 @@
 
 ## Prioritized Backlog
 
-### Tier 1: System Monitoring & UX
-1. [ ] **Resource Monitoring:** Add a "CPU/GPU Load" indicator to the System view footer.
-2. [ ] **Auto-Cleanup:** Implement a background thread to prune stale `uploads/` and `projects/generated_videos/` older than 7 days.
+### Tier 1: Maintenance & Integration
+1. [ ] **Auto-Cleanup:** Implement a background thread to prune stale `uploads/` and `projects/generated_videos/` older than 7 days.
+2. [ ] **Project Search:** Add a search bar to the "My Voice Library" and "Project Studio" view to filter large lists.
 
-### Tier 2: Governance & Maintenance
-1. [ ] **Documentation Refinement:** Add a `CONTRIBUTING.md` file explaining the Conductor framework and modular JS structure for future developers.
-2. [ ] **Unit Test Expansion:** Create automated tests for the new `AudioPostProcessor` and `AuditManager` classes.
+### Tier 2: Governance & Documentation
+1. [ ] **Documentation Refinement:** Add a `CONTRIBUTING.md` file explaining the Conductor framework and modular JS structure.
+2. [ ] **Unit Test Expansion:** Create automated tests for `AudioPostProcessor` and `AuditManager`.
 
 ## Completed (Mar 2026 Refactor)
+- [x] Implement **Resource Monitoring** (CPU/RAM/GPU) in System Manager.
 - [x] Apply **Technoid Brutalist Polish** to the System view UI.
 - [x] Implement **Generation Audit Log** (audit.json) for transparency.
 - [x] Implement **Audio Effects** (EQ & Reverb) for atmospheric polish.

@@ -68,6 +68,7 @@ function switchView(view) {
         SystemManager.fetchInventory();
         SystemManager.loadSystemSettings();
         SystemManager.fetchAuditLog();
+        SystemManager.refreshResourceStats();
     }
 }
 
@@ -137,6 +138,7 @@ Object.assign(window, {
     importPhonemes: SystemManager.importPhonemes.bind(SystemManager),
     updateWatermarkSettings: SystemManager.updateWatermarkSettings.bind(SystemManager),
     fetchAuditLog: SystemManager.fetchAuditLog.bind(SystemManager),
+    refreshResourceStats: SystemManager.refreshResourceStats.bind(SystemManager),
     setupDragAndDrop: AssetManager.setupDragAndDrop
 });
 
@@ -144,5 +146,6 @@ Object.assign(window, {
 document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => {
         if (['projects', 'dubbing', 'system'].includes(state.currentView)) TaskManager.refreshTasks();
-    }, 5000);
+        if (state.currentView === 'system') SystemManager.refreshResourceStats();
+    }, 2000);
 });

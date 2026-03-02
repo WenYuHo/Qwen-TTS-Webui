@@ -65,50 +65,35 @@ class AudioPostProcessor:
     # ... (existing code)
 
 class AuditManager:
-    """Logs system-wide AI generation events for transparency and tracking."""
-    def __init__(self):
-        self.file_path = PROJECTS_DIR / "audit.json"
-        self.lock = threading.Lock()
+    # ... (existing code)
 
-    def log_event(self, event_type: str, metadata: dict, status: str):
-        """Append a new event record to the audit log."""
-        event = {
-            "timestamp": time.time(),
-            "type": event_type,
-            "status": status,
-            "metadata": self._sanitize_metadata(metadata)
+class ResourceMonitor:
+    """Provides real-time CPU, RAM, and GPU usage metrics."""
+    @staticmethod
+    def get_stats() -> dict:
+        import psutil
+        stats = {
+            "cpu_percent": psutil.cpu_percent(),
+            "ram_percent": psutil.virtual_memory().percent,
+            "gpu": None
         }
         
-        with self.lock:
-            log = self._load()
-            log.append(event)
-            # Keep only last 1000 events to prevent file bloat
-            if len(log) > 1000:
-                log = log[-1000:]
-            self._save(log)
-
-    def _sanitize_metadata(self, metadata: dict) -> dict:
-        """Removes sensitive or overly large data from log metadata."""
-        sanitized = metadata.copy()
-        # Remove raw results or large lists
-        for key in ["result", "wav", "waveform", "hidden_states"]:
-            sanitized.pop(key, None)
-        return sanitized
-
-    def _load(self) -> list:
-        if not self.file_path.exists():
-            return []
         try:
-            with open(self.file_path, "r", encoding="utf-8") as f:
-                return json.load(f)
+            import torch
+            if torch.cuda.is_available():
+                # Simple GPU usage via torch
+                gpu_id = torch.cuda.current_device()
+                props = torch.cuda.get_device_properties(gpu_id)
+                stats["gpu"] = {
+                    "name": props.name,
+                    "vram_total": props.total_memory / (1024**3),
+                    "vram_used": torch.cuda.memory_allocated(gpu_id) / (1024**3),
+                    "vram_percent": (torch.cuda.memory_allocated(gpu_id) / props.total_memory) * 100
+                }
         except Exception:
-            return []
-
-    def _save(self, log: list):
-        with open(self.file_path, "w", encoding="utf-8") as f:
-            json.dump(log, f, indent=2)
-
-    def get_log(self) -> list:
-        return self._load()
+            pass
+            
+        return stats
 
 audit_manager = AuditManager()
+resource_monitor = ResourceMonitor()

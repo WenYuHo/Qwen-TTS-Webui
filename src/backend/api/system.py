@@ -50,6 +50,11 @@ async def get_audit_log():
     from ..utils import audit_manager
     return {"log": audit_manager.get_log()}
 
+@router.get("/stats")
+async def get_system_stats():
+    from ..utils import resource_monitor
+    return resource_monitor.get_stats()
+
 @router.get("/phonemes")
 async def get_phonemes():
     return {"overrides": phoneme_manager.overrides}

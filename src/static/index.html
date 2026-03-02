@@ -455,6 +455,24 @@ Bob: Hi Alice, how are you today?"></textarea>
                     </div>
 
                     <div class="card-brutalist">
+                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-color:var(--accent);">System Resources</h2>
+                        <div id="resource-stats" class="status-grid">
+                            <div class="status-item">
+                                <span class="label-industrial">CPU Load</span>
+                                <span id="stat-cpu" class="status-val volt-text">--%</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="label-industrial">RAM Usage</span>
+                                <span id="stat-ram" class="status-val volt-text">--%</span>
+                            </div>
+                            <div class="status-item" id="gpu-stat-container" style="display:none;">
+                                <span class="label-industrial">GPU VRAM</span>
+                                <span id="stat-gpu" class="status-val volt-text">--%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-brutalist">
                         <h2 style="margin-bottom:16px; font-size: 1.1rem; border-color:var(--accent);">AI Safety & Safety</h2>
                         <div class="control-group" style="margin-bottom:0;">
                             <label style="display:flex; align-items:center; gap:12px; cursor:pointer; margin-bottom:12px; font-family:var(--font-mono); font-size:0.8rem;">
