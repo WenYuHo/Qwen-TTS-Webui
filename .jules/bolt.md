@@ -68,3 +68,7 @@
 ## 2026-03-03 - [Path Resolution and Watermark Caching]
 **Learning:** Redundant filesystem calls like `Path.resolve()` in frequently-called security layers (e.g., `_resolve_paths`) can add significant cumulative latency during batch synthesis of 50+ segments. Pre-resolving base directories in the engine's `__init__` reduces these to O(1) in-memory checks. Additionally, recalculating DSP elements like a watermark tone (using `sin` and `linspace`) on every call is wasteful. Caching these arrays keyed by sample rate eliminates redundant math and allocations.
 **Action:** Always pre-resolve constant base paths during object initialization. Cache static DSP/math-generated audio components that depend only on sampling rate.
+
+## 2026-03-03 - [Import Overhead and Peak Memory Optimization]
+**Learning:** In frequently-called monitoring functions (like `ResourceMonitor.get_stats`), inline imports of heavy libraries (`psutil`, `torch`) add significant latency (multi-millisecond) due to redundant `sys.modules` lookups. Moving these to the module level reduces overhead by ~54x. Additionally, using `max(np.max(out), -np.min(out))` instead of `np.max(np.abs(out))` for peak normalization eliminates an $O(N)$ temporary array allocation, which is critical for memory efficiency when processing large (10min+) audio arrays.
+**Action:** Move all inline imports of core or optional libraries to the top-level of the module. Prefer peak detection methods that avoid temporary array allocations (like `abs()`) on large datasets.

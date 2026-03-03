@@ -5,6 +5,8 @@ import soundfile as sf
 import numpy as np
 import time
 import threading
+import cProfile
+import pstats
 from pathlib import Path
 from .config import PROJECTS_DIR, BASE_DIR, logger
 
@@ -12,6 +14,16 @@ try:
     from scipy import signal as scipy_signal
 except ImportError:
     scipy_signal = None
+
+try:
+    import psutil
+except ImportError:
+    psutil = None
+
+try:
+    import torch
+except ImportError:
+    torch = None
 
 # ⚡ Bolt: Cache for Butterworth filter coefficients to avoid redundant DSP math
 _eq_filter_cache = {}
@@ -134,7 +146,8 @@ class AudioPostProcessor:
                 shift = delay_samples * i
                 if shift < len(wav):
                     out[shift:] += wav[:-shift] * (decay ** i)
-            max_amp = np.max(np.abs(out))
+            # ⚡ Bolt: Use max(np.max, -np.min) to avoid allocating a large temporary array for np.abs(out)
+            max_amp = max(np.max(out), -np.min(out))
             if max_amp > 1.0:
                 out /= max_amp
             return out
@@ -187,15 +200,14 @@ class ResourceMonitor:
     """Provides real-time CPU, RAM, and GPU usage metrics."""
     @staticmethod
     def get_stats() -> dict:
-        import psutil
+        # ⚡ Bolt: Use top-level imports for psutil and torch to avoid redundant lookup overhead
         stats = {
-            "cpu_percent": psutil.cpu_percent(),
-            "ram_percent": psutil.virtual_memory().percent,
+            "cpu_percent": psutil.cpu_percent() if psutil else 0,
+            "ram_percent": psutil.virtual_memory().percent if psutil else 0,
             "gpu": None
         }
         try:
-            import torch
-            if torch.cuda.is_available():
+            if torch and torch.cuda.is_available():
                 gpu_id = torch.cuda.current_device()
                 props = torch.cuda.get_device_properties(gpu_id)
                 stats["gpu"] = {
@@ -279,8 +291,8 @@ class StorageManager:
                     server_state.engine.clear_cache()
             
             # Clear CUDA cache if applicable
-            import torch
-            if torch.cuda.is_available():
+            # ⚡ Bolt: Use top-level torch import
+            if torch and torch.cuda.is_available():
                 torch.cuda.empty_cache()
         except Exception as e:
             logger.error(f"Failed to clear engine/CUDA cache: {e}")
@@ -301,7 +313,7 @@ class Profiler:
     """Context manager for profiling code blocks using cProfile."""
     def __init__(self, name: str):
         self.name = name
-        import cProfile
+        # ⚡ Bolt: Use top-level cProfile import
         self.profiler = cProfile.Profile()
 
     def __enter__(self):
@@ -310,7 +322,7 @@ class Profiler:
 
     def __exit__(self, *args):
         self.profiler.disable()
-        import pstats
+        # ⚡ Bolt: Use top-level pstats import
         import io
         s = io.StringIO()
         ps = pstats.Stats(self.profiler, stream=s).sort_stats('cumulative')
