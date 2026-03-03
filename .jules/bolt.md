@@ -64,3 +64,7 @@
 ## 2026-03-03 - [EQ Coefficient Caching and Redundant Imports]
 **Learning:** Performing DSP filter design (e.g., `scipy.signal.butter`) on every audio segment in a batch synthesis job adds significant CPU overhead due to complex mathematical operations (trigonometry, bilinear transform). Caching the resulting coefficients `(b, a)` keyed by `(preset, sample_rate)` eliminates this overhead. Additionally, moving heavy library imports like `scipy.signal` to the module level (with safe fallback) prevents redundant `sys.modules` lookups during high-frequency calls.
 **Action:** Always cache pre-computed mathematical constants or filter coefficients in audio processing pipelines. Move function-local imports of heavy libraries to the top-level if the function is in a performance-critical path.
+
+## 2026-03-03 - [Path Resolution and Watermark Caching]
+**Learning:** Redundant filesystem calls like `Path.resolve()` in frequently-called security layers (e.g., `_resolve_paths`) can add significant cumulative latency during batch synthesis of 50+ segments. Pre-resolving base directories in the engine's `__init__` reduces these to O(1) in-memory checks. Additionally, recalculating DSP elements like a watermark tone (using `sin` and `linspace`) on every call is wasteful. Caching these arrays keyed by sample rate eliminates redundant math and allocations.
+**Action:** Always pre-resolve constant base paths during object initialization. Cache static DSP/math-generated audio components that depend only on sampling rate.

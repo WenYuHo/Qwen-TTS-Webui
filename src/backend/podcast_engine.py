@@ -15,17 +15,26 @@ from deep_translator import GoogleTranslator
 
 from .qwen_tts.inference.qwen3_tts_model import VoiceClonePromptItem
 from .model_loader import get_model
-from .config import BASE_DIR, SHARED_ASSETS_DIR, logger
+from .config import BASE_DIR, SHARED_ASSETS_DIR, VIDEO_DIR, logger
 from .video_engine import VideoEngine
 from .utils import phoneme_manager, AudioPostProcessor, Profiler
 
 from concurrent.futures import ThreadPoolExecutor
 import queue
 
+# ⚡ Bolt: Global cache for audio watermark tone to avoid redundant math and allocations
+_watermark_tone_cache = {}
+
 class PodcastEngine:
     def __init__(self):
         self.upload_dir = Path("uploads").resolve()
         self.upload_dir.mkdir(parents=True, exist_ok=True)
+
+        # ⚡ Bolt: Pre-resolve base directories once during init to avoid redundant filesystem I/O in _resolve_paths
+        self._bgm_dir = (Path(BASE_DIR) / "bgm").resolve()
+        self._video_dir = Path(VIDEO_DIR).resolve()
+        self._shared_assets_dir = Path(SHARED_ASSETS_DIR).resolve()
+
         self.executor = ThreadPoolExecutor(max_workers=4)
         # Caches
         self.preset_embeddings = {}
@@ -52,16 +61,13 @@ class PodcastEngine:
             else:
                 path_obj = path_obj.resolve()
 
-            is_safe = path_obj.is_relative_to(self.upload_dir)
-            if not is_safe:
-                bgm_dir = (Path(BASE_DIR) / "bgm").resolve()
-                is_safe = path_obj.is_relative_to(bgm_dir)
-            if not is_safe:
-                video_dir = (Path(BASE_DIR) / "projects" / "videos").resolve()
-                is_safe = path_obj.is_relative_to(video_dir)
-            if not is_safe:
-                from .config import SHARED_ASSETS_DIR
-                is_safe = path_obj.is_relative_to(SHARED_ASSETS_DIR.resolve())
+            # ⚡ Bolt: Use pre-resolved base directories for O(1) safety checks without further I/O
+            is_safe = (
+                path_obj.is_relative_to(self.upload_dir) or
+                path_obj.is_relative_to(self._bgm_dir) or
+                path_obj.is_relative_to(self._video_dir) or
+                path_obj.is_relative_to(self._shared_assets_dir)
+            )
 
             if not is_safe:
                 logger.error(f"Access denied to path: {path_obj}")
@@ -166,15 +172,24 @@ class PodcastEngine:
     def _apply_audio_watermark(self, wav: np.ndarray, sr: int) -> np.ndarray:
         try:
             from .api.system import _settings
-            if not _settings.watermark_audio: return wav
-            duration = 0.1
-            t = np.linspace(0, duration, int(sr * duration), False)
-            tone = 0.05 * np.sin(2 * np.pi * 20000 * t)
-            fade = int(sr * 0.01)
-            tone[:fade] *= np.linspace(0, 1, fade)
-            tone[-fade:] *= np.linspace(1, 0, fade)
+            if not _settings.watermark_audio:
+                return wav
+
+            # ⚡ Bolt: Cache the watermark tone to avoid redundant math and allocations
+            if sr in _watermark_tone_cache:
+                tone = _watermark_tone_cache[sr]
+            else:
+                duration = 0.1
+                t = np.linspace(0, duration, int(sr * duration), False)
+                tone = 0.05 * np.sin(2 * np.pi * 20000 * t)
+                fade = int(sr * 0.01)
+                tone[:fade] *= np.linspace(0, 1, fade)
+                tone[-fade:] *= np.linspace(1, 0, fade)
+                _watermark_tone_cache[sr] = tone
+
             return np.concatenate([wav, tone])
-        except Exception: return wav
+        except Exception:
+            return wav
 
     def generate_segment(self, text: str, profile: Dict[str, Any], language: str = "auto", model: Optional[Any] = None, instruct: Optional[str] = None) -> tuple[np.ndarray, int]:
         try:
