@@ -14,7 +14,10 @@ export const VoiceLabManager = {
 
         if (container) container.style.display = 'block';
         if (status) status.innerText = "Designing...";
+
         btn.disabled = true;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> DESIGNING...';
 
         try {
             let finalPrompt = promptText;
@@ -51,11 +54,12 @@ export const VoiceLabManager = {
             status.innerText = "Ready";
             Notification.show("Design preview ready", "success");
         } catch (err) {
-            status.innerText = "Error";
+            if (status) status.innerText = "Error";
             ErrorDisplay.show("Design Error", err.message);
             console.error(err);
         } finally {
             btn.disabled = false;
+            btn.innerHTML = originalHtml;
         }
     },
 
@@ -69,9 +73,12 @@ export const VoiceLabManager = {
         const status = document.getElementById('clone-status');
         const player = document.getElementById('preview-player');
 
-        container.style.display = 'block';
-        status.innerText = "Cloning...";
+        if (container) container.style.display = 'block';
+        if (status) status.innerText = "Cloning...";
+
         btn.disabled = true;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> CLONING...';
 
         try {
             let path = window.state.voicelab.lastClonedPath;
@@ -109,11 +116,12 @@ export const VoiceLabManager = {
             status.innerText = "Ready";
             Notification.show("Clone preview ready", "success");
         } catch (err) {
-            status.innerText = "Error";
+            if (status) status.innerText = "Error";
             ErrorDisplay.show("Cloning Error", err.message);
             console.error(err);
         } finally {
             btn.disabled = false;
+            btn.innerHTML = originalHtml;
         }
     },
 
@@ -131,7 +139,10 @@ export const VoiceLabManager = {
 
         if (container) container.style.display = 'block';
         if (status) status.innerText = "Mixing...";
+
         btn.disabled = true;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> MIXING...';
 
         try {
             const profiles = await this.getAllProfiles();
@@ -171,6 +182,7 @@ export const VoiceLabManager = {
             console.error(err);
         } finally {
             btn.disabled = false;
+            btn.innerHTML = originalHtml;
         }
     },
 
@@ -199,7 +211,7 @@ export const VoiceLabManager = {
                         <strong style="text-transform:uppercase;">${p}</strong>
                         <div style="font-size:0.7rem; opacity:0.5;">PRESET VOICE</div>
                     </div>
-                    <button class="btn btn-secondary btn-sm" onclick="previewVoice('preset', '${p}')"><i class="fas fa-play"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="previewVoice('preset', '${p}')" title="Preview ${p}" aria-label="Preview ${p}"><i class="fas fa-play" aria-hidden="true"></i></button>
                 </div>
             </div>
         `).join('');
@@ -212,8 +224,8 @@ export const VoiceLabManager = {
                         <div style="font-size:0.7rem; opacity:0.5;">${v.profile.type.toUpperCase()}</div>
                     </div>
                     <div style="display:flex; gap:8px;">
-                        <button class="btn btn-secondary btn-sm" onclick="previewVoice('${v.profile.type}', '${v.profile.value}')"><i class="fas fa-play"></i></button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteVoice('${v.name}')" style="padding:4px 8px;"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-secondary btn-sm" onclick="previewVoice('${v.profile.type}', '${v.profile.value}')" title="Preview ${v.name}" aria-label="Preview ${v.name}"><i class="fas fa-play" aria-hidden="true"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteVoice('${v.name}')" style="padding:4px 8px;" title="Delete ${v.name}" aria-label="Delete ${v.name}"><i class="fas fa-trash" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
