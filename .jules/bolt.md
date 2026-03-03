@@ -52,3 +52,15 @@
 ## 2026-03-01 - [Mel Spectrogram Caching]
 **Learning:** The `mel_spectrogram` function, critical for speaker embedding extraction, was repeatedly generating Mel filterbanks and Hann windows on every call, then transferring them from CPU to GPU. Implementing module-level global caching for these tensors provides a ~5.6x speedup (from 23ms to 4ms on CPU) for the function itself.
 **Action:** Cache static mathematical components (filters, windows, kernels) in frequently-called ML preprocessing functions, ensuring the cache key includes the target `device` to avoid cross-device tensor errors.
+
+## 2026-03-02 - [Transcription and Translation Caching]
+**Learning:** Redundant transcription (via Whisper) and translation (via GoogleTranslator API) in dubbing workflows can add significant latency and cost. Implementing a persistent in-memory cache for these operations provides a 5-10x speedup for repeated tasks. To prevent memory leaks, caches should use MD5-hashed keys for large text and implement a size-bounding policy (e.g., clearing after 1000 entries).
+**Action:** Always integrate high-latency ML or network operations with a bounded, content-keyed cache.
+
+## 2026-03-02 - [High-Performance Regex Multi-Replacement]
+**Learning:** In text preprocessing layers (like PhonemeManager), performing sequential regex substitutions in an O(N) loop (where N is the number of overrides) results in O(N*M) complexity (M=text length) and incurs significant Python-to-C overhead for each call. Combining all patterns into a single alternation regex (`|`) allows for a single-pass O(M) substitution.
+**Action:** Use single-pass combined regex patterns for multi-string replacement tasks. Sort patterns by length descending to ensure correct matching of overlapping terms.
+
+## 2026-03-03 - [EQ Coefficient Caching and Redundant Imports]
+**Learning:** Performing DSP filter design (e.g., `scipy.signal.butter`) on every audio segment in a batch synthesis job adds significant CPU overhead due to complex mathematical operations (trigonometry, bilinear transform). Caching the resulting coefficients `(b, a)` keyed by `(preset, sample_rate)` eliminates this overhead. Additionally, moving heavy library imports like `scipy.signal` to the module level (with safe fallback) prevents redundant `sys.modules` lookups during high-frequency calls.
+**Action:** Always cache pre-computed mathematical constants or filter coefficients in audio processing pipelines. Move function-local imports of heavy libraries to the top-level if the function is in a performance-critical path.

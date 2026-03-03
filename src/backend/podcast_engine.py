@@ -15,7 +15,7 @@ from deep_translator import GoogleTranslator
 
 from .qwen_tts.inference.qwen3_tts_model import VoiceClonePromptItem
 from .model_loader import get_model
-from .config import BASE_DIR, logger
+from .config import BASE_DIR, SHARED_ASSETS_DIR, logger
 from .video_engine import VideoEngine
 from .utils import phoneme_manager, AudioPostProcessor, Profiler
 
@@ -111,19 +111,28 @@ class PodcastEngine:
         actual_path = str(resolved[0])
         if VideoEngine.is_video(actual_path):
             actual_path = self._extract_audio_with_cache(actual_path)
-        try:
-            path_obj = Path(actual_path)
-            if path_obj.exists():
+
+        path_obj = Path(actual_path)
+        cache_key = None
+        if path_obj.exists():
+            try:
                 stat = path_obj.stat()
                 cache_key = f"{actual_path}:{stat.st_size}:{stat.st_mtime}"
                 if cache_key in self.transcription_cache:
                     return self.transcription_cache[cache_key]
-        except Exception: pass
+            except Exception: pass
         if self._whisper_model is None:
             import whisper
             self._whisper_model = whisper.load_model("base")
         result = self._whisper_model.transcribe(actual_path)
         text = result["text"]
+        if cache_key:
+            try:
+                # ⚡ Bolt: Simple cache size management
+                if len(self.transcription_cache) > 1000:
+                    self.transcription_cache.clear()
+                self.transcription_cache[cache_key] = text
+            except Exception: pass
         return text
 
     def get_speaker_embedding(self, profile: Dict[str, str], model: Optional[Any] = None) -> Optional[torch.Tensor]:
@@ -171,19 +180,24 @@ class PodcastEngine:
         try:
             text = phoneme_manager.apply(text)
             final_instruct = instruct or profile.get("instruct")
-            if profile["type"] == "preset":
+            wavs = None
+            ptype = profile.get("type")
+            if ptype == "preset":
                 if model is None: model = get_model("CustomVoice")
                 wavs, sr = model.generate_custom_voice(text=text, speaker=profile["value"], language=language, instruct=final_instruct)
-            elif profile["type"] == "design":
+            elif ptype == "design":
                 if model is None: model = get_model("VoiceDesign")
                 design_instruct = profile["value"]
                 if final_instruct: design_instruct = f"{design_instruct}, {final_instruct}"
                 wavs, sr = model.generate_voice_design(text=text, instruct=design_instruct, language=language, non_streaming_mode=True)
-            elif profile.get("type") == "clone":
+            elif ptype == "clone":
                 cache_key = profile["value"]
                 if cache_key in self.prompt_cache: prompt = self.prompt_cache[cache_key]
                 else:
-                    resolved_paths = self._resolve_paths(profile["value"])
+                    try:
+                        resolved_paths = self._resolve_paths(profile["value"])
+                    except (FileNotFoundError, PermissionError) as e:
+                        raise RuntimeError(f"Cloning reference audio not found: {profile['value']}") from e
                     if model is None: model = get_model("Base")
                     ref_audio = str(resolved_paths[0])
                     if VideoEngine.is_video(ref_audio): ref_audio = self._extract_audio_with_cache(ref_audio)
@@ -191,7 +205,7 @@ class PodcastEngine:
                     self.prompt_cache[cache_key] = prompt
                 if model is None: model = get_model("Base")
                 wavs, sr = model.generate_voice_clone(text=text, language=language, voice_clone_prompt=prompt, instruct=final_instruct)
-            elif profile.get("type") == "mix":
+            elif ptype == "mix":
                 cache_key = f"mix:{profile['value']}"
                 if cache_key in self.prompt_cache: prompt = self.prompt_cache[cache_key]
                 else:
@@ -201,10 +215,14 @@ class PodcastEngine:
                     self.prompt_cache[cache_key] = prompt
                 if model is None: model = get_model("Base")
                 wavs, sr = model.generate_voice_clone(text=text, language=language, voice_clone_prompt=prompt, instruct=final_instruct)
-            if not wavs: raise RuntimeError("No waveforms")
+            else:
+                raise RuntimeError(f"Unknown speaker type: {ptype}")
+
+            if not wavs: raise RuntimeError("No waveforms generated")
             return self._apply_audio_watermark(wavs[0], sr), sr
         except Exception as e:
-            logger.error(f"Synthesis failed: {e}")
+            if not isinstance(e, RuntimeError):
+                logger.error(f"Synthesis failed: {e}")
             raise
 
     def _compute_mixed_embedding(self, mix_configs: List[Dict[str, Any]], model: Optional[Any] = None) -> Optional[torch.Tensor]:
@@ -279,11 +297,78 @@ class PodcastEngine:
             sample_rate = 24000
             waveforms = [None] * len(script)
             srs = [None] * len(script)
+
+            # ⚡ Bolt: Group segments by model type for batched synthesis
+            groups = {"CustomVoice": [], "VoiceDesign": [], "Base": []}
             for i, item in enumerate(script):
+                role = item.get("role")
+                profile = profiles.get(role)
+                if profile is None:
+                    continue
+                mtype = self._get_model_type_for_profile(profile)
+
+                # Preset profiles use CustomVoice model but might be categorized as "Base"
+                # if _get_model_type_for_profile logic is inconsistent.
+                # Ensure they go to CustomVoice group.
+                if profile.get("type") == "preset":
+                    mtype = "CustomVoice"
+
+                groups[mtype].append(i)
+
+            for mtype, indices in groups.items():
+                if not indices:
+                    continue
                 try:
-                    wav, sr = self.generate_segment(item["text"], profile=profiles.get(item["role"]), language=item.get("language", "auto"), instruct=item.get("instruct"))
-                    waveforms[i], srs[i] = wav, sr
-                except Exception: continue
+                    model = get_model(mtype)
+                    batch_texts = [phoneme_manager.apply(script[i]["text"]) for i in indices]
+                    batch_langs = [script[i].get("language", "auto") for i in indices]
+                    batch_instructs = [script[i].get("instruct") or profiles[script[i]["role"]].get("instruct") for i in indices]
+
+                    if mtype == "CustomVoice":
+                        speakers = [profiles[script[i]["role"]]["value"] for i in indices]
+                        wavs, sr = model.generate_custom_voice(text=batch_texts, speaker=speakers, language=batch_langs, instruct=batch_instructs)
+                    elif mtype == "VoiceDesign":
+                        design_instructs = []
+                        for i, idx in enumerate(indices):
+                            p = profiles[script[idx]["role"]]
+                            ins = p["value"]
+                            if batch_instructs[i]: ins = f"{ins}, {batch_instructs[i]}"
+                            design_instructs.append(ins)
+                        wavs, sr = model.generate_voice_design(text=batch_texts, instruct=design_instructs, language=batch_langs, non_streaming_mode=True)
+                    elif mtype == "Base":
+                        batch_prompts = []
+                        for i, idx in enumerate(indices):
+                            p = profiles[script[idx]["role"]]
+                            cache_key = p["value"] if p["type"] == "clone" else f"mix:{p['value']}"
+                            if cache_key in self.prompt_cache:
+                                prompt = self.prompt_cache[cache_key]
+                            else:
+                                if p["type"] == "clone":
+                                    resolved = self._resolve_paths(p["value"])
+                                    ref_audio = str(resolved[0])
+                                    if VideoEngine.is_video(ref_audio): ref_audio = self._extract_audio_with_cache(ref_audio)
+                                    prompt = model.create_voice_clone_prompt(ref_audio=ref_audio, x_vector_only_mode=True)
+                                elif p["type"] == "mix":
+                                    mix_configs = json.loads(p["value"])
+                                    mixed_emb = self._compute_mixed_embedding(mix_configs, model=model)
+                                    prompt = [VoiceClonePromptItem(ref_code=None, ref_spk_embedding=mixed_emb, x_vector_only_mode=True, icl_mode=False, ref_text=None)]
+                                else:
+                                    raise ValueError(f"Profile type {p['type']} not compatible with Base model batching")
+                                self.prompt_cache[cache_key] = prompt
+                            batch_prompts.append(prompt[0])
+                        wavs, sr = model.generate_voice_clone(text=batch_texts, language=batch_langs, voice_clone_prompt=batch_prompts, instruct=batch_instructs)
+
+                    for j, idx in enumerate(indices):
+                        waveforms[idx], srs[idx] = self._apply_audio_watermark(wavs[j], sr), sr
+                except Exception as e:
+                    logger.warning(f"⚡ Bolt: Batch synthesis failed for {mtype}, falling back to serial: {e}")
+                    for idx in indices:
+                        try:
+                            item = script[idx]
+                            wav, sr = self.generate_segment(item["text"], profile=profiles.get(item["role"]), language=item.get("language", "auto"), instruct=item.get("instruct"))
+                            waveforms[idx], srs[idx] = wav, sr
+                        except Exception: continue
+
             speech_segments = []
             max_sample = 0
             current_sample_offset = 0
@@ -300,17 +385,35 @@ class PodcastEngine:
             for seg in speech_segments: final_wav[seg["start"]:seg["end"]] = seg["wav"]
             if bgm_mood:
                 try:
-                    bgm_full_path = (Path(BASE_DIR) / "bgm" / f"{bgm_mood}.mp3").resolve()
-                    if bgm_full_path.exists():
-                        bgm_audio = AudioSegment.from_file(bgm_full_path).set_frame_rate(sample_rate).set_channels(1)
-                        bgm_samples = np.array(bgm_audio.get_array_of_samples(), dtype=np.float32) / 32768.0 * 0.1
-                        if len(bgm_samples) < len(final_wav): bgm_samples = np.tile(bgm_samples, int(np.ceil(len(final_wav)/len(bgm_samples))))
+                    # ⚡ Bolt: Cache BGM samples to avoid redundant loading and resampling
+                    if bgm_mood in self.bgm_cache:
+                        bgm_samples = self.bgm_cache[bgm_mood].copy()
+                    else:
+                        bgm_full_path = (Path(BASE_DIR) / "bgm" / f"{bgm_mood}.mp3").resolve()
+                        if not bgm_full_path.exists():
+                            # Fallback to absolute or relative if mood.mp3 doesn't exist
+                            bgm_full_path = Path(bgm_mood).resolve()
+                            if not bgm_full_path.exists():
+                                # Try shared_assets
+                                bgm_full_path = (SHARED_ASSETS_DIR / bgm_mood).resolve()
+
+                        if bgm_full_path.exists() and bgm_full_path.is_file():
+                            bgm_audio = AudioSegment.from_file(bgm_full_path).set_frame_rate(sample_rate).set_channels(1)
+                            bgm_samples = np.array(bgm_audio.get_array_of_samples(), dtype=np.float32) / 32768.0 * 0.1
+                            self.bgm_cache[bgm_mood] = bgm_samples.copy()
+                        else:
+                            bgm_samples = None
+
+                    if bgm_samples is not None:
+                        if len(bgm_samples) < len(final_wav):
+                            bgm_samples = np.tile(bgm_samples, int(np.ceil(len(final_wav)/len(bgm_samples))))
                         bgm_samples = bgm_samples[:len(final_wav)]
                         if ducking_level > 0:
                             duck_factor = 10 ** (-(ducking_level * 25) / 20.0)
                             for seg in speech_segments: bgm_samples[seg["start"]:seg["end"]] *= duck_factor
                         final_wav += bgm_samples
-                except Exception: pass
+                except Exception as e:
+                    logger.error(f"Failed to apply BGM: {e}")
             max_val = np.max(np.abs(final_wav))
             if max_val > 1.0: final_wav /= max_val
             final_wav = AudioPostProcessor.apply_eq(final_wav, sample_rate, preset=eq_preset)
@@ -320,6 +423,19 @@ class PodcastEngine:
     def dub_audio(self, audio_path: str, target_lang: str) -> Optional[Dict[str, Any]]:
         text = self.transcribe_audio(audio_path)
         trans_lang = 'zh-CN' if target_lang == 'zh' else target_lang
-        translated_text = GoogleTranslator(source='auto', target=trans_lang).translate(text)
+
+        # ⚡ Bolt: Cache translation results with hashed keys to avoid redundant API calls and save memory
+        import hashlib
+        text_hash = hashlib.md5(text.encode('utf-8')).hexdigest()
+        cache_key = f"{text_hash}:{trans_lang}"
+
+        if cache_key in self.translation_cache:
+            translated_text = self.translation_cache[cache_key]
+        else:
+            if len(self.translation_cache) > 1000:
+                self.translation_cache.clear()
+            translated_text = GoogleTranslator(source='auto', target=trans_lang).translate(text)
+            self.translation_cache[cache_key] = translated_text
+
         wav, sr = self.generate_segment(translated_text, profile={"type": "clone", "value": audio_path}, language=target_lang)
         return {"waveform": wav, "sample_rate": sr, "text": translated_text}

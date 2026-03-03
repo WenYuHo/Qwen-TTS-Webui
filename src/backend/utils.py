@@ -1,11 +1,20 @@
 import io
 import json
+import re
 import soundfile as sf
 import numpy as np
 import time
 import threading
 from pathlib import Path
 from .config import PROJECTS_DIR, BASE_DIR, logger
+
+try:
+    from scipy import signal as scipy_signal
+except ImportError:
+    scipy_signal = None
+
+# ⚡ Bolt: Cache for Butterworth filter coefficients to avoid redundant DSP math
+_eq_filter_cache = {}
 
 def numpy_to_wav_bytes(waveform, sample_rate):
     """Converts a numpy waveform to a WAV-formatted BytesIO object."""
@@ -30,6 +39,23 @@ class PhonemeManager:
     def __init__(self):
         self.file_path = PROJECTS_DIR / "phonemes.json"
         self.overrides = self._load()
+        self.combined_pattern = None
+        self.word_map = {}
+        self._compile_combined()
+
+    def _compile_combined(self):
+        """Pre-compile a single combined regex pattern for high-performance single-pass replacement."""
+        if not self.overrides:
+            self.combined_pattern = None
+            self.word_map = {}
+            return
+
+        # Sort words by length descending to ensure longest matches are tried first
+        sorted_words = sorted(self.overrides.keys(), key=len, reverse=True)
+        self.word_map = {word.lower(): word for word in self.overrides}
+
+        pattern_str = r'\b(' + '|'.join(re.escape(w) for w in sorted_words) + r')\b'
+        self.combined_pattern = re.compile(pattern_str, re.IGNORECASE)
 
     def _load(self):
         if not self.file_path.exists():
@@ -42,19 +68,24 @@ class PhonemeManager:
 
     def save(self, overrides):
         self.overrides = overrides
+        self._compile_combined()
         with open(self.file_path, "w", encoding="utf-8") as f:
             json.dump(self.overrides, f, indent=2, ensure_ascii=False)
 
     def apply(self, text: str) -> str:
         """Replace words in text with their phonetic equivalents."""
-        if not self.overrides:
+        if not self.overrides or not self.combined_pattern:
             return text
-        modified_text = text
-        for word, phonetic in self.overrides.items():
-            import re
-            pattern = re.compile(r'\b' + re.escape(word) + r'\b', re.IGNORECASE)
-            modified_text = pattern.sub(phonetic, modified_text)
-        return modified_text
+
+        def _replacer(match):
+            # ⚡ Bolt: Use O(1) dictionary lookup within a single-pass regex substitution
+            word = match.group(0).lower()
+            original_word = self.word_map.get(word)
+            if original_word:
+                return self.overrides.get(original_word, match.group(0))
+            return match.group(0)
+
+        return self.combined_pattern.sub(_replacer, text)
 
 phoneme_manager = PhonemeManager()
 
@@ -62,22 +93,34 @@ class AudioPostProcessor:
     """Applies atmospheric effects like EQ and Reverb to final waveforms."""
     @staticmethod
     def apply_eq(wav: np.ndarray, sr: int, preset: str = "flat") -> np.ndarray:
-        if preset == "flat":
+        # ⚡ Bolt: Fast return for identity preset or missing dependency
+        if preset == "flat" or scipy_signal is None:
             return wav
+
         try:
-            from scipy import signal
+            # ⚡ Bolt: Cache coefficients (b, a) to avoid redundant scipy.signal.butter calls
+            # This reduces CPU overhead significantly for multi-segment batch generation.
+            cache_key = (preset, sr)
+            if cache_key in _eq_filter_cache:
+                b, a = _eq_filter_cache[cache_key]
+            else:
+                if preset == "broadcast":
+                    b, a = scipy_signal.butter(2, [80 / (sr/2), 5000 / (sr/2)], btype='bandpass')
+                elif preset == "warm":
+                    b, a = scipy_signal.butter(2, 3000 / (sr/2), btype='low')
+                elif preset == "bright":
+                    b, a = scipy_signal.butter(2, 1000 / (sr/2), btype='high')
+                else:
+                    return wav
+                _eq_filter_cache[cache_key] = (b, a)
+
+            out = scipy_signal.lfilter(b, a, wav)
             if preset == "broadcast":
-                b, a = signal.butter(2, [80 / (sr/2), 5000 / (sr/2)], btype='bandpass')
-                return signal.lfilter(b, a, wav) * 1.5
-            elif preset == "warm":
-                b, a = signal.butter(2, 3000 / (sr/2), btype='low')
-                return signal.lfilter(b, a, wav)
-            elif preset == "bright":
-                b, a = signal.butter(2, 1000 / (sr/2), btype='high')
-                return signal.lfilter(b, a, wav)
-        except Exception:
+                out *= 1.5
+            return out
+        except Exception as e:
+            logger.error(f"⚡ Bolt: EQ failed for {preset} at {sr}Hz: {e}")
             return wav
-        return wav
 
     @staticmethod
     def apply_reverb(wav: np.ndarray, sr: int, intensity: float = 0.0) -> np.ndarray:

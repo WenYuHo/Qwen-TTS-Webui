@@ -8,3 +8,45 @@
     }
   }
 ]
+[
+  {
+    "timestamp": 1772452610.6839576,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "ryan"
+    }
+  },
+  {
+    "timestamp": 1772452655.2604954,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "ryan"
+    }
+  },
+  {
+    "timestamp": 1772452682.4265003,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "ryan"
+    }
+  },
+  {
+    "timestamp": 1772452741.7081747,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "ryan"
+    }
+  },
+  {
+    "timestamp": 1772452857.008376,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "ryan"
+    }
+  }
+]
