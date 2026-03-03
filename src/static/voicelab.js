@@ -331,5 +331,50 @@ export const VoiceLabManager = {
             const name = card.querySelector('strong')?.innerText.toLowerCase() || '';
             card.style.display = name.includes(query) ? 'flex' : 'none';
         });
+    },
+
+    setupCloningRecording() {
+        const btn = document.getElementById('clone-record-btn');
+        if (!btn) return;
+
+        btn.onclick = async () => {
+            if (!window.state.voicelab.isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    window.state.voicelab.mediaRecorder = new MediaRecorder(stream);
+                    window.state.voicelab.audioChunks = [];
+
+                    window.state.voicelab.mediaRecorder.ondataavailable = (event) => {
+                        window.state.voicelab.audioChunks.push(event.data);
+                    };
+
+                    window.state.voicelab.mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(window.state.voicelab.audioChunks, { type: 'audio/wav' });
+                        const formData = new FormData();
+                        formData.append('file', audioBlob, 'clone_input.wav');
+                        
+                        Notification.show("Uploading recording...", "info");
+                        const upRes = await fetch('/api/voice/upload', { method: 'POST', body: formData });
+                        const upData = await upRes.json();
+                        window.state.voicelab.lastClonedPath = upData.filename;
+                        Notification.show("Recording ready for cloning", "success");
+                    };
+
+                    window.state.voicelab.mediaRecorder.start();
+                    window.state.voicelab.isRecording = true;
+                    btn.innerHTML = 'STOP';
+                    btn.classList.remove('btn-danger');
+                    btn.classList.add('btn-secondary');
+                } catch (err) {
+                    Notification.show("Microphone access denied", "error");
+                }
+            } else {
+                window.state.voicelab.mediaRecorder.stop();
+                window.state.voicelab.isRecording = false;
+                btn.innerHTML = 'RECORD';
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-danger');
+            }
+        };
     }
 };

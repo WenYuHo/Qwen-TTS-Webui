@@ -2,7 +2,7 @@ from pydantic import BaseModel, field_validator
 from typing import List, Optional, Dict, Any
 
 class SpeakerProfile(BaseModel):
-    role: str
+    role: Optional[str] = None
     type: str
     value: str
 

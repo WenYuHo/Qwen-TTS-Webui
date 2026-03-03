@@ -78,6 +78,7 @@ function performSwitch(view) {
 
     if (view === 'speech') {
         VoiceLabManager.loadVoiceLibrary();
+        VoiceLabManager.setupCloningRecording();
     }
     if (view === 'assets') {
         AssetManager.loadAssets();
