@@ -60,3 +60,7 @@
 ## 2026-03-02 - [High-Performance Regex Multi-Replacement]
 **Learning:** In text preprocessing layers (like PhonemeManager), performing sequential regex substitutions in an O(N) loop (where N is the number of overrides) results in O(N*M) complexity (M=text length) and incurs significant Python-to-C overhead for each call. Combining all patterns into a single alternation regex (`|`) allows for a single-pass O(M) substitution.
 **Action:** Use single-pass combined regex patterns for multi-string replacement tasks. Sort patterns by length descending to ensure correct matching of overlapping terms.
+
+## 2026-03-03 - [EQ Coefficient Caching and Redundant Imports]
+**Learning:** Performing DSP filter design (e.g., `scipy.signal.butter`) on every audio segment in a batch synthesis job adds significant CPU overhead due to complex mathematical operations (trigonometry, bilinear transform). Caching the resulting coefficients `(b, a)` keyed by `(preset, sample_rate)` eliminates this overhead. Additionally, moving heavy library imports like `scipy.signal` to the module level (with safe fallback) prevents redundant `sys.modules` lookups during high-frequency calls.
+**Action:** Always cache pre-computed mathematical constants or filter coefficients in audio processing pipelines. Move function-local imports of heavy libraries to the top-level if the function is in a performance-critical path.

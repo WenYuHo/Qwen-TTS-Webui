@@ -8,6 +8,14 @@ import threading
 from pathlib import Path
 from .config import PROJECTS_DIR, BASE_DIR, logger
 
+try:
+    from scipy import signal as scipy_signal
+except ImportError:
+    scipy_signal = None
+
+# ⚡ Bolt: Cache for Butterworth filter coefficients to avoid redundant DSP math
+_eq_filter_cache = {}
+
 def numpy_to_wav_bytes(waveform, sample_rate):
     """Converts a numpy waveform to a WAV-formatted BytesIO object."""
     if waveform.dtype != np.float32:
@@ -85,22 +93,34 @@ class AudioPostProcessor:
     """Applies atmospheric effects like EQ and Reverb to final waveforms."""
     @staticmethod
     def apply_eq(wav: np.ndarray, sr: int, preset: str = "flat") -> np.ndarray:
-        if preset == "flat":
+        # ⚡ Bolt: Fast return for identity preset or missing dependency
+        if preset == "flat" or scipy_signal is None:
             return wav
+
         try:
-            from scipy import signal
+            # ⚡ Bolt: Cache coefficients (b, a) to avoid redundant scipy.signal.butter calls
+            # This reduces CPU overhead significantly for multi-segment batch generation.
+            cache_key = (preset, sr)
+            if cache_key in _eq_filter_cache:
+                b, a = _eq_filter_cache[cache_key]
+            else:
+                if preset == "broadcast":
+                    b, a = scipy_signal.butter(2, [80 / (sr/2), 5000 / (sr/2)], btype='bandpass')
+                elif preset == "warm":
+                    b, a = scipy_signal.butter(2, 3000 / (sr/2), btype='low')
+                elif preset == "bright":
+                    b, a = scipy_signal.butter(2, 1000 / (sr/2), btype='high')
+                else:
+                    return wav
+                _eq_filter_cache[cache_key] = (b, a)
+
+            out = scipy_signal.lfilter(b, a, wav)
             if preset == "broadcast":
-                b, a = signal.butter(2, [80 / (sr/2), 5000 / (sr/2)], btype='bandpass')
-                return signal.lfilter(b, a, wav) * 1.5
-            elif preset == "warm":
-                b, a = signal.butter(2, 3000 / (sr/2), btype='low')
-                return signal.lfilter(b, a, wav)
-            elif preset == "bright":
-                b, a = signal.butter(2, 1000 / (sr/2), btype='high')
-                return signal.lfilter(b, a, wav)
-        except Exception:
+                out *= 1.5
+            return out
+        except Exception as e:
+            logger.error(f"⚡ Bolt: EQ failed for {preset} at {sr}Hz: {e}")
             return wav
-        return wav
 
     @staticmethod
     def apply_reverb(wav: np.ndarray, sr: int, intensity: float = 0.0) -> np.ndarray:
