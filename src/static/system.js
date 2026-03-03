@@ -19,7 +19,7 @@ export const SystemManager = {
                     </div>
                     <div style="display:flex; align-items:center; gap:12px;">
                         <span class="badge ${model.status === 'downloaded' ? 'badge-success' : 'badge-warn'}">${model.status === 'downloaded' ? 'Ready' : 'Missing'}</span>
-                        ${model.status === 'missing' ? `<button class="btn btn-primary btn-sm" onclick="triggerDownload('${model.repo_id}')"><i class="fas fa-download"></i></button>` : ''}
+                        ${model.status === 'missing' ? `<button class="btn btn-primary btn-sm" onclick="triggerDownload('${model.repo_id}')" title="Download ${model.key}" aria-label="Download ${model.key}"><i class="fas fa-download" aria-hidden="true"></i></button>` : ''}
                     </div>
                 </div>
             `).join('');
@@ -49,8 +49,8 @@ export const SystemManager = {
         if (!list) return;
         list.innerHTML = Object.entries(overrides).map(([word, phonetic]) => `
             <div class="card" style="padding:8px 12px; display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; background:rgba(255,255,255,0.02);">
-                <div><strong>${word}</strong> <i class="fas fa-arrow-right" style="margin:0 8px; opacity:0.5;"></i> <span style="color:var(--accent)">${phonetic}</span></div>
-                <button class="btn btn-danger btn-sm" onclick="removePhonemeOverride('${word}')" style="padding:2px 6px;"><i class="fas fa-times"></i></button>
+                <div><strong>${word}</strong> <i class="fas fa-arrow-right" style="margin:0 8px; opacity:0.5;" aria-hidden="true"></i> <span style="color:var(--accent)">${phonetic}</span></div>
+                <button class="btn btn-danger btn-sm" onclick="removePhonemeOverride('${word}')" style="padding:2px 6px;" title="Remove override for ${word}" aria-label="Remove override for ${word}"><i class="fas fa-times" aria-hidden="true"></i></button>
             </div>
         `).join('');
     },
