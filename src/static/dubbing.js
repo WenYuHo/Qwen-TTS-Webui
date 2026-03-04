@@ -3,12 +3,16 @@ import { Notification, ErrorDisplay } from './ui_components.js';
 import { TaskManager } from './task_manager.js';
 
 export const DubbingManager = {
-    async startDubbing() {
+    async startDubbing(btn) {
         const fileInput = document.getElementById('dub-file');
         const targetLang = document.getElementById('dub-lang').value;
         
         if (!fileInput.files.length) return Notification.show("Select a file to dub", "warn");
         
+        btn.disabled = true;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> UPLOADING...';
+
         Notification.show("Uploading source file...", "info");
         
         try {
@@ -37,10 +41,13 @@ export const DubbingManager = {
             
         } catch (err) {
             ErrorDisplay.show("Dubbing Failed", err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
         }
     },
 
-    async startVoiceChanger() {
+    async startVoiceChanger(btn) {
         const targetVoice = document.getElementById('s2s-target-voice').value;
         const preserveProsody = document.getElementById('s2s-preserve').checked;
         const sourcePath = window.state.s2s.lastUploadedPath;
@@ -48,6 +55,10 @@ export const DubbingManager = {
         if (!sourcePath) return Notification.show("Record or upload source audio", "warn");
         if (!targetVoice) return Notification.show("Select a target voice", "warn");
         
+        btn.disabled = true;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> CONVERTING...';
+
         try {
             const res = await fetch('/api/s2s/convert', {
                 method: 'POST',
@@ -67,6 +78,9 @@ export const DubbingManager = {
             
         } catch (err) {
             ErrorDisplay.show("S2S Failed", err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
         }
     },
 

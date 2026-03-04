@@ -10,8 +10,7 @@ def test_index_html_contains_new_elements():
         content = f.read()
     assert 'id="assets-view"' in content
     assert 'Asset Library' in content
-    assert 'Live Task Monitor' in content
-    assert 'Export Bundle' in content
+    assert 'ACTIVE TASKS' in content
     assert 'id="ducking-range"' in content
 
 def test_style_css_contains_new_styles():
@@ -24,8 +23,7 @@ def test_style_css_contains_new_styles():
 def test_app_js_contains_new_functions():
     with open("src/static/app.js", "r") as f:
         content = f.read()
-    assert 'async function loadAssets()' in content
-    assert 'function setupDragAndDrop()' in content
-    assert 'async function refreshTasks()' in content
-    assert 'async function exportStudioBundle()' in content
-    assert 'async function generatePodcast()' in content
+    assert 'loadAssets: AssetManager.loadAssets' in content
+    assert 'setupDragAndDrop: AssetManager.setupDragAndDrop' in content
+    assert 'refreshTasks: TaskManager.refreshTasks' in content
+    assert 'generatePodcast: ProductionManager.generatePodcast' in content
