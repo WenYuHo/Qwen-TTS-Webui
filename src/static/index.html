@@ -17,7 +17,7 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <i class="fas fa-microphone-lines fa-2x" style="color:var(--accent)" aria-hidden="true"></i>
-                <span>Qwen-TTS Studio</span>
+                <span id="app-logo-text">Qwen-TTS Studio</span>
             </div>
             <nav class="sidebar-nav">
                 <button id="nav-speech" class="nav-item active" onclick="console.log('Voice Studio click'); switchView('speech')" aria-pressed="true">
@@ -73,9 +73,9 @@
                 <div class="grid-3">
                     <!-- Voice Design -->
                     <div class="card-brutalist">
-                        <h2 style="margin-bottom:16px; font-size: 1.2rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;">Voice Design</h2>
+                        <h2 style="margin-bottom:16px; font-size: 1.2rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;" tabindex="-1">Voice Design</h2>
                         <div class="control-group">
-                            <span class="label-industrial">Style Prompt</span>
+                            <label for="design-prompt" class="label-industrial">Style Prompt</label>
                             <textarea id="design-prompt" placeholder="A calm, soothing female voice..." style="height: 80px; border-color:var(--accent);"></textarea>
                             <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">
                                 <button class="btn btn-secondary btn-sm" style="font-size:0.55rem; padding:2px 6px;" onclick="document.getElementById('design-prompt').value='A mature male voice with a deep, authoritative tone and clear articulation.'">DEEP MALE</button>
@@ -103,14 +103,14 @@
 
                     <!-- Voice Cloning -->
                     <div class="card-brutalist">
-                        <h2 style="margin-bottom:16px; font-size: 1.2rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;">Voice Cloning</h2>
+                        <h2 style="margin-bottom:16px; font-size: 1.2rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;" tabindex="-1">Voice Cloning</h2>
                         <div class="control-group">
-                            <span class="label-industrial">Reference Audio</span>
+                            <label for="clone-file" class="label-industrial">Reference Audio</label>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                                <button class="btn btn-secondary" onclick="document.getElementById('clone-file').click()">UPLOAD</button>
-                                <button class="btn btn-danger" id="clone-record-btn">RECORD</button>
+                                <button class="btn btn-secondary" onclick="document.getElementById('clone-file').click()" aria-label="Upload reference audio">UPLOAD</button>
+                                <button class="btn btn-danger" id="clone-record-btn" aria-label="Record reference audio">RECORD</button>
                             </div>
-                            <input type="file" id="clone-file" accept="audio/*" style="display:none">
+                            <input type="file" id="clone-file" accept="audio/*" style="display:none" aria-label="Reference audio file">
                         </div>
                         <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="testVoiceClone(this)">CLONE & PREVIEW</button>
                         <div id="clone-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.4); border:1px solid var(--accent); padding: 12px;">
@@ -124,16 +124,16 @@
 
                     <!-- Voice Mixing -->
                     <div class="card-brutalist">
-                        <h2 style="margin-bottom:16px; font-size: 1.2rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;">Voice Mixer</h2>
+                        <h2 style="margin-bottom:16px; font-size: 1.2rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;" tabindex="-1">Voice Mixer</h2>
                         <div class="control-group">
-                            <div style="display:flex; justify-content:space-between;"><span class="label-industrial">Base Voice A</span><span id="weight-a-val" class="volt-text">50%</span></div>
+                            <div style="display:flex; justify-content:space-between;"><label for="mix-voice-a" class="label-industrial">Base Voice A</label><span id="weight-a-val" class="volt-text">50%</span></div>
                             <select id="mix-voice-a" class="btn btn-secondary btn-sm" style="width:100%; margin-bottom:8px;"></select>
-                            <input type="range" id="mix-weight-a" min="0" max="100" value="50" style="width:100%" oninput="document.getElementById('weight-a-val').innerText = this.value + '%' ">
+                            <input type="range" id="mix-weight-a" min="0" max="100" value="50" style="width:100%" oninput="document.getElementById('weight-a-val').innerText = this.value + '%' " aria-label="Voice A weight">
                         </div>
                         <div class="control-group">
-                            <div style="display:flex; justify-content:space-between;"><span class="label-industrial">Base Voice B</span><span id="weight-b-val" class="volt-text">50%</span></div>
+                            <div style="display:flex; justify-content:space-between;"><label for="mix-voice-b" class="label-industrial">Base Voice B</label><span id="weight-b-val" class="volt-text">50%</span></div>
                             <select id="mix-voice-b" class="btn btn-secondary btn-sm" style="width:100%; margin-bottom:8px;"></select>
-                            <input type="range" id="mix-weight-b" min="0" max="100" value="50" style="width:100%" oninput="document.getElementById('weight-b-val').innerText = this.value + '%' ">
+                            <input type="range" id="mix-weight-b" min="0" max="100" value="50" style="width:100%" oninput="document.getElementById('weight-b-val').innerText = this.value + '%' " aria-label="Voice B weight">
                         </div>
                         <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="testVoiceMix(this)">MIX & PREVIEW</button>
                         <div id="mix-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.4); border:1px solid var(--accent); padding: 12px;">
@@ -148,10 +148,10 @@
 
                 <div class="view-header" style="margin-top: 48px;">
                     <div class="view-title" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                        <h2 class="volt-text">MY VOICE LIBRARY</h2>
+                        <h2 class="volt-text" tabindex="-1">MY VOICE LIBRARY</h2>
                         <div style="width:300px; position:relative;">
-                            <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.5; color:var(--accent)"></i>
-                            <input type="text" id="voice-search" placeholder="Filter voices..." style="padding: 8px 8px 8px 36px; font-size:0.8rem; border:2px solid var(--accent); background:rgba(0,0,0,0.3); color:white;" oninput="filterVoiceLibrary()">
+                            <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.5; color:var(--accent)" aria-hidden="true"></i>
+                            <input type="text" id="voice-search" placeholder="Filter voices..." style="padding: 8px 8px 8px 36px; font-size:0.8rem; border:2px solid var(--accent); background:rgba(0,0,0,0.3); color:white;" oninput="filterVoiceLibrary()" aria-label="Search voices">
                         </div>
                     </div>
                 </div>
@@ -163,13 +163,13 @@
                 <div class="view-header">
                     <div class="view-title" style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
                         <div>
-                            <h1>ASSET LIBRARY</h1>
+                            <h1 tabindex="-1">ASSET LIBRARY</h1>
                             <p>Manage shared media assets.</p>
                         </div>
                         <div style="display:flex; gap:16px;">
                             <div style="width:200px; position:relative;">
-                                <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.5; color:var(--accent)"></i>
-                                <input type="text" id="asset-search" placeholder="Search..." style="padding: 6px 8px 6px 36px; font-size:0.75rem; border:2px solid var(--accent); background:rgba(0,0,0,0.3); color:white;" oninput="filterAssets()">
+                                <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.5; color:var(--accent)" aria-hidden="true"></i>
+                                <input type="text" id="asset-search" placeholder="Search..." style="padding: 6px 8px 6px 36px; font-size:0.75rem; border:2px solid var(--accent); background:rgba(0,0,0,0.3); color:white;" oninput="filterAssets()" aria-label="Search assets">
                             </div>
                             <button class="btn btn-primary btn-sm" onclick="document.getElementById('asset-upload-input').click()">UPLOAD</button>
                             <button class="btn btn-secondary btn-sm" onclick="showHelp()">HELP</button>
@@ -185,15 +185,15 @@
                 <div class="view-header">
                     <div class="view-title" style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
                         <div>
-                            <h1>PROJECT STUDIO</h1>
+                            <h1 tabindex="-1">PROJECT STUDIO</h1>
                             <p>Create multi-character audio dramas.</p>
                         </div>
                         <div style="display:flex; gap:12px; align-items:center;">
                             <div style="width:180px; position:relative;">
-                                <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.5; color:var(--accent)"></i>
-                                <input type="text" id="project-search" placeholder="Search..." style="padding: 6px 8px 6px 36px; font-size:0.75rem; border:2px solid var(--accent); background:rgba(0,0,0,0.3); color:white;" oninput="filterProjects()">
+                                <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.5; color:var(--accent)" aria-hidden="true"></i>
+                                <input type="text" id="project-search" placeholder="Search..." style="padding: 6px 8px 6px 36px; font-size:0.75rem; border:2px solid var(--accent); background:rgba(0,0,0,0.3); color:white;" oninput="filterProjects()" aria-label="Search projects">
                             </div>
-                            <select id="project-select" class="btn btn-secondary btn-sm" style="width:140px; border-color:var(--accent);"><option value="">(New)</option></select>
+                            <select id="project-select" class="btn btn-secondary btn-sm" style="width:140px; border-color:var(--accent);" aria-label="Select project"><option value="">(New)</option></select>
                             <button class="btn btn-secondary btn-sm" onclick="loadProject()">LOAD</button>
                             <button class="btn btn-primary btn-sm" onclick="saveProject()">SAVE</button>
                             <button class="btn btn-secondary btn-sm" onclick="showHelp()">HELP</button>
@@ -217,10 +217,10 @@
                     </div>
 
                     <div class="card-brutalist sidebar-controls">
-                        <span class="label-industrial">SETTINGS</span>
+                        <h3 class="label-industrial">SETTINGS</h3>
                         <div class="control-group">
-                            <span class="label-industrial">BGM</span>
-                            <select id="bgm-select" style="border-color:var(--accent);"><option value="">None</option></select>
+                            <label for="bgm-select" class="label-industrial">BGM</label>
+                            <select id="bgm-select" style="border-color:var(--accent);" aria-label="Background Music Select"><option value="">None</option></select>
                         </div>
                         <div class="control-group">
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
@@ -229,18 +229,18 @@
                             </label>
                         </div>
                         <div class="control-group">
-                            <div style="display:flex; justify-content:space-between;"><span class="label-industrial">Ducking</span><span id="ducking-val" class="volt-text">0%</span></div>
+                            <div style="display:flex; justify-content:space-between;"><label for="ducking-range" class="label-industrial">Ducking</label><span id="ducking-val" class="volt-text">0%</span></div>
                             <input type="range" id="ducking-range" min="0" max="100" value="0" style="width:100%" oninput="document.getElementById('ducking-val').innerText = this.value + '%' ">
                         </div>
                         
-                        <span class="label-industrial">EFFECTS</span>
+                        <h3 class="label-industrial">EFFECTS</h3>
                         <div class="card" style="padding:12px; margin-bottom:20px; background:rgba(0,0,0,0.3); border:1px solid var(--accent);">
-                            <select id="audio-eq" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);"><option value="flat">Flat</option><option value="broadcast">Radio</option></select>
-                            <div style="display:flex; justify-content:space-between; margin-top:12px;"><span class="label-industrial">Reverb</span><span id="reverb-val" class="volt-text">0%</span></div>
+                            <select id="audio-eq" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);" aria-label="Equalizer Preset"><option value="flat">Flat</option><option value="broadcast">Radio</option></select>
+                            <div style="display:flex; justify-content:space-between; margin-top:12px;"><label for="audio-reverb" class="label-industrial">Reverb</label><span id="reverb-val" class="volt-text">0%</span></div>
                             <input type="range" id="audio-reverb" min="0" max="100" value="0" style="width:100%" oninput="document.getElementById('reverb-val').innerText = this.value + '%' ">
                         </div>
 
-                        <span class="label-industrial">VIDEO ENGINE</span>
+                        <h3 class="label-industrial">VIDEO ENGINE</h3>
                         <div class="card" style="padding:12px; background:rgba(204,255,0,0.05); border:1px solid var(--accent); margin-bottom:20px;">
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:8px;">
                                 <input type="checkbox" id="video-enabled" onchange="document.getElementById('video-options').style.display = this.checked ? 'block' : 'none'">
@@ -248,35 +248,35 @@
                             </label>
                             <div id="video-options" style="display:none;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                    <span class="label-industrial">PROMPT</span>
+                                    <label for="video-prompt" class="label-industrial">PROMPT</label>
                                     <button class="btn btn-secondary btn-sm" style="padding:2px 6px; font-size:0.6rem;" onclick="suggestVideoScene()">SUGGEST</button>
                                 </div>
                                 <textarea id="video-prompt" placeholder="Scene..." style="height: 50px; font-size: 0.75rem; border-color: var(--accent); background: rgba(0,0,0,0.3); color: white;"></textarea>
                                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px;">
                                     <div class="control-group" style="margin-bottom:0;">
-                                        <span class="label-industrial" style="font-size:0.6rem;">Res</span>
+                                        <label for="video-res" class="label-industrial" style="font-size:0.6rem;">Res</label>
                                         <select id="video-res" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
                                             <option value="768x512">768x512</option>
                                             <option value="512x512">512x512</option>
                                         </select>
                                     </div>
                                     <div class="control-group" style="margin-bottom:0;">
-                                        <span class="label-industrial" style="font-size:0.6rem;">Frames</span>
+                                        <label for="video-frames" class="label-industrial" style="font-size:0.6rem;">Frames</label>
                                         <input type="number" id="video-frames" value="24" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
                                     </div>
                                 </div>
                                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px;">
                                     <div class="control-group" style="margin-bottom:0;">
-                                        <span class="label-industrial" style="font-size:0.6rem;">Guidance</span>
+                                        <label for="video-guidance" class="label-industrial" style="font-size:0.6rem;">Guidance</label>
                                         <input type="number" id="video-guidance" value="3.5" step="0.5" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
                                     </div>
                                     <div class="control-group" style="margin-bottom:0;">
-                                        <span class="label-industrial" style="font-size:0.6rem;">Steps</span>
+                                        <label for="video-steps" class="label-industrial" style="font-size:0.6rem;">Steps</label>
                                         <input type="number" id="video-steps" value="30" step="1" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
                                     </div>
                                 </div>
                                 <div class="control-group" style="margin-top:8px; margin-bottom:0;">
-                                    <span class="label-industrial" style="font-size:0.6rem;">Seed</span>
+                                    <label for="video-seed" class="label-industrial" style="font-size:0.6rem;">Seed</label>
                                     <input type="number" id="video-seed" value="-1" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
                                 </div>
                                 <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-top:8px;">
@@ -312,7 +312,7 @@
                 <div class="view-header">
                     <div class="view-title" style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
                         <div>
-                            <h1>DUBBING & S2S</h1>
+                            <h1 tabindex="-1">DUBBING & S2S</h1>
                             <p>Translate audio or perform expressive voice conversion.</p>
                         </div>
                         <button class="btn btn-secondary btn-sm" onclick="showHelp()"><i class="fas fa-question-circle"></i> HELP</button>
@@ -320,16 +320,16 @@
                 </div>
                 <div class="grid-2">
                     <div class="card-brutalist">
-                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;">Dubbing (Translation)</h2>
+                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;" tabindex="-1">Dubbing (Translation)</h2>
                         <div class="control-group">
-                            <span class="label-industrial">Source File</span>
-                            <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" onclick="document.getElementById('dub-file').click()">
-                                <i class="fas fa-file-video"></i> UPLOAD FILE
+                            <label for="dub-file" class="label-industrial">Source File</label>
+                            <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" onclick="document.getElementById('dub-file').click()" aria-label="Upload file for dubbing">
+                                <i class="fas fa-file-video" aria-hidden="true"></i> UPLOAD FILE
                             </button>
-                            <input type="file" id="dub-file" accept="video/*,audio/*" style="display:none">
+                            <input type="file" id="dub-file" accept="video/*,audio/*" style="display:none" aria-label="Source file for dubbing">
                         </div>
                         <div class="control-group">
-                            <span class="label-industrial">Target Language</span>
+                            <label for="dub-lang" class="label-industrial">Target Language</label>
                             <select id="dub-lang" style="border-color:var(--accent);">
                                 <option value="en">English</option>
                                 <option value="zh">Chinese</option>
@@ -343,16 +343,16 @@
                     </div>
 
                     <div class="card-brutalist">
-                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;">Voice Changer (S2S)</h2>
+                        <h2 style="margin-bottom:16px; font-size: 1.1rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;" tabindex="-1">Voice Changer (S2S)</h2>
                         <div class="control-group">
                             <span class="label-industrial">Source Audio</span>
-                            <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" id="s2s-record-btn">
-                                <i class="fas fa-circle"></i> RECORD AUDIO
+                            <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" id="s2s-record-btn" aria-label="Record source audio for voice changer">
+                                <i class="fas fa-circle" aria-hidden="true"></i> RECORD AUDIO
                             </button>
                         </div>
                         <div class="control-group">
-                            <span class="label-industrial">Target Voice</span>
-                            <select id="s2s-target-voice" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);"></select>
+                            <label for="s2s-target-voice" class="label-industrial">Target Voice</label>
+                            <select id="s2s-target-voice" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);" aria-label="Target voice for S2S"></select>
                         </div>
                         <div class="control-group">
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
@@ -372,7 +372,7 @@
                 <div class="view-header">
                     <div class="view-title" style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
                         <div>
-                            <h1>SYSTEM MANAGER</h1>
+                            <h1 tabindex="-1">SYSTEM MANAGER</h1>
                             <p>Monitor health and hardware.</p>
                         </div>
                         <button class="btn btn-secondary btn-sm" onclick="showHelp()">HELP</button>
@@ -386,8 +386,8 @@
                 </div>
                 <div id="system-inventory-tab" class="system-sub-tab">
                     <div class="grid-2">
-                        <div class="card-brutalist"><h2>Inventory</h2><div id="model-inventory-list"></div></div>
-                        <div class="card-brutalist"><h2>Resources</h2><div id="resource-stats" class="status-grid">
+                        <div class="card-brutalist"><h2 tabindex="-1">Inventory</h2><div id="model-inventory-list"></div></div>
+                        <div class="card-brutalist"><h2 tabindex="-1">Resources</h2><div id="resource-stats" class="status-grid">
                             <div class="status-item"><span class="label-industrial">CPU</span><span id="stat-cpu" class="status-val volt-text">--%</span></div>
                             <div class="status-item"><span class="label-industrial">RAM</span><span id="stat-ram" class="status-val volt-text">--%</span></div>
                             <div class="status-item" id="gpu-stat-container" style="display:none;"><span class="label-industrial">VRAM</span><span id="stat-gpu" class="status-val volt-text">--%</span></div>
@@ -410,22 +410,22 @@
                     </div>
                 </div>
                 <div id="system-phonemes-tab" class="system-sub-tab" style="display:none;">
-                    <div class="card-brutalist"><h2>Phoneme Editor</h2>
+                    <div class="card-brutalist"><h2 tabindex="-1">Phoneme Editor</h2>
                         <div class="control-group" style="display:flex; gap:8px;">
-                            <input type="text" id="phoneme-word" placeholder="Word"><input type="text" id="phoneme-replacement" placeholder="Phonetic">
-                            <button class="btn btn-primary" onclick="addPhonemeOverride()">+</button>
+                            <input type="text" id="phoneme-word" placeholder="Word" aria-label="Word to override"><input type="text" id="phoneme-replacement" placeholder="Phonetic" aria-label="Phonetic replacement">
+                            <button class="btn btn-primary" onclick="addPhonemeOverride()" aria-label="Add phoneme override">+</button>
                         </div>
                         <div id="phoneme-list"></div>
                     </div>
                 </div>
                 <div id="system-performance-tab" class="system-sub-tab" style="display:none;">
                     <div class="card-brutalist">
-                        <div style="display:flex; justify-content:space-between; align-items:center;"><h2>Engine Performance</h2><button class="btn btn-primary" onclick="runEngineBenchmark()">BENCHMARK</button></div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;"><h2 tabindex="-1">Engine Performance</h2><button class="btn btn-primary" onclick="runEngineBenchmark()">BENCHMARK</button></div>
                         <pre id="performance-output" style="background:#000; padding:20px; color:var(--accent); font-size:0.7rem;"></pre>
                     </div>
                 </div>
                 <div id="system-audit-tab" class="system-sub-tab" style="display:none;">
-                    <div class="card-brutalist"><h2>Audit Log</h2><div id="audit-log-list"></div></div>
+                    <div class="card-brutalist"><h2 tabindex="-1">Audit Log</h2><div id="audit-log-list"></div></div>
                 </div>
             </div>
 
@@ -440,10 +440,10 @@
     </div>
 
     <!-- Modals -->
-    <div id="video-modal" class="modal-overlay" style="display:none;" onclick="if(event.target === this) hideVideoModal()">
+    <div id="video-modal" class="modal-overlay" role="dialog" aria-labelledby="video-modal-title" aria-modal="true" style="display:none;" onclick="if(event.target === this) hideVideoModal()">
         <div class="card-brutalist modal-content" style="max-width:900px; width:95%; padding:0; overflow:hidden;">
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; border-bottom:2px solid var(--accent);">
-                <h2 id="video-modal-title">Video Preview</h2><button class="btn btn-danger btn-sm" onclick="hideVideoModal()">X</button>
+                <h2 id="video-modal-title" tabindex="-1">Video Preview</h2><button class="btn btn-danger btn-sm" onclick="hideVideoModal()" aria-label="Close modal">X</button>
             </div>
             <div style="background:#000; position:relative; min-height:400px; display:flex; justify-content:center;">
                 <video id="video-modal-player" controls style="max-width:100%;"></video>
@@ -458,7 +458,6 @@
 
     <!-- Toast -->
     <div id="toast-container" style="position:fixed; bottom:80px; right:24px; z-index:10000; display:flex; flex-direction:column; gap:12px; pointer-events:none;"></div>
-    <audio id="preview-player" style="display:none"></audio>
 
     <!-- Scripts -->
     <script src="/static/libs/wavesurfer.min.js"></script>

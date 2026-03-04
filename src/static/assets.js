@@ -27,14 +27,14 @@ export const AssetManager = {
                 const icon = isAudio ? 'fa-file-audio' : 'fa-file';
                 return `
                     <div class="card asset-card" style="display:flex; align-items:center; gap:16px;">
-                        <div class="asset-icon"><i class="fas ${icon}"></i></div>
+                        <div class="asset-icon" aria-hidden="true"><i class="fas ${icon}"></i></div>
                         <div style="flex:1;">
                             <strong style="display:block; font-size:0.95rem;">${asset.name}</strong>
                             <span style="font-size:0.8rem; color:var(--text-secondary);">${(asset.size / 1024 / 1024).toFixed(2)} MB</span>
                         </div>
                         <div style="display:flex; gap:8px;">
-                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}')" title="Play" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
-                            <button class="btn btn-danger btn-sm" onclick="deleteAsset('${asset.name}')" title="Delete" aria-label="Delete ${asset.name}"><i class="fas fa-trash" aria-hidden="true"></i></button>
+                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}')" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
+                            <button class="btn btn-danger btn-sm" onclick="deleteAsset('${asset.name}')" title="Delete ${asset.name}" aria-label="Delete ${asset.name}"><i class="fas fa-trash" aria-hidden="true"></i></button>
                         </div>
                     </div>
                 `;

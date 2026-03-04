@@ -15,17 +15,26 @@ from deep_translator import GoogleTranslator
 
 from .qwen_tts.inference.qwen3_tts_model import VoiceClonePromptItem
 from .model_loader import get_model
-from .config import BASE_DIR, SHARED_ASSETS_DIR, logger
+from .config import BASE_DIR, SHARED_ASSETS_DIR, VIDEO_DIR, logger
 from .video_engine import VideoEngine
-from .utils import phoneme_manager, AudioPostProcessor, Profiler
+from .utils import phoneme_manager, AudioPostProcessor, Profiler, prune_dict_cache
 
 from concurrent.futures import ThreadPoolExecutor
 import queue
+
+# ⚡ Bolt: Global cache for audio watermark tone to avoid redundant math and allocations
+_watermark_tone_cache = {}
 
 class PodcastEngine:
     def __init__(self):
         self.upload_dir = Path("uploads").resolve()
         self.upload_dir.mkdir(parents=True, exist_ok=True)
+
+        # ⚡ Bolt: Pre-resolve base directories once during init to avoid redundant filesystem I/O in _resolve_paths
+        self._bgm_dir = (Path(BASE_DIR) / "bgm").resolve()
+        self._video_dir = Path(VIDEO_DIR).resolve()
+        self._shared_assets_dir = Path(SHARED_ASSETS_DIR).resolve()
+
         self.executor = ThreadPoolExecutor(max_workers=4)
         # Caches
         self.preset_embeddings = {}
@@ -52,16 +61,13 @@ class PodcastEngine:
             else:
                 path_obj = path_obj.resolve()
 
-            is_safe = path_obj.is_relative_to(self.upload_dir)
-            if not is_safe:
-                bgm_dir = (Path(BASE_DIR) / "bgm").resolve()
-                is_safe = path_obj.is_relative_to(bgm_dir)
-            if not is_safe:
-                video_dir = (Path(BASE_DIR) / "projects" / "videos").resolve()
-                is_safe = path_obj.is_relative_to(video_dir)
-            if not is_safe:
-                from .config import SHARED_ASSETS_DIR
-                is_safe = path_obj.is_relative_to(SHARED_ASSETS_DIR.resolve())
+            # ⚡ Bolt: Use pre-resolved base directories for O(1) safety checks without further I/O
+            is_safe = (
+                path_obj.is_relative_to(self.upload_dir) or
+                path_obj.is_relative_to(self._bgm_dir) or
+                path_obj.is_relative_to(self._video_dir) or
+                path_obj.is_relative_to(self._shared_assets_dir)
+            )
 
             if not is_safe:
                 logger.error(f"Access denied to path: {path_obj}")
@@ -87,6 +93,10 @@ class PodcastEngine:
             cached_path = self.video_audio_cache[video_path]
             if Path(cached_path).exists():
                 return cached_path
+
+        # ⚡ Bolt: Prevent unbounded growth of the video audio cache
+        prune_dict_cache(self.video_audio_cache, limit=100, count=10)
+
         extracted_path = VideoEngine.extract_audio(video_path)
         self.video_audio_cache[video_path] = extracted_path
         return extracted_path
@@ -128,9 +138,8 @@ class PodcastEngine:
         text = result["text"]
         if cache_key:
             try:
-                # ⚡ Bolt: Simple cache size management
-                if len(self.transcription_cache) > 1000:
-                    self.transcription_cache.clear()
+                # ⚡ Bolt: Gradual cache pruning instead of drastic clear()
+                prune_dict_cache(self.transcription_cache, limit=1000, count=100)
                 self.transcription_cache[cache_key] = text
             except Exception: pass
         return text
@@ -148,6 +157,8 @@ class PodcastEngine:
             mtype = "Base" if ptype == "clone" else "CustomVoice"
             model = get_model(mtype)
         if ptype == "preset":
+            # ⚡ Bolt: Prevent unbounded growth of preset embeddings cache
+            prune_dict_cache(self.preset_embeddings, limit=200, count=20)
             emb = model.get_speaker_embedding(profile["value"])
             self.preset_embeddings[profile["value"].lower()] = emb
             return emb
@@ -158,6 +169,11 @@ class PodcastEngine:
             if VideoEngine.is_video(clone_path): clone_path = self._extract_audio_with_cache(clone_path)
             prompt = model.create_voice_clone_prompt(ref_audio=clone_path, x_vector_only_mode=True)
             emb = prompt[0].ref_spk_embedding
+
+            # ⚡ Bolt: Prevent unbounded growth of prompt and embedding caches
+            prune_dict_cache(self.prompt_cache, limit=200, count=20)
+            prune_dict_cache(self.clone_embedding_cache, limit=200, count=20)
+
             self.prompt_cache[cache_key] = prompt
             self.clone_embedding_cache[cache_key] = emb
             return emb
@@ -166,15 +182,30 @@ class PodcastEngine:
     def _apply_audio_watermark(self, wav: np.ndarray, sr: int) -> np.ndarray:
         try:
             from .api.system import _settings
-            if not _settings.watermark_audio: return wav
-            duration = 0.1
-            t = np.linspace(0, duration, int(sr * duration), False)
-            tone = 0.05 * np.sin(2 * np.pi * 20000 * t)
-            fade = int(sr * 0.01)
-            tone[:fade] *= np.linspace(0, 1, fade)
-            tone[-fade:] *= np.linspace(1, 0, fade)
-            return np.concatenate([wav, tone])
-        except Exception: return wav
+            if not _settings.watermark_audio:
+                return wav
+
+            # ⚡ Bolt: Cache the watermark tone to avoid redundant math and allocations
+            if sr in _watermark_tone_cache:
+                tone = _watermark_tone_cache[sr]
+            else:
+                duration = 0.1
+                t = np.linspace(0, duration, int(sr * duration), False)
+                tone = 0.05 * np.sin(2 * np.pi * 20000 * t)
+                fade = int(sr * 0.01)
+                tone[:fade] *= np.linspace(0, 1, fade)
+                tone[-fade:] *= np.linspace(1, 0, fade)
+                _watermark_tone_cache[sr] = tone
+
+            # Handle both mono and stereo
+            if len(wav.shape) == 2:
+                # Expand tone to stereo
+                tone_stereo = np.stack([tone, tone])
+                return np.concatenate([wav, tone_stereo], axis=1)
+            else:
+                return np.concatenate([wav, tone])
+        except Exception:
+            return wav
 
     def generate_segment(self, text: str, profile: Dict[str, Any], language: str = "auto", model: Optional[Any] = None, instruct: Optional[str] = None) -> tuple[np.ndarray, int]:
         try:
@@ -209,6 +240,8 @@ class PodcastEngine:
                 cache_key = f"mix:{profile['value']}"
                 if cache_key in self.prompt_cache: prompt = self.prompt_cache[cache_key]
                 else:
+                    # ⚡ Bolt: Prevent unbounded growth of prompt cache
+                    prune_dict_cache(self.prompt_cache, limit=200, count=20)
                     mix_configs = json.loads(profile["value"])
                     mixed_emb = self._compute_mixed_embedding(mix_configs)
                     prompt = [VoiceClonePromptItem(ref_code=None, ref_spk_embedding=mixed_emb, x_vector_only_mode=True, icl_mode=False, ref_text=None)]
@@ -228,6 +261,10 @@ class PodcastEngine:
     def _compute_mixed_embedding(self, mix_configs: List[Dict[str, Any]], model: Optional[Any] = None) -> Optional[torch.Tensor]:
         cache_key = json.dumps(sorted(mix_configs, key=lambda x: str(x["profile"])), sort_keys=True)
         if cache_key in self.mix_embedding_cache: return self.mix_embedding_cache[cache_key]
+
+        # ⚡ Bolt: Prevent unbounded growth of mixed embedding cache
+        prune_dict_cache(self.mix_embedding_cache, limit=200, count=20)
+
         total_weight = sum(c["weight"] for c in mix_configs)
         if total_weight == 0: return None
         mixed_emb = None
@@ -359,12 +396,16 @@ class PodcastEngine:
                                     prompt = [VoiceClonePromptItem(ref_code=None, ref_spk_embedding=mixed_emb, x_vector_only_mode=True, icl_mode=False, ref_text=None)]
                                 else:
                                     raise ValueError(f"Profile type {p['type']} not compatible with Base model batching")
+                                # ⚡ Bolt: Prevent unbounded growth of prompt cache
+                                prune_dict_cache(self.prompt_cache, limit=200, count=20)
                                 self.prompt_cache[cache_key] = prompt
                             batch_prompts.append(prompt[0])
                         wavs, sr = model.generate_voice_clone(text=batch_texts, language=batch_langs, voice_clone_prompt=batch_prompts, instruct=batch_instructs)
 
                     for j, idx in enumerate(indices):
-                        waveforms[idx], srs[idx] = self._apply_audio_watermark(wavs[j], sr), sr
+                        # ⚡ Bolt: Consolidate watermarking by moving it out of the per-segment synthesis loop.
+                        # This saves N-1 redundant concatenations and temporary array allocations.
+                        waveforms[idx], srs[idx] = wavs[j], sr
                 except Exception as e:
                     logger.warning(f"⚡ Bolt: Batch synthesis failed for {mtype}, falling back to serial: {e}")
                     for idx in indices:
@@ -420,6 +461,8 @@ class PodcastEngine:
                                 bgm_full_path = (SHARED_ASSETS_DIR / bgm_mood).resolve()
 
                         if bgm_full_path.exists() and bgm_full_path.is_file():
+                            # ⚡ Bolt: Prevent unbounded growth of BGM cache
+                            prune_dict_cache(self.bgm_cache, limit=50, count=5)
                             bgm_audio = AudioSegment.from_file(bgm_full_path).set_frame_rate(sample_rate).set_channels(1)
                             bgm_samples = np.array(bgm_audio.get_array_of_samples(), dtype=np.float32) / 32768.0 * 0.1
                             self.bgm_cache[bgm_mood] = bgm_samples.copy()
@@ -454,7 +497,10 @@ class PodcastEngine:
             # ⚡ Bolt: Final mastering for ACX compliance if requested
             if master_acx:
                 final_wav = AudioPostProcessor.normalize_acx(final_wav)
-                
+
+            # ⚡ Bolt: Apply watermark once at the very end of the podcast project.
+            final_wav = self._apply_audio_watermark(final_wav, sample_rate)
+
             return {"waveform": final_wav, "sample_rate": sample_rate}
 
     def dub_audio(self, audio_path: str, target_lang: str) -> Optional[Dict[str, Any]]:
@@ -469,8 +515,8 @@ class PodcastEngine:
         if cache_key in self.translation_cache:
             translated_text = self.translation_cache[cache_key]
         else:
-            if len(self.translation_cache) > 1000:
-                self.translation_cache.clear()
+            # ⚡ Bolt: Gradual cache pruning instead of drastic clear()
+            prune_dict_cache(self.translation_cache, limit=1000, count=100)
             translated_text = GoogleTranslator(source='auto', target=trans_lang).translate(text)
             self.translation_cache[cache_key] = translated_text
 
