@@ -28,6 +28,21 @@ except ImportError:
 # ⚡ Bolt: Cache for Butterworth filter coefficients to avoid redundant DSP math
 _eq_filter_cache = {}
 
+def prune_dict_cache(cache: dict, limit: int, count: int = 100):
+    """
+    Remove the oldest `count` items from the dictionary if it exceeds `limit`.
+    Leverages Python 3.7+ insertion ordering for O(count) pruning.
+    """
+    if len(cache) >= limit:
+        # Use next(iter()) to get the first (oldest) key and pop it.
+        # This is efficient for maintaining 'hot' items in the cache.
+        for _ in range(min(count, len(cache))):
+            try:
+                key = next(iter(cache))
+                cache.pop(key)
+            except (StopIteration, KeyError):
+                break
+
 def numpy_to_wav_bytes(waveform, sample_rate):
     """Converts a numpy waveform to a WAV-formatted BytesIO object."""
     if waveform.dtype != np.float32:
@@ -116,6 +131,9 @@ class AudioPostProcessor:
             if cache_key in _eq_filter_cache:
                 b, a = _eq_filter_cache[cache_key]
             else:
+                # ⚡ Bolt: Prevent unbounded growth of the EQ filter cache
+                prune_dict_cache(_eq_filter_cache, limit=200, count=20)
+
                 if preset == "broadcast":
                     b, a = scipy_signal.butter(2, [80 / (sr/2), 5000 / (sr/2)], btype='bandpass')
                 elif preset == "warm":
