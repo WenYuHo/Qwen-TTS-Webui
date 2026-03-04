@@ -190,21 +190,35 @@ class AudioPostProcessor:
         if len(wav) == 0:
             return wav
         try:
+            # Ensure we are working with float32 to avoid in-place type errors and handle int inputs safely.
+            # Bolt: copy=False avoids a copy if already float32.
+            wav = wav.astype(np.float32, copy=False)
+
             # ⚡ Bolt: Use np.vdot for multi-channel RMS. It's ~5x faster than np.mean(wav**2)
             # and avoids an intermediate O(N) array allocation for the squares.
             current_rms = np.sqrt(np.vdot(wav, wav) / wav.size)
-            if current_rms > 0:
-                target_rms = 0.1
-                gain = target_rms / current_rms
-                wav = wav * gain
+            if current_rms <= 0:
+                return wav
+
+            # ⚡ Bolt: Combine RMS gain and Peak limiting into a single gain factor to avoid multiple O(N) passes.
+            # This is critical for performance when processing large (10min+) audio buffers.
+            gain = 0.1 / current_rms
 
             # 2. Peak Limiting: -3dB (approx 0.707 linear)
             # ⚡ Bolt: Use max(np.max, -np.min) to avoid O(N) allocation for np.abs(wav)
             max_peak = max(np.max(wav), -np.min(wav))
-            if max_peak > 0.707:
-                wav = wav * (0.707 / max_peak)
 
-            return wav.astype(np.float32)
+            if max_peak * gain > 0.707:
+                gain = 0.707 / max_peak
+
+            if gain != 1.0:
+                # ⚡ Bolt: multiplication creates a new array if input was read-only,
+                # but since we ensured a float32 copy/view above, we can safely multiply.
+                # To be absolutely safe regarding read-only/mmap, we avoid *= here
+                # and just return wav * gain.
+                return wav * gain
+
+            return wav
         except Exception as e:
             logger.error(f"ACX normalization failed: {e}")
             return wav
