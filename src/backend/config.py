@@ -10,6 +10,13 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+# --- ⚡ Bolt: Add Local Binaries to PATH ---
+# This ensures ffmpeg.exe and sox.exe are found by all subprocesses
+BIN_DIR = BASE_DIR / "bin"
+if BIN_DIR.exists():
+    os.environ["PATH"] = str(BIN_DIR) + os.pathsep + os.environ.get("PATH", "")
+# --- End Bolt ---
+
 # Configure logging
 LOG_DIR = BASE_DIR / "logs"
 if not LOG_DIR.exists():

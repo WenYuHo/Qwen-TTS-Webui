@@ -134,12 +134,29 @@ export const SystemManager = {
     },
 
     switchSystemSubTab(tab) {
+        // Update tab visibility
         document.querySelectorAll('.system-sub-tab').forEach(t => t.style.display = 'none');
         const target = document.getElementById(`system-${tab}-tab`);
         if (target) {
             target.style.display = 'block';
             localStorage.setItem('system_active_subtab', tab);
         }
+
+        // Update button active states
+        const container = document.querySelector('#system-view .header');
+        if (container) {
+            container.querySelectorAll('button').forEach(btn => {
+                const clickAttr = btn.getAttribute('onclick') || '';
+                if (clickAttr.includes(`'${tab}'`)) {
+                    btn.classList.add('btn-primary');
+                    btn.classList.remove('btn-secondary');
+                } else {
+                    btn.classList.add('btn-secondary');
+                    btn.classList.remove('btn-primary');
+                }
+            });
+        }
+
         if (tab === 'audit') this.fetchAuditLog();
         if (tab === 'phonemes') this.loadPhonemes();
     },

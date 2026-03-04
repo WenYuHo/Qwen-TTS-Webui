@@ -5,6 +5,10 @@ from .. import server_state
 
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
+@router.get("/")
+async def list_tasks():
+    return server_state.task_manager.list_tasks()
+
 @router.get("/{task_id}")
 async def get_task_status(task_id: str):
     task = server_state.task_manager.get_task(task_id)

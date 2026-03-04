@@ -1,32 +1,37 @@
-fastapi
-uvicorn
-python-dotenv
-sox
-soundfile
-numpy
-python-multipart
-pydub
-librosa
-scipy
+# Core ML
+torch
+torchaudio
 transformers==5.2.0
 accelerate
 einops
 onnxruntime
+
+# Backend
+fastapi
+uvicorn
+python-dotenv
+python-multipart
 psutil
-# Testing
-pytest
-pytest-asyncio
-httpx
-# huggingface_hub is required for download_models logic if used, but we use pre-downloaded
+
+# Audio & Data
+sox
+soundfile
+numpy
+pydub
+librosa
+scipy
 openai-whisper
 deep-translator
 beautifulsoup4
 huggingface_hub
+
+# Graphics & Video
 moviepy
 Pillow
 
-# --- Optional: Video Generation (LTX-Video) ---
-# Install these separately if needed
-diffusers
-opencv-python
-tqdm
+# Testing
+pytest
+pytest-asyncio
+httpx
+playwright
+pytest-playwright

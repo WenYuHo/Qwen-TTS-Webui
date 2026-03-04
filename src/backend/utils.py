@@ -130,16 +130,70 @@ class AudioPostProcessor:
             delay_samples = int(0.05 * sr)
             decay = intensity * 0.4
             out = wav.copy()
+            # ⚡ Bolt: Handle both Mono and Stereo reverb
+            is_stereo = len(wav.shape) == 2
+            
             for i in range(1, 4):
                 shift = delay_samples * i
-                if shift < len(wav):
-                    out[shift:] += wav[:-shift] * (decay ** i)
+                if is_stereo:
+                    if shift < wav.shape[1]:
+                        out[:, shift:] += wav[:, :-shift] * (decay ** i)
+                else:
+                    if shift < len(wav):
+                        out[shift:] += wav[:-shift] * (decay ** i)
+            
             max_amp = np.max(np.abs(out))
             if max_amp > 1.0:
                 out /= max_amp
             return out
         except Exception:
             return wav
+
+    @staticmethod
+    def normalize_acx(wav: np.ndarray) -> np.ndarray:
+        """Applies RMS normalization and peak limiting to meet ACX standards."""
+        if len(wav) == 0:
+            return wav
+        try:
+            # ⚡ Bolt: Handle multi-channel RMS calculation
+            current_rms = np.sqrt(np.mean(wav**2))
+            if current_rms > 0:
+                target_rms = 0.1
+                gain = target_rms / current_rms
+                wav = wav * gain
+
+            # 2. Peak Limiting: -3dB (approx 0.707 linear)
+            max_peak = np.max(np.abs(wav))
+            if max_peak > 0.707:
+                wav = wav * (0.707 / max_peak)
+
+            return wav.astype(np.float32)
+        except Exception as e:
+            logger.error(f"ACX normalization failed: {e}")
+            return wav
+
+    @staticmethod
+    def apply_panning(wav: np.ndarray, pan: float = 0.0) -> np.ndarray:
+        """Applies stereo panning to a mono signal.
+        pan: -1.0 (Full Left) to 1.0 (Full Right)
+        Returns: Stereo (2, N) numpy array.
+        """
+        if len(wav.shape) > 1:
+            # Already stereo, or multi-channel
+            return wav
+            
+        try:
+            # Linear panning
+            left = (1.0 - pan) / 2.0
+            right = (1.0 + pan) / 2.0
+            
+            stereo = np.zeros((2, len(wav)), dtype=np.float32)
+            stereo[0] = wav * left
+            stereo[1] = wav * right
+            return stereo
+        except Exception as e:
+            logger.error(f"Panning failed: {e}")
+            return np.stack([wav, wav]) # Fallback to dual-mono
 
 class AuditManager:
     """Logs system-wide AI generation events for transparency and tracking."""
@@ -243,6 +297,9 @@ class StorageManager:
             if not target_dir.exists():
                 continue
             for item in target_dir.iterdir():
+                # Preservation: Never delete .gitkeep files
+                if item.name == ".gitkeep":
+                    continue
                 if item.is_file():
                     try:
                         stat = item.stat()
@@ -264,7 +321,10 @@ class StorageManager:
             if not target_dir.exists():
                 continue
             for item in target_dir.iterdir():
-                if item.is_file() and not item.name.startswith("."):
+                # Preservation: Never delete infrastructure files
+                if item.name == ".gitkeep":
+                    continue
+                if item.is_file():
                     try:
                         item.unlink()
                         pruned_count += 1
@@ -275,8 +335,19 @@ class StorageManager:
         try:
             from . import server_state
             if hasattr(server_state, "engine") and server_state.engine:
-                if hasattr(server_state.engine, "clear_cache"):
-                    server_state.engine.clear_cache()
+                engine = server_state.engine
+                # Clear dictionaries if they exist
+                for attr in ["preset_embeddings", "clone_embedding_cache", "mix_embedding_cache", 
+                            "bgm_cache", "prompt_cache", "transcription_cache", 
+                            "translation_cache", "video_audio_cache"]:
+                    if hasattr(engine, attr):
+                        getattr(engine, attr).clear()
+                
+                # Clear whisper model if lazy-loaded
+                if hasattr(engine, "_whisper_model"):
+                    engine._whisper_model = None
+                
+                logger.info("StorageManager: Engine in-memory caches purged.")
             
             # Clear CUDA cache if applicable
             import torch
@@ -284,6 +355,10 @@ class StorageManager:
                 torch.cuda.empty_cache()
         except Exception as e:
             logger.error(f"Failed to clear engine/CUDA cache: {e}")
+
+        # Also clear DSP caches
+        global _eq_filter_cache
+        _eq_filter_cache.clear()
 
         self.last_cleanup_time = time.time()
         self.total_pruned_count += pruned_count

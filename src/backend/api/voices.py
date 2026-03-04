@@ -11,7 +11,17 @@ from ..utils import numpy_to_wav_bytes
 
 router = APIRouter(prefix="/api/voice", tags=["voices"])
 
-PRESETS = ["aiden", "dylan", "eric", "ono_anna", "ryan", "serena", "sohee", "uncle_fu", "vivian"]
+PRESETS = [
+    {"id": "aiden", "name": "Aiden", "gender": "Male", "description": "Calm, narrative"},
+    {"id": "dylan", "name": "Dylan", "gender": "Male", "description": "Young, energetic"},
+    {"id": "eric", "name": "Eric", "gender": "Male", "description": "Deep, authoritative"},
+    {"id": "ono_anna", "name": "Anna", "gender": "Female", "description": "Soft, clear"},
+    {"id": "ryan", "name": "Ryan", "gender": "Male", "description": "Casual, conversational"},
+    {"id": "serena", "name": "Serena", "gender": "Female", "description": "Professional, news"},
+    {"id": "sohee", "name": "Sohee", "gender": "Female", "description": "Bright, friendly"},
+    {"id": "uncle_fu", "name": "Uncle Fu", "gender": "Male", "description": "Older, storytelling"},
+    {"id": "vivian", "name": "Vivian", "gender": "Female", "description": "Warm, engaging"}
+]
 
 @router.get("/speakers")
 async def get_speakers():

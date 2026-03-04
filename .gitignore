@@ -18,6 +18,8 @@ uploads/
 /src/bgm/
 *.wav
 *.mp3
+*.png
+bin/
 
 # IDEs
 .idea/

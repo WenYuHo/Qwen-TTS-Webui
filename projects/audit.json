@@ -1,52 +1,42 @@
 [
   {
-    "timestamp": 1772437584.1610038,
+    "timestamp": 1772607014.3676918,
     "type": "segment_generation",
     "status": "failed",
     "metadata": {
-      "role": "ryan"
-    }
-  }
-]
-[
-  {
-    "timestamp": 1772452610.6839576,
-    "type": "segment_generation",
-    "status": "failed",
-    "metadata": {
-      "role": "ryan"
+      "role": "preview"
     }
   },
   {
-    "timestamp": 1772452655.2604954,
+    "timestamp": 1772607018.456309,
     "type": "segment_generation",
     "status": "failed",
     "metadata": {
-      "role": "ryan"
+      "role": "preview"
     }
   },
   {
-    "timestamp": 1772452682.4265003,
+    "timestamp": 1772609109.9855292,
     "type": "segment_generation",
-    "status": "failed",
+    "status": "completed",
     "metadata": {
-      "role": "ryan"
+      "role": "preview"
     }
   },
   {
-    "timestamp": 1772452741.7081747,
+    "timestamp": 1772609665.7313213,
     "type": "segment_generation",
-    "status": "failed",
+    "status": "completed",
     "metadata": {
-      "role": "ryan"
+      "role": "preview"
     }
   },
   {
-    "timestamp": 1772452857.008376,
+    "timestamp": 1772609946.0763688,
     "type": "segment_generation",
-    "status": "failed",
+    "status": "completed",
     "metadata": {
-      "role": "ryan"
+      "role": "preview"
     }
   }
 ]

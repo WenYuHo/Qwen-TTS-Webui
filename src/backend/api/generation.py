@@ -35,12 +35,17 @@ def run_synthesis_task(task_id: str, is_podcast: bool, request_data: PodcastRequ
     try:
         server_state.task_manager.update_task(task_id, status=server_state.TaskStatus.PROCESSING, progress=10, message="Initializing engine")
         
-        # profiles is now a Dict[str, VoiceProfile] from the client
+        # ⚡ Bolt Fix: Handle both dict and Pydantic models correctly
+        profiles_map = {}
         if isinstance(request_data.profiles, dict):
-            profiles_map = request_data.profiles
+            for k, v in request_data.profiles.items():
+                # If v is already a dict, use it, else use model_dump
+                profiles_map[k] = v if isinstance(v, dict) else v.model_dump()
         else:
-            # Fallback for old list-based format if any
-            profiles_map = {p["role"]: {"type": p["type"], "value": p["value"]} for p in request_data.profiles}
+            # Fallback for list-based if still exists in some requests
+            for p in request_data.profiles:
+                p_dict = p if isinstance(p, dict) else p.model_dump()
+                profiles_map[p_dict["role"]] = p_dict
 
         server_state.task_manager.update_task(task_id, progress=30, message="Loading models and starting inference")
 
@@ -52,7 +57,8 @@ def run_synthesis_task(task_id: str, is_podcast: bool, request_data: PodcastRequ
                 bgm_mood=request_data.bgm_mood, 
                 ducking_level=request_data.ducking_level or 0.0,
                 eq_preset=request_data.eq_preset or "flat",
-                reverb_level=request_data.reverb_level or 0.0
+                reverb_level=request_data.reverb_level or 0.0,
+                master_acx=request_data.master_acx or False
             )
         else:
             line = request_data.script[0]

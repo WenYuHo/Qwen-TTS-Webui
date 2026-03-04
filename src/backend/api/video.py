@@ -38,6 +38,9 @@ def run_video_generation_task(task_id: str, request: VideoGenerationRequest):
             guidance_scale=request.guidance_scale,
             num_inference_steps=request.num_inference_steps,
             seed=request.seed,
+            max_shift=request.max_shift,
+            base_shift=request.base_shift,
+            terminal=request.terminal,
         )
 
         server_state.task_manager.update_task(
@@ -107,7 +110,10 @@ def run_narrated_video_task(task_id: str, request: NarratedVideoRequest):
             num_frames=request.num_frames,
             guidance_scale=request.guidance_scale,
             num_inference_steps=request.num_inference_steps,
-            seed=request.seed
+            seed=request.seed,
+            max_shift=request.max_shift,
+            base_shift=request.base_shift,
+            terminal=request.terminal,
         )
 
         # 3. Generate and save SRT
@@ -167,45 +173,73 @@ class SuggestionRequest(BaseModel):
 @router.post("/suggest")
 async def suggest_video_scene(request: SuggestionRequest):
     """
-    Advanced 'Contextual Architect' logic for LTX-Video.
-    Analyzes script text to construct professional, multi-layered cinematic prompts.
+    Local 'Prompt Architect' utility for LTX-Video.
+    This is a rule-based logic to assist users in constructing cinematic prompts.
+    Note: This does not use an AI model for suggestion; it is a keyword-based template engine.
     """
     import random
-    text = request.text.lower()
+    import re
     
-    # 1. Multi-Layer Component Libraries
+    raw_text = request.text.strip()
+    text = raw_text.lower()
+    
+    # 1. Subject Extraction (Basic)
+    # Try to strip common "Role: " prefixes if present
+    subject = raw_text
+    role_match = re.match(r'^([^\]:]+)(?:\])?\s*:\s*(.*)', raw_text)
+    if role_match:
+        subject = role_match.group(2).strip()
+    
+    # Limit subject length for the prompt
+    subject = subject[:120]
+
+    # 2. Multi-Layer Cinematic Component Libraries
     atmospheres = {
-        "noir": "film noir aesthetic, high contrast, moody, rainy city streets, deep shadows",
-        "cyberpunk": "cyberpunk neon-lit environment, high-tech low-life, rainy reflections",
-        "mystery": "suspenseful, misty atmosphere, dim volumetric lighting, dark cinematic tones",
-        "adventure": "epic adventure mood, vast landscape, heroic lighting, vibrant colors",
-        "sci-fi": "futuristic sci-fi interior, sterile surfaces, pulsating blue lights, high-tech",
-        "horror": "eerie horror setting, flickering lights, claustrophobic framing, decaying textures",
-        "nature": "serene natural environment, soft sunlight, lush vegetation, 8k nature photography",
-        "dream": "surreal dreamscape, ethereal light, floating particles, soft focus, otherworldly",
-        "industrial": "gritty industrial factory, steam vents, rusted metal, warm orange sparks"
+        "noir": "film noir aesthetic, high contrast, moody, rainy city streets, deep shadows, smoke curling in the air",
+        "cyberpunk": "cyberpunk neon-lit environment, high-tech low-life, rainy reflections, flickering holographic advertisements",
+        "mystery": "suspenseful, misty atmosphere, dim volumetric lighting, dark cinematic tones, mysterious fog",
+        "adventure": "epic adventure mood, vast landscape, heroic lighting, vibrant colors, sweeping vistas",
+        "sci-fi": "futuristic sci-fi interior, sterile surfaces, pulsating blue lights, high-tech consoles, metallic sheen",
+        "horror": "eerie horror setting, flickering lights, claustrophobic framing, decaying textures, unsettling shadows",
+        "nature": "serene natural environment, soft sunlight, lush vegetation, 8k nature photography, peaceful atmosphere",
+        "dream": "surreal dreamscape, ethereal light, floating particles, soft focus, otherworldly colors",
+        "industrial": "gritty industrial factory, steam vents, rusted metal, warm orange sparks, heavy machinery",
+        "vintage": "1970s vintage film aesthetic, warm sepia tones, heavy film grain, nostalgic atmosphere",
+        "royal": "opulent royal chamber, gold accents, velvet textures, warm candlelight, majestic lighting"
     }
     
     lightings = [
         "cinematic volumetric lighting", "dramatic Rembrandt lighting", "soft golden hour glow",
         "harsh top-down industrial light", "cool moonlight with deep shadows", "vibrant neon backlighting",
-        "natural diffused window light", "flickering candlelight with warm tones"
+        "natural diffused window light", "flickering candlelight with warm tones", "moody blue-hour lighting",
+        "dramatic chiaroscuro lighting"
     ]
     
     shots = [
         "close-up cinematic portrait shot", "wide establishing shot with deep perspective",
         "dynamic low-angle heroic shot", "overhead bird's-eye view", "medium tracking shot, smooth motion",
-        "shallow depth of field, bokeh background", "extreme close-up on details"
+        "shallow depth of field, bokeh background", "extreme close-up on intricate details",
+        "anamorphic widescreen cinematic shot", "dramatic side-profile shot"
     ]
     
     motions = [
         "slow cinematic camera zoom", "steady pan across the scene", "subtle handheld camera shake",
-        "dolly-in towards the subject", "static composition with flowing environment elements"
+        "dolly-in towards the subject", "static composition with flowing environment elements",
+        "dynamic tracking motion", "slow-motion cinematic capture"
     ]
 
-    # 2. Architect the suggestion
+    lenses = [
+        "35mm prime lens", "85mm portrait lens", "24mm wide-angle lens", "anamorphic lens", "50mm f/1.8 lens"
+    ]
+
+    palettes = [
+        "teal and orange color grade", "monochromatic moody tones", "vibrant saturated colors",
+        "washed-out vintage colors", "warm earthy color palette", "cool cinematic blue tones"
+    ]
+
+    # 3. Architect the suggestion
     # Find matching atmosphere or use default
-    atmosphere = "cinematic masterpiece"
+    atmosphere = "cinematic masterpiece, highly detailed textures"
     for key, val in atmospheres.items():
         if key in text:
             atmosphere = val
@@ -214,14 +248,26 @@ async def suggest_video_scene(request: SuggestionRequest):
     lighting = random.choice(lightings)
     shot = random.choice(shots)
     motion = random.choice(motions)
+    lens = random.choice(lenses)
+    palette = random.choice(palettes)
     
-    styles = ["photorealistic", "highly detailed", "4k", "8k", "unreal engine 5 render style", "kodak portra 400 aesthetic"]
+    styles = [
+        "photorealistic", "hyper-detailed 8k", "unreal engine 5 render style", 
+        "kodak portra 400 aesthetic", "shot on 35mm film", "IMAX cinematic quality"
+    ]
     style = random.choice(styles)
 
-    # 3. Construct Final Prompt
-    prompt = f"{shot} of {text[:150]}, {atmosphere}, {lighting}, {motion}, {style}, professional color grading, high-quality textures."
+    # 4. Construct Final Prompt
+    # Structure: [Shot] of [Subject], [Atmosphere], [Lighting], [Motion], [Lens], [Palette], [Style], [Final Polish]
+    prompt = (
+        f"{shot} of {subject}, {atmosphere}, {lighting}, {motion}, "
+        f"{lens}, {palette}, {style}, professional color grading, ultra-high resolution."
+    )
     
-    return {"suggestion": prompt}
+    return {
+        "suggestion": prompt,
+        "note": "This suggestion was generated by the local Prompt Architect utility (rule-based)."
+    }
 
 @router.post("/narrated")
 async def generate_narrated_video(request: NarratedVideoRequest, background_tasks: BackgroundTasks):

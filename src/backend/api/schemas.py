@@ -19,6 +19,8 @@ class ScriptLine(BaseModel):
     start_time: Optional[float] = 0.0
     language: Optional[str] = "auto"
     pause_after: Optional[float] = 0.5
+    instruct: Optional[str] = None
+    pan: Optional[float] = 0.0
 
 class PodcastRequest(BaseModel):
     profiles: List[SpeakerProfile]
@@ -28,6 +30,7 @@ class PodcastRequest(BaseModel):
     eq_preset: Optional[str] = "flat"
     reverb_level: Optional[float] = 0.0
     stream: Optional[bool] = False
+    master_acx: Optional[bool] = False
 
 class S2SRequest(BaseModel):
     source_audio: str
@@ -76,6 +79,9 @@ class VideoGenerationRequest(BaseModel):
     guidance_scale: Optional[float] = 3.5
     num_inference_steps: Optional[int] = 30
     seed: Optional[int] = -1
+    max_shift: Optional[float] = None
+    base_shift: Optional[float] = None
+    terminal: Optional[float] = None
 
 class NarratedVideoRequest(BaseModel):
     prompt: str
@@ -87,3 +93,6 @@ class NarratedVideoRequest(BaseModel):
     guidance_scale: Optional[float] = 3.5
     num_inference_steps: Optional[int] = 30
     seed: Optional[int] = -1
+    max_shift: Optional[float] = None
+    base_shift: Optional[float] = None
+    terminal: Optional[float] = None

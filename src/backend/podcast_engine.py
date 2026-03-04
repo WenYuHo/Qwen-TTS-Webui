@@ -242,7 +242,8 @@ class PodcastEngine:
     def stream_synthesize(self, text: str, profile: Dict[str, Any], language: str = "auto", instruct: Optional[str] = None):
         import re
         
-        # 1. First split by major punctuation
+        # 1. First split by major punctuation to create sentences
+        # Matches periods, exclamation, question marks, and newlines
         initial_chunks = re.split(r'([.!?。！？\n\r]+)', text)
         sentences = []
         for i in range(0, len(initial_chunks)-1, 2):
@@ -252,6 +253,7 @@ class PodcastEngine:
             sentences.append(initial_chunks[-1].strip())
             
         # 2. Recursive split for long sentences (> 150 chars) to prevent drift
+        # This prevents the attention mechanism from getting lost in extremely long clauses
         final_chunks = []
         for s in sentences:
             if len(s) > 150:
@@ -270,14 +272,17 @@ class PodcastEngine:
 
         if not final_chunks: final_chunks = [text]
         
-        # 3. Process with higher priority executor
-        futures = [self.executor.submit(self.generate_segment, chunk_text, profile, language, None, instruct) for chunk_text in final_chunks]
-        for f in futures:
+        # 3. Process sequentially or in small batches to maintain stability
+        # Processing too many chunks in parallel can cause VRAM spikes and OOM
+        # Using a generator here allows for true streaming response
+        for chunk_text in final_chunks:
             try:
-                wav, sr = f.result()
+                # ⚡ Bolt Stability: Add a small pause or reset context if needed here
+                # For now, generating segment-by-segment is safer than one huge prompt
+                wav, sr = self.generate_segment(chunk_text, profile, language, None, instruct)
                 yield wav, sr
             except Exception as e:
-                logger.error(f"Chunk synthesis failed: {e}")
+                logger.error(f"Chunk synthesis failed for '{chunk_text[:20]}...': {e}")
                 continue
 
     def generate_voice_changer(self, source_audio: str, target_profile: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -292,7 +297,7 @@ class PodcastEngine:
         wavs, sr = model.generate_voice_clone(text=text, voice_clone_prompt=voice_clone_prompt)
         return {"waveform": wavs[0], "sample_rate": sr, "text": text}
 
-    def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None, ducking_level: float = 0.0, eq_preset: str = "flat", reverb_level: float = 0.0) -> Optional[Dict[str, Any]]:
+    def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None, ducking_level: float = 0.0, eq_preset: str = "flat", reverb_level: float = 0.0, master_acx: bool = False) -> Optional[Dict[str, Any]]:
         with Profiler("Generate Podcast"):
             sample_rate = 24000
             waveforms = [None] * len(script)
@@ -377,12 +382,29 @@ class PodcastEngine:
                 wav, sr = waveforms[i], srs[i]
                 start_sample = current_sample_offset
                 end_sample = start_sample + len(wav)
-                speech_segments.append({"wav": wav, "start": start_sample, "end": end_sample})
+                speech_segments.append({"wav": wav, "start": start_sample, "end": end_sample, "index": i})
                 current_sample_offset = end_sample + int(item.get("pause_after", 0.5) * sr)
                 if end_sample > max_sample: max_sample = end_sample
             if not speech_segments: return None
-            final_wav = np.zeros(max_sample + int(2.0 * sample_rate), dtype=np.float32)
-            for seg in speech_segments: final_wav[seg["start"]:seg["end"]] = seg["wav"]
+
+            # ⚡ Bolt: Multi-track mixing buffer (Mono by default, Stereo if panning/BGM)
+            # ACX/Audible prefers mono for voice, but 2026 trends favor spatial 3D audio.
+            is_stereo = any(s.get("pan", 0) != 0 for s in script) or bgm_mood is not None
+            
+            if is_stereo:
+                final_wav = np.zeros((2, max_sample + int(2.0 * sample_rate)), dtype=np.float32)
+            else:
+                final_wav = np.zeros(max_sample + int(2.0 * sample_rate), dtype=np.float32)
+
+            for seg in speech_segments:
+                wav = seg["wav"]
+                pan = script[seg["index"]].get("pan", 0.0)
+                if is_stereo:
+                    segment_stereo = AudioPostProcessor.apply_panning(wav, pan)
+                    final_wav[:, seg["start"]:seg["end"]] = segment_stereo
+                else:
+                    final_wav[seg["start"]:seg["end"]] = wav
+
             if bgm_mood:
                 try:
                     # ⚡ Bolt: Cache BGM samples to avoid redundant loading and resampling
@@ -405,12 +427,22 @@ class PodcastEngine:
                             bgm_samples = None
 
                     if bgm_samples is not None:
-                        if len(bgm_samples) < len(final_wav):
-                            bgm_samples = np.tile(bgm_samples, int(np.ceil(len(final_wav)/len(bgm_samples))))
-                        bgm_samples = bgm_samples[:len(final_wav)]
+                        if len(bgm_samples) < (max_sample + int(2.0 * sample_rate)):
+                            bgm_samples = np.tile(bgm_samples, int(np.ceil((max_sample + int(2.0 * sample_rate))/len(bgm_samples))))
+                        bgm_samples = bgm_samples[:(max_sample + int(2.0 * sample_rate))]
+                        
+                        if is_stereo:
+                            # ⚡ Bolt: Expand BGM to stereo if mixing into stereo buffer
+                            bgm_samples = np.stack([bgm_samples, bgm_samples])
+                            
                         if ducking_level > 0:
                             duck_factor = 10 ** (-(ducking_level * 25) / 20.0)
-                            for seg in speech_segments: bgm_samples[seg["start"]:seg["end"]] *= duck_factor
+                            for seg in speech_segments: 
+                                if is_stereo:
+                                    bgm_samples[:, seg["start"]:seg["end"]] *= duck_factor
+                                else:
+                                    bgm_samples[seg["start"]:seg["end"]] *= duck_factor
+                        
                         final_wav += bgm_samples
                 except Exception as e:
                     logger.error(f"Failed to apply BGM: {e}")
@@ -418,6 +450,11 @@ class PodcastEngine:
             if max_val > 1.0: final_wav /= max_val
             final_wav = AudioPostProcessor.apply_eq(final_wav, sample_rate, preset=eq_preset)
             final_wav = AudioPostProcessor.apply_reverb(final_wav, sample_rate, intensity=reverb_level)
+            
+            # ⚡ Bolt: Final mastering for ACX compliance if requested
+            if master_acx:
+                final_wav = AudioPostProcessor.normalize_acx(final_wav)
+                
             return {"waveform": final_wav, "sample_rate": sample_rate}
 
     def dub_audio(self, audio_path: str, target_lang: str) -> Optional[Dict[str, Any]]:

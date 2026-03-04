@@ -142,6 +142,9 @@ class LTXVideoEngine:
         guidance_scale: float = 3.5,
         num_inference_steps: int = 30,
         seed: Optional[int] = None,
+        max_shift: Optional[float] = None,
+        base_shift: Optional[float] = None,
+        terminal: Optional[float] = None,
     ) -> Dict[str, Any]:
         """Generate a video from a text prompt.
 
@@ -167,6 +170,11 @@ class LTXVideoEngine:
 
         if seed is not None and seed != -1:
             pipeline_kwargs["seed"] = seed
+            
+        # ⚡ Bolt: Advanced LTX-2 Shift Parameters for motion control
+        if max_shift is not None: pipeline_kwargs["max_shift"] = max_shift
+        if base_shift is not None: pipeline_kwargs["base_shift"] = base_shift
+        if terminal is not None: pipeline_kwargs["terminal"] = terminal
 
         self._pipeline(**pipeline_kwargs)
         
@@ -187,6 +195,9 @@ class LTXVideoEngine:
         guidance_scale: float = 3.5,
         num_inference_steps: int = 30,
         seed: Optional[int] = None,
+        max_shift: Optional[float] = None,
+        base_shift: Optional[float] = None,
+        terminal: Optional[float] = None,
     ) -> Dict[str, Any]:
         """Generate video and combine with narration audio into a single MP4.
 
@@ -212,6 +223,9 @@ class LTXVideoEngine:
             guidance_scale=guidance_scale,
             num_inference_steps=num_inference_steps,
             seed=seed,
+            max_shift=max_shift,
+            base_shift=base_shift,
+            terminal=terminal,
         )
 
         # 2. Save narration audio to temp WAV

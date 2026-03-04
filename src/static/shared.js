@@ -54,6 +54,10 @@ const CanvasManager = {
     deleteBlock(id) {
         this.blocks = this.blocks.filter(b => b.id !== id);
     },
+    updateBlock(id, updates) {
+        const block = this.blocks.find(b => b.id === id);
+        if (block) Object.assign(block, updates);
+    },
     clear() {
         this.blocks = [];
     },
@@ -175,20 +179,46 @@ function parseScript(text) {
     const flush = () => {
         if (currentRole && currentText.length > 0) {
             const rawText = currentText.join('\n').trim();
-            const instructRegex = /\[(.+?)\]/;
-            const match = rawText.match(instructRegex);
-            let instruct = null;
-            let cleanText = rawText;
-
-            if (match) {
-                instruct = match[1];
-                cleanText = rawText.replace(instructRegex, '').trim();
-            }
-
-            script.push({ 
-                role: currentRole, 
-                text: cleanText,
-                instruct: instruct
+            
+            // ⚡ Bolt: Split text by [instruct] or (non-verbal-tag)
+            // Allows mid-sentence emotional shifts or cues.
+            const splitRegex = /(\[.+?\]|\(.+?\))/g;
+            const parts = rawText.split(splitRegex);
+            
+            let activeInstruct = null;
+            
+            parts.forEach((part, index) => {
+                if (!part) return;
+                
+                const instructMatch = part.match(/^\[(.+?)\]$/) || part.match(/^\((.+?)\)$/);
+                if (instructMatch) {
+                    activeInstruct = instructMatch[1];
+                    
+                    // ⚡ Bolt: If tag is at the end or followed by another tag, synthesize it as text
+                    const nextPart = parts[index + 1];
+                    const followedByInstruct = nextPart && (nextPart.match(/^\[(.+?)\]$/) || nextPart.match(/^\((.+?)\)$/));
+                    
+                    if (!nextPart || followedByInstruct) {
+                        script.push({
+                            role: currentRole,
+                            text: `(${activeInstruct})`,
+                            instruct: activeInstruct,
+                            language: 'auto',
+                            pause_after: 0.3
+                        });
+                    }
+                } else {
+                    const cleanPart = part.trim();
+                    if (cleanPart) {
+                        script.push({ 
+                            role: currentRole, 
+                            text: cleanPart,
+                            instruct: activeInstruct,
+                            language: 'auto',
+                            pause_after: 0.2 
+                        });
+                    }
+                }
             });
         }
         currentText = [];

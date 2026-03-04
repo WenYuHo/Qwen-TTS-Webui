@@ -7,6 +7,7 @@ export const ProductionManager = {
         const bgm_mood = document.getElementById('bgm-select').value;
         const ducking_level = parseFloat(document.getElementById('ducking-range').value) / 100.0;
         const streamEnabled = document.getElementById('stream-podcast').checked;
+        const masterAcx = document.getElementById('master-acx').checked;
         
         // Audio Effects
         const eqPreset = document.getElementById('audio-eq').value;
@@ -20,6 +21,9 @@ export const ProductionManager = {
         const guidanceScale = parseFloat(document.getElementById('video-guidance').value);
         const inferenceSteps = parseInt(document.getElementById('video-steps').value);
         const seed = parseInt(document.getElementById('video-seed').value);
+        const maxShift = parseFloat(document.getElementById('video-max-shift').value) || null;
+        const baseShift = parseFloat(document.getElementById('video-base-shift').value) || null;
+        const terminal = parseFloat(document.getElementById('video-terminal').value) || null;
 
         const productionView = document.getElementById('canvas-production-view');
         const isProduction = productionView && productionView.style.display === 'flex';
@@ -56,9 +60,12 @@ export const ProductionManager = {
                         width: width,
                         height: height,
                         num_frames: numFrames,
-                        guidance_scale: guidanceScale,
+                        guidance_scale: guidance_scale,
                         num_inference_steps: inferenceSteps,
-                        seed: seed
+                        seed: seed,
+                        max_shift: maxShift,
+                        base_shift: baseShift,
+                        terminal: terminal
                     })
                 });
                 const data = await res.json();
@@ -79,7 +86,8 @@ export const ProductionManager = {
                     ducking_level, 
                     eq_preset: eqPreset, 
                     reverb_level: reverbLevel,
-                    stream: streamEnabled
+                    stream: streamEnabled,
+                    master_acx: masterAcx
                 })
             });
 
@@ -169,6 +177,160 @@ export const ProductionManager = {
         } catch (err) {
             console.error("Suggestion failed:", err);
         }
+    },
+
+    async fetchProjectList() {
+        const select = document.getElementById('project-select');
+        if (!select) return;
+        try {
+            const res = await fetch('/api/projects');
+            const data = await res.json();
+            const current = select.value;
+            select.innerHTML = '<option value="">(New)</option>' + 
+                data.projects.map(p => `<option value="${p}" ${p === current ? 'selected' : ''}>${p}</option>`).join('');
+        } catch (err) { console.error("Failed to fetch projects", err); }
+    },
+
+    async saveProject() {
+        const select = document.getElementById('project-select');
+        let name = select.value;
+        if (!name) {
+            name = prompt("Enter project name:");
+            if (!name) return;
+        }
+
+        const data = {
+            script_text: document.getElementById('script-editor').value,
+            blocks: window.CanvasManager.blocks,
+            settings: {
+                bgm_mood: document.getElementById('bgm-select').value,
+                ducking_level: parseFloat(document.getElementById('ducking-range').value) / 100.0,
+                eq_preset: document.getElementById('audio-eq').value,
+                reverb_level: parseFloat(document.getElementById('audio-reverb').value) / 100.0,
+                video_enabled: document.getElementById('video-enabled').checked,
+                video_prompt: document.getElementById('video-prompt').value,
+                master_acx: document.getElementById('master-acx').checked,
+                video_max_shift: parseFloat(document.getElementById('video-max-shift').value) || null,
+                video_base_shift: parseFloat(document.getElementById('video-base-shift').value) || null,
+                video_terminal: parseFloat(document.getElementById('video-terminal').value) || null
+            }
+        };
+
+        try {
+            const res = await fetch(`/api/projects/${name}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!res.ok) throw new Error("Save failed");
+            Notification.show("Project saved", "success");
+            await this.fetchProjectList();
+            select.value = name;
+        } catch (err) { Notification.show("Save failed: " + err.message, "error"); }
+    },
+
+    async loadProject() {
+        const name = document.getElementById('project-select').value;
+        if (!name) return Notification.show("Select a project", "warn");
+
+        try {
+            const res = await fetch(`/api/projects/${name}`);
+            if (!res.ok) throw new Error("Load failed");
+            const data = await res.json();
+
+            document.getElementById('script-editor').value = data.script_text || '';
+            window.CanvasManager.blocks = data.blocks || [];
+            
+            if (data.settings) {
+                document.getElementById('bgm-select').value = data.settings.bgm_mood || '';
+                document.getElementById('ducking-range').value = (data.settings.ducking_level || 0) * 100;
+                document.getElementById('ducking-val').innerText = `${Math.round((data.settings.ducking_level || 0) * 100)}%`;
+                document.getElementById('audio-eq').value = data.settings.eq_preset || 'flat';
+                document.getElementById('audio-reverb').value = (data.settings.reverb_level || 0) * 100;
+                document.getElementById('reverb-val').innerText = `${Math.round((data.settings.reverb_level || 0) * 100)}%`;
+                document.getElementById('video-enabled').checked = data.settings.video_enabled || false;
+                document.getElementById('video-prompt').value = data.settings.video_prompt || '';
+                document.getElementById('video-options').style.display = data.settings.video_enabled ? 'block' : 'none';
+                document.getElementById('master-acx').checked = data.settings.master_acx || false;
+                document.getElementById('video-max-shift').value = data.settings.video_max_shift || '';
+                document.getElementById('video-base-shift').value = data.settings.video_base_shift || '';
+                document.getElementById('video-terminal').value = data.settings.video_terminal || '';
+            }
+
+            this.renderBlocks();
+            Notification.show("Project loaded", "success");
+        } catch (err) { Notification.show("Load failed: " + err.message, "error"); }
+    },
+
+    toggleCanvasView(view) {
+        const draft = document.getElementById('canvas-draft-view');
+        const prod = document.getElementById('canvas-production-view');
+        if (!draft || !prod) return;
+
+        if (view === 'draft') {
+            draft.style.display = 'flex';
+            prod.style.display = 'none';
+        } else {
+            draft.style.display = 'none';
+            prod.style.display = 'flex';
+            this.renderBlocks();
+        }
+        localStorage.setItem('project_active_subtab', view);
+
+        // Update buttons
+        const container = document.querySelector('#projects-view .header');
+        if (container) {
+            container.querySelectorAll('button').forEach(btn => {
+                const clickAttr = btn.getAttribute('onclick') || '';
+                if (clickAttr.includes(`'${view}'`)) {
+                    btn.classList.add('btn-primary');
+                    btn.classList.remove('btn-secondary');
+                } else if (clickAttr.includes('toggleCanvasView')) {
+                    btn.classList.add('btn-secondary');
+                    btn.classList.remove('btn-primary');
+                }
+            });
+        }
+    },
+
+    loadSubTabState() {
+        const saved = localStorage.getItem('project_active_subtab') || 'draft';
+        this.toggleCanvasView(saved);
+    },
+
+    promoteToProduction() {
+        const text = document.getElementById('script-editor').value;
+        if (!text.trim()) return Notification.show("Draft is empty", "warn");
+
+        const script = window.parseScript(text);
+        window.CanvasManager.clear();
+        script.forEach(s => window.CanvasManager.addBlock(s.role, s.text));
+        
+        this.toggleCanvasView('production');
+        Notification.show("Promoted to production", "success");
+    },
+
+    renderBlocks() {
+        const container = document.getElementById('blocks-container');
+        if (!container) return;
+
+        container.innerHTML = window.CanvasManager.blocks.map(b => `
+            <div class="card" style="margin-bottom:12px; padding:16px; border-left:4px solid var(--accent); background:rgba(255,255,255,0.02);">
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <strong style="color:var(--accent); font-family:var(--font-mono);">${b.role.toUpperCase()}</strong>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn btn-secondary btn-sm" onclick="window.CanvasManager.moveBlock('${b.id}', -1); window.ProductionManager.renderBlocks()"><i class="fas fa-arrow-up"></i></button>
+                        <button class="btn btn-secondary btn-sm" onclick="window.CanvasManager.moveBlock('${b.id}', 1); window.ProductionManager.renderBlocks()"><i class="fas fa-arrow-down"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="window.CanvasManager.deleteBlock('${b.id}'); window.ProductionManager.renderBlocks()"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px; margin-top:12px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
+                    <span class="label-industrial" style="font-size:0.55rem;">PAN</span>
+                    <input type="range" min="-100" max="100" value="${(b.pan || 0) * 100}" style="flex:1; height:4px;" onchange="window.CanvasManager.updateBlock('${b.id}', {pan: this.value/100.0})">
+                    <span class="volt-text" style="font-size:0.6rem; width:30px;">${b.pan > 0 ? 'R' : b.pan < 0 ? 'L' : 'C'}</span>
+                </div>
+            </div>
+        `).join('');
     },
 
     filterProjects() {

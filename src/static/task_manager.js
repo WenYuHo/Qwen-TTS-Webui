@@ -3,16 +3,20 @@
 export const TaskManager = {
     async refreshTasks() {
         const grids = document.querySelectorAll('.js-task-monitor-list');
-        if (grids.length === 0) return;
+        if (grids.length === 0) {
+            console.warn("TaskManager: No grids found with class .js-task-monitor-list");
+            return;
+        }
 
         try {
-            const resp = await fetch('/api/tasks/');
+            const resp = await fetch('/api/tasks');
             const tasks = await resp.json();
+            console.log(`TaskManager: Fetched ${tasks.length} tasks`);
 
             const content = tasks.length === 0
                 ? '<div class="card" style="border-style:dashed; opacity:0.6; text-align:center;">No active tasks</div>'
                 : tasks.sort((a,b) => b.created_at - a.created_at).map(task => `
-                <div class="card task-item" style="border-left: 4px solid ${this.getTaskColor(task.status)};">
+                <div class="card task-item" style="border-left: 4px solid ${this.getTaskColor(task.status)}; padding:12px; margin-bottom:8px;">
                     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
                         <div>
                             <div class="task-item-meta">
@@ -62,7 +66,7 @@ export const TaskManager = {
 
     async clearCompletedTasks() {
         try {
-            const resp = await fetch('/api/tasks/');
+            const resp = await fetch('/api/tasks');
             const tasks = await resp.json();
             const finished = tasks.filter(t => ['completed', 'failed', 'cancelled'].includes(t.status));
 

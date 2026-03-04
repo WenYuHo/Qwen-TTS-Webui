@@ -26,6 +26,15 @@ const state = {
 };
 window.state = state;
 
+// ⚡ Bolt: Global Background Services
+setInterval(() => {
+    // Global services
+    TaskManager.refreshTasks();
+    
+    // View-specific services
+    if (window.state && window.state.currentView === 'system') SystemManager.refreshResourceStats();
+}, 2000);
+
 function switchView(view) {
     console.log("switchView triggered for:", view);
     const currentViewEl = document.querySelector('.view-container.active');
@@ -52,6 +61,7 @@ function switchView(view) {
 function performSwitch(view) {
     console.log("performSwitch execution for:", view);
     state.currentView = view;
+    localStorage.setItem('studio_active_view', view);
     
     document.querySelectorAll('.view-container').forEach(v => {
         v.classList.remove('active');
@@ -83,6 +93,11 @@ function performSwitch(view) {
     if (view === 'assets') {
         AssetManager.loadAssets();
         AssetManager.setupDragAndDrop();
+    }
+    if (view === 'projects') {
+        ProductionManager.fetchProjectList();
+        ProductionManager.loadSubTabState();
+        AssetManager.loadAssets(); // For BGM selection
     }
     if (view === 'system') {
         TaskManager.refreshTasks();
@@ -137,7 +152,7 @@ Object.assign(window, {
             const wA = parseInt(document.getElementById('mix-weight-a').value || 50) / 100;
             const wB = parseInt(document.getElementById('mix-weight-b').value || 50) / 100;
             
-            const allProfiles = await window.getAllProfiles();
+            const allProfiles = await VoiceLabManager.getAllProfiles();
             const mixConfig = [
                 { profile: allProfiles[vA], weight: wA },
                 { profile: allProfiles[vB], weight: wB }
@@ -145,6 +160,7 @@ Object.assign(window, {
             VoiceLabManager.saveVoice(name, { type: 'mix', value: JSON.stringify(mixConfig) });
         }
     },
+    saveVoice: VoiceLabManager.saveVoice.bind(VoiceLabManager),
     previewVoice: VoiceLabManager.previewVoice.bind(VoiceLabManager),
     deleteVoice: VoiceLabManager.deleteVoice.bind(VoiceLabManager),
     addPhonemeOverride: SystemManager.addPhonemeOverride.bind(SystemManager),
@@ -157,6 +173,10 @@ Object.assign(window, {
     loadSubTabState: SystemManager.loadSubTabState.bind(SystemManager),
     clearCache: SystemManager.clearCache.bind(SystemManager),
     runEngineBenchmark: SystemManager.runEngineBenchmark.bind(SystemManager),
+    loadProject: ProductionManager.loadProject.bind(ProductionManager),
+    saveProject: ProductionManager.saveProject.bind(ProductionManager),
+    toggleCanvasView: ProductionManager.toggleCanvasView.bind(ProductionManager),
+    promoteToProduction: ProductionManager.promoteToProduction.bind(ProductionManager),
     showVideoPreview: VideoModal.show.bind(VideoModal),
     hideVideoModal: VideoModal.hide.bind(VideoModal),
     showHelp: () => HelpManager.show(state.currentView),
@@ -168,8 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
     SystemManager.fetchInventory();
     UIHeartbeat.start();
     CanvasManager.load();
-    setInterval(() => {
-        if (['projects', 'dubbing', 'system'].includes(state.currentView)) TaskManager.refreshTasks();
-        if (state.currentView === 'system') SystemManager.refreshResourceStats();
-    }, 2000);
+
+    const savedView = localStorage.getItem('studio_active_view');
+    if (savedView && savedView !== 'speech') {
+        performSwitch(savedView);
+    }
 });

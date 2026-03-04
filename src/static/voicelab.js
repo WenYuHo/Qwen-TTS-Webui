@@ -10,10 +10,9 @@ export const VoiceLabManager = {
 
         const container = document.getElementById('design-preview-container');
         const status = document.getElementById('design-status');
-        const player = document.getElementById('preview-player');
-
+        
         if (container) container.style.display = 'block';
-        if (status) status.innerText = "Designing...";
+        if (status) status.innerText = "Queuing...";
         btn.disabled = true;
 
         try {
@@ -23,39 +22,43 @@ export const VoiceLabManager = {
             }
 
             const profile = { type: 'design', value: finalPrompt };
-            const res = await fetch('/api/generate/stream', {
+            
+            // ⚡ Bolt: Use Task-based generation for background processing
+            const res = await fetch('/api/generate/segment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    text: "This is a preview of the voice you designed. It should sound consistent from start to finish.", 
-                    profile: profile 
+                    profiles: [{ role: 'preview', ...profile }],
+                    script: [{ role: 'preview', text: "This is a preview of the voice you designed. It should sound consistent from start to finish." }]
                 })
             });
 
-            if (!res.ok) throw new Error("Design preview failed");
+            if (!res.ok) throw new Error("Design task creation failed");
+            const { task_id } = await res.json();
+            
+            status.innerText = "Processing...";
+            Notification.show("Voice design started in background", "info");
 
-            const reader = res.body.getReader();
-            const chunks = [];
-            while(true) {
-                const {done, value} = await reader.read();
-                if (done) break;
-                chunks.push(value);
-                if (chunks.length === 1) {
-                    const blob = new Blob([value], { type: 'audio/wav' });
-                    player.src = URL.createObjectURL(blob);
+            TaskManager.pollTask(task_id, (data) => {
+                const blob = new Blob([new Uint8Array(data.result)], { type: 'audio/wav' });
+                const url = URL.createObjectURL(blob);
+                window.state.voicelab.lastDesignedPath = url;
+                
+                const player = document.getElementById('preview-player');
+                if (player) {
+                    player.src = url;
                     player.play();
                 }
-            }
-            const fullBlob = new Blob(chunks, { type: 'audio/wav' });
-            window.state.voicelab.lastDesignedPath = URL.createObjectURL(fullBlob);
-            status.innerText = "Ready";
-            Notification.show("Design preview ready", "success");
+                status.innerText = "Ready";
+                btn.disabled = false;
+                Notification.show("Design preview ready", "success");
+            });
+
         } catch (err) {
             status.innerText = "Error";
+            btn.disabled = false;
             ErrorDisplay.show("Design Error", err.message);
             console.error(err);
-        } finally {
-            btn.disabled = false;
         }
     },
 
@@ -67,10 +70,9 @@ export const VoiceLabManager = {
 
         const container = document.getElementById('clone-preview-container');
         const status = document.getElementById('clone-status');
-        const player = document.getElementById('preview-player');
 
         container.style.display = 'block';
-        status.innerText = "Cloning...";
+        status.innerText = "Queuing...";
         btn.disabled = true;
 
         try {
@@ -81,39 +83,44 @@ export const VoiceLabManager = {
                 const upRes = await fetch('/api/voice/upload', { method: 'POST', body: formData });
                 const upData = await upRes.json();
                 path = upData.filename;
+                window.state.voicelab.lastClonedPath = path;
             }
 
             const profile = { type: 'clone', value: path };
-            const res = await fetch('/api/generate/stream', {
+            const res = await fetch('/api/generate/segment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: "This is a preview of your cloned voice.", profile: profile })
+                body: JSON.stringify({ 
+                    profiles: [{ role: 'preview', ...profile }],
+                    script: [{ role: 'preview', text: "This is a preview of your cloned voice." }]
+                })
             });
 
-            if (!res.ok) throw new Error("Clone preview failed");
+            if (!res.ok) throw new Error("Clone task creation failed");
+            const { task_id } = await res.json();
+            
+            status.innerText = "Cloning...";
+            Notification.show("Voice cloning started in background", "info");
 
-            const reader = res.body.getReader();
-            const chunks = [];
-            while(true) {
-                const {done, value} = await reader.read();
-                if (done) break;
-                chunks.push(value);
-                if (chunks.length === 1) {
-                    const blob = new Blob([value], { type: 'audio/wav' });
-                    player.src = URL.createObjectURL(blob);
+            TaskManager.pollTask(task_id, (data) => {
+                const blob = new Blob([new Uint8Array(data.result)], { type: 'audio/wav' });
+                const url = URL.createObjectURL(blob);
+                
+                const player = document.getElementById('preview-player');
+                if (player) {
+                    player.src = url;
                     player.play();
                 }
-            }
-            const fullBlob = new Blob(chunks, { type: 'audio/wav' });
-            window.state.voicelab.lastClonedPath = URL.createObjectURL(fullBlob);
-            status.innerText = "Ready";
-            Notification.show("Clone preview ready", "success");
+                status.innerText = "Ready";
+                btn.disabled = false;
+                Notification.show("Clone preview ready", "success");
+            });
+
         } catch (err) {
             status.innerText = "Error";
+            btn.disabled = false;
             ErrorDisplay.show("Cloning Error", err.message);
             console.error(err);
-        } finally {
-            btn.disabled = false;
         }
     },
 
@@ -127,10 +134,9 @@ export const VoiceLabManager = {
 
         const container = document.getElementById('mix-preview-container');
         const status = document.getElementById('mix-status');
-        const player = document.getElementById('preview-player');
 
         if (container) container.style.display = 'block';
-        if (status) status.innerText = "Mixing...";
+        if (status) status.innerText = "Queuing...";
         btn.disabled = true;
 
         try {
@@ -141,36 +147,41 @@ export const VoiceLabManager = {
             ];
             const profile = { type: 'mix', value: JSON.stringify(mixConfig) };
 
-            const res = await fetch('/api/generate/stream', {
+            const res = await fetch('/api/generate/segment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: "This is a preview of your mixed voice.", profile: profile })
+                body: JSON.stringify({ 
+                    profiles: [{ role: 'preview', ...profile }],
+                    script: [{ role: 'preview', text: "This is a preview of your mixed voice." }]
+                })
             });
 
-            if (!res.ok) throw new Error("Mix preview failed");
+            if (!res.ok) throw new Error("Mix task creation failed");
+            const { task_id } = await res.json();
+            
+            status.innerText = "Mixing...";
+            Notification.show("Voice mixing started in background", "info");
 
-            const reader = res.body.getReader();
-            const chunks = [];
-            while(true) {
-                const {done, value} = await reader.read();
-                if (done) break;
-                chunks.push(value);
-                if (chunks.length === 1) {
-                    const blob = new Blob([value], { type: 'audio/wav' });
-                    player.src = URL.createObjectURL(blob);
+            TaskManager.pollTask(task_id, (data) => {
+                const blob = new Blob([new Uint8Array(data.result)], { type: 'audio/wav' });
+                const url = URL.createObjectURL(blob);
+                window.state.voicelab.lastMixedPath = url;
+                
+                const player = document.getElementById('preview-player');
+                if (player) {
+                    player.src = url;
                     player.play();
                 }
-            }
-            const fullBlob = new Blob(chunks, { type: 'audio/wav' });
-            window.state.voicelab.lastMixedPath = URL.createObjectURL(fullBlob);
-            if (status) status.innerText = "Ready";
-            Notification.show("Mix preview ready", "success");
+                status.innerText = "Ready";
+                btn.disabled = false;
+                Notification.show("Mix preview ready", "success");
+            });
+
         } catch (err) {
             if (status) status.innerText = "Error";
+            btn.disabled = false;
             ErrorDisplay.show("Mixing Error", err.message);
             console.error(err);
-        } finally {
-            btn.disabled = false;
         }
     },
 
@@ -192,17 +203,23 @@ export const VoiceLabManager = {
         const grid = document.getElementById('voice-library-grid');
         if (!grid) return;
 
-        let html = presets.map(p => `
+        // ⚡ Bolt: Enhanced Preset Cards with Metadata
+        let html = presets.map(p => {
+            const name = typeof p === 'string' ? p : p.name;
+            const id = typeof p === 'string' ? p : p.id;
+            const meta = typeof p === 'string' ? 'PRESET VOICE' : `${p.gender} | ${p.description}`;
+            
+            return `
             <div class="card voice-card" style="padding:16px; border-left:4px solid var(--accent);">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <strong style="text-transform:uppercase;">${p}</strong>
-                        <div style="font-size:0.7rem; opacity:0.5;">PRESET VOICE</div>
+                        <strong style="text-transform:uppercase;">${name}</strong>
+                        <div style="font-size:0.7rem; opacity:0.7;">${meta}</div>
                     </div>
-                    <button class="btn btn-secondary btn-sm" onclick="previewVoice('preset', '${p}')"><i class="fas fa-play"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="previewVoice('preset', '${id}')" title="Preview Voice"><i class="fas fa-play"></i></button>
                 </div>
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
 
         html += savedVoices.map(v => `
             <div class="card voice-card" style="padding:16px; border-left:4px solid var(--text-primary);">
@@ -229,7 +246,11 @@ export const VoiceLabManager = {
         if (!a || !b) return;
 
         const options = [
-            ...presets.map(p => `<option value="${p}">${p} (Preset)</option>`),
+            ...presets.map(p => {
+                const name = typeof p === 'string' ? p : p.name;
+                const id = typeof p === 'string' ? p : p.id;
+                return `<option value="${id}">${name} (Preset)</option>`;
+            }),
             ...savedVoices.map(v => `<option value="${v.name}">${v.name} (${v.profile.type})</option>`)
         ].join('');
 
@@ -247,7 +268,10 @@ export const VoiceLabManager = {
         const speakerData = await speakerRes.json();
         
         const profiles = {};
-        speakerData.presets.forEach(p => profiles[p] = { type: 'preset', value: p });
+        speakerData.presets.forEach(p => {
+            const id = typeof p === 'string' ? p : p.id;
+            profiles[id] = { type: 'preset', value: id };
+        });
         libData.voices.forEach(v => profiles[v.name] = v.profile);
         return profiles;
     },

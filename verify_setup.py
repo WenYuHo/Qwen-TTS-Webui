@@ -11,6 +11,11 @@ src_dir = current_dir / "src"
 if str(src_dir) not in sys.path:
     sys.path.insert(0, str(src_dir))
 
+# Add local bin to PATH for binary detection
+bin_dir = current_dir / "bin"
+if bin_dir.exists():
+    os.environ["PATH"] = str(bin_dir) + os.pathsep + os.environ.get("PATH", "")
+
 def check_binary(name):
     path = shutil.which(name)
     if path:
