@@ -38,5 +38,29 @@
     "metadata": {
       "role": "preview"
     }
+  },
+  {
+    "timestamp": 1772624985.8361728,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "Alice"
+    }
+  },
+  {
+    "timestamp": 1772624985.8462455,
+    "type": "s2s_generation",
+    "status": "completed",
+    "metadata": {
+      "source": "test.wav"
+    }
+  },
+  {
+    "timestamp": 1772624985.8557618,
+    "type": "dubbing",
+    "status": "completed",
+    "metadata": {
+      "source": "test.wav"
+    }
   }
 ]
