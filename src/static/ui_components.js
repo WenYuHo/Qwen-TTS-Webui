@@ -26,6 +26,11 @@ export const VideoModal = {
 
         modal.style.display = 'flex';
         player.play();
+
+        this._handleEsc = (e) => {
+            if (e.key === 'Escape') this.hide();
+        };
+        document.addEventListener('keydown', this._handleEsc);
     },
 
     hide() {
@@ -35,6 +40,10 @@ export const VideoModal = {
         if (player) {
             player.pause();
             player.src = '';
+        }
+        if (this._handleEsc) {
+            document.removeEventListener('keydown', this._handleEsc);
+            this._handleEsc = null;
         }
     },
 
@@ -179,26 +188,41 @@ export const HelpManager = {
         const overlay = document.createElement('div');
         overlay.className = 'modal-overlay';
         overlay.style.display = 'flex';
-        overlay.onclick = (e) => { if(e.target === overlay) overlay.remove(); };
+
+        const closeHelp = () => {
+            document.removeEventListener('keydown', handleEsc);
+            overlay.remove();
+        };
+
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') closeHelp();
+        };
+
+        overlay.onclick = (e) => { if(e.target === overlay) closeHelp(); };
+        document.addEventListener('keydown', handleEsc);
 
         const modal = document.createElement('div');
-        modal.className = 'card-brutalist';
+        modal.className = 'card-brutalist modal-content';
         modal.style.maxWidth = '500px';
         modal.style.padding = '32px';
-        modal.style.animation = 'viewEnter 0.2s ease-out';
 
         modal.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid var(--accent); padding-bottom:12px;">
-                <h2 style="margin:0; font-size:1.2rem;">COMMAND REFERENCE</h2>
-                <button class="btn btn-danger btn-sm" onclick="this.parentElement.parentElement.parentElement.remove()"><i class="fas fa-times"></i></button>
+                <h2 style="margin:0; font-size:1.2rem;" tabindex="-1">COMMAND REFERENCE</h2>
+                <button class="btn btn-danger btn-sm" aria-label="Close help modal" title="Close help modal"><i class="fas fa-times"></i></button>
             </div>
             <div style="font-size:0.9rem; line-height:1.6; font-family:var(--font-mono); color:var(--text-secondary);">
                 ${content.replace(/\n/g, '<br>').replace(/### (.+)/g, '<strong style="color:var(--accent)">$1</strong>')}
             </div>
-            <button class="btn btn-secondary btn-sm" style="width:100%; margin-top:24px;" onclick="this.parentElement.parentElement.remove()">ACKNOWLEDGE</button>
+            <button class="btn btn-secondary btn-sm" style="width:100%; margin-top:24px;">ACKNOWLEDGE</button>
         `;
+
+        modal.querySelectorAll('button').forEach(btn => btn.onclick = closeHelp);
 
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
+
+        const heading = modal.querySelector('h2');
+        if (heading) heading.focus();
     }
 };
