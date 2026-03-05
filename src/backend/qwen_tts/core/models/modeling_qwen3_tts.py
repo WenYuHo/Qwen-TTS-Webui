@@ -432,7 +432,9 @@ def mel_spectrogram(
         onesided=True,
         return_complex=True,
     )
-    spec = torch.sqrt(torch.view_as_real(spec).pow(2).sum(-1) + 1e-9)
+    # ⚡ Bolt: Use .abs() for complex magnitude calculation.
+    # It is faster and more memory-efficient than manual sqrt(real^2 + imag^2).
+    spec = spec.abs()
 
     mel_spec = torch.matmul(mel_basis, spec)
     mel_spec = dynamic_range_compression_torch(mel_spec)
