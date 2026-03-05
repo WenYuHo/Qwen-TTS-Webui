@@ -27,6 +27,8 @@ except ImportError:
 
 # ⚡ Bolt: Cache for Butterworth filter coefficients to avoid redundant DSP math
 _eq_filter_cache = {}
+# ⚡ Bolt: Cache for static GPU properties to avoid redundant CUDA driver calls
+_gpu_info_cache = {}
 
 def prune_dict_cache(cache: dict, limit: int, count: int = 100):
     """
@@ -136,6 +138,8 @@ class AudioPostProcessor:
 
                 if preset == "broadcast":
                     b, a = scipy_signal.butter(2, [80 / (sr/2), 5000 / (sr/2)], btype='bandpass')
+                    # ⚡ Bolt: Pre-scale coefficients to eliminate the O(N) multiplication pass later
+                    b *= 1.5
                 elif preset == "warm":
                     b, a = scipy_signal.butter(2, 3000 / (sr/2), btype='low')
                 elif preset == "bright":
@@ -145,8 +149,6 @@ class AudioPostProcessor:
                 _eq_filter_cache[cache_key] = (b, a)
 
             out = scipy_signal.lfilter(b, a, wav)
-            if preset == "broadcast":
-                out *= 1.5
             return out
         except Exception as e:
             logger.error(f"⚡ Bolt: EQ failed for {preset} at {sr}Hz: {e}")
@@ -297,12 +299,23 @@ class ResourceMonitor:
         try:
             if torch and torch.cuda.is_available():
                 gpu_id = torch.cuda.current_device()
-                props = torch.cuda.get_device_properties(gpu_id)
+
+                # ⚡ Bolt: Cache static GPU properties (name, total VRAM) to reduce driver overhead
+                if gpu_id not in _gpu_info_cache:
+                    props = torch.cuda.get_device_properties(gpu_id)
+                    _gpu_info_cache[gpu_id] = {
+                        "name": props.name,
+                        "vram_total": props.total_memory / (1024**3)
+                    }
+
+                gpu_static = _gpu_info_cache[gpu_id]
+                vram_used = torch.cuda.memory_allocated(gpu_id) / (1024**3)
+
                 stats["gpu"] = {
-                    "name": props.name,
-                    "vram_total": props.total_memory / (1024**3),
-                    "vram_used": torch.cuda.memory_allocated(gpu_id) / (1024**3),
-                    "vram_percent": (torch.cuda.memory_allocated(gpu_id) / props.total_memory) * 100
+                    "name": gpu_static["name"],
+                    "vram_total": gpu_static["vram_total"],
+                    "vram_used": vram_used,
+                    "vram_percent": (vram_used / gpu_static["vram_total"]) * 100
                 }
         except Exception:
             pass
