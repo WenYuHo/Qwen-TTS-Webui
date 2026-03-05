@@ -444,8 +444,7 @@ class Profiler:
 
     def __exit__(self, *args):
         self.profiler.disable()
-        # ⚡ Bolt: Use top-level pstats import
-        import io
+        # ⚡ Bolt: Use top-level io and pstats imports
         s = io.StringIO()
         ps = pstats.Stats(self.profiler, stream=s).sort_stats('cumulative')
         ps.print_stats(20) # Top 20 functions

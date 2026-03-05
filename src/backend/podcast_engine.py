@@ -1,6 +1,8 @@
 import os
 import json
 import uuid
+import re
+import hashlib
 import torch
 import numpy as np
 import soundfile as sf
@@ -277,8 +279,6 @@ class PodcastEngine:
         return mixed_emb
 
     def stream_synthesize(self, text: str, profile: Dict[str, Any], language: str = "auto", instruct: Optional[str] = None):
-        import re
-        
         # 1. First split by major punctuation to create sentences
         # Matches periods, exclamation, question marks, and newlines
         initial_chunks = re.split(r'([.!?。！？\n\r]+)', text)
@@ -510,7 +510,6 @@ class PodcastEngine:
         trans_lang = 'zh-CN' if target_lang == 'zh' else target_lang
 
         # ⚡ Bolt: Cache translation results with hashed keys to avoid redundant API calls and save memory
-        import hashlib
         text_hash = hashlib.md5(text.encode('utf-8')).hexdigest()
         cache_key = f"{text_hash}:{trans_lang}"
 
