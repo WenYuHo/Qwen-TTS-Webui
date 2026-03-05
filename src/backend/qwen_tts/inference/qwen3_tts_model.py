@@ -484,18 +484,15 @@ class Qwen3TTSModel:
                 wav_resampled = wav.astype(np.float32)
             wavs_to_embed.append(wav_resampled)
 
-        # Use the underlying model's extract_speaker_embedding (which likely uses ECAPA-TDNN)
-        # Note: if the underlying model doesn't support batching, we still get benefits from consolidated resampling.
-        # Most ECAPA-TDNN implementations support batching via list or padded tensor.
-        try:
-            spk_embs = self.model.extract_speaker_embedding(audio=wavs_to_embed,
-                                                           sr=self.model.speaker_encoder_sample_rate)
-            # Ensure it's a list/tensor we can iterate
-            if isinstance(spk_embs, torch.Tensor) and spk_embs.ndim == 1:
-                spk_embs = [spk_embs]
-        except Exception:
-            # Fallback to serial if batching fails
-            spk_embs = [self.model.extract_speaker_embedding(audio=w, sr=self.model.speaker_encoder_sample_rate) for w in wavs_to_embed]
+        # ⚡ Bolt: Use the now-optimized batched extract_speaker_embedding from core model.
+        # This performs all extractions in a single parallel pass on GPU.
+        spk_embs = self.model.extract_speaker_embedding(audio=wavs_to_embed,
+                                                       sr=self.model.speaker_encoder_sample_rate)
+
+        # Ensure it's a list/tensor we can iterate.
+        # If input was a single item list, extract_speaker_embedding returns (1, D) or (D,)
+        if isinstance(spk_embs, torch.Tensor) and spk_embs.ndim == 1:
+            spk_embs = [spk_embs]
 
         items: List[VoiceClonePromptItem] = []
         for i, ((wav, sr), code, rtext, xvec_only, spk_emb) in enumerate(zip(normalized, ref_codes, ref_text_list, xvec_list, spk_embs)):

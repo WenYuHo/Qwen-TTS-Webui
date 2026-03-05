@@ -394,11 +394,6 @@ def mel_spectrogram(
     Returns:
         torch.Tensor: Mel spectrogram.
     """
-    if torch.min(y) < -1.0:
-        print(f"[WARNING] Min value of input waveform signal is {torch.min(y)}")
-    if torch.max(y) > 1.0:
-        print(f"[WARNING] Max value of input waveform signal is {torch.max(y)}")
-
     device = y.device
 
     # ⚡ Bolt: Cache mel basis to avoid librosa filter generation and device transfers on every call
@@ -1912,9 +1907,25 @@ class Qwen3TTSForConditionalGeneration(Qwen3TTSPreTrainedModel, GenerationMixin)
     
     @torch.inference_mode()
     def extract_speaker_embedding(self, audio, sr):
+        # ⚡ Bolt: Support both single audio (np.ndarray) and batch audio (List[np.ndarray])
+        # This enables O(1) parallel extraction on GPU for multiple speakers.
+        is_batch = isinstance(audio, list)
+        if is_batch:
+            if not audio:
+                return torch.empty(0, self.config.speaker_encoder_config.enc_dim, device=self.device)
+            # Ensure all elements are float32 and move to device immediately
+            # Use pad_sequence to handle varying length samples in a batch
+            wavs = [torch.from_numpy(a).float().to(self.device) for a in audio]
+            y = torch.nn.utils.rnn.pad_sequence(wavs, batch_first=True, padding_value=0.0)
+        else:
+            y = torch.from_numpy(audio).float().to(self.device).unsqueeze(0)
+
         assert sr == 24000, "Only support 24kHz audio"
+
+        # ⚡ Bolt: mel_spectrogram now runs entirely on GPU if audio is on GPU.
+        # It also supports batched input of shape (B, T).
         mels = mel_spectrogram(
-            torch.from_numpy(audio).unsqueeze(0), 
+            y,
             n_fft=1024, 
             num_mels=128, 
             sampling_rate=24000,
@@ -1923,8 +1934,14 @@ class Qwen3TTSForConditionalGeneration(Qwen3TTSPreTrainedModel, GenerationMixin)
             fmin=0, 
             fmax=12000
         ).transpose(1, 2)
-        speaker_embedding = self.speaker_encoder(mels.to(self.device).to(self.dtype))[0]
-        return speaker_embedding
+
+        # ⚡ Bolt: Use batched encoder call. Result is (B, D)
+        speaker_embeddings = self.speaker_encoder(mels.to(self.dtype))
+
+        if is_batch:
+            return speaker_embeddings
+        else:
+            return speaker_embeddings[0]
     
     @torch.inference_mode()
     def generate_speaker_prompt(
