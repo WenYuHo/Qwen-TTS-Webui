@@ -26,6 +26,8 @@ import queue
 
 # ⚡ Bolt: Global cache for audio watermark tone to avoid redundant math and allocations
 _watermark_tone_cache = {}
+# ⚡ Bolt: Reference to system settings to avoid redundant circular-import-safe lookups
+_system_settings = None
 
 class PodcastEngine:
     def __init__(self):
@@ -183,29 +185,45 @@ class PodcastEngine:
 
     def _apply_audio_watermark(self, wav: np.ndarray, sr: int) -> np.ndarray:
         try:
-            from .api.system import _settings
-            if not _settings.watermark_audio:
+            global _system_settings
+            if _system_settings is None:
+                # ⚡ Bolt: Circular-safe import for settings
+                import src.backend.api.system as system_api
+                _system_settings = system_api._settings
+
+            if not _system_settings.watermark_audio:
                 return wav
 
-            # ⚡ Bolt: Cache the watermark tone to avoid redundant math and allocations
-            if sr in _watermark_tone_cache:
-                tone = _watermark_tone_cache[sr]
-            else:
-                duration = 0.1
-                t = np.linspace(0, duration, int(sr * duration), False)
-                tone = 0.05 * np.sin(2 * np.pi * 20000 * t)
-                fade = int(sr * 0.01)
-                tone[:fade] *= np.linspace(0, 1, fade)
-                tone[-fade:] *= np.linspace(1, 0, fade)
-                _watermark_tone_cache[sr] = tone
+            # ⚡ Bolt: Use a multi-channel cache for the watermark tone to avoid redundant np.stack calls.
+            # Keyed by (sample_rate, num_channels)
+            is_stereo = len(wav.shape) == 2
+            channels = 2 if is_stereo else 1
+            cache_key = (sr, channels)
 
-            # Handle both mono and stereo
-            if len(wav.shape) == 2:
-                # Expand tone to stereo
-                tone_stereo = np.stack([tone, tone])
-                return np.concatenate([wav, tone_stereo], axis=1)
+            if cache_key in _watermark_tone_cache:
+                tone_to_use = _watermark_tone_cache[cache_key]
             else:
-                return np.concatenate([wav, tone])
+                # First ensure mono tone for this SR is cached
+                if (sr, 1) not in _watermark_tone_cache:
+                    duration = 0.1
+                    t = np.linspace(0, duration, int(sr * duration), False)
+                    tone = 0.05 * np.sin(2 * np.pi * 20000 * t)
+                    fade = int(sr * 0.01)
+                    tone[:fade] *= np.linspace(0, 1, fade)
+                    tone[-fade:] *= np.linspace(1, 0, fade)
+                    _watermark_tone_cache[(sr, 1)] = tone
+
+                if channels == 2:
+                    mono_tone = _watermark_tone_cache[(sr, 1)]
+                    tone_to_use = np.stack([mono_tone, mono_tone])
+                    _watermark_tone_cache[cache_key] = tone_to_use
+                else:
+                    tone_to_use = _watermark_tone_cache[(sr, 1)]
+
+            if is_stereo:
+                return np.concatenate([wav, tone_to_use], axis=1)
+            else:
+                return np.concatenate([wav, tone_to_use])
         except Exception:
             return wav
 
@@ -450,7 +468,10 @@ class PodcastEngine:
                 try:
                     # ⚡ Bolt: Cache BGM samples to avoid redundant loading and resampling
                     if bgm_mood in self.bgm_cache:
-                        bgm_samples = self.bgm_cache[bgm_mood].copy()
+                        bgm_samples = self.bgm_cache[bgm_mood]
+                        # ⚡ Bolt: Only copy if we need to modify the samples in-place (ducking)
+                        if ducking_level > 0:
+                            bgm_samples = bgm_samples.copy()
                     else:
                         bgm_full_path = (Path(BASE_DIR) / "bgm" / f"{bgm_mood}.mp3").resolve()
                         if not bgm_full_path.exists():

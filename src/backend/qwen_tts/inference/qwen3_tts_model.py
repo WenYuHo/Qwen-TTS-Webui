@@ -243,7 +243,7 @@ class Qwen3TTSModel:
         if audio.ndim > 1:
             audio = np.mean(audio, axis=-1)
 
-        return audio.astype(np.float32), int(sr)
+        return audio, int(sr)
 
     def _normalize_audio_inputs(self, audios: Union[AudioLike, List[AudioLike]]) -> List[Tuple[np.ndarray, int]]:
         """
@@ -275,14 +275,16 @@ class Qwen3TTSModel:
             if isinstance(a, str):
                 out.append(self._load_audio_to_np(a))
             elif isinstance(a, tuple) and len(a) == 2 and isinstance(a[0], np.ndarray):
-                out.append((a[0].astype(np.float32), int(a[1])))
+                # ⚡ Bolt: copy=False avoids a copy if already float32.
+                out.append((a[0].astype(np.float32, copy=False), int(a[1])))
             elif isinstance(a, np.ndarray):
                 raise ValueError("For numpy waveform input, pass a tuple (audio, sr).")
             else:
                 raise TypeError(f"Unsupported audio input type: {type(a)}")
         for i, a in enumerate(out):
             if a[0].ndim > 1:
-                a[0] = np.mean(a[0], axis=-1).astype(np.float32)
+                # np.mean returns a new array, no need for astype here as it preserves floatiness
+                a[0] = np.mean(a[0], axis=-1)
                 out[i] = (a[0], a[1])
         return out
 
