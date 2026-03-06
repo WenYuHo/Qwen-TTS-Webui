@@ -140,6 +140,8 @@ export const SystemManager = {
         if (target) {
             target.style.display = 'block';
             localStorage.setItem('system_active_subtab', tab);
+            const heading = target.querySelector('h1') || target.querySelector('h2');
+            if (heading) heading.focus();
         }
 
         // Update button active states
@@ -150,9 +152,11 @@ export const SystemManager = {
                 if (clickAttr.includes(`'${tab}'`)) {
                     btn.classList.add('btn-primary');
                     btn.classList.remove('btn-secondary');
+                    btn.setAttribute('aria-pressed', 'true');
                 } else {
                     btn.classList.add('btn-secondary');
                     btn.classList.remove('btn-primary');
+                    btn.setAttribute('aria-pressed', 'false');
                 }
             });
         }
