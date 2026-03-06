@@ -270,10 +270,14 @@ export const ProductionManager = {
         if (view === 'draft') {
             draft.style.display = 'flex';
             prod.style.display = 'none';
+            const heading = draft.querySelector('h1') || draft.querySelector('h2') || document.getElementById('script-editor');
+            if (heading) heading.focus();
         } else {
             draft.style.display = 'none';
             prod.style.display = 'flex';
             this.renderBlocks();
+            const heading = prod.querySelector('h1') || prod.querySelector('h2');
+            if (heading) heading.focus();
         }
         localStorage.setItem('project_active_subtab', view);
 
@@ -285,9 +289,11 @@ export const ProductionManager = {
                 if (clickAttr.includes(`'${view}'`)) {
                     btn.classList.add('btn-primary');
                     btn.classList.remove('btn-secondary');
+                    btn.setAttribute('aria-pressed', 'true');
                 } else if (clickAttr.includes('toggleCanvasView')) {
                     btn.classList.add('btn-secondary');
                     btn.classList.remove('btn-primary');
+                    btn.setAttribute('aria-pressed', 'false');
                 }
             });
         }
@@ -319,9 +325,9 @@ export const ProductionManager = {
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                     <strong style="color:var(--accent); font-family:var(--font-mono);">${b.role.toUpperCase()}</strong>
                     <div style="display:flex; gap:8px;">
-                        <button class="btn btn-secondary btn-sm" onclick="window.CanvasManager.moveBlock('${b.id}', -1); window.ProductionManager.renderBlocks()"><i class="fas fa-arrow-up"></i></button>
-                        <button class="btn btn-secondary btn-sm" onclick="window.CanvasManager.moveBlock('${b.id}', 1); window.ProductionManager.renderBlocks()"><i class="fas fa-arrow-down"></i></button>
-                        <button class="btn btn-danger btn-sm" onclick="window.CanvasManager.deleteBlock('${b.id}'); window.ProductionManager.renderBlocks()"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-secondary btn-sm" onclick="window.CanvasManager.moveBlock('${b.id}', -1); window.ProductionManager.renderBlocks()" aria-label="Move block up" title="Move block up"><i class="fas fa-arrow-up" aria-hidden="true"></i></button>
+                        <button class="btn btn-secondary btn-sm" onclick="window.CanvasManager.moveBlock('${b.id}', 1); window.ProductionManager.renderBlocks()" aria-label="Move block down" title="Move block down"><i class="fas fa-arrow-down" aria-hidden="true"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="window.CanvasManager.deleteBlock('${b.id}'); window.ProductionManager.renderBlocks()" aria-label="Delete block" title="Delete block"><i class="fas fa-trash" aria-hidden="true"></i></button>
                     </div>
                 </div>
                 <div style="display:flex; align-items:center; gap:12px; margin-top:12px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
