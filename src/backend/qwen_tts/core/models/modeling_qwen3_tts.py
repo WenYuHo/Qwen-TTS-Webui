@@ -2075,6 +2075,32 @@ class Qwen3TTSForConditionalGeneration(Qwen3TTSPreTrainedModel, GenerationMixin)
         trailing_text_hiddens = []
         if speakers is None:
             speakers = [None] * len(input_ids)
+
+        # ⚡ Bolt: Pre-calculate constant embeddings outside the sample loop to reduce redundant lookups and projections.
+        # These depend only on fixed tokens (BOS, EOS, PAD) and the model's device/dtype.
+        _constant_dtype = input_ids[0].dtype
+        _constant_device = self.talker.device
+        tts_bos_embed, tts_eos_embed, tts_pad_embed = self.talker.text_projection(
+            self.talker.get_text_embeddings()(
+                torch.tensor(
+                    [[self.config.tts_bos_token_id, self.config.tts_eos_token_id, self.config.tts_pad_token_id]],
+                    device=_constant_device,
+                    dtype=_constant_dtype,
+                )
+            )
+        ).chunk(3, dim=1)  # 3 * [1 1 d]
+
+        codec_input_emebdding_1 = self.talker.get_input_embeddings()(
+            torch.tensor(
+                [[
+                    self.config.talker_config.codec_pad_id,
+                    self.config.talker_config.codec_bos_id,
+                ]],
+                device=_constant_device,
+                dtype=_constant_dtype,
+            )
+        )
+
         for index, (input_id, language, speaker) in enumerate(zip(input_ids, languages, speakers)):
             if voice_clone_spk_embeds is None:
                 if speaker == "" or speaker == None: # Instruct create speaker
@@ -2113,16 +2139,6 @@ class Qwen3TTSForConditionalGeneration(Qwen3TTSPreTrainedModel, GenerationMixin)
                 dialect = self.config.talker_config.spk_is_dialect[speaker.lower()]
                 language_id = self.config.talker_config.codec_language_id[dialect]
             
-            tts_bos_embed, tts_eos_embed, tts_pad_embed = self.talker.text_projection(
-                self.talker.get_text_embeddings()(
-                    torch.tensor(
-                        [[self.config.tts_bos_token_id, self.config.tts_eos_token_id, self.config.tts_pad_token_id]],
-                        device=self.talker.device,
-                        dtype=input_id.dtype,
-                    )
-                )
-            ).chunk(3, dim=1)  # 3 * [1 1 d]
-            
             # codec: tag and speaker
             if language_id is None:
                 codec_prefill_list = [[
@@ -2141,16 +2157,6 @@ class Qwen3TTSForConditionalGeneration(Qwen3TTSPreTrainedModel, GenerationMixin)
             codec_input_emebdding_0 = self.talker.get_input_embeddings()(
                                                     torch.tensor(
                                                         codec_prefill_list,
-                                                        device=self.talker.device,
-                                                        dtype=input_id.dtype,
-                                                    )
-                                                )
-            codec_input_emebdding_1 = self.talker.get_input_embeddings()(
-                                                    torch.tensor(
-                                                        [[
-                                                            self.config.talker_config.codec_pad_id,
-                                                            self.config.talker_config.codec_bos_id,
-                                                        ]],
                                                         device=self.talker.device,
                                                         dtype=input_id.dtype,
                                                     )
