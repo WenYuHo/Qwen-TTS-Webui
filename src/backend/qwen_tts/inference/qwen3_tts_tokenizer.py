@@ -161,7 +161,7 @@ class Qwen3TTSTokenizer:
         if sr != target_sr:
             audio = librosa.resample(y=audio, orig_sr=sr, target_sr=target_sr)
 
-        return audio.astype(np.float32)
+        return audio
 
     def _normalize_audio_inputs(
         self,
@@ -207,8 +207,10 @@ class Qwen3TTSTokenizer:
             if a.ndim > 1:
                 a = np.mean(a, axis=-1)
             if int(sr) != target_sr:
-                a = librosa.resample(y=a.astype(np.float32), orig_sr=int(sr), target_sr=target_sr)
-            out.append(a.astype(np.float32))
+                # ⚡ Bolt: copy=False avoids a copy if already float32.
+                a = librosa.resample(y=a.astype(np.float32, copy=False), orig_sr=int(sr), target_sr=target_sr)
+            # ⚡ Bolt: copy=False avoids a copy if already float32.
+            out.append(a.astype(np.float32, copy=False))
         return out
 
     def encode(

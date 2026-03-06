@@ -81,7 +81,8 @@ class PhonemeManager:
 
         # Sort words by length descending to ensure longest matches are tried first
         sorted_words = sorted(self.overrides.keys(), key=len, reverse=True)
-        self.word_map = {word.lower(): word for word in self.overrides}
+        # ⚡ Bolt: Map lowercased word directly to its phonetic override for O(1) lookup
+        self.word_map = {word.lower(): phonetic for word, phonetic in self.overrides.items()}
 
         pattern_str = r'\b(' + '|'.join(re.escape(w) for w in sorted_words) + r')\b'
         self.combined_pattern = re.compile(pattern_str, re.IGNORECASE)
@@ -107,12 +108,8 @@ class PhonemeManager:
             return text
 
         def _replacer(match):
-            # ⚡ Bolt: Use O(1) dictionary lookup within a single-pass regex substitution
-            word = match.group(0).lower()
-            original_word = self.word_map.get(word)
-            if original_word:
-                return self.overrides.get(original_word, match.group(0))
-            return match.group(0)
+            # ⚡ Bolt: Single dictionary lookup within a single-pass regex substitution
+            return self.word_map.get(match.group(0).lower(), match.group(0))
 
         return self.combined_pattern.sub(_replacer, text)
 
@@ -175,10 +172,7 @@ class AudioPostProcessor:
                         out[shift:] += wav[:-shift] * (decay ** i)
             
             # ⚡ Bolt: Use max(np.max, -np.min) to avoid allocating a large temporary array for np.abs(out)
-            if is_stereo:
-                max_amp = max(np.max(out), -np.min(out))
-            else:
-                max_amp = max(np.max(out), -np.min(out))
+            max_amp = max(np.max(out), -np.min(out))
                 
             if max_amp > 1.0:
                 out /= max_amp
