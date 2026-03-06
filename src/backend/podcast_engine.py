@@ -242,8 +242,14 @@ class PodcastEngine:
                 if final_instruct: design_instruct = f"{design_instruct}, {final_instruct}"
                 wavs, sr = model.generate_voice_design(text=text, instruct=design_instruct, language=language, non_streaming_mode=True)
             elif ptype == "clone":
+                ref_text = profile.get("ref_text")
+                use_icl = ref_text is not None and ref_text.strip() != ""
                 cache_key = profile["value"]
-                if cache_key in self.prompt_cache: prompt = self.prompt_cache[cache_key]
+                # When ref_text is provided, use ICL mode for higher quality cloning
+                # ICL captures expressive similarity, prosody, and emotional nuances
+                icl_cache_key = f"{cache_key}:icl:{ref_text}" if use_icl else cache_key
+                if icl_cache_key in self.prompt_cache:
+                    prompt = self.prompt_cache[icl_cache_key]
                 else:
                     try:
                         resolved_paths = self._resolve_paths(profile["value"])
@@ -252,8 +258,14 @@ class PodcastEngine:
                     if model is None: model = get_model("Base")
                     ref_audio = str(resolved_paths[0])
                     if VideoEngine.is_video(ref_audio): ref_audio = self._extract_audio_with_cache(ref_audio)
-                    prompt = model.create_voice_clone_prompt(ref_audio=ref_audio, x_vector_only_mode=True)
-                    self.prompt_cache[cache_key] = prompt
+                    prompt = model.create_voice_clone_prompt(
+                        ref_audio=ref_audio,
+                        ref_text=ref_text if use_icl else None,
+                        x_vector_only_mode=not use_icl
+                    )
+                    # Prevent unbounded growth of prompt cache
+                    prune_dict_cache(self.prompt_cache, limit=200, count=20)
+                    self.prompt_cache[icl_cache_key] = prompt
                 if model is None: model = get_model("Base")
                 wavs, sr = model.generate_voice_clone(text=text, language=language, voice_clone_prompt=prompt, instruct=final_instruct)
             elif ptype == "mix":

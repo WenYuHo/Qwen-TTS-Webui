@@ -83,17 +83,20 @@ const previewCache = new Map();
 
 async function getVoicePreview(profile) {
     // Cache key based on profile values (type and value/instruct)
-    const cacheKey = `${profile.type}:${profile.value}`;
+    const customText = document.getElementById('custom-preview-text')?.value?.trim() || '';
+    const cacheKey = `${profile.type}:${profile.value}:${customText}`;
     if (previewCache.has(cacheKey)) {
         console.log(`[BOLT] Using cached preview for ${profile.role}`);
         return previewCache.get(cacheKey);
     }
 
     try {
+        const body = { ...profile };
+        if (customText) body.preview_text = customText;
         const res = await fetch('/api/voice/preview', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(profile)
+            body: JSON.stringify(body)
         });
         if (!res.ok) throw new Error("Preview failed");
         const blob = await res.blob();
@@ -112,7 +115,7 @@ const TaskPoller = {
                 try {
                     const res = await fetch(`/api/tasks/${taskId}`);
                     if (!res.ok) throw new Error("Status check failed");
-                    
+
                     const task = await res.json();
                     if (onProgress) onProgress(task);
 
@@ -139,7 +142,7 @@ const UIHeartbeat = {
     start() {
         const dot = document.getElementById('heartbeat-dot');
         if (!dot) return;
-        
+
         setInterval(() => {
             dot.style.opacity = '1';
             setTimeout(() => {
@@ -179,25 +182,25 @@ function parseScript(text) {
     const flush = () => {
         if (currentRole && currentText.length > 0) {
             const rawText = currentText.join('\n').trim();
-            
+
             // ⚡ Bolt: Split text by [instruct] or (non-verbal-tag)
             // Allows mid-sentence emotional shifts or cues.
             const splitRegex = /(\[.+?\]|\(.+?\))/g;
             const parts = rawText.split(splitRegex);
-            
+
             let activeInstruct = null;
-            
+
             parts.forEach((part, index) => {
                 if (!part) return;
-                
+
                 const instructMatch = part.match(/^\[(.+?)\]$/) || part.match(/^\((.+?)\)$/);
                 if (instructMatch) {
                     activeInstruct = instructMatch[1];
-                    
+
                     // ⚡ Bolt: If tag is at the end or followed by another tag, synthesize it as text
                     const nextPart = parts[index + 1];
                     const followedByInstruct = nextPart && (nextPart.match(/^\[(.+?)\]$/) || nextPart.match(/^\((.+?)\)$/));
-                    
+
                     if (!nextPart || followedByInstruct) {
                         script.push({
                             role: currentRole,
@@ -210,12 +213,12 @@ function parseScript(text) {
                 } else {
                     const cleanPart = part.trim();
                     if (cleanPart) {
-                        script.push({ 
-                            role: currentRole, 
+                        script.push({
+                            role: currentRole,
                             text: cleanPart,
                             instruct: activeInstruct,
                             language: 'auto',
-                            pause_after: 0.2 
+                            pause_after: 0.2
                         });
                     }
                 }
@@ -256,7 +259,7 @@ Object.assign(window, {
         ]);
         const libData = await libRes.json();
         const speakerData = await speakerRes.json();
-        
+
         const profiles = {};
         speakerData.presets.forEach(p => profiles[p] = { type: 'preset', value: p });
         libData.voices.forEach(v => profiles[v.name] = v.profile);

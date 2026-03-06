@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse, StreamingResponse
 import uuid
+import random
 from pathlib import Path
 import json
 import logging
@@ -10,6 +11,19 @@ from .. import server_state
 from ..utils import numpy_to_wav_bytes
 
 router = APIRouter(prefix="/api/voice", tags=["voices"])
+
+# Phonetically-diverse preview sentences — crafted to exercise a wide range
+# of vowels, consonants, pauses, emotions, and speech patterns.
+PREVIEW_TEXTS = [
+    "The quick brown fox jumps gracefully over the lazy dog, enjoying every single moment of freedom.",
+    "Yesterday's weather was absolutely perfect — warm sunshine, cool breezes, and a beautiful golden sunset over the mountains.",
+    "She whispered softly, 'Don't worry, everything will be alright,' then smiled with quiet confidence.",
+    "From quantum physics to classical music, the breadth of human knowledge never ceases to amaze me.",
+    "Good morning everyone! Welcome to today's briefing. Let's dive right into the key highlights and explore what's ahead.",
+    "The old lighthouse keeper watched as enormous waves crashed against the jagged rocks below, each one thundering louder than the last.",
+    "Technology continues to reshape our world in extraordinary ways, connecting billions of people across every continent.",
+    "Can you believe how far we've come? Just twenty years ago, none of this would have seemed remotely possible.",
+]
 
 PRESETS = [
     {"id": "aiden", "name": "Aiden", "gender": "Male", "description": "Calm, narrative"},
@@ -64,7 +78,18 @@ async def voice_mix(request: MixRequest):
 async def voice_preview(request: SpeakerProfile):
     try:
         profile = {"type": request.type, "value": request.value}
-        wav, sr = server_state.engine.generate_segment("This is a preview of my voice.", profile=profile)
+
+        # Use custom text or pick from the curated pool
+        text = request.preview_text if request.preview_text else random.choice(PREVIEW_TEXTS)
+
+        # If ref_text is provided (for clone mode), pass it to enable ICL mode
+        if request.ref_text:
+            profile["ref_text"] = request.ref_text
+
+        # Add clarity instruct hint for better sounding previews
+        instruct = "clear speech, natural delivery, steady pace"
+
+        wav, sr = server_state.engine.generate_segment(text, profile=profile, instruct=instruct)
 
         # Security: Return audio from memory instead of writing to a public static directory
         # This prevents disk space exhaustion (DoS) and unintended file access.

@@ -10,7 +10,7 @@ export const VoiceLabManager = {
 
         const container = document.getElementById('design-preview-container');
         const status = document.getElementById('design-status');
-        
+
         if (container) container.style.display = 'block';
         if (status) status.innerText = "Designing...";
 
@@ -19,26 +19,27 @@ export const VoiceLabManager = {
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> DESIGNING...';
 
         try {
+            const customText = document.getElementById('custom-preview-text')?.value?.trim() || '';
             let finalPrompt = promptText;
             if (stabilityBoost) {
                 finalPrompt = `${promptText}, stable delivery, clear speech, consistent tone, no distortion`;
             }
 
             const profile = { type: 'design', value: finalPrompt };
-            
+
             // ⚡ Bolt: Use Task-based generation for background processing
             const res = await fetch('/api/generate/segment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     profiles: [{ role: 'preview', ...profile }],
-                    script: [{ role: 'preview', text: "This is a preview of the voice you designed. It should sound consistent from start to finish." }]
+                    script: [{ role: 'preview', text: customText || "Yesterday's weather was absolutely perfect — warm sunshine, cool breezes, and a beautiful golden sunset over the mountains." }]
                 })
             });
 
             if (!res.ok) throw new Error("Design task creation failed");
             const { task_id } = await res.json();
-            
+
             status.innerText = "Processing...";
             Notification.show("Voice design started in background", "info");
 
@@ -46,7 +47,7 @@ export const VoiceLabManager = {
                 const blob = new Blob([new Uint8Array(data.result)], { type: 'audio/wav' });
                 const url = URL.createObjectURL(blob);
                 window.state.voicelab.lastDesignedPath = url;
-                
+
                 const player = document.getElementById('preview-player');
                 if (player) {
                     player.src = url;
@@ -94,26 +95,30 @@ export const VoiceLabManager = {
                 window.state.voicelab.lastClonedPath = path;
             }
 
+            const customText = document.getElementById('custom-preview-text')?.value?.trim() || '';
+            const refText = document.getElementById('clone-ref-text')?.value?.trim() || '';
             const profile = { type: 'clone', value: path };
+            // Pass ref_text for ICL mode — dramatically improves cloning quality
+            if (refText) profile.ref_text = refText;
             const res = await fetch('/api/generate/segment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     profiles: [{ role: 'preview', ...profile }],
-                    script: [{ role: 'preview', text: "This is a preview of your cloned voice." }]
+                    script: [{ role: 'preview', text: customText || "She whispered softly, 'Don't worry, everything will be alright,' then smiled with quiet confidence." }]
                 })
             });
 
             if (!res.ok) throw new Error("Clone task creation failed");
             const { task_id } = await res.json();
-            
+
             status.innerText = "Cloning...";
             Notification.show("Voice cloning started in background", "info");
 
             TaskManager.pollTask(task_id, (data) => {
                 const blob = new Blob([new Uint8Array(data.result)], { type: 'audio/wav' });
                 const url = URL.createObjectURL(blob);
-                
+
                 const player = document.getElementById('preview-player');
                 if (player) {
                     player.src = url;
@@ -163,15 +168,15 @@ export const VoiceLabManager = {
             const res = await fetch('/api/generate/segment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     profiles: [{ role: 'preview', ...profile }],
-                    script: [{ role: 'preview', text: "This is a preview of your mixed voice." }]
+                    script: [{ role: 'preview', text: (document.getElementById('custom-preview-text')?.value?.trim()) || "From quantum physics to classical music, the breadth of human knowledge never ceases to amaze me." }]
                 })
             });
 
             if (!res.ok) throw new Error("Mix task creation failed");
             const { task_id } = await res.json();
-            
+
             status.innerText = "Mixing...";
             Notification.show("Voice mixing started in background", "info");
 
@@ -179,7 +184,7 @@ export const VoiceLabManager = {
                 const blob = new Blob([new Uint8Array(data.result)], { type: 'audio/wav' });
                 const url = URL.createObjectURL(blob);
                 window.state.voicelab.lastMixedPath = url;
-                
+
                 const player = document.getElementById('preview-player');
                 if (player) {
                     player.src = url;
@@ -208,7 +213,7 @@ export const VoiceLabManager = {
             ]);
             const libData = await libRes.json();
             const speakerData = await speakerRes.json();
-            
+
             this.renderVoiceLibrary(libData.voices, speakerData.presets);
             this.updateMixDropdowns(libData.voices, speakerData.presets);
         } catch (err) { console.error("Failed to load voices", err); }
@@ -223,7 +228,7 @@ export const VoiceLabManager = {
             const name = typeof p === 'string' ? p : p.name;
             const id = typeof p === 'string' ? p : p.id;
             const meta = typeof p === 'string' ? 'PRESET VOICE' : `${p.gender} | ${p.description}`;
-            
+
             return `
             <div class="card voice-card" style="padding:16px; border-left:4px solid var(--accent);">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -281,7 +286,7 @@ export const VoiceLabManager = {
         ]);
         const libData = await libRes.json();
         const speakerData = await speakerRes.json();
-        
+
         const profiles = {};
         speakerData.presets.forEach(p => {
             const id = typeof p === 'string' ? p : p.id;
@@ -296,13 +301,13 @@ export const VoiceLabManager = {
             const res = await fetch('/api/voice/library');
             const data = await res.json();
             data.voices.push({ name, profile });
-            
+
             await fetch('/api/voice/library', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-            
+
             Notification.show("Voice saved to library", "success");
             this.loadVoiceLibrary();
         } catch (err) { Notification.show("Failed to save voice", "error"); }
@@ -314,24 +319,27 @@ export const VoiceLabManager = {
             const res = await fetch('/api/voice/library');
             const data = await res.json();
             data.voices = data.voices.filter(v => v.name !== name);
-            
+
             await fetch('/api/voice/library', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-            
+
             this.loadVoiceLibrary();
         } catch (err) { console.error(err); }
     },
 
     async previewVoice(type, value) {
         const player = document.getElementById('preview-player');
+        const customText = document.getElementById('custom-preview-text')?.value?.trim() || '';
         try {
+            const body = { type, value, name: "Preview" };
+            if (customText) body.preview_text = customText;
             const res = await fetch('/api/voice/preview', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type, value, name: "Preview" })
+                body: JSON.stringify(body)
             });
             const blob = await res.blob();
             player.src = URL.createObjectURL(blob);
@@ -391,7 +399,7 @@ export const VoiceLabManager = {
                         const audioBlob = new Blob(window.state.voicelab.audioChunks, { type: 'audio/wav' });
                         const formData = new FormData();
                         formData.append('file', audioBlob, 'clone_input.wav');
-                        
+
                         Notification.show("Uploading recording...", "info");
                         const upRes = await fetch('/api/voice/upload', { method: 'POST', body: formData });
                         const upData = await upRes.json();

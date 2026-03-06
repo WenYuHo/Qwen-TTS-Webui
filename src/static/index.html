@@ -70,6 +70,15 @@
                     </div>
                 </div>
 
+                <!-- Custom Preview Text -->
+                <div class="card" style="margin-bottom:24px; padding:12px 20px; background:rgba(0,0,0,0.3); border:1px solid var(--accent); display:flex; align-items:center; gap:12px;">
+                    <i class="fas fa-comment-alt" style="color:var(--accent); opacity:0.7;" aria-hidden="true"></i>
+                    <div style="flex:1;">
+                        <label for="custom-preview-text" class="label-industrial" style="font-size:0.6rem; margin-bottom:4px; display:block;">PREVIEW TEXT (optional — leave blank for auto)</label>
+                        <input type="text" id="custom-preview-text" placeholder="Type your own sentence to hear in any voice..." style="width:100%; padding:6px 10px; font-size:0.8rem; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:white;" aria-label="Custom preview text">
+                    </div>
+                </div>
+
                 <div class="grid-3">
                     <!-- Voice Design -->
                     <div class="card-brutalist">
@@ -111,6 +120,10 @@
                                 <button class="btn btn-danger" id="clone-record-btn" aria-label="Record reference audio">RECORD</button>
                             </div>
                             <input type="file" id="clone-file" accept="audio/*" style="display:none" aria-label="Reference audio file">
+                        </div>
+                        <div class="control-group">
+                            <label for="clone-ref-text" class="label-industrial">Reference Transcript <span style="opacity:0.5; font-weight:400;">(optional — boosts quality)</span></label>
+                            <textarea id="clone-ref-text" placeholder="Type exactly what is spoken in the reference audio for dramatically better cloning..." style="height: 50px; font-size:0.8rem; border-color:var(--accent);"></textarea>
                         </div>
                         <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="testVoiceClone(this)">CLONE & PREVIEW</button>
                         <div id="clone-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.4); border:1px solid var(--accent); padding: 12px;">

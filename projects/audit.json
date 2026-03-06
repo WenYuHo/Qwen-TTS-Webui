@@ -62,5 +62,53 @@
     "metadata": {
       "source": "test.wav"
     }
+  },
+  {
+    "timestamp": 1772780805.4570415,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "ryan"
+    }
+  },
+  {
+    "timestamp": 1772780828.346259,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "ryan"
+    }
+  },
+  {
+    "timestamp": 1772780877.797506,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "ryan"
+    }
+  },
+  {
+    "timestamp": 1772780878.447424,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "Alice"
+    }
+  },
+  {
+    "timestamp": 1772780878.4564884,
+    "type": "s2s_generation",
+    "status": "completed",
+    "metadata": {
+      "source": "test.wav"
+    }
+  },
+  {
+    "timestamp": 1772780878.4670753,
+    "type": "dubbing",
+    "status": "completed",
+    "metadata": {
+      "source": "test.wav"
+    }
   }
 ]

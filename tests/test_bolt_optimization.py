@@ -48,12 +48,13 @@ def test_watermark_tone_caching():
 
     # 1. First call - should generate and cache
     watermarked1 = engine._apply_audio_watermark(wav, sr)
-    assert sr in _watermark_tone_cache
-    tone1 = _watermark_tone_cache[sr]
+    cache_key = (sr, 1) # Mono
+    assert cache_key in _watermark_tone_cache
+    tone1 = _watermark_tone_cache[cache_key]
 
     # 2. Second call - should reuse from cache
     watermarked2 = engine._apply_audio_watermark(wav, sr)
-    tone2 = _watermark_tone_cache[sr]
+    tone2 = _watermark_tone_cache[cache_key]
 
     # Verify it's the same object (identity check)
     assert tone1 is tone2
@@ -63,8 +64,9 @@ def test_watermark_tone_caching():
     sr2 = 44100
     wav2 = np.zeros(sr2, dtype=np.float32)
     watermarked3 = engine._apply_audio_watermark(wav2, sr2)
-    assert sr2 in _watermark_tone_cache
-    assert _watermark_tone_cache[sr2] is not tone1
+    cache_key2 = (sr2, 1)
+    assert cache_key2 in _watermark_tone_cache
+    assert _watermark_tone_cache[cache_key2] is not tone1
 
 def test_watermark_disabled():
     """Verify that watermarking can be disabled via settings."""

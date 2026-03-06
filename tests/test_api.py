@@ -47,7 +47,8 @@ def test_api_speakers():
     assert response.status_code == 200
     data = response.json()
     assert "presets" in data
-    assert "ryan" in data["presets"]
+    speaker_ids = [s["id"] for s in data["presets"]]
+    assert "ryan" in speaker_ids
 
 
 def test_api_upload_invalid_type():

@@ -1,10 +1,12 @@
 from pydantic import BaseModel, field_validator
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 
 class SpeakerProfile(BaseModel):
     role: Optional[str] = None
     type: str
     value: str
+    preview_text: Optional[str] = None
+    ref_text: Optional[str] = None
 
 class MixRequest(BaseModel):
     name: str
@@ -23,7 +25,7 @@ class ScriptLine(BaseModel):
     pan: Optional[float] = 0.0
 
 class PodcastRequest(BaseModel):
-    profiles: List[SpeakerProfile]
+    profiles: Union[List[SpeakerProfile], Dict[str, SpeakerProfile]]
     script: List[ScriptLine]
     bgm_mood: Optional[str] = None
     ducking_level: Optional[float] = 0.0

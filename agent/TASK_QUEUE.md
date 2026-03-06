@@ -1,6 +1,13 @@
 # Task Queue: Autonomous Improvement
 
 ## Prioritized Backlog
+- [ ] **Sound Gen: Benchmark Baseline** — Create `tools/benchmark_tts.py` measuring latency/VRAM for all voice types. See `conductor/track-sound-generation.md` Phase 3 Task 3.1.
+- [ ] **Sound Gen: Silence Padding for ICL** — Append 0.5s silence to ref audio before ICL encoding to prevent phoneme bleed. See Track Phase 3 Task 3.3.
+- [ ] **Sound Gen: Reference Audio Validation** — Validate ref audio duration (3-30s) and reject silence-only input. See Track Phase 3 Task 3.4.
+- [ ] **Sound Gen: Temperature Presets** — Expose Consistent/Balanced/Creative temperature presets in UI. See Track Phase 3 Task 3.5.
+- [ ] **Sound Gen: Per-Segment Quality Scoring** — Compute SNR/clipping metrics per segment. See Track Phase 4 Task 4.1.
+- [ ] **Sound Gen: Auto-Retry on Low Quality** — Retry garbled segments with lower temperature. See Track Phase 4 Task 4.2.
+- [ ] **Sound Gen: Unit Tests for Preview & ICL** — Tests for preview text pool, ICL mode toggle. See Track Phase 5.
 - [ ] **Video Gen Auto-Setup:** Verify and automate the installation of `ltx-pipelines` and related dependencies if a GPU is detected.
 
 ## Completed (Mar 2026 Refactor)
