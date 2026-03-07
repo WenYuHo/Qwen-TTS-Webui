@@ -47,6 +47,18 @@ export const SystemManager = {
     renderPhonemeList(overrides) {
         const list = document.getElementById('phoneme-list');
         if (!list) return;
+
+        if (Object.keys(overrides).length === 0) {
+            list.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-language"></i>
+                    <h3>No overrides found</h3>
+                    <p>Add words and their phonetic pronunciations above.</p>
+                </div>
+            `;
+            return;
+        }
+
         list.innerHTML = Object.entries(overrides).map(([word, phonetic]) => `
             <div class="card" style="padding:8px 12px; display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; background:rgba(255,255,255,0.02);">
                 <div><strong>${word}</strong> <i class="fas fa-arrow-right" style="margin:0 8px; opacity:0.5;" aria-hidden="true"></i> <span style="color:var(--accent)">${phonetic}</span></div>
@@ -206,7 +218,18 @@ export const SystemManager = {
     renderAuditLog(log) {
         const list = document.getElementById('audit-log-list');
         if (!list) return;
-        if (!log.length) { list.innerHTML = '<div style="text-align:center; opacity:0.5; padding:20px;">No events recorded</div>'; return; }
+
+        if (!log.length) {
+            list.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>No events recorded</h3>
+                    <p>System activity will appear here as tasks are processed.</p>
+                </div>
+            `;
+            return;
+        }
+
         list.innerHTML = log.sort((a,b) => b.timestamp - a.timestamp).map(e => `
             <div class="card" style="padding:8px 12px; font-size:0.75rem; background:rgba(255,255,255,0.01); border-color:rgba(255,255,255,0.05); margin-bottom:4px;">
                 <div style="display:flex; justify-content:space-between;">
