@@ -21,3 +21,7 @@
 ## 2026-03-06 - [Deep Tab Focus and Notification Accessibility]
 **Learning:** In a layered SPA, focus management must extend to sub-tabs (Inventory, Phonemes, etc.) to prevent keyboard "traps" or orientation loss. Combining `aria-pressed` on the trigger with programmatic focus on the new section's heading (with `tabindex="-1"`) provides the clearest signal to screen readers. For asynchronous feedback, an `aria-live="polite"` container ensures non-disruptive but guaranteed announcement of background task states.
 **Action:** Always implement sub-tab focus management and use `aria-live` for dynamic status updates.
+
+## 2026-03-20 - [Semantic Empty States for System Management]
+**Learning:** Extending the existing `.empty-state` CSS pattern to administrative views like the System Manager (Audit Log, Phoneme Editor) significantly improves visual consistency and provides clear guidance to the user. Using FontAwesome icons that match the semantic context (e.g., `fa-clipboard-list` for logs, `fa-language` for phonemes) helps with quick visual recognition and reinforces the "Technoid Brutalist" style.
+**Action:** Always check for unhandled empty states in data-heavy administrative views and implement icon-based guidance using existing UI patterns.
