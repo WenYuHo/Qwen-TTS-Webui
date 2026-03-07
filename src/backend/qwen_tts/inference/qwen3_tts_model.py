@@ -70,6 +70,20 @@ class Qwen3TTSModel:
           model.get_supported_languages(), model.get_supported_speakers()
     """
 
+    # ⚡ Bolt: Centralized hard defaults to avoid dict recreation in _merge_generate_kwargs
+    _HARD_DEFAULTS = {
+        "do_sample": True,
+        "top_k": 50,
+        "top_p": 1.0,
+        "temperature": 0.9,
+        "repetition_penalty": 1.05,
+        "subtalker_dosample": True,
+        "subtalker_top_k": 50,
+        "subtalker_top_p": 1.0,
+        "subtalker_temperature": 0.9,
+        "max_new_tokens": 2048,
+    }
+
     def __init__(self, model: Qwen3TTSForConditionalGeneration, processor, generate_defaults: Optional[Dict[str, Any]] = None):
         self.model = model
         self.processor = processor
@@ -276,19 +290,19 @@ class Qwen3TTSModel:
         out: List[Tuple[np.ndarray, int]] = []
         for a in items:
             if isinstance(a, str):
-                out.append(self._load_audio_to_np(a))
+                wav, sr = self._load_audio_to_np(a)
             elif isinstance(a, tuple) and len(a) == 2 and isinstance(a[0], np.ndarray):
                 # ⚡ Bolt: copy=False avoids a copy if already float32.
-                out.append((a[0].astype(np.float32, copy=False), int(a[1])))
+                wav, sr = a[0].astype(np.float32, copy=False), int(a[1])
             elif isinstance(a, np.ndarray):
                 raise ValueError("For numpy waveform input, pass a tuple (audio, sr).")
             else:
                 raise TypeError(f"Unsupported audio input type: {type(a)}")
-        for i, a in enumerate(out):
-            if a[0].ndim > 1:
-                # np.mean returns a new array, no need for astype here as it preserves floatiness
-                a[0] = np.mean(a[0], axis=-1)
-                out[i] = (a[0], a[1])
+
+            # ⚡ Bolt: Convert to mono in-place if needed during the same pass
+            if wav.ndim > 1:
+                wav = np.mean(wav, axis=-1)
+            out.append((wav, sr))
         return out
 
     def _ensure_list(self, x: MaybeList) -> List[Any]:
@@ -324,20 +338,7 @@ class Qwen3TTSModel:
             output.append(seq_ids)
         return output
 
-    def _merge_generate_kwargs(
-        self,
-        do_sample: Optional[bool] = None,
-        top_k: Optional[int] = None,
-        top_p: Optional[float] = None,
-        temperature: Optional[float] = None,
-        repetition_penalty: Optional[float] = None,
-        subtalker_dosample: Optional[bool] = None,
-        subtalker_top_k: Optional[int] = None,
-        subtalker_top_p: Optional[float] = None,
-        subtalker_temperature: Optional[float] = None,
-        max_new_tokens: Optional[int] = None,
-        **kwargs,
-    ) -> Dict[str, Any]:
+    def _merge_generate_kwargs(self, **kwargs) -> Dict[str, Any]:
         """
         Merge user-provided generation arguments with defaults from `generate_config.json`.
 
@@ -346,50 +347,15 @@ class Qwen3TTSModel:
           - Otherwise, use the value from generate_config.json if present.
           - Otherwise, fall back to the hard defaults.
 
-        Args:
-            do_sample, top_k, top_p, temperature, repetition_penalty,
-            subtalker_dosample, subtalker_top_k, subtalker_top_p, subtalker_temperature, max_new_tokens:
-                Common generation parameters.
-            **kwargs:
-                Other arguments forwarded to model.generate().
-
         Returns:
             Dict[str, Any]: Final kwargs to pass into model.generate().
         """
-        hard_defaults = dict(
-            do_sample=True,
-            top_k=50,
-            top_p=1.0,
-            temperature=0.9,
-            repetition_penalty=1.05,
-            subtalker_dosample=True,
-            subtalker_top_k=50,
-            subtalker_top_p=1.0,
-            subtalker_temperature=0.9,
-            max_new_tokens=2048,
-        )
-
-        def pick(name: str, user_val: Any) -> Any:
-            if user_val is not None:
-                return user_val
-            if name in self.generate_defaults:
-                return self.generate_defaults[name]
-            return hard_defaults[name]
-
-        merged = dict(kwargs)
-        merged.update(
-            do_sample=pick("do_sample", do_sample),
-            top_k=pick("top_k", top_k),
-            top_p=pick("top_p", top_p),
-            temperature=pick("temperature", temperature),
-            repetition_penalty=pick("repetition_penalty", repetition_penalty),
-            subtalker_dosample=pick("subtalker_dosample", subtalker_dosample),
-            subtalker_top_k=pick("subtalker_top_k", subtalker_top_k),
-            subtalker_top_p=pick("subtalker_top_p", subtalker_top_p),
-            subtalker_temperature=pick("subtalker_temperature", subtalker_temperature),
-            max_new_tokens=pick("max_new_tokens", max_new_tokens),
-        )
-        return merged
+        # ⚡ Bolt: Use O(1) loop over keys to merge defaults from config and hardcoded fallbacks.
+        # This replaces the nested 'pick' function and explicit argument listing to reduce overhead.
+        for name, hard_val in self._HARD_DEFAULTS.items():
+            if kwargs.get(name) is None:
+                kwargs[name] = self.generate_defaults.get(name, hard_val)
+        return kwargs
 
     # voice clone model
     @torch.inference_mode()
@@ -466,7 +432,8 @@ class Qwen3TTSModel:
                 raise ValueError(f"Reference audio duration must be between 3s and 30s. Got {duration:.2f}s (index {i}).")
             
             # Validation: Reject silence-only input (Peak < 0.01)
-            peak = np.max(np.abs(wav))
+            # ⚡ Bolt: Use max(np.max, -np.min) to avoid allocating a large temporary array for np.abs(wav)
+            peak = max(np.max(wav), -np.min(wav))
             if peak < 0.01:
                 raise ValueError(f"Reference audio appears to be silent or too quiet (peak={peak:.4f}). index {i}")
 
