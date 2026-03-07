@@ -56,6 +56,9 @@ if __name__ == "__main__":
     from backend.utils import storage_manager
     storage_manager.start()
     
+    # ⚡ Bolt: Start task manager background cleanup
+    server_state.task_manager.start_cleanup_loop()
+
     print("\n" + "="*50)
     print("  QWEN-TTS STUDIO IS READY")
     print("  URL: http://localhost:8080")
