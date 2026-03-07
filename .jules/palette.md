@@ -17,3 +17,7 @@
 ## 2026-03-01 - [Multi-View Component Synchronization]
 **Learning:** In a multi-view Single Page Application (SPA) where shared components (like a Task Monitor) appear across different views, using IDs for these components prevents reliable simultaneous updates. Converting these to class-based selectors (e.g., `.js-task-monitor-list`) and using `querySelectorAll` in the update logic ensures that state remains consistent across all views without requiring a view-switch to trigger a refresh.
 **Action:** Use class-based selectors for shared UI components that exist in multiple DOM branches. Implement global update functions that target all instances of these classes.
+
+## 2026-03-06 - [Deep Tab Focus and Notification Accessibility]
+**Learning:** In a layered SPA, focus management must extend to sub-tabs (Inventory, Phonemes, etc.) to prevent keyboard "traps" or orientation loss. Combining `aria-pressed` on the trigger with programmatic focus on the new section's heading (with `tabindex="-1"`) provides the clearest signal to screen readers. For asynchronous feedback, an `aria-live="polite"` container ensures non-disruptive but guaranteed announcement of background task states.
+**Action:** Always implement sub-tab focus management and use `aria-live` for dynamic status updates.

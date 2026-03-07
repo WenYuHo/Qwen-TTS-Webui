@@ -26,6 +26,37 @@ class TaskManager:
         self.threads: Dict[str, threading.Thread] = {}
         self.stop_events: Dict[str, threading.Event] = {}
         self.lock = threading.Lock()
+        self._cleanup_thread = None
+        self._cleanup_stop_event = threading.Event()
+
+    def start_cleanup_loop(self, interval: int = 3600):
+        """
+        Starts a background daemon thread that periodically prunes stale task records.
+
+        Args:
+            interval: Time in seconds between cleanup runs (default: 1 hour).
+        """
+        if self._cleanup_thread and self._cleanup_thread.is_alive():
+            return
+
+        self._cleanup_stop_event.clear()
+        self._cleanup_thread = threading.Thread(
+            target=self._run_cleanup_loop,
+            args=(interval,),
+            daemon=True,
+            name="TaskCleanupLoop"
+        )
+        self._cleanup_thread.start()
+        logger.info(f"TaskManager: Background cleanup loop started (interval: {interval}s)")
+
+    def stop_cleanup_loop(self):
+        """Signals the background cleanup loop to terminate."""
+        self._cleanup_stop_event.set()
+
+    def _run_cleanup_loop(self, interval: int):
+        """Internal loop executed by the cleanup thread."""
+        while not self._cleanup_stop_event.wait(interval):
+            self.cleanup_old_tasks(max_age_seconds=interval)
 
     def create_task(self, task_type: str, metadata: Optional[Dict[str, Any]] = None) -> str:
         """

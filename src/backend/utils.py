@@ -243,6 +243,7 @@ class AuditManager:
     def __init__(self):
         self.file_path = PROJECTS_DIR / "audit.json"
         self.lock = threading.Lock()
+        self._cache = None # ⚡ Bolt: In-memory cache to avoid redundant I/O
 
     def log_event(self, event_type: str, metadata: dict, status: str):
         event = {
@@ -252,6 +253,7 @@ class AuditManager:
             "metadata": self._sanitize_metadata(metadata)
         }
         with self.lock:
+            # ⚡ Bolt: _load() now populates and returns the cache
             log = self._load()
             log.append(event)
             if len(log) > 1000:
@@ -265,20 +267,36 @@ class AuditManager:
         return sanitized
 
     def _load(self) -> list:
+        # ⚡ Bolt: Return cached log if available
+        if self._cache is not None:
+            return self._cache
+
         if not self.file_path.exists():
-            return []
+            self._cache = []
+            return self._cache
         try:
             with open(self.file_path, "r", encoding="utf-8") as f:
-                return json.load(f)
+                self._cache = json.load(f)
+                return self._cache
         except Exception:
-            return []
+            self._cache = []
+            return self._cache
 
     def _save(self, log: list):
+        # ⚡ Bolt: Always update cache on save to stay in sync
+        self._cache = log
         with open(self.file_path, "w", encoding="utf-8") as f:
             json.dump(log, f, indent=2)
 
     def get_log(self) -> list:
-        return self._load()
+        with self.lock:
+            # ⚡ Bolt: Return copy to prevent external mutation of cache
+            return list(self._load())
+
+    def clear_cache(self):
+        """⚡ Bolt: Clear the in-memory cache."""
+        with self.lock:
+            self._cache = None
 
 class ResourceMonitor:
     """Provides real-time CPU, RAM, and GPU usage metrics."""
@@ -412,6 +430,9 @@ class StorageManager:
         # Also clear DSP caches
         global _eq_filter_cache
         _eq_filter_cache.clear()
+
+        # ⚡ Bolt: Clear audit manager cache
+        audit_manager.clear_cache()
 
         self.last_cleanup_time = time.time()
         self.total_pruned_count += pruned_count

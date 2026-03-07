@@ -103,7 +103,7 @@
                         </button>
                         <div id="design-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.4); border:1px solid var(--accent); padding: 12px;">
                             <div style="display:flex; align-items:center; gap:12px;">
-                                <button class="btn btn-secondary btn-sm" onclick="playDesignPreview()"><i class="fas fa-play"></i></button>
+                                <button class="btn btn-secondary btn-sm" onclick="playDesignPreview()" aria-label="Play design preview" title="Play design preview"><i class="fas fa-play" aria-hidden="true"></i></button>
                                 <span id="design-status" class="volt-text" style="font-size:0.8rem; font-weight:700;">READY</span>
                                 <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="saveDesignedVoice()">SAVE</button>
                             </div>
@@ -128,7 +128,7 @@
                         <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="testVoiceClone(this)">CLONE & PREVIEW</button>
                         <div id="clone-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.4); border:1px solid var(--accent); padding: 12px;">
                             <div style="display:flex; align-items:center; gap:12px;">
-                                <button class="btn btn-secondary btn-sm" onclick="playClonePreview()"><i class="fas fa-play"></i></button>
+                                <button class="btn btn-secondary btn-sm" onclick="playClonePreview()" aria-label="Play clone preview" title="Play clone preview"><i class="fas fa-play" aria-hidden="true"></i></button>
                                 <span id="clone-status" class="volt-text" style="font-size:0.8rem; font-weight:700;">READY</span>
                                 <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="saveClonedVoice()">SAVE</button>
                             </div>
@@ -151,7 +151,7 @@
                         <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="testVoiceMix(this)">MIX & PREVIEW</button>
                         <div id="mix-preview-container" class="card" style="margin-top:20px; display:none; background: rgba(0,0,0,0.4); border:1px solid var(--accent); padding: 12px;">
                             <div style="display:flex; align-items:center; gap:12px;">
-                                <button class="btn btn-secondary btn-sm" onclick="playMixPreview()"><i class="fas fa-play"></i></button>
+                                <button class="btn btn-secondary btn-sm" onclick="playMixPreview()" aria-label="Play mix preview" title="Play mix preview"><i class="fas fa-play" aria-hidden="true"></i></button>
                                 <span id="mix-status" class="volt-text" style="font-size:0.8rem; font-weight:700;">READY</span>
                                 <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="saveMixedVoice()">SAVE</button>
                             </div>
@@ -456,7 +456,7 @@
     <div id="video-modal" class="modal-overlay" role="dialog" aria-labelledby="video-modal-title" aria-modal="true" style="display:none;" onclick="if(event.target === this) hideVideoModal()">
         <div class="card-brutalist modal-content" style="max-width:900px; width:95%; padding:0; overflow:hidden;">
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; border-bottom:2px solid var(--accent);">
-                <h2 id="video-modal-title" tabindex="-1">Video Preview</h2><button class="btn btn-danger btn-sm" onclick="hideVideoModal()" aria-label="Close modal">X</button>
+                <h2 id="video-modal-title" tabindex="-1">Video Preview</h2><button class="btn btn-danger btn-sm" onclick="hideVideoModal()" aria-label="Close modal" title="Close modal">X</button>
             </div>
             <div style="background:#000; position:relative; min-height:400px; display:flex; justify-content:center;">
                 <video id="video-modal-player" controls style="max-width:100%;"></video>
@@ -470,7 +470,7 @@
     </div>
 
     <!-- Toast -->
-    <div id="toast-container" style="position:fixed; bottom:80px; right:24px; z-index:10000; display:flex; flex-direction:column; gap:12px; pointer-events:none;"></div>
+    <div id="toast-container" aria-live="polite" style="position:fixed; bottom:80px; right:24px; z-index:10000; display:flex; flex-direction:column; gap:12px; pointer-events:none;"></div>
 
     <!-- Scripts -->
     <script src="/static/libs/wavesurfer.min.js"></script>

@@ -47,8 +47,9 @@ def test_watermark_tone_caching():
     _watermark_tone_cache.clear()
 
     # 1. First call - should generate and cache
+    # ⚡ Bolt: Cache key is now (sample_rate, num_channels)
     watermarked1 = engine._apply_audio_watermark(wav, sr)
-    cache_key = (sr, 1) # Mono
+    cache_key = (sr, 1) # mono
     assert cache_key in _watermark_tone_cache
     tone1 = _watermark_tone_cache[cache_key]
 

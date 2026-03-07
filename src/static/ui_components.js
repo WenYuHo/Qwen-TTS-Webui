@@ -25,6 +25,7 @@ export const VideoModal = {
         }
 
         modal.style.display = 'flex';
+        if (title) title.focus();
         player.play();
 
         this._handleEsc = (e) => {
@@ -143,7 +144,7 @@ export const ErrorDisplay = {
                 <strong style="color:var(--danger); font-family:var(--font-mono); font-size:0.9rem;">
                     <i class="fas fa-exclamation-triangle"></i> ${title.toUpperCase()}
                 </strong>
-                <button class="btn btn-danger btn-sm" style="padding:2px 6px;" onclick="this.parentElement.parentElement.remove()"><i class="fas fa-times"></i></button>
+                <button class="btn btn-danger btn-sm" style="padding:2px 6px;" onclick="this.parentElement.parentElement.remove()" aria-label="Close error message" title="Close error message"><i class="fas fa-times" aria-hidden="true"></i></button>
             </div>
             <div style="font-size:0.75rem; color:#ffb3c1; margin-bottom:12px; line-height:1.4;">
                 ${detail}
