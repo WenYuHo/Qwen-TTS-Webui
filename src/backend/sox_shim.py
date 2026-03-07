@@ -18,7 +18,8 @@ class Transformer:
         logging.warning("Using mock sox.Transformer. Results may vary from real SoX.")
         
         # Simple RMS normalization as a placeholder for 'norm' effect
-        max_val = np.max(np.abs(input_array))
+        # ⚡ Bolt: Use max(np.max, -np.min) to avoid allocating a large temporary array for np.abs(input_array)
+        max_val = max(np.max(input_array), -np.min(input_array))
         if max_val > 0:
             # Scale to roughly -6dB (0.5 linear)
             return (input_array / max_val * 0.5).astype(input_array.dtype)
