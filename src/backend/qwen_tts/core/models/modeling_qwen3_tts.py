@@ -527,16 +527,22 @@ class Qwen3TTSTalkerRotaryEmbedding(nn.Module):
     @dynamic_rope_update  # power user: used with advanced RoPE types (e.g. dynamic rope)
     def forward(self, x, position_ids):
         # In contrast to other models, Qwen3TTSThinkerText has different position ids for the grids
-        # So we expand the inv_freq to shape (3, ...)
-        inv_freq_expanded = self.inv_freq[None, None, :, None].float().expand(3, position_ids.shape[1], -1, 1)
-        position_ids_expanded = position_ids[:, :, None, :].float()  # shape (3, bs, 1, positions)
-
+        # ⚡ Bolt: Use broadcasting instead of matmul + transpose to reduce intermediate allocations.
         device_type = x.device.type if isinstance(x.device.type, str) and x.device.type != "mps" else "cpu"
         with torch.autocast(device_type=device_type, enabled=False):  # Force float32
-            freqs = (inv_freq_expanded.float() @ position_ids_expanded.float()).transpose(2, 3)
-            emb = torch.cat((freqs, freqs), dim=-1)
-            cos = emb.cos() * self.attention_scaling
-            sin = emb.sin() * self.attention_scaling
+            # inv_freq: (D/2,), position_ids: (3, BS, S) -> freqs: (3, BS, S, D/2)
+            freqs = position_ids[..., None].float() * self.inv_freq[None, None, None, :].float()
+
+            # ⚡ Bolt: Compute cos/sin on half-size freqs before cat to reduce transcendental math by 50%.
+            cos = freqs.cos()
+            sin = freqs.sin()
+
+            if self.attention_scaling != 1.0:
+                cos *= self.attention_scaling
+                sin *= self.attention_scaling
+
+            cos = torch.cat((cos, cos), dim=-1)
+            sin = torch.cat((sin, sin), dim=-1)
 
         return cos.to(dtype=x.dtype), sin.to(dtype=x.dtype)
 
@@ -564,15 +570,22 @@ class Qwen3TTSRotaryEmbedding(nn.Module):
     @torch.no_grad()
     @dynamic_rope_update  # power user: used with advanced RoPE types (e.g. dynamic rope)
     def forward(self, x, position_ids):
-        inv_freq_expanded = self.inv_freq[None, :, None].float().expand(position_ids.shape[0], -1, 1).to(x.device)
-        position_ids_expanded = position_ids[:, None, :].float()
-
+        # ⚡ Bolt: Use broadcasting instead of matmul + transpose to reduce intermediate allocations.
         device_type = x.device.type if isinstance(x.device.type, str) and x.device.type != "mps" else "cpu"
         with torch.autocast(device_type=device_type, enabled=False):  # Force float32
-            freqs = (inv_freq_expanded.float() @ position_ids_expanded.float()).transpose(1, 2)
-            emb = torch.cat((freqs, freqs), dim=-1)
-            cos = emb.cos() * self.attention_scaling
-            sin = emb.sin() * self.attention_scaling
+            # inv_freq: (D/2,), position_ids: (BS, S) -> freqs: (BS, S, D/2)
+            freqs = position_ids[..., None].float() * self.inv_freq[None, None, :].float().to(x.device)
+
+            # ⚡ Bolt: Compute cos/sin on half-size freqs before cat to reduce transcendental math by 50%.
+            cos = freqs.cos()
+            sin = freqs.sin()
+
+            if self.attention_scaling != 1.0:
+                cos *= self.attention_scaling
+                sin *= self.attention_scaling
+
+            cos = torch.cat((cos, cos), dim=-1)
+            sin = torch.cat((sin, sin), dim=-1)
 
         return cos.to(dtype=x.dtype), sin.to(dtype=x.dtype)
 
