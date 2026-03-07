@@ -253,6 +253,16 @@
                             <input type="range" id="audio-reverb" min="0" max="100" value="0" style="width:100%" oninput="document.getElementById('reverb-val').innerText = this.value + '%' ">
                         </div>
 
+                        <h3 class="label-industrial">TEMPERATURE</h3>
+                        <div class="card" style="padding:12px; margin-bottom:20px; background:rgba(0,0,0,0.3); border:1px solid var(--accent);">
+                            <select id="global-temperature" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);" aria-label="Global Temperature Preset">
+                                <option value="0.9" selected>Creative (0.9)</option>
+                                <option value="0.5">Balanced (0.5)</option>
+                                <option value="0.1">Consistent (0.1)</option>
+                            </select>
+                            <p style="font-size:0.55rem; opacity:0.6; margin-top:8px; line-height:1.2;">Higher = more expressive/varied. Lower = more stable/literal.</p>
+                        </div>
+
                         <h3 class="label-industrial">VIDEO ENGINE</h3>
                         <div class="card" style="padding:12px; background:rgba(204,255,0,0.05); border:1px solid var(--accent); margin-bottom:20px;">
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:8px;">

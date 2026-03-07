@@ -22,7 +22,8 @@ async def stream_synthesis(request: StreamingSynthesisRequest):
             for wav, sr in server_state.engine.stream_synthesize(
                 text=request.text,
                 profile=request.profile,
-                language=request.language or "auto"
+                language=request.language or "auto",
+                temperature=request.temperature
             ):
                 yield numpy_to_wav_bytes(wav, sr).read()
 
@@ -58,12 +59,13 @@ def run_synthesis_task(task_id: str, is_podcast: bool, request_data: PodcastRequ
                 ducking_level=request_data.ducking_level or 0.0,
                 eq_preset=request_data.eq_preset or "flat",
                 reverb_level=request_data.reverb_level or 0.0,
-                master_acx=request_data.master_acx or False
+                master_acx=request_data.master_acx or False,
+                temperature=request_data.temperature
             )
         else:
             line = request_data.script[0]
             profile = profiles_map.get(line.role)
-            wav, sr = server_state.engine.generate_segment(line.text, profile=profile, language=line.language)
+            wav, sr = server_state.engine.generate_segment(line.text, profile=profile, language=line.language, temperature=line.temperature or request_data.temperature)
             result = {"waveform": wav, "sample_rate": sr}
 
         server_state.task_manager.update_task(task_id, progress=80, message="Encoding audio")
@@ -132,7 +134,8 @@ async def generate_podcast(request: PodcastRequest, background_tasks: Background
                     script=[line.model_dump() for line in request.script],
                     profiles=profiles_map,
                     eq_preset=request.eq_preset or "flat",
-                    reverb_level=request.reverb_level or 0.0
+                    reverb_level=request.reverb_level or 0.0,
+                    temperature=request.temperature
                 ):
                     yield numpy_to_wav_bytes(wav, sr).read()
             

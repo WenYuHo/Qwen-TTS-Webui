@@ -8,6 +8,7 @@ export const ProductionManager = {
         const ducking_level = parseFloat(document.getElementById('ducking-range').value) / 100.0;
         const streamEnabled = document.getElementById('stream-podcast').checked;
         const masterAcx = document.getElementById('master-acx').checked;
+        const globalTemperature = parseFloat(document.getElementById('global-temperature').value) || 0.9;
         
         // Audio Effects
         const eqPreset = document.getElementById('audio-eq').value;
@@ -34,7 +35,8 @@ export const ProductionManager = {
                 role: b.role,
                 text: b.text,
                 language: b.language || 'auto',
-                pause_after: b.pause_after || 0.5
+                pause_after: b.pause_after || 0.5,
+                temperature: b.temperature || null
             }));
         } else {
             script = window.parseScript(document.getElementById('script-editor').value);
@@ -60,7 +62,7 @@ export const ProductionManager = {
                         width: width,
                         height: height,
                         num_frames: numFrames,
-                        guidance_scale: guidance_scale,
+                        guidance_scale: guidanceScale,
                         num_inference_steps: inferenceSteps,
                         seed: seed,
                         max_shift: maxShift,
@@ -87,7 +89,8 @@ export const ProductionManager = {
                     eq_preset: eqPreset, 
                     reverb_level: reverbLevel,
                     stream: streamEnabled,
-                    master_acx: masterAcx
+                    master_acx: masterAcx,
+                    temperature: globalTemperature
                 })
             });
 
@@ -207,6 +210,7 @@ export const ProductionManager = {
                 ducking_level: parseFloat(document.getElementById('ducking-range').value) / 100.0,
                 eq_preset: document.getElementById('audio-eq').value,
                 reverb_level: parseFloat(document.getElementById('audio-reverb').value) / 100.0,
+                global_temperature: parseFloat(document.getElementById('global-temperature').value),
                 video_enabled: document.getElementById('video-enabled').checked,
                 video_prompt: document.getElementById('video-prompt').value,
                 master_acx: document.getElementById('master-acx').checked,
@@ -248,6 +252,7 @@ export const ProductionManager = {
                 document.getElementById('audio-eq').value = data.settings.eq_preset || 'flat';
                 document.getElementById('audio-reverb').value = (data.settings.reverb_level || 0) * 100;
                 document.getElementById('reverb-val').innerText = `${Math.round((data.settings.reverb_level || 0) * 100)}%`;
+                document.getElementById('global-temperature').value = data.settings.global_temperature || '0.9';
                 document.getElementById('video-enabled').checked = data.settings.video_enabled || false;
                 document.getElementById('video-prompt').value = data.settings.video_prompt || '';
                 document.getElementById('video-options').style.display = data.settings.video_enabled ? 'block' : 'none';
@@ -330,10 +335,23 @@ export const ProductionManager = {
                         <button class="btn btn-danger btn-sm" onclick="window.CanvasManager.deleteBlock('${b.id}'); window.ProductionManager.renderBlocks()" aria-label="Delete block" title="Delete block"><i class="fas fa-trash" aria-hidden="true"></i></button>
                     </div>
                 </div>
-                <div style="display:flex; align-items:center; gap:12px; margin-top:12px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
-                    <span class="label-industrial" style="font-size:0.55rem;">PAN</span>
-                    <input type="range" min="-100" max="100" value="${(b.pan || 0) * 100}" style="flex:1; height:4px;" onchange="window.CanvasManager.updateBlock('${b.id}', {pan: this.value/100.0})">
-                    <span class="volt-text" style="font-size:0.6rem; width:30px;">${b.pan > 0 ? 'R' : b.pan < 0 ? 'L' : 'C'}</span>
+                <div style="font-size:0.85rem; margin-bottom:12px; opacity:0.8; font-style:italic;">"${b.text.substring(0, 100)}${b.text.length > 100 ? '...' : ''}"</div>
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:12px; border-top:1px solid rgba(255,255,255,0.05); padding-top:12px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="label-industrial" style="font-size:0.55rem; width:30px;">PAN</span>
+                        <input type="range" min="-100" max="100" value="${(b.pan || 0) * 100}" style="flex:1; height:4px;" onchange="window.CanvasManager.updateBlock('${b.id}', {pan: this.value/100.0})">
+                        <span class="volt-text" style="font-size:0.6rem; width:20px;">${b.pan > 0 ? 'R' : b.pan < 0 ? 'L' : 'C'}</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="label-industrial" style="font-size:0.55rem; width:30px;">TEMP</span>
+                        <select class="btn btn-secondary btn-sm" style="flex:1; font-size:0.6rem; padding:2px;" onchange="window.CanvasManager.updateBlock('${b.id}', {temperature: parseFloat(this.value)})">
+                            <option value="" ${b.temperature === undefined ? 'selected' : ''}>Auto</option>
+                            <option value="0.9" ${b.temperature === 0.9 ? 'selected' : ''}>Creative</option>
+                            <option value="0.5" ${b.temperature === 0.5 ? 'selected' : ''}>Balanced</option>
+                            <option value="0.1" ${b.temperature === 0.1 ? 'selected' : ''}>Stable</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         `).join('');

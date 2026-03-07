@@ -23,6 +23,7 @@ class ScriptLine(BaseModel):
     pause_after: Optional[float] = 0.5
     instruct: Optional[str] = None
     pan: Optional[float] = 0.0
+    temperature: Optional[float] = None
 
 class PodcastRequest(BaseModel):
     profiles: Union[List[SpeakerProfile], Dict[str, SpeakerProfile]]
@@ -33,6 +34,7 @@ class PodcastRequest(BaseModel):
     reverb_level: Optional[float] = 0.0
     stream: Optional[bool] = False
     master_acx: Optional[bool] = False
+    temperature: Optional[float] = None
 
 class S2SRequest(BaseModel):
     source_audio: str
@@ -48,6 +50,7 @@ class StreamingSynthesisRequest(BaseModel):
     profile: Dict[str, Any]
     language: Optional[str] = "auto"
     instruct: Optional[str] = None
+    temperature: Optional[float] = None
 
 class ProjectBlock(BaseModel):
     id: str

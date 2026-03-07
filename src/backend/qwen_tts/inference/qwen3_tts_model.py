@@ -16,6 +16,7 @@
 import base64
 import io
 import urllib.request
+import logging
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
@@ -27,6 +28,8 @@ import torch
 from transformers import AutoConfig, AutoModel, AutoProcessor
 
 from ..core.models import Qwen3TTSConfig, Qwen3TTSForConditionalGeneration, Qwen3TTSProcessor
+
+logger = logging.getLogger("studio")
 
 AudioLike = Union[
     str,                     # wav path, URL, base64
@@ -453,6 +456,25 @@ class Qwen3TTSModel:
             )
 
         normalized = self._normalize_audio_inputs(ref_audio_list)
+
+        # ⚡ Bolt: Append 0.5s silence to ref audio in ICL mode to prevent phoneme bleed
+        # This acts as a buffer between the reference speech and the newly generated speech.
+        for i, (wav, sr) in enumerate(normalized):
+            # Validation: Duration must be between 3s and 30s
+            duration = len(wav) / sr
+            if duration < 3.0 or duration > 30.0:
+                raise ValueError(f"Reference audio duration must be between 3s and 30s. Got {duration:.2f}s (index {i}).")
+            
+            # Validation: Reject silence-only input (Peak < 0.01)
+            peak = np.max(np.abs(wav))
+            if peak < 0.01:
+                raise ValueError(f"Reference audio appears to be silent or too quiet (peak={peak:.4f}). index {i}")
+
+            if not xvec_list[i]:
+                silence_len = int(0.5 * sr)
+                silence = np.zeros(silence_len, dtype=wav.dtype)
+                normalized[i] = (np.concatenate([wav, silence]), sr)
+                logger.info(f"Appended 0.5s silence buffer to ICL reference audio (index {i})")
 
         # ⚡ Bolt: Skip expensive speech tokenizer encoding if all items are x_vector_only
         all_xvec = all(xvec_list)

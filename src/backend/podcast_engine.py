@@ -12,12 +12,13 @@ import threading
 import time
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+
+from .config import BASE_DIR, SHARED_ASSETS_DIR, VIDEO_DIR, logger
 from pydub import AudioSegment
 from deep_translator import GoogleTranslator
 
 from .qwen_tts.inference.qwen3_tts_model import VoiceClonePromptItem
 from .model_loader import get_model
-from .config import BASE_DIR, SHARED_ASSETS_DIR, VIDEO_DIR, logger
 from .video_engine import VideoEngine
 from .utils import phoneme_manager, AudioPostProcessor, Profiler, prune_dict_cache
 
@@ -105,14 +106,16 @@ class PodcastEngine:
         self.video_audio_cache[video_path] = extracted_path
         return extracted_path
 
-    def stream_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], eq_preset: str = "flat", reverb_level: float = 0.0):
+    def stream_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], eq_preset: str = "flat", reverb_level: float = 0.0, temperature: Optional[float] = None):
         """Yields synthesized audio blocks sequentially for low-latency podcast playback."""
         for item in script:
             try:
                 role = item["role"]
                 profile = profiles.get(role, {"type": "preset", "value": "Ryan"})
                 text = phoneme_manager.apply(item["text"])
-                wav, sr = self.generate_segment(text, profile, language=item.get("language", "auto"), instruct=item.get("instruct"))
+                # Priority: item temperature > global temperature
+                current_temp = item.get("temperature") if item.get("temperature") is not None else temperature
+                wav, sr = self.generate_segment(text, profile, language=item.get("language", "auto"), instruct=item.get("instruct"), temperature=current_temp)
                 wav = AudioPostProcessor.apply_eq(wav, sr, preset=eq_preset)
                 wav = AudioPostProcessor.apply_reverb(wav, sr, intensity=reverb_level)
                 yield wav, sr, item
@@ -227,7 +230,7 @@ class PodcastEngine:
         except Exception:
             return wav
 
-    def generate_segment(self, text: str, profile: Dict[str, Any], language: str = "auto", model: Optional[Any] = None, instruct: Optional[str] = None) -> tuple[np.ndarray, int]:
+    def generate_segment(self, text: str, profile: Dict[str, Any], language: str = "auto", model: Optional[Any] = None, instruct: Optional[str] = None, temperature: Optional[float] = None) -> tuple[np.ndarray, int]:
         try:
             text = phoneme_manager.apply(text)
             final_instruct = instruct or profile.get("instruct")
@@ -235,12 +238,12 @@ class PodcastEngine:
             ptype = profile.get("type")
             if ptype == "preset":
                 if model is None: model = get_model("CustomVoice")
-                wavs, sr = model.generate_custom_voice(text=text, speaker=profile["value"], language=language, instruct=final_instruct)
+                wavs, sr = model.generate_custom_voice(text=text, speaker=profile["value"], language=language, instruct=final_instruct, temperature=temperature)
             elif ptype == "design":
                 if model is None: model = get_model("VoiceDesign")
                 design_instruct = profile["value"]
                 if final_instruct: design_instruct = f"{design_instruct}, {final_instruct}"
-                wavs, sr = model.generate_voice_design(text=text, instruct=design_instruct, language=language, non_streaming_mode=True)
+                wavs, sr = model.generate_voice_design(text=text, instruct=design_instruct, language=language, non_streaming_mode=True, temperature=temperature)
             elif ptype == "clone":
                 ref_text = profile.get("ref_text")
                 use_icl = ref_text is not None and ref_text.strip() != ""
@@ -267,7 +270,7 @@ class PodcastEngine:
                     prune_dict_cache(self.prompt_cache, limit=200, count=20)
                     self.prompt_cache[icl_cache_key] = prompt
                 if model is None: model = get_model("Base")
-                wavs, sr = model.generate_voice_clone(text=text, language=language, voice_clone_prompt=prompt, instruct=final_instruct)
+                wavs, sr = model.generate_voice_clone(text=text, language=language, voice_clone_prompt=prompt, instruct=final_instruct, temperature=temperature)
             elif ptype == "mix":
                 cache_key = f"mix:{profile['value']}"
                 if cache_key in self.prompt_cache: prompt = self.prompt_cache[cache_key]
@@ -279,7 +282,7 @@ class PodcastEngine:
                     prompt = [VoiceClonePromptItem(ref_code=None, ref_spk_embedding=mixed_emb, x_vector_only_mode=True, icl_mode=False, ref_text=None)]
                     self.prompt_cache[cache_key] = prompt
                 if model is None: model = get_model("Base")
-                wavs, sr = model.generate_voice_clone(text=text, language=language, voice_clone_prompt=prompt, instruct=final_instruct)
+                wavs, sr = model.generate_voice_clone(text=text, language=language, voice_clone_prompt=prompt, instruct=final_instruct, temperature=temperature)
             else:
                 raise RuntimeError(f"Unknown speaker type: {ptype}")
 
@@ -308,7 +311,7 @@ class PodcastEngine:
         self.mix_embedding_cache[cache_key] = mixed_emb
         return mixed_emb
 
-    def stream_synthesize(self, text: str, profile: Dict[str, Any], language: str = "auto", instruct: Optional[str] = None):
+    def stream_synthesize(self, text: str, profile: Dict[str, Any], language: str = "auto", instruct: Optional[str] = None, temperature: Optional[float] = None):
         # 1. First split by major punctuation to create sentences
         # Matches periods, exclamation, question marks, and newlines
         initial_chunks = re.split(r'([.!?。！？\n\r]+)', text)
@@ -346,7 +349,7 @@ class PodcastEngine:
             try:
                 # ⚡ Bolt Stability: Add a small pause or reset context if needed here
                 # For now, generating segment-by-segment is safer than one huge prompt
-                wav, sr = self.generate_segment(chunk_text, profile, language, None, instruct)
+                wav, sr = self.generate_segment(chunk_text, profile, language, None, instruct, temperature=temperature)
                 yield wav, sr
             except Exception as e:
                 logger.error(f"Chunk synthesis failed for '{chunk_text[:20]}...': {e}")
@@ -364,13 +367,15 @@ class PodcastEngine:
         wavs, sr = model.generate_voice_clone(text=text, voice_clone_prompt=voice_clone_prompt)
         return {"waveform": wavs[0], "sample_rate": sr, "text": text}
 
-    def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None, ducking_level: float = 0.0, eq_preset: str = "flat", reverb_level: float = 0.0, master_acx: bool = False) -> Optional[Dict[str, Any]]:
+    def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None, ducking_level: float = 0.0, eq_preset: str = "flat", reverb_level: float = 0.0, master_acx: bool = False, temperature: Optional[float] = None) -> Optional[Dict[str, Any]]:
         with Profiler("Generate Podcast"):
             sample_rate = 24000
             waveforms = [None] * len(script)
             srs = [None] * len(script)
 
-            # ⚡ Bolt: Group segments by model type for batched synthesis
+            # ⚡ Bolt: Group segments by model type and temperature for batched synthesis
+            # Note: Batching currently only works for identical generation parameters.
+            # If segments have different temperatures, we might need more complex grouping or fall back to serial.
             groups = {"CustomVoice": [], "VoiceDesign": [], "Base": []}
             for i, item in enumerate(script):
                 role = item.get("role")
@@ -378,19 +383,21 @@ class PodcastEngine:
                 if profile is None:
                     continue
                 mtype = self._get_model_type_for_profile(profile)
-
-                # Preset profiles use CustomVoice model but might be categorized as "Base"
-                # if _get_model_type_for_profile logic is inconsistent.
-                # Ensure they go to CustomVoice group.
                 if profile.get("type") == "preset":
                     mtype = "CustomVoice"
-
                 groups[mtype].append(i)
 
             for mtype, indices in groups.items():
                 if not indices:
                     continue
                 try:
+                    # Check if all segments in this group share the same temperature
+                    # If not, we fall back to serial synthesis for safety
+                    group_temps = [script[idx].get("temperature") if script[idx].get("temperature") is not None else temperature for idx in indices]
+                    if len(set(group_temps)) > 1:
+                         raise ValueError("Heterogeneous temperatures in batch; falling back to serial.")
+
+                    target_temp = group_temps[0]
                     model = get_model(mtype)
                     batch_texts = [phoneme_manager.apply(script[i]["text"]) for i in indices]
                     batch_langs = [script[i].get("language", "auto") for i in indices]
@@ -398,7 +405,7 @@ class PodcastEngine:
 
                     if mtype == "CustomVoice":
                         speakers = [profiles[script[i]["role"]]["value"] for i in indices]
-                        wavs, sr = model.generate_custom_voice(text=batch_texts, speaker=speakers, language=batch_langs, instruct=batch_instructs)
+                        wavs, sr = model.generate_custom_voice(text=batch_texts, speaker=speakers, language=batch_langs, instruct=batch_instructs, temperature=target_temp)
                     elif mtype == "VoiceDesign":
                         design_instructs = []
                         for i, idx in enumerate(indices):
@@ -406,7 +413,7 @@ class PodcastEngine:
                             ins = p["value"]
                             if batch_instructs[i]: ins = f"{ins}, {batch_instructs[i]}"
                             design_instructs.append(ins)
-                        wavs, sr = model.generate_voice_design(text=batch_texts, instruct=design_instructs, language=batch_langs, non_streaming_mode=True)
+                        wavs, sr = model.generate_voice_design(text=batch_texts, instruct=design_instructs, language=batch_langs, non_streaming_mode=True, temperature=target_temp)
                     elif mtype == "Base":
                         batch_prompts = []
                         for i, idx in enumerate(indices):
@@ -430,18 +437,17 @@ class PodcastEngine:
                                 prune_dict_cache(self.prompt_cache, limit=200, count=20)
                                 self.prompt_cache[cache_key] = prompt
                             batch_prompts.append(prompt[0])
-                        wavs, sr = model.generate_voice_clone(text=batch_texts, language=batch_langs, voice_clone_prompt=batch_prompts, instruct=batch_instructs)
+                        wavs, sr = model.generate_voice_clone(text=batch_texts, language=batch_langs, voice_clone_prompt=batch_prompts, instruct=batch_instructs, temperature=target_temp)
 
                     for j, idx in enumerate(indices):
-                        # ⚡ Bolt: Consolidate watermarking by moving it out of the per-segment synthesis loop.
-                        # This saves N-1 redundant concatenations and temporary array allocations.
                         waveforms[idx], srs[idx] = wavs[j], sr
                 except Exception as e:
                     logger.warning(f"⚡ Bolt: Batch synthesis failed for {mtype}, falling back to serial: {e}")
                     for idx in indices:
                         try:
                             item = script[idx]
-                            wav, sr = self.generate_segment(item["text"], profile=profiles.get(item["role"]), language=item.get("language", "auto"), instruct=item.get("instruct"))
+                            current_temp = item.get("temperature") if item.get("temperature") is not None else temperature
+                            wav, sr = self.generate_segment(item["text"], profile=profiles.get(item["role"]), language=item.get("language", "auto"), instruct=item.get("instruct"), temperature=current_temp)
                             waveforms[idx], srs[idx] = wav, sr
                         except Exception: continue
 

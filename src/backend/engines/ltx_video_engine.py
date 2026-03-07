@@ -92,8 +92,44 @@ class LTXVideoEngine:
             
             if self._pipeline:
                 logger.info(f"LTX Engine initialized with {self._model_type}")
+                
+                # --- ⚡ Bolt: LTX-Video Performance Optimizations ---
+                import torch
+                
+                # 1. VAE Memory Reduction (Prevents OOM during final decode)
+                if hasattr(self._pipeline, "vae") and hasattr(self._pipeline.vae, "enable_slicing"):
+                    self._pipeline.vae.enable_slicing()
+                    logger.info("Enabled VAE slicing for memory reduction.")
+                elif hasattr(self._pipeline, "vae") and hasattr(self._pipeline.vae, "enable_tiling"):
+                    self._pipeline.vae.enable_tiling()
+                    logger.info("Enabled VAE tiling for memory reduction.")
+
+                # 2. Xformers / Memory Efficient Attention
+                try:
+                    import xformers  # noqa: F401
+                    if hasattr(self._pipeline, "enable_xformers_memory_efficient_attention"):
+                        self._pipeline.enable_xformers_memory_efficient_attention()
+                        logger.info("Enabled xformers memory efficient attention.")
+                except ImportError:
+                    logger.info("xformers not installed. Using PyTorch SDPA (default).")
+                    
+                # 3. CPU Offloading (Crucial for 8GB/12GB GPUs running Video Gen)
+                if hasattr(self._pipeline, "enable_model_cpu_offload"):
+                    self._pipeline.enable_model_cpu_offload()
+                    logger.info("Enabled model CPU offloading.")
+
+                # 4. PyTorch 2.0 Compilation (Speed boost)
+                if hasattr(torch, "compile") and hasattr(self._pipeline, "transformer"):
+                    try:
+                        # mode="reduce-overhead" is often best for video gen
+                        self._pipeline.transformer = torch.compile(self._pipeline.transformer, mode="reduce-overhead", fullgraph=True)
+                        logger.info("Applied torch.compile() to LTX transformer for speed optimization.")
+                    except Exception as e:
+                        logger.warning(f"Failed to torch.compile transformer (safe to ignore): {e}")
+
             else:
                 raise RuntimeError("Failed to resolve an LTX model path.")
+
 
     def _apply_video_watermark(self, video_path: str):
         """Overlays a subtle 'AI Generated' text watermark using OpenCV."""
@@ -181,7 +217,15 @@ class LTXVideoEngine:
         # Apply watermark
         self._apply_video_watermark(str(output_path))
 
-        logger.info(f"Video generated: {output_path}")
+        # --- ⚡ Bolt: Aggressive VRAM Cleanup ---
+        import gc
+        import torch
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.ipc_collect()
+            
+        logger.info(f"Video generated: {output_path}. VRAM cleared.")
         return {"path": str(output_path), "filename": filename}
 
     def generate_narrated_video(
