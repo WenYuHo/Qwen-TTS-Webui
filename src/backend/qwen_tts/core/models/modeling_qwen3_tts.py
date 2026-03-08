@@ -170,41 +170,45 @@ class AttentiveStatisticsPooling(nn.Module):
         return mask
 
     def _compute_statistics(self, x, m, dim=2):
+        # ⚡ Bolt: Use E[X^2] - (E[X])^2 to reduce computational redundancy and temporary tensor allocations.
         mean = (m * x).sum(dim)
-        std = torch.sqrt((m * (x - mean.unsqueeze(dim)).pow(2)).sum(dim).clamp(self.eps))
+        var = (m * x.pow(2)).sum(dim) - mean.pow(2)
+        std = torch.sqrt(var.clamp(min=self.eps))
         return mean, std
 
     def forward(self, hidden_states):
         seq_length = hidden_states.shape[-1]
-        lengths = torch.ones(hidden_states.shape[0], device=hidden_states.device)
+        channels = hidden_states.shape[1]
 
-        # Make binary mask of shape [N, 1, L]
-        mask = self._length_to_mask(
-            lengths * seq_length, max_len=seq_length, dtype=hidden_states.dtype, device=hidden_states.device
-        )
-        mask = mask.unsqueeze(1)
+        # ⚡ Bolt: Use native torch.mean/var for uniform sequences (common in inference) to bypass
+        # manual mask generation and O(N) divisions, providing improved throughput.
+        mean = hidden_states.mean(dim=2)
+        std = hidden_states.std(dim=2, unbiased=False)
 
-        # Expand the temporal context of the pooling layer by allowing the
-        # self-attention to look at global properties of the utterance.
-        total = mask.sum(dim=2, keepdim=True)
+        # ⚡ Bolt: Refactor statistical projections into separate weights to enable constant-time
+        # broadcasting. This replaces the O(N) cat([hidden_states, mean_expanded, std_expanded])
+        # pattern, significantly reducing memory bandwidth usage.
+        W = self.tdnn.conv.weight
+        b = self.tdnn.conv.bias
 
-        mean, std = self._compute_statistics(hidden_states, mask / total)
-        # ⚡ Bolt: Use .expand() instead of .repeat() to avoid unnecessary memory copies
-        mean = mean.unsqueeze(2).expand(-1, -1, seq_length)
-        std = std.unsqueeze(2).expand(-1, -1, seq_length)
-        attention = torch.cat([hidden_states, mean, std], dim=1)
+        # Projection 1: Local hidden states (convolution)
+        x_part = F.conv1d(hidden_states, W[:, :channels], bias=None)
+        # Projection 2: Global mean/std (linear projections on pooled features)
+        m_part = F.linear(mean, W[:, channels:2*channels].squeeze(-1))
+        s_part = F.linear(std, W[:, 2*channels:].squeeze(-1))
 
-        # Apply layers
-        attention = self.conv(self.tanh(self.tdnn(attention)))
+        # Combine via broadcasting (B, C_attn, L) + (B, C_attn, 1)
+        combined = x_part + (m_part + s_part + b).view(-1, W.shape[0], 1)
+        attention = self.tdnn.activation(combined)
 
-        # Filter out zero-paddings
-        attention = attention.masked_fill(mask == 0, float("-inf"))
+        # Apply final attention projections
+        attention = self.conv(self.tanh(attention))
 
         attention = F.softmax(attention, dim=2)
         mean, std = self._compute_statistics(hidden_states, attention)
-        # Append mean and std of the batch
-        pooled_stats = torch.cat((mean, std), dim=1)
-        pooled_stats = pooled_stats.unsqueeze(2)
+
+        # Concatenate mean and std and restore shape [B, 2*C, 1]
+        pooled_stats = torch.cat((mean, std), dim=1).unsqueeze(2)
 
         return pooled_stats
 
