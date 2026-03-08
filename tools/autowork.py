@@ -25,10 +25,17 @@ def main():
 
     print(f"🚀 Found next task: {task}")
     
-    # Use absolute path for gemini command on Windows
-    gemini_cmd = r"C:\Users\tony5\AppData\Roaming\npm\gemini.cmd"
+    # Find gemini command in PATH
+    import shutil
+    gemini_cmd = shutil.which("gemini") or shutil.which("gemini.cmd")
     
+    if not gemini_cmd:
+        print("❌ ERROR: 'gemini' command not found in PATH.")
+        print("Please ensure @google/gemini-cli is installed (npm install -g @google/gemini-cli)")
+        return
+
     # Construct the Ralph command with hybrid-agent instructions
+    # Security: Use a list of arguments instead of a shell string
     command = [
         gemini_cmd, "-y", 
         f"/ralph:loop \"{task}. Protocol: 1. Create unique feature branch. 2. Code/Test locally. 3. Push and open PR. 4. Poll PR status until merged. Use TASK_DONE as the promise only when the PR is merged into main. Follow agent/MEMORY.md.\" --completion-promise \"TASK_DONE\""
@@ -38,8 +45,10 @@ def main():
     print(f"📝 Command: {' '.join(command)}")
     
     try:
-        # Run the command and inherit stdout/stderr
-        subprocess.run(command, shell=True)
+        # Security: shell=False is default and safer
+        subprocess.run(command, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Loop failed with exit code {e.returncode}")
     except KeyboardInterrupt:
         print("\n🛑 Loop interrupted by user.")
 

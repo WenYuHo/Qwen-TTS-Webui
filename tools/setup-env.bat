@@ -49,7 +49,7 @@ echo Requires ~1GB additional downloads and a strong GPU (8GB+ VRAM recommended)
 set /p install_video="Would you like to install video generation dependencies? (y/n): "
 if /i "%install_video%"=="y" (
     echo Installing LTX-Video requirements...
-    pip install -r requirements_video.txt
+    pip install ltx-pipelines diffusers opencv-python tqdm
     echo [OK] Video dependencies installed.
 ) else (
     echo Skipping video generation setup.

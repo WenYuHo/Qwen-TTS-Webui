@@ -23,8 +23,8 @@ The following structure aims to clean up the root directory and organize files b
 ├── requirements.txt
 ├── .gitignore
 ├── LICENSE
-├── setup_env.sh            # Keep at root for visibility
-└── start.sh                # Keep at root for visibility
+├── studio-linux.sh       # Unified entry for Linux/macOS
+├── studio.bat            # Unified entry for Windows
 ```
 
 ## Move Mapping
@@ -35,7 +35,7 @@ The following structure aims to clean up the root directory and organize files b
 | `shared_assets/*` | `data/shared_assets/` | Medium | Requires updating paths in `src/backend/api/assets.py`. |
 | `update_*.py` | `scripts/archive/` | Low | Maintenance scripts, safe to move. |
 | `verify_model_*.py` | `scripts/verification/` | Low | Safe to move. |
-| `verify_setup.py` | `scripts/verification/` | Medium | Referenced by `start.sh`. Need to update `start.sh`. |
+| `verify_setup.py` | `scripts/verification/` | Medium | Referenced by `studio-linux.sh`. Need to update `studio-linux.sh`. |
 
 ## Safety Status
 - **Auto-move safe:** No files are marked as auto-move safe in the bootstrap phase. All moves require [AWAITING APPROVAL] status in `TASK_QUEUE.md` to be cleared by a human.

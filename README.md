@@ -39,13 +39,16 @@ This repository follows the **Conductor Framework**. Before starting any work, A
 ### 2. Installation & Launch
 The **Studio Launcher** handles everything: environment creation, CUDA detection, and dependency installation.
 
-```bash
-# Windows:
-studio.bat
+**Windows Users:**
+Double-click `studio.bat` or run:
+```powershell
+.\studio.bat
+```
 
-# Linux/macOS:
-chmod +x studio.sh
-./studio.sh
+**Linux/macOS Users:**
+```bash
+chmod +x studio-linux.sh
+./studio-linux.sh
 ```
 
 ### 3. Usage

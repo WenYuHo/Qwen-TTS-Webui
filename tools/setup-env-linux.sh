@@ -11,7 +11,7 @@ if [ ! -d ".venv" ]; then
     if [ $? -ne 0 ]; then
         echo "ERROR: Failed to create virtual environment."
         echo "Ensure python3-venv is installed."
-        $E 1
+        exit 1
     fi
 else
     echo "[1/3] Virtual environment already exists."
@@ -31,5 +31,5 @@ echo
 echo "=========================================="
 echo "SUCCESS: Environment is ready!"
 echo "=========================================="
-echo "Use ./start.sh to launch the studio."
+echo "Use ./start-linux.sh to launch the studio."
 echo
