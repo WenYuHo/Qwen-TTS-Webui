@@ -206,6 +206,8 @@ export const VoiceLabManager = {
     },
 
     async loadVoiceLibrary() {
+        const grid = document.getElementById('voice-library-grid');
+        if (grid) grid.innerHTML = '<div class="empty-state empty-state-grid"><h3><i class="fas fa-spinner fa-spin"></i> Loading library...</h3></div>';
         try {
             const [libRes, speakerRes] = await Promise.all([
                 fetch('/api/voice/library'),

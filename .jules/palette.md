@@ -25,3 +25,7 @@
 ## 2026-03-20 - [Semantic Empty States for System Management]
 **Learning:** Extending the existing `.empty-state` CSS pattern to administrative views like the System Manager (Audit Log, Phoneme Editor) significantly improves visual consistency and provides clear guidance to the user. Using FontAwesome icons that match the semantic context (e.g., `fa-clipboard-list` for logs, `fa-language` for phonemes) helps with quick visual recognition and reinforces the "Technoid Brutalist" style.
 **Action:** Always check for unhandled empty states in data-heavy administrative views and implement icon-based guidance using existing UI patterns.
+
+## 2026-03-22 - [Contextual ARIA Labels and Actionable Empty States]
+**Learning:** In media-heavy applications with multiple audio players, generic `aria-label`s are insufficient; providing contextual labels (e.g., "Global Voice Preview Player" vs "Main Podcast Playback Player") significantly aids screen reader navigation. Furthermore, "Actionable Empty States" that provide clear, step-by-step guidance on how to populate a container (e.g., "Go to Draft tab to write script...") transform a dead-end UI into a helpful onboarding flow.
+**Action:** Always provide unique, contextual labels for multiple instances of the same media element. Ensure every empty state includes a clear "call to action" or instructional path.

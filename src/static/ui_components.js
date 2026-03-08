@@ -109,7 +109,7 @@ export const Notification = {
         };
 
         toast.innerHTML = `
-            <i class="fas ${icons[type] || 'fa-bell'}" style="font-size:1.1rem;"></i>
+            <i class="fas ${icons[type] || 'fa-bell'}" style="font-size:1.1rem;" aria-hidden="true"></i>
             <div style="flex:1; font-size:0.85rem; font-weight:700; font-family:var(--font-mono);">${message.toUpperCase()}</div>
         `;
 
