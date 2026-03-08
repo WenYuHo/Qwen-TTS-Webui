@@ -273,30 +273,54 @@ class AudioPostProcessor:
 
     @staticmethod
     def apply_declick(wav: np.ndarray, sr: int) -> np.ndarray:
-        """Simple heuristic de-clicker: clamps spikes > 10x local RMS."""
+        """⚡ Bolt: Vectorized de-clicker using chunked RMS and broadcasting."""
         try:
-            if len(wav.shape) > 1:
+            is_stereo = len(wav.shape) > 1
+            window = int(sr * 0.002) # 2ms
+            if window < 2: return wav
+
+            if is_stereo:
+                # ⚡ Bolt: Process stereo by applying to each channel.
                 out = np.zeros_like(wav)
                 for i in range(wav.shape[0]):
                     out[i] = AudioPostProcessor.apply_declick(wav[i], sr)
                 return out
 
+            n_chunks = len(wav) // window
+            if n_chunks == 0: return wav
+
+            truncated_len = n_chunks * window
+            chunks = wav[:truncated_len].reshape(n_chunks, window)
+
+            # ⚡ Bolt: Use np.einsum for fast squared sum across chunks (O(N) but optimized)
+            # This replaces the O(N/window) Python loop with a single vectorized pass.
+            rms = np.sqrt(np.einsum('ij,ij->i', chunks, chunks) / window) + 1e-6
+            thresholds = rms * 10
+
+            # Identify spikes via broadcasting: (n_chunks, window) > (n_chunks, 1)
+            spikes = np.abs(chunks) > thresholds[:, np.newaxis]
+
             out = wav.copy()
-            window = int(sr * 0.002) # 2ms
-            if window < 2: return wav
+            modified = False
             
-            # Process in chunks
-            for i in range(0, len(wav), window):
-                chunk = wav[i:i+window]
-                if len(chunk) < 2: continue
-                local_rms = np.sqrt(np.mean(chunk**2)) + 1e-6
-                # Identify spikes
-                spikes = np.abs(chunk) > (local_rms * 10)
-                if np.any(spikes):
-                    # Clamp spikes to local RMS * 3
-                    sign = np.sign(chunk[spikes])
-                    out[i:i+window][spikes] = sign * local_rms * 3
-            return out
+            if np.any(spikes):
+                out_chunks = out[:truncated_len].reshape(n_chunks, window)
+                # Apply clamping: sign * local_rms * 3
+                target_values = (rms * 3)[:, np.newaxis]
+                signs = np.sign(out_chunks)
+                out_chunks[spikes] = (signs * target_values)[spikes]
+                modified = True
+
+            # ⚡ Bolt: Handle remainder chunk outside the main chunk condition to catch trailing spikes
+            remainder = wav[truncated_len:]
+            if len(remainder) >= 2:
+                rem_rms = np.sqrt(np.mean(remainder**2)) + 1e-6
+                rem_spikes = np.abs(remainder) > (rem_rms * 10)
+                if np.any(rem_spikes):
+                    out[truncated_len:][rem_spikes] = np.sign(remainder[rem_spikes]) * rem_rms * 3
+                    modified = True
+
+            return out if modified else wav
         except Exception as e:
             logger.error(f"De-click failed: {e}")
             return wav
