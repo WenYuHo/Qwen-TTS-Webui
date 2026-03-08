@@ -79,8 +79,8 @@ try:
             print("   Go to System > Model Inventory in the WebUI to download them.")
     except ImportError:
         # Auto-Setup trigger:
-        from tools.setup_video_gen import check_nvidia_gpu
-        if check_nvidia_gpu():
+        from tools.setup_video_gen import check_gpu
+        if check_gpu():
             print("[INFO] NVIDIA GPU detected but LTX Pipelines not installed.")
             print("[ACTION] Triggering Video Gen Auto-Setup...")
             try:

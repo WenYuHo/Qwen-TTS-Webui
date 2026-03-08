@@ -52,7 +52,10 @@ def run_synthesis_task(task_id: str, is_podcast: bool, request_data: PodcastRequ
         server_state.task_manager.update_task(task_id, progress=30, message="Loading models and starting inference")
 
         # ⚡ Bolt: Resolve temperature kwargs from preset
-        temp_kwargs = TEMPERATURE_PRESETS.get(request_data.temperature_preset or "balanced", TEMPERATURE_PRESETS["balanced"])
+        temp_kwargs = dict(TEMPERATURE_PRESETS.get(request_data.temperature_preset or "balanced", TEMPERATURE_PRESETS["balanced"]))
+        global_temp = temp_kwargs.pop("temperature", 0.9)
+        if request_data.temperature is not None:
+            global_temp = request_data.temperature
 
         if is_podcast:
             script_data = [line.model_dump() for line in request_data.script]
@@ -64,13 +67,13 @@ def run_synthesis_task(task_id: str, is_podcast: bool, request_data: PodcastRequ
                 eq_preset=request_data.eq_preset or "flat",
                 reverb_level=request_data.reverb_level or 0.0,
                 master_acx=request_data.master_acx or False,
-                temperature=request_data.temperature,
+                temperature=global_temp,
                 **temp_kwargs
             )
         else:
             line = request_data.script[0]
             profile = profiles_map.get(line.role)
-            wav, sr = server_state.engine.generate_segment(line.text, profile=profile, language=line.language, temperature=line.temperature or request_data.temperature, **temp_kwargs)
+            wav, sr = server_state.engine.generate_segment(line.text, profile=profile, language=line.language, temperature=line.temperature or global_temp, **temp_kwargs)
             result = {"waveform": wav, "sample_rate": sr}
 
         server_state.task_manager.update_task(task_id, progress=80, message="Encoding audio")
