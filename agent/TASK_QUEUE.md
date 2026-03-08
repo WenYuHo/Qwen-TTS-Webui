@@ -5,13 +5,6 @@
 - **SYSTEM**: `BOOT_SEQUENCE_COMPLETE`
 
 ## PRIORITIZED BACKLOG
-- [ ] **DUBBING_S2S_PH2**
-    - Task: Implemented emotion/instruct support for S2S. Batch conversion and target preview pending.
-    - Ref: `conductor/track-dubbing-pipeline.md` (Ph2).
-    - Promise: `DUBBING_S2S_PH2_COMPLETE`
-    - Reserved: NONE
-    - Updated: 2026-03-07T18:15:00Z
-    - Signals: `NONE`
 
 - [ ] **ENGINE_REFACTOR_MODULAR**
     - Task: Decompose `src/backend/podcast_engine.py` -> Segmenter, Synthesizer, Patcher modules.
@@ -32,3 +25,4 @@
 ## COMPLETED
 - [x] **DUBBING_PH1** (2026-03-07)
 - [x] **VIDEO_GEN_SETUP** (2026-03-07)
+- [x] **DUBBING_S2S_PH2** (2026-03-07)

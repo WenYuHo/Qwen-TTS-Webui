@@ -298,7 +298,7 @@ def generate_voice_changer(self, source_audio, target_profile=None):
 
 ### Tasks
 
-- [ ] **2.1 — Wire Prosody Preservation**
+- [x] **2.1 — Wire Prosody Preservation**
 
   **Step 1: Add `preserve_prosody` flag to `S2SRequest` in `schemas.py`:**
   ```python
@@ -367,7 +367,7 @@ def generate_voice_changer(self, source_audio, target_profile=None):
 
 ---
 
-- [ ] **2.2 — Target Voice Preview Before Conversion**
+- [x] **2.2 — Target Voice Preview Before Conversion**
 
   **Add preview button next to the target voice dropdown in `index.html`:**
   ```html
@@ -403,7 +403,7 @@ def generate_voice_changer(self, source_audio, target_profile=None):
 
 ---
 
-- [ ] **2.3 — Batch S2S Conversion**
+- [x] **2.3 — Batch S2S Conversion**
 
   **Step 1: Support multiple files via drag-and-drop in `dubbing.js`:**
   ```javascript
@@ -435,7 +435,7 @@ def generate_voice_changer(self, source_audio, target_profile=None):
 
 ---
 
-- [ ] **2.4 — Emotion Instruct for S2S**
+- [x] **2.4 — Emotion Instruct for S2S**
 
   **Use the same `EMOTION_PRESETS` map from Voice Library track:**
   ```javascript
