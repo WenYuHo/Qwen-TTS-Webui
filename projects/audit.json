@@ -2233,5 +2233,325 @@
     "metadata": {
       "role": "Speaker"
     }
+  },
+  {
+    "timestamp": 1773006017.0555153,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "ryan"
+    }
+  },
+  {
+    "timestamp": 1773006017.0836887,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
+  },
+  {
+    "timestamp": 1773006137.9661064,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "Speaker"
+    }
+  },
+  {
+    "timestamp": 1773006137.9895372,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "Speaker"
+    }
+  },
+  {
+    "timestamp": 1773006138.0031059,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "Speaker"
+    }
+  },
+  {
+    "timestamp": 1773006138.016694,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "Speaker"
+    }
+  },
+  {
+    "timestamp": 1773006216.4982603,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
+  },
+  {
+    "timestamp": 1773006613.4796963,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
+  },
+  {
+    "timestamp": 1773006821.454903,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "Alice"
+    }
+  },
+  {
+    "timestamp": 1773006821.4649782,
+    "type": "s2s",
+    "status": "failed",
+    "metadata": {
+      "source": "test.wav"
+    }
+  },
+  {
+    "timestamp": 1773006821.4748592,
+    "type": "dub",
+    "status": "failed",
+    "metadata": {
+      "source": "test.wav"
+    }
+  },
+  {
+    "timestamp": 1773010274.4192052,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "ryan"
+    }
+  },
+  {
+    "timestamp": 1773010274.457484,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
+  },
+  {
+    "timestamp": 1773010287.732311,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773010287.7358854,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773010287.7426996,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773010287.746193,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773010287.9785628,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
+  },
+  {
+    "timestamp": 1773010321.7236931,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773010321.7275224,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773010321.7353415,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773010321.7397053,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773010321.7631233,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "Alice"
+    }
+  },
+  {
+    "timestamp": 1773010321.7741683,
+    "type": "s2s",
+    "status": "failed",
+    "metadata": {
+      "source": "test.wav"
+    }
+  },
+  {
+    "timestamp": 1773010321.7847953,
+    "type": "dub",
+    "status": "failed",
+    "metadata": {
+      "source": "test.wav"
+    }
+  },
+  {
+    "timestamp": 1773010329.660846,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "Speaker"
+    }
+  },
+  {
+    "timestamp": 1773010329.6802723,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "Speaker"
+    }
+  },
+  {
+    "timestamp": 1773010329.6933177,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "Speaker"
+    }
+  },
+  {
+    "timestamp": 1773010329.7072802,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "Speaker"
+    }
+  },
+  {
+    "timestamp": 1773010376.4929216,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "ryan"
+    }
+  },
+  {
+    "timestamp": 1773010376.5192356,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
   }
 ]

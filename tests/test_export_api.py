@@ -1,5 +1,6 @@
 import pytest
-from fastapi.testclient import TestClient
+import pytest_asyncio
+from httpx import AsyncClient, ASGITransport
 from server import app
 import os
 import shutil
@@ -7,10 +8,15 @@ from pathlib import Path
 from backend.config import PROJECTS_DIR, VIDEO_DIR
 import zipfile
 import io
+import json
 
-client = TestClient(app)
+@pytest_asyncio.fixture
+async def client():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac
 
-def test_project_export():
+@pytest.mark.asyncio
+async def test_project_export(client):
     # 1. Create a dummy project
     project_name = "test_export_proj"
     project_path = PROJECTS_DIR / f"{project_name}.json"
@@ -21,7 +27,6 @@ def test_project_export():
         "voices": []
     }
     with open(project_path, "w") as f:
-        import json
         json.dump(project_data, f)
 
     # 2. Create a dummy video file
@@ -29,7 +34,7 @@ def test_project_export():
     video_path.write_text("dummy video")
 
     # 3. Request export
-    resp = client.get(f"/api/projects/{project_name}/export")
+    resp = await client.get(f"/api/projects/{project_name}/export")
     assert resp.status_code == 200
     assert resp.headers["Content-Type"] == "application/x-zip-compressed"
 

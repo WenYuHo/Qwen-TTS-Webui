@@ -1,22 +1,21 @@
 import pytest
-from fastapi.testclient import TestClient
+import pytest_asyncio
+from httpx import AsyncClient, ASGITransport
 import sys
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+import numpy as np
+import json
+import os
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from server import app
 from backend.task_manager import task_manager, TaskStatus
-import json
-import os
-import numpy as np
-from unittest.mock import MagicMock, patch
 
-client = TestClient(app)
-
-@pytest.fixture
-def mock_engine():
+@pytest_asyncio.fixture
+async def client():
     # Patch the engine in server_state where all routers get it from
     with patch('backend.server_state.engine') as mock:
         mock.upload_dir = Path("uploads")
@@ -28,23 +27,30 @@ def mock_engine():
         mock.generate_podcast.return_value = {"waveform": dummy_wav, "sample_rate": 24000}
         mock.dub_audio.return_value = {"waveform": dummy_wav, "sample_rate": 24000, "text": "Spanish text"}
         mock.transcribe_audio.return_value = "Transcribed text"
+        mock.get_system_status.return_value = {"status": "ok"}
 
-        yield mock
+        app.state.mock_engine = mock
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+            yield ac
 
-def test_health_check(mock_engine):
-    mock_engine.get_system_status.return_value = {"status": "ok"}
-    response = client.get("/api/health")
+@pytest.mark.asyncio
+async def test_health_check(client):
+    response = await client.get("/api/health")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
 
-def test_upload_voice(mock_engine):
+@pytest.mark.asyncio
+async def test_upload_voice(client):
+    # client fixture setup app.state.mock_engine
+    mock_engine = app.state.mock_engine
+    
     # Create a dummy wav file
     dummy_wav_file = Path("test_upload.wav")
     dummy_wav_file.write_bytes(b"dummy audio content")
 
     try:
         with open(dummy_wav_file, "rb") as f:
-            response = client.post("/api/voice/upload", files={"file": ("test.wav", f, "audio/wav")})
+            response = await client.post("/api/voice/upload", files={"file": ("test.wav", f, "audio/wav")})
 
         assert response.status_code == 200
         assert "filename" in response.json()
@@ -59,34 +65,38 @@ def test_upload_voice(mock_engine):
         if dummy_wav_file.exists():
             dummy_wav_file.unlink()
 
-def test_generate_segment(mock_engine):
+@pytest.mark.asyncio
+async def test_generate_segment(client):
     data = {
-        "profiles": [{"role": "Alice", "type": "preset", "value": "Ryan"}],
+        "profiles": {"Alice": {"type": "preset", "value": "Ryan"}},
         "script": [{"role": "Alice", "text": "Hello"}]
     }
-    response = client.post("/api/generate/segment", json=data)
+    response = await client.post("/api/generate/segment", json=data)
     assert response.status_code == 200
     assert "task_id" in response.json()
 
-def test_s2s_endpoint(mock_engine):
+@pytest.mark.asyncio
+async def test_s2s_endpoint(client):
     data = {
         "source_audio": "test.wav",
         "target_voice": {"role": "Bob", "type": "preset", "value": "Eric"}
     }
-    response = client.post("/api/generate/s2s", json=data)
+    response = await client.post("/api/generate/s2s", json=data)
     assert response.status_code == 200
     assert "task_id" in response.json()
 
-def test_dub_endpoint(mock_engine):
+@pytest.mark.asyncio
+async def test_dub_endpoint(client):
     data = {
         "source_audio": "test.wav",
         "target_lang": "Spanish"
     }
-    response = client.post("/api/generate/dub", json=data)
+    response = await client.post("/api/generate/dub", json=data)
     assert response.status_code == 200
     assert "task_id" in response.json()
 
-def test_project_endpoints():
+@pytest.mark.asyncio
+async def test_project_endpoints(client):
     project_name = "test_project"
     data = {
         "name": project_name,
@@ -95,15 +105,15 @@ def test_project_endpoints():
     }
 
     # Save
-    response = client.post(f"/api/projects/{project_name}", json=data)
+    response = await client.post(f"/api/projects/{project_name}", json=data)
     assert response.status_code == 200
 
     # List
-    response = client.get("/api/projects")
+    response = await client.get("/api/projects")
     assert project_name in response.json()["projects"]
 
     # Load
-    response = client.get(f"/api/projects/{project_name}")
+    response = await client.get(f"/api/projects/{project_name}")
     assert response.status_code == 200
     assert response.json()["name"] == project_name
 

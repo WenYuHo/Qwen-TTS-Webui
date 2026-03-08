@@ -1,7 +1,7 @@
 import os
 import sys
-import time
-import requests
+import asyncio
+import httpx
 import numpy as np
 import soundfile as sf
 from pathlib import Path
@@ -27,49 +27,50 @@ def analyze_audio(path, label):
     else:
         print("✅ RESULT: Audio signature looks healthy.")
 
-def test_quality_via_api():
+async def test_quality_via_api():
     base_url = "http://localhost:8080"
     tests = [
         {"name": "DEEP_MALE", "prompt": "A mature male voice with a deep, authoritative tone and clear articulation."},
         {"name": "BRIGHT_FEMALE", "prompt": "A youthful female voice, bright and energetic, with a friendly, helpful persona."}
     ]
     
-    for t in tests:
-        print(f"\nTesting Template via API: {t['name']}...")
-        payload = {
-            "profiles": [{"role": "preview", "type": "design", "value": t['prompt']}],
-            "script": [{"role": "preview", "text": "This is a technical quality test to ensure the voice sounds natural and clear."}]
-        }
-        
-        try:
-            # Create task
-            res = requests.post(f"{base_url}/api/generate/segment", json=payload)
-            task_id = res.json()["task_id"]
-            print(f"Task created: {task_id}. Polling...")
+    async with httpx.AsyncClient(base_url=base_url, timeout=30.0) as client:
+        for t in tests:
+            print(f"\nTesting Template via API: {t['name']}...")
+            payload = {
+                "profiles": [{"role": "preview", "type": "design", "value": t['prompt']}],
+                "script": [{"role": "preview", "text": "This is a technical quality test to ensure the voice sounds natural and clear."}]
+            }
             
-            # Poll for completion
-            while True:
-                task_res = requests.get(f"{base_url}/api/tasks/{task_id}")
-                task_data = task_res.json()
-                status = task_data["status"]
+            try:
+                # Create task
+                res = await client.post("/api/generate/segment", json=payload)
+                task_id = res.json()["task_id"]
+                print(f"Task created: {task_id}. Polling...")
                 
-                if status == "completed":
-                    print("Task completed!")
-                    # Task manager in this project stores result as bytes
-                    # result field is expected to be present in completed task
-                    audio_bytes = bytes(task_data["result"])
-                    path = f"test_{t['name']}.wav"
-                    with open(path, "wb") as f:
-                        f.write(audio_bytes)
-                    analyze_audio(path, t['name'])
-                    break
-                elif status == "failed":
-                    print(f"❌ Task failed: {task_data.get('error')}")
-                    break
-                
-                time.sleep(2)
-        except Exception as e:
-            print(f"❌ API Request failed: {e}")
+                # Poll for completion
+                while True:
+                    task_res = await client.get(f"/api/tasks/{task_id}")
+                    task_data = task_res.json()
+                    status = task_data["status"]
+                    
+                    if status == "completed":
+                        print("Task completed!")
+                        # Task manager in this project stores result as bytes
+                        # result field is expected to be present in completed task
+                        audio_bytes = bytes(task_data["result"])
+                        path = f"test_{t['name']}.wav"
+                        with open(path, "wb") as f:
+                            f.write(audio_bytes)
+                        analyze_audio(path, t['name'])
+                        break
+                    elif status == "failed":
+                        print(f"❌ Task failed: {task_data.get('error')}")
+                        break
+                    
+                    await asyncio.sleep(2)
+            except Exception as e:
+                print(f"❌ API Request failed: {e}")
 
 if __name__ == "__main__":
-    test_quality_via_api()
+    asyncio.run(test_quality_via_api())

@@ -1,5 +1,6 @@
 import pytest
-from fastapi.testclient import TestClient
+import pytest_asyncio
+from httpx import AsyncClient, ASGITransport
 import sys
 from pathlib import Path
 from unittest.mock import patch, MagicMock
@@ -12,11 +13,15 @@ mock_engine = MagicMock()
 with patch("backend.podcast_engine.PodcastEngine", return_value=mock_engine):
     from server import app
 
-client = TestClient(app)
+@pytest_asyncio.fixture
+async def client():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac
 
-def test_clear_cache_endpoint():
+@pytest.mark.asyncio
+async def test_clear_cache_endpoint(client):
     """Verify that the cache clearing endpoint returns success and correct structure."""
-    response = client.post("/api/system/cache/clear")
+    response = await client.post("/api/system/cache/clear")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ok"
@@ -25,9 +30,10 @@ def test_clear_cache_endpoint():
     assert "storage_stats" in data
     assert "last_cleanup" in data["storage_stats"]
 
-def test_system_stats_endpoint():
+@pytest.mark.asyncio
+async def test_system_stats_endpoint(client):
     """Verify that system stats include storage info."""
-    response = client.get("/api/system/stats")
+    response = await client.get("/api/system/stats")
     assert response.status_code == 200
     data = response.json()
     assert "cpu_percent" in data

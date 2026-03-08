@@ -1,12 +1,17 @@
 import pytest
-from fastapi.testclient import TestClient
+import pytest_asyncio
+from httpx import AsyncClient, ASGITransport
 from server import app
 from backend.config import SHARED_ASSETS_DIR
 from pathlib import Path
 
-client = TestClient(app)
+@pytest_asyncio.fixture
+async def client():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac
 
-def test_upload_asset_path_traversal():
+@pytest.mark.asyncio
+async def test_upload_asset_path_traversal(client):
     # Attempt to upload a file outside the shared assets directory
     # Using a nested path to test Path(file.filename).name
     filename = "../../traversal_test.txt"
@@ -14,7 +19,7 @@ def test_upload_asset_path_traversal():
 
     # We expect this to succeed but with the sanitized name "traversal_test.txt"
     # because Path("../../traversal_test.txt").name is "traversal_test.txt"
-    response = client.post("/api/assets/upload", files=files)
+    response = await client.post("/api/assets/upload", files=files)
 
     assert response.status_code == 200
     assert response.json()["message"] == "Asset traversal_test.txt uploaded successfully"
@@ -31,12 +36,13 @@ def test_upload_asset_path_traversal():
     if safe_file.exists():
         safe_file.unlink()
 
-def test_upload_asset_invalid_name():
+@pytest.mark.asyncio
+async def test_upload_asset_invalid_name(client):
     # Test a name that might still cause issues if not for .name
     # Though Path(".").name is "" which would fail our validation
     filename = "."
     files = {"file": (filename, b"content")}
 
-    response = client.post("/api/assets/upload", files=files)
+    response = await client.post("/api/assets/upload", files=files)
     assert response.status_code == 400
     assert response.json()["detail"] == "Invalid filename"
