@@ -1,7 +1,7 @@
 import os
 import pytest
 from pathlib import Path
-from src.backend.config import LTX_MODELS_PATH, find_ltx_model, find_model_path, MODELS
+from backend.config import LTX_MODELS_PATH, find_ltx_model, find_model_path, MODELS
 
 def test_ltx_checkpoint_integrity():
     """Verify that LTX checkpoints exist and are valid (not just zero-byte files)."""

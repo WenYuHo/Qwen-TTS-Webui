@@ -1,6 +1,6 @@
 import pytest
 import time
-from src.backend.task_manager import TaskManager, TaskStatus
+from backend.task_manager import TaskManager, TaskStatus
 
 def test_task_creation_and_listing():
     tm = TaskManager()

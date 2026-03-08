@@ -6,8 +6,8 @@ echo "Starting Qwen-TTS Podcast Studio..."
 
 if [ ! -d ".venv" ]; then
     echo "[ERROR] Virtual environment not found."
-    echo "Please run './setup_env.sh' first!"
-    $E 1
+    echo "Please run './setup-env-linux.sh' first!"
+    exit 1
 fi
 
 # Activate local environment and run

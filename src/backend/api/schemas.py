@@ -40,11 +40,22 @@ class PodcastRequest(BaseModel):
 class S2SRequest(BaseModel):
     source_audio: str
     target_voice: Dict[str, Any]
-    preserve_prosody: bool = False
+    preserve_prosody: bool = True
+    instruct: Optional[str] = None
+    target_lang: Optional[str] = None
+
+class BatchS2SRequest(BaseModel):
+    source_audios: List[str]
+    target_voice: Dict[str, Any]
+    preserve_prosody: bool = True
+    instruct: Optional[str] = None
 
 class DubRequest(BaseModel):
     source_audio: str
     target_lang: str
+
+class DetectLanguageRequest(BaseModel):
+    source_audio: str
 
 class StreamingSynthesisRequest(BaseModel):
     text: str

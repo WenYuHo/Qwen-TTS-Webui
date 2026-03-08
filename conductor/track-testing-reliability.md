@@ -445,7 +445,7 @@ except: pass
 
 ---
 
-- [ ] **3.2 — Voice Clone E2E**
+- [x] **3.2 — Voice Clone E2E**
 
   ```python
   @pytest.mark.integration
@@ -460,27 +460,16 @@ except: pass
 
 ---
 
-- [ ] **3.3 — Browser Smoke Test**
+- [x] **3.3 — Browser Smoke Test**
 
   **File:** `tests/test_browser_smoke.py` — requires Playwright:
   ```python
   import pytest
   
   @pytest.mark.browser
-  def test_homepage_loads():
+  def test_homepage_loads(start_server):
       """Verify all tabs render without JS errors."""
-      from playwright.sync_api import sync_playwright
-      with sync_playwright() as p:
-          browser = p.chromium.launch()
-          page = browser.new_page()
-          errors = []
-          page.on("pageerror", lambda err: errors.append(str(err)))
-          page.goto("http://localhost:7860")
-          # Verify key elements exist
-          assert page.locator("#voice-library-grid").is_visible()
-          assert page.locator("#script-editor").is_visible()
-          assert len(errors) == 0, f"JS errors: {errors}"
-          browser.close()
+      # ... (implemented)
   ```
 
   **Run with:** `pytest tests/test_browser_smoke.py -m browser -v`

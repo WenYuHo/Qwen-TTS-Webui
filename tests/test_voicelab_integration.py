@@ -2,6 +2,10 @@ import sys
 import io
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+import pytest
+import pytest_asyncio
+from httpx import AsyncClient, ASGITransport
+import numpy as np
 
 # 1. Mock heavy dependencies before any imports
 mock_modules = [
@@ -38,12 +42,14 @@ server_state.engine = mock_engine
 with patch("backend.api.generation.numpy_to_wav_bytes") as mock_wav_helper:
     mock_wav_helper.return_value = io.BytesIO(b"RIFF_WAVE_DATA")
     from server import app
-from fastapi.testclient import TestClient
-import numpy as np
 
-client = TestClient(app)
+@pytest_asyncio.fixture
+async def client():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac
 
-def test_stream_synthesis_integration():
+@pytest.mark.asyncio
+async def test_stream_synthesis_integration(client):
     """Verify that the /api/generate/stream endpoint returns a 200 and has correct headers."""
     def mock_generator(*args, **kwargs):
         yield np.zeros(1000, dtype=np.float32), 24000
@@ -56,57 +62,58 @@ def test_stream_synthesis_integration():
         "language": "en"
     }
     
-    # Use follow_redirects=False to avoid issues with streaming in TestClient
-    response = client.post("/api/generate/stream", json=payload)
+    response = await client.post("/api/generate/stream", json=payload)
     assert response.status_code == 200
     assert response.headers["content-type"] == "audio/wav"
-    # Note: TestClient response.content for StreamingResponse might be empty 
-    # depending on how it's handled, but we've verified headers and status.
 
-def test_video_suggestion_integration():
+@pytest.mark.asyncio
+async def test_video_suggestion_integration(client):
     """Verify that the /api/video/suggest endpoint returns a cinematic prompt."""
     payload = {"text": "A rainy night in a cyberpunk city."}
-    response = client.post("/api/video/suggest", json=payload)
+    response = await client.post("/api/video/suggest", json=payload)
     
     assert response.status_code == 200
     data = response.json()
     assert "suggestion" in data
     assert "cyberpunk" in data["suggestion"].lower()
 
-def test_phoneme_crud():
+@pytest.mark.asyncio
+async def test_phoneme_crud(client):
     """Verify the phoneme dictionary API (GET, POST, DELETE)."""
     # 1. Add override
     payload = {"word": "QwenTest", "phonetic": "Kwen"}
-    response = client.post("/api/system/phonemes", json=payload)
+    response = await client.post("/api/system/phonemes", json=payload)
     assert response.status_code == 200
     
     # 2. Get list
-    response = client.get("/api/system/phonemes")
+    response = await client.get("/api/system/phonemes")
     assert response.status_code == 200
     assert "QwenTest" in response.json()["overrides"]
     
     # 3. Delete override
-    response = client.delete("/api/system/phonemes/QwenTest")
+    response = await client.delete("/api/system/phonemes/QwenTest")
     assert response.status_code == 200
     assert "QwenTest" not in response.json()["overrides"]
 
-def test_system_settings_persistence():
+@pytest.mark.asyncio
+async def test_system_settings_persistence(client):
     """Verify that system settings can be retrieved and updated."""
-    response = client.get("/api/system/settings")
+    response = await client.get("/api/system/settings")
     assert response.status_code == 200
     
     payload = {"watermark_audio": False, "watermark_video": False}
-    response = client.post("/api/system/settings", json=payload)
+    response = await client.post("/api/system/settings", json=payload)
     assert response.status_code == 200
     assert response.json()["settings"]["watermark_audio"] is False
 
-def test_clone_preview_with_ref_text():
+@pytest.mark.asyncio
+async def test_clone_preview_with_ref_text(client):
     """Verify the full clone workflow: upload -> preview with ref_text."""
     # 1. Simulate upload
     mock_file = io.BytesIO(b"FAKE_AUDIO_CONTENT")
     # We need to mock the actual file writing in upload_voice
     with patch("backend.api.voices.open", create=True) as mock_open:
-        response = client.post("/api/voice/upload", files={"file": ("test.wav", mock_file, "audio/wav")})
+        response = await client.post("/api/voice/upload", files={"file": ("test.wav", mock_file, "audio/wav")})
     
     assert response.status_code == 200
     filename = response.json()["filename"]
@@ -122,7 +129,7 @@ def test_clone_preview_with_ref_text():
         "ref_text": "This is the reference transcript for ICL."
     }
     
-    response = client.post("/api/voice/preview", json=payload)
+    response = await client.post("/api/voice/preview", json=payload)
     assert response.status_code == 200
     assert response.headers["content-type"] == "audio/wav"
     

@@ -346,10 +346,23 @@
                         <h2 style="margin-bottom:16px; font-size: 1.1rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;" tabindex="-1">Dubbing (Translation)</h2>
                         <div class="control-group">
                             <label for="dub-file" class="label-industrial">Source File</label>
-                            <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" onclick="document.getElementById('dub-file').click()" aria-label="Upload file for dubbing">
-                                <i class="fas fa-file-video" aria-hidden="true"></i> UPLOAD FILE
-                            </button>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                                <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" onclick="document.getElementById('dub-file').click()" aria-label="Upload file for dubbing">
+                                    <i class="fas fa-file-video" aria-hidden="true"></i> UPLOAD
+                                </button>
+                                <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" onclick="detectLanguage(this)" id="dub-detect-btn" aria-label="Detect language from uploaded file">
+                                    <i class="fas fa-search" aria-hidden="true"></i> DETECT
+                                </button>
+                            </div>
                             <input type="file" id="dub-file" accept="video/*,audio/*" style="display:none" aria-label="Source file for dubbing">
+                        </div>
+                        <div id="dub-source-preview" class="card" style="margin-top:16px; padding:12px; background:rgba(0,0,0,0.3); border:1px solid var(--accent); display:none;">
+                            <label class="label-industrial" style="font-size:0.6rem; margin-bottom:8px; display:block;">SOURCE PREVIEW</label>
+                            <div id="dub-ws-container" style="height:64px; margin-bottom:12px; background:rgba(0,0,0,0.2);"></div>
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <button class="btn btn-secondary btn-sm" id="dub-preview-play-btn"><i class="fas fa-play"></i></button>
+                                <span id="dub-preview-time" class="volt-text" style="font-size:0.7rem;">00:00 / 00:00</span>
+                            </div>
                         </div>
                         <div class="control-group">
                             <label for="dub-lang" class="label-industrial">Target Language</label>
@@ -363,19 +376,57 @@
                         <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="startDubbing(this)">
                             <i class="fas fa-magic"></i> START DUBBING
                         </button>
+
+                        <div id="dub-comparison" class="card" style="margin-top:24px; padding:16px; background:rgba(204,255,0,0.05); border:2px solid var(--accent); display:none;">
+                            <h3 class="label-industrial" style="margin-bottom:16px; display:block; text-align:center; letter-spacing:2px;">COMPARISON</h3>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                                <div class="card" style="padding:8px; background:rgba(0,0,0,0.3);">
+                                    <label class="label-industrial" style="font-size:0.5rem; margin-bottom:4px; display:block;">ORIGINAL</label>
+                                    <audio id="dub-comp-original" controls style="width:100%; height:32px; filter:invert(1);"></audio>
+                                </div>
+                                <div class="card" style="padding:8px; background:rgba(0,0,0,0.3);">
+                                    <label class="label-industrial" style="font-size:0.5rem; margin-bottom:4px; display:block;">DUBBED</label>
+                                    <audio id="dub-comp-dubbed" controls style="width:100%; height:32px; filter:invert(1);"></audio>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-sm" style="width:100%; margin-top:16px;" onclick="syncPlayDub()">
+                                <i class="fas fa-play"></i> SYNC PLAYBACK
+                            </button>
+                        </div>
                     </div>
 
                     <div class="card-brutalist">
                         <h2 style="margin-bottom:16px; font-size: 1.1rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;" tabindex="-1">Voice Changer (S2S)</h2>
                         <div class="control-group">
                             <span class="label-industrial">Source Audio</span>
-                            <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" id="s2s-record-btn" aria-label="Record source audio for voice changer">
-                                <i class="fas fa-circle" aria-hidden="true"></i> RECORD AUDIO
-                            </button>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                                <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" id="s2s-upload-btn" onclick="document.getElementById('s2s-files').click()">
+                                    <i class="fas fa-file-audio"></i> UPLOAD
+                                </button>
+                                <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" id="s2s-record-btn" aria-label="Record source audio for voice changer">
+                                    <i class="fas fa-circle" aria-hidden="true"></i> RECORD
+                                </button>
+                            </div>
+                            <input type="file" id="s2s-files" accept="audio/*" multiple style="display:none" onchange="uploadS2SFiles(this)">
+                            <div id="s2s-file-list" class="volt-text" style="font-size:0.6rem; margin-top:8px; opacity:0.7;">No files selected</div>
                         </div>
                         <div class="control-group">
                             <label for="s2s-target-voice" class="label-industrial">Target Voice</label>
-                            <select id="s2s-target-voice" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);" aria-label="Target voice for S2S"></select>
+                            <div style="display:flex; gap:8px;">
+                                <select id="s2s-target-voice" class="btn btn-secondary btn-sm" style="flex:1; border-color:var(--accent);" aria-label="Target voice for S2S"></select>
+                                <button class="btn btn-secondary btn-sm" onclick="previewS2STarget(this)" title="Preview target voice"><i class="fas fa-play"></i></button>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label for="s2s-emotion" class="label-industrial">Emotion / Style</label>
+                            <select id="s2s-emotion" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);">
+                                <option value="">Neutral (Standard)</option>
+                                <option value="cheerful">😊 Cheerful</option>
+                                <option value="sad">😢 Sad</option>
+                                <option value="angry">😠 Angry</option>
+                                <option value="whispering">🤫 Whisper</option>
+                                <option value="shouting">📢 Shout</option>
+                            </select>
                         </div>
                         <div class="control-group">
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">

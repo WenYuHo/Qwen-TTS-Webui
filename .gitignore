@@ -1,4 +1,5 @@
 # Environment
+.gemini/
 .venv/
 venv/
 env/

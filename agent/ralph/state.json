@@ -1,0 +1,8 @@
+{
+    "active": true,
+    "current_iteration": 1,
+    "max_iterations": 20,
+    "completion_promise": "MISSION_COMPLETE",
+    "original_prompt": "--mission Autonomous Swarm Mode: Execute pending tasks from agent/TASK_QUEUE.md. If the queue is empty, brainstorm 3 new high-priority tasks and add them to the queue. Continue until MISSION_COMPLETE is manually achieved.",
+    "started_at": "2026-03-08T22:49:04Z"
+}

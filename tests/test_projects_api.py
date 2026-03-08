@@ -1,9 +1,10 @@
-from fastapi.testclient import TestClient
+import pytest
+import pytest_asyncio
+from httpx import AsyncClient, ASGITransport
 import sys
 import os
 from pathlib import Path
 import shutil
-import pytest
 
 # Add src to path
 current_dir = Path(__file__).resolve().parent
@@ -13,7 +14,10 @@ sys.path.insert(0, str(src_dir))
 from server import app
 from backend.api.projects import PROJECTS_DIR
 
-client = TestClient(app)
+@pytest_asyncio.fixture
+async def client():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac
 
 @pytest.fixture(autouse=True)
 def clean_projects():
@@ -30,7 +34,8 @@ def clean_projects():
     for f in PROJECTS_DIR.glob("test_*.json"):
         f.unlink()
 
-def test_save_and_load_project():
+@pytest.mark.asyncio
+async def test_save_and_load_project(client):
     project_data = {
         "name": "test_project_1",
         "blocks": [
@@ -40,28 +45,30 @@ def test_save_and_load_project():
     }
     
     # 1. Save
-    response = client.post("/api/projects/test_project_1", json=project_data)
+    response = await client.post("/api/projects/test_project_1", json=project_data)
     assert response.status_code == 200
     assert response.json()["status"] == "saved"
     
     # 2. List
-    response = client.get("/api/projects")
+    response = await client.get("/api/projects")
     assert response.status_code == 200
     projects = response.json()["projects"]
     assert "test_project_1" in projects
     
     # 3. Load
-    response = client.get("/api/projects/test_project_1")
+    response = await client.get("/api/projects/test_project_1")
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == "test_project_1"
     assert len(data["blocks"]) == 1
     assert data["blocks"][0]["text"] == "Hello world"
 
-def test_invalid_project_name():
-    response = client.post("/api/projects/   ", json={"name": " ", "blocks": []})
+@pytest.mark.asyncio
+async def test_invalid_project_name(client):
+    response = await client.post("/api/projects/   ", json={"name": " ", "blocks": []})
     assert response.status_code == 422
 
-def test_load_nonexistent():
-    response = client.get("/api/projects/nonexistent_project_xyz")
+@pytest.mark.asyncio
+async def test_load_nonexistent(client):
+    response = await client.get("/api/projects/nonexistent_project_xyz")
     assert response.status_code == 404

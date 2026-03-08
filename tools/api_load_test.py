@@ -36,8 +36,7 @@ async def run_load_test(url, concurrent_users, total_requests):
     durations = [r[0] for r in results if isinstance(r[1], int) and r[1] == 200]
     errors = [r for r in results if not (isinstance(r[1], int) and r[1] == 200)]
     
-    print("
---- Load Test Results ---")
+    print("\n--- Load Test Results ---")
     print(f"Total Requests: {total_requests}")
     print(f"Successful:     {len(durations)}")
     print(f"Failed/Errors:  {len(errors)}")
