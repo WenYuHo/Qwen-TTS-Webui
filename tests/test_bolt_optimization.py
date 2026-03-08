@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
 from pathlib import Path
-from src.backend.podcast_engine import PodcastEngine, _watermark_tone_cache
-from src.backend.api.system import _settings
+from backend.podcast_engine import PodcastEngine, _watermark_tone_cache
+from backend.api.system import _settings
 
 def test_resolve_paths_optimization(tmp_path):
     """Verify that _resolve_paths correctly identifies safe and unsafe paths using the new optimization."""

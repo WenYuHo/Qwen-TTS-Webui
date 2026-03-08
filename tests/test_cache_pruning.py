@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from src.backend.utils import prune_dict_cache, _eq_filter_cache, AudioPostProcessor
+from backend.utils import prune_dict_cache, _eq_filter_cache, AudioPostProcessor
 
 def test_prune_dict_cache():
     """Verify that prune_dict_cache removes oldest items correctly."""
@@ -27,7 +27,7 @@ def test_prune_dict_cache():
 def test_eq_filter_cache_pruning():
     """Verify that EQ filter cache triggers pruning."""
     # Mock scipy_signal for AudioPostProcessor.apply_eq
-    import src.backend.utils as utils
+    import backend.utils as utils
     from unittest.mock import MagicMock
 
     original_scipy = utils.scipy_signal

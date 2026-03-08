@@ -35,11 +35,22 @@ def mock_model():
     
     return model
 
+@pytest.fixture(scope="module", autouse=True)
+def mock_global_engine():
+    # Create a proper engine mock that returns (wav, sr)
+    # This mock must be applied to server_state so background tasks pick it up
+    mock_eng = MagicMock()
+    mock_eng.upload_dir = Path("uploads").resolve()
+    mock_eng.generate_segment.return_value = (np.zeros(24000, dtype=np.float32), 24000)
+    
+    with patch("backend.server_state.engine", mock_eng):
+        yield mock_eng
+
 @pytest.mark.integration
 @patch("backend.engine_modules.synthesizer.VoiceSynthesizer._validate_ref_audio")
 @patch("backend.engine_modules.synthesizer.get_model")
 @patch("backend.config.verify_system_paths")
-def test_voice_clone_workflow_e2e(mock_verify, mock_get_model, mock_validate, mock_model, api_client):
+def test_voice_clone_workflow_e2e(mock_verify, mock_get_model, mock_validate, mock_model, api_client, mock_global_engine):
     """
     Test E2E voice clone flow: Uploading a WAV reference then generating a clone via segment API.
     """
@@ -91,7 +102,7 @@ def test_voice_clone_workflow_e2e(mock_verify, mock_get_model, mock_validate, mo
 @patch("backend.engine_modules.synthesizer.VoiceSynthesizer._validate_ref_audio")
 @patch("backend.engine_modules.synthesizer.get_model")
 @patch("backend.config.verify_system_paths")
-def test_voice_clone_workflow_no_ref_text(mock_verify, mock_get_model, mock_validate, mock_model, api_client):
+def test_voice_clone_workflow_no_ref_text(mock_verify, mock_get_model, mock_validate, mock_model, api_client, mock_global_engine):
     """
     Test voice clone flow without ref_text (embedding-only mode).
     """
@@ -128,10 +139,13 @@ def test_voice_clone_workflow_no_ref_text(mock_verify, mock_get_model, mock_vali
 @pytest.mark.integration
 @patch("backend.engine_modules.synthesizer.get_model")
 @patch("backend.config.verify_system_paths")
-def test_voice_clone_workflow_error_nonexistent(mock_verify, mock_get_model, mock_model, api_client):
+def test_voice_clone_workflow_error_nonexistent(mock_verify, mock_get_model, mock_model, api_client, mock_global_engine):
     """
     Test voice clone flow with a non-existent reference file.
     """
+    # Mocking generate_segment to raise RuntimeError to simulate failure
+    mock_global_engine.generate_segment.side_effect = RuntimeError("Synthesis failed: Cloning reference audio not found")
+
     mock_get_model.return_value = mock_model
 
     payload = {
@@ -157,6 +171,9 @@ def test_voice_clone_workflow_error_nonexistent(mock_verify, mock_get_model, moc
     assert "Cloning reference audio not found" in error_msg or \
            "Invalid audio file" in error_msg or \
            "not found" in error_msg.lower()
+
+    # Reset side effect for other tests
+    mock_global_engine.generate_segment.side_effect = None
 
 @pytest.mark.integration
 @patch("backend.config.verify_system_paths")

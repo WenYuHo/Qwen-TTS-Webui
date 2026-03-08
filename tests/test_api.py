@@ -28,18 +28,18 @@ def test_root_serves_index():
 
 
 def test_health_endpoint():
-    # Ensure mock returns the expected structure
+    # Ensure mock returns the expected structure from PodcastEngine.get_system_status
     mock_engine.get_system_status.return_value = {
         "status": "ready",
-        "models": {"models_dir_exists": True, "found_models": []},
-        "device": {"type": "cpu", "cuda_available": False}
+        "device": "cpu",
+        "models_loaded": []
     }
     response = client.get("/api/health")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ready"
-    assert "models" in data
     assert "device" in data
+    assert "models_loaded" in data
 
 
 def test_api_speakers():

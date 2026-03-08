@@ -30,6 +30,17 @@
     - Updated: 2026-03-07T23:30:00Z
     - Signals: `NONE`
 
+- [x] **TEST_LIBRARY_AUDIT** (2026-03-08)
+- [x] **TEST_REFACTOR_PYTEST** (2026-03-08)
+- [x] **TEST_CONSOLIDATE_ROOT** (2026-03-08)
+- [ ] **TEST_ASYNC_STANDARDIZATION**
+    - Task: Standardize on `httpx.AsyncClient` for all API tests for better async flow coverage.
+    - Ref: `agent/TESTING_AUDIT_REPORT.md`
+    - Promise: `TEST_ASYNC_STANDARDIZATION`
+    - Reserved: NONE
+    - Updated: 2026-03-08T00:00:00Z
+    - Signals: `NONE`
+
 - [ ] **NEXT_TASK_PLACEHOLDER**
     - Task: Playwright E2E tests for synthesis and video gen flows.
     - Ref: `conductor/track-testing-reliability.md` (Ph3).

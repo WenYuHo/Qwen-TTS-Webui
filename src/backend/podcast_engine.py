@@ -180,7 +180,7 @@ class PodcastEngine:
             global _system_settings
             if _system_settings is None:
                 # ⚡ Bolt: Circular-safe import for settings
-                import src.backend.api.system as system_api
+                from .api import system as system_api
                 _system_settings = system_api._settings
 
             if not _system_settings.watermark_audio:
