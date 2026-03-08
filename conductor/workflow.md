@@ -20,6 +20,7 @@ When multiple agents (e.g., Ralph locally, Jules in the cloud) work on the same 
 ### 2. Feature Branch Requirement
 - Agents **MUST NOT** commit directly to the `main` branch.
 - Every task must be performed on a unique feature branch (e.g., `ralph/task-name`).
+- **Source Control Mandate:** When a user initiates an autonomous task or loop (e.g., via `/ralph:loop`), this constitutes the **explicit request** to stage and commit code changes to the relevant feature branch as part of the task's natural lifecycle.
 - Once the task is complete and tests pass, the agent must push the branch and open a Pull Request (PR).
 
 ### 3. The PR Polling & Fix Loop
