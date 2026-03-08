@@ -2553,5 +2553,241 @@
     "metadata": {
       "segments": 1
     }
+  },
+  {
+    "timestamp": 1773013441.442438,
+    "type": "s2s",
+    "status": "completed",
+    "metadata": {
+      "source": "test.wav"
+    }
+  },
+  {
+    "timestamp": 1773013518.8458357,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.0,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773013518.8504303,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.0,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773013518.8590958,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.0,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773013518.8635612,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.0,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773013588.5613081,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.0,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773013588.571945,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.0,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773013588.5821555,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.0,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773013588.5895593,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.0,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773013687.557493,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.0,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773013687.5625644,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.0,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773013687.571362,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.0,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773013687.5757124,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.0,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773013687.8837268,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "ryan"
+    }
+  },
+  {
+    "timestamp": 1773013687.9140964,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
+  },
+  {
+    "timestamp": 1773013687.9365046,
+    "type": "s2s",
+    "status": "completed",
+    "metadata": {
+      "source": "test.wav"
+    }
   }
 ]

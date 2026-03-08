@@ -158,6 +158,22 @@ async def generate_podcast(request: PodcastRequest, background_tasks: Background
 
 @router.post("/s2s")
 async def generate_s2s(request: S2SRequest, background_tasks: BackgroundTasks):
+    if request.stream:
+        try:
+            def s2s_stream():
+                for wav, sr in server_state.engine.stream_voice_changer(
+                    source_audio=request.source_audio,
+                    target_profile=request.target_voice,
+                    preserve_prosody=request.preserve_prosody,
+                    instruct=request.instruct
+                ):
+                    yield numpy_to_wav_bytes(wav, sr).read()
+            
+            return StreamingResponse(s2s_stream(), media_type="audio/wav")
+        except Exception as e:
+            logger.error(f"Streaming S2S failed: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail="Streaming S2S failed")
+
     task_id = server_state.task_manager.create_task("s2s", {"source": request.source_audio})
     background_tasks.add_task(run_s2s_task, task_id, request.source_audio, request.target_voice, server_state.engine, request.preserve_prosody, request.instruct)
     return {"task_id": task_id, "status": server_state.TaskStatus.PENDING}

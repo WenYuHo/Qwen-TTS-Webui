@@ -193,3 +193,43 @@ def test_generate_segment_without_ref_text(monkeypatch):
     call_kwargs = mock_model.create_voice_clone_prompt.call_args.kwargs
     assert call_kwargs.get("ref_text") is None
     assert call_kwargs.get("x_vector_only_mode") is True
+
+def test_stream_voice_changer(monkeypatch):
+    """Test the streaming S2S logic with segments and windowing."""
+    import torch
+    import soundfile as sf
+    engine = PodcastEngine()
+    
+    # 1. Mock transcribe_audio to return segments
+    mock_segments = [
+        {"text": "Hello", "start": 0.5, "end": 1.5},
+        {"text": "World", "start": 2.0, "end": 2.5}
+    ]
+    monkeypatch.setattr(engine, "transcribe_audio", lambda x: {"segments": mock_segments, "text": "Hello World"})
+    
+    # 2. Mock model calls
+    mock_model = MagicMock()
+    mock_model.generate_voice_clone.return_value = ([np.zeros(1000)], 24000)
+    mock_model.create_voice_clone_prompt.return_value = [MagicMock()]
+    
+    # 3. Mock internal methods
+    monkeypatch.setattr("backend.podcast_engine.get_model", lambda x: mock_model)
+    monkeypatch.setattr(engine, "_resolve_paths", lambda x: [Path("dummy.wav")])
+    monkeypatch.setattr(engine, "get_speaker_embedding", lambda x, **kwargs: torch.zeros(128))
+    
+    # Mock soundfile.read to return a 5s dummy waveform (24k * 5 = 120000)
+    with patch("soundfile.read", return_value=(np.zeros(120000), 24000)):
+        chunks = list(engine.stream_voice_changer("dummy.wav", preserve_prosody=True))
+        
+        assert len(chunks) == 2
+        # Verify model was called twice
+        assert mock_model.generate_voice_clone.call_count == 2
+        
+        # Verify windowing logic (3s window for short segments)
+        # First call for "Hello" (0.5s to 1.5s)
+        # Logic: needed = 3 - 1 = 2. Pad: start=max(0, 0.5-1)=0, end=min(5, 0+3)=3.
+        last_call_args = mock_model.create_voice_clone_prompt.call_args_list[0]
+        ref_audio_arg = last_call_args.kwargs.get("ref_audio")
+        assert isinstance(ref_audio_arg, tuple)
+        # 3s window @ 24k = 72000 samples
+        assert len(ref_audio_arg[0]) == 72000

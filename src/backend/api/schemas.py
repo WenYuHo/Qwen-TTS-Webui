@@ -43,6 +43,7 @@ class S2SRequest(BaseModel):
     preserve_prosody: bool = True
     instruct: Optional[str] = None
     target_lang: Optional[str] = None
+    stream: Optional[bool] = False
 
 class BatchS2SRequest(BaseModel):
     source_audios: List[str]

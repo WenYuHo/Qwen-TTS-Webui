@@ -219,6 +219,7 @@ export const DubbingManager = {
         const targetVoiceId = document.getElementById('s2s-target-voice').value;
         const preserveProsody = document.getElementById('s2s-preserve').checked;
         const emotion = document.getElementById('s2s-emotion').value;
+        const streamEnabled = document.getElementById('s2s-stream-toggle')?.checked || false;
         const sourcePaths = window.state.s2s.lastUploadedPaths || (window.state.s2s.lastUploadedPath ? [window.state.s2s.lastUploadedPath] : []);
         
         if (sourcePaths.length === 0) return Notification.show("Record or upload source audio", "warn");
@@ -235,19 +236,40 @@ export const DubbingManager = {
             const endpoint = sourcePaths.length > 1 ? '/api/generate/s2s/batch' : '/api/generate/s2s';
             const body = sourcePaths.length > 1 
                 ? { source_audios: sourcePaths, target_voice: targetProfile, preserve_prosody: preserveProsody, instruct: emotion || null }
-                : { source_audio: sourcePaths[0], target_voice: targetProfile, preserve_prosody: preserveProsody, instruct: emotion || null };
+                : { source_audio: sourcePaths[0], target_voice: targetProfile, preserve_prosody: preserveProsody, instruct: emotion || null, stream: streamEnabled };
 
-            const res = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            
-            const data = await res.json();
-            if (data.error) throw new Error(data.error);
-            
-            Notification.show(sourcePaths.length > 1 ? "Batch S2S task created" : "Voice conversion task created", "success");
-            if (window.refreshTasks) window.refreshTasks();
+            if (streamEnabled && sourcePaths.length === 1) {
+                Notification.show("Streaming started...", "success");
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                
+                if (!response.ok) throw new Error("Streaming S2S failed");
+                
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const player = document.getElementById('preview-player');
+                if (player) {
+                    player.src = url;
+                    player.play();
+                } else {
+                    new Audio(url).play();
+                }
+            } else {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+                
+                Notification.show(sourcePaths.length > 1 ? "Batch S2S task created" : "Voice conversion task created", "success");
+                if (window.refreshTasks) window.refreshTasks();
+            }
             
         } catch (err) {
             ErrorDisplay.show("S2S Failed", err.message);

@@ -307,6 +307,80 @@ class PodcastEngine:
                 logger.error(f"Chunk synthesis failed for '{chunk_text[:20]}...': {e}")
                 continue
 
+    def stream_voice_changer(self, source_audio: str, target_profile: Optional[Dict[str, Any]] = None, preserve_prosody: bool = True, instruct: Optional[str] = None):
+        """Yields synthesized audio blocks sequentially for low-latency S2S."""
+        # 1. Transcribe with segments
+        result = self.transcribe_audio(source_audio)
+        segments = result.get("segments", [])
+        if not segments:
+            # Fallback to entire text if no segments
+            res = self.generate_voice_changer(source_audio, target_profile, preserve_prosody, instruct)
+            yield res["waveform"], res["sample_rate"]
+            return
+
+        resolved = self._resolve_paths(source_audio)
+        source_path = str(resolved[0])
+        if VideoEngine.is_video(source_path):
+            source_path = self._extract_audio_with_cache(source_path)
+
+        # Load source audio once for slicing
+        full_wav, sr_source = sf.read(source_path)
+        if full_wav.ndim > 1:
+            full_wav = np.mean(full_wav, axis=-1)
+
+        model = get_model("Base")
+        target_emb = self.get_speaker_embedding(target_profile or {"type": "preset", "value": "Ryan"})
+
+        for seg in segments:
+            try:
+                text = seg["text"].strip()
+                if not text: continue
+                
+                start_s = seg["start"]
+                end_s = seg["end"]
+                
+                # Extract chunk for prosody reference
+                # We aim for a ~3s-10s window around the segment for best prosody preservation
+                # while satisfying Qwen3TTS's 3s minimum requirement.
+                duration_seg = end_s - start_s
+                if duration_seg < 3.0:
+                    # Pad symmetrically to reach 3s
+                    needed = 3.0 - duration_seg
+                    start_s = max(0, start_s - needed / 2)
+                    end_s = min(len(full_wav) / sr_source, start_s + 3.0)
+                    # If end_s hit the boundary, adjust start_s again
+                    if end_s - start_s < 3.0:
+                        start_s = max(0, end_s - 3.0)
+                
+                start_idx = int(start_s * sr_source)
+                end_idx = int(end_s * sr_source)
+                chunk = full_wav[start_idx:end_idx]
+                
+                duration = len(chunk) / sr_source
+                
+                if preserve_prosody and 3.0 <= duration <= 30.0:
+                    # ICL mode captures prosody via ref_code
+                    prompt_items = model.create_voice_clone_prompt(ref_audio=(chunk, sr_source), ref_text=text, x_vector_only_mode=False)
+                    voice_clone_prompt = {
+                        "ref_code": [prompt_items[0].ref_code],
+                        "ref_spk_embedding": [target_emb],
+                        "x_vector_only_mode": [False],
+                        "icl_mode": [True]
+                    }
+                else:
+                    # Fallback to speaker embedding only
+                    voice_clone_prompt = {
+                        "ref_spk_embedding": [target_emb],
+                        "x_vector_only_mode": [True],
+                        "icl_mode": [False]
+                    }
+
+                wavs, sr = model.generate_voice_clone(text=text, voice_clone_prompt=voice_clone_prompt, instruct=instruct)
+                yield wavs[0], sr
+            except Exception as e:
+                logger.error(f"S2S streaming chunk failed: {e}")
+                continue
+
     def generate_voice_changer(self, source_audio: str, target_profile: Optional[Dict[str, Any]] = None, preserve_prosody: bool = True, instruct: Optional[str] = None) -> Dict[str, Any]:
         result = self.transcribe_audio(source_audio)
         text = result["text"]
