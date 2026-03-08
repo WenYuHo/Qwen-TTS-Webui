@@ -9,6 +9,27 @@
 5. **User Experience First:** Every decision should prioritize user experience
 6. **Non-Interactive & CI-Aware:** Prefer non-interactive commands. Use `CI=true` for watch-mode tools (tests, linters) to ensure single execution.
 
+## Hybrid Agent Coordination & PR Protocol
+
+When multiple agents (e.g., Ralph locally, Jules in the cloud) work on the same repository, they must follow these synchronization rules to prevent merge conflicts and stale state.
+
+### 1. The Pull-First Rule
+- **Mandatory:** Execute `git pull --rebase --autostash` at the start of every session or task. 
+- If local changes exist that block a rebase, the agent must **commit them as a WIP** (`git commit -m "chore: WIP local changes"`) before pulling.
+
+### 2. Feature Branch Requirement
+- Agents **MUST NOT** commit directly to the `main` branch.
+- Every task must be performed on a unique feature branch (e.g., `ralph/task-name`).
+- Once the task is complete and tests pass, the agent must push the branch and open a Pull Request (PR).
+
+### 3. The PR Polling & Fix Loop
+- After opening a PR, the agent must stay in the loop to monitor the PR status (e.g., using `gh pr view` or checking CI results).
+- **Wait & Verify:** If the PR fails CI or is rejected by another agent/human, the agent must read the feedback, apply fixes on the same branch, and re-push.
+- A task is only "Done" when the PR is merged into `main`.
+
+### 4. Conflict Resolution
+- If a conflict occurs during a pull, the agent must attempt to resolve it automatically. If the conflict is too complex (e.g., major architectural disagreement), the agent must stop and ask for human intervention.
+
 ## Task Workflow
 
 All tasks follow a strict lifecycle:

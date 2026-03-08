@@ -238,6 +238,69 @@ class AudioPostProcessor:
             logger.error(f"Panning failed: {e}")
             return np.stack([wav, wav]) # Fallback to dual-mono
 
+    @staticmethod
+    def apply_compressor(wav: np.ndarray, sr: int, threshold_db: float = -20.0, ratio: float = 4.0) -> np.ndarray:
+        """Applies dynamic range compression."""
+        try:
+            # Handle stereo
+            if len(wav.shape) > 1:
+                # Apply to each channel independently for simplicity, or linked (using max)
+                # Here we do independent to keep it simple and fast
+                out = np.zeros_like(wav)
+                for i in range(wav.shape[0]):
+                    out[i] = AudioPostProcessor.apply_compressor(wav[i], sr, threshold_db, ratio)
+                return out
+
+            # Convert to dB
+            # Avoid log(0)
+            abs_wav = np.abs(wav)
+            db_wav = 20 * np.log10(abs_wav + 1e-10)
+            
+            # Gain reduction
+            mask = db_wav > threshold_db
+            if not np.any(mask):
+                return wav
+
+            reduction = (db_wav - threshold_db) * (1 - 1/ratio)
+            gain_db = np.zeros_like(db_wav)
+            gain_db[mask] = -reduction[mask]
+            
+            gain_linear = 10 ** (gain_db / 20.0)
+            return wav * gain_linear
+        except Exception as e:
+            logger.error(f"Compression failed: {e}")
+            return wav
+
+    @staticmethod
+    def apply_declick(wav: np.ndarray, sr: int) -> np.ndarray:
+        """Simple heuristic de-clicker: clamps spikes > 10x local RMS."""
+        try:
+            if len(wav.shape) > 1:
+                out = np.zeros_like(wav)
+                for i in range(wav.shape[0]):
+                    out[i] = AudioPostProcessor.apply_declick(wav[i], sr)
+                return out
+
+            out = wav.copy()
+            window = int(sr * 0.002) # 2ms
+            if window < 2: return wav
+            
+            # Process in chunks
+            for i in range(0, len(wav), window):
+                chunk = wav[i:i+window]
+                if len(chunk) < 2: continue
+                local_rms = np.sqrt(np.mean(chunk**2)) + 1e-6
+                # Identify spikes
+                spikes = np.abs(chunk) > (local_rms * 10)
+                if np.any(spikes):
+                    # Clamp spikes to local RMS * 3
+                    sign = np.sign(chunk[spikes])
+                    out[i:i+window][spikes] = sign * local_rms * 3
+            return out
+        except Exception as e:
+            logger.error(f"De-click failed: {e}")
+            return wav
+
 class AuditManager:
     """Logs system-wide AI generation events for transparency and tracking."""
     def __init__(self):

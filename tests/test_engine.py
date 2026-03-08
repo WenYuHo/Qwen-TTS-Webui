@@ -39,6 +39,10 @@ def test_generate_podcast_with_mocked_segment(monkeypatch):
     dummy_wav = np.zeros(24000, dtype=np.float32)
     monkeypatch.setattr(engine, "generate_segment", lambda text, profile, **kwargs: (dummy_wav, 24000))
 
+    # Ensure watermark is enabled for this test by patching the global variable in the module
+    from backend.api.system import SystemSettings
+    monkeypatch.setattr("backend.podcast_engine._system_settings", SystemSettings(watermark_audio=True))
+
     script = [{"role": "ryan", "text": "Hello"}]
     profiles = {"ryan": {"type": "preset", "value": "Ryan"}}
     result = engine.generate_podcast(script, profiles=profiles)
@@ -141,3 +145,51 @@ def test_segment_error_is_skipped(monkeypatch):
     assert result is not None
     # Still produces audio even with failures
     assert len(result["waveform"]) > 2000
+
+def test_generate_segment_with_ref_text(monkeypatch):
+    """Test ICL mode activation when ref_text is provided."""
+    engine = PodcastEngine()
+    
+    # Mock dependencies
+    mock_model = MagicMock()
+    mock_model.create_voice_clone_prompt.return_value = [MagicMock()]
+    mock_model.generate_voice_clone.return_value = ([np.zeros(24000)], 24000)
+    
+    # Mock internal methods to avoid I/O
+    monkeypatch.setattr(engine, "_resolve_paths", lambda x: [Path("dummy.wav")])
+    monkeypatch.setattr(engine, "_extract_audio_with_cache", lambda x: "dummy.wav")
+    monkeypatch.setattr(engine, "_validate_ref_audio", lambda x: None)
+    
+    # Mock soundfile to avoid file I/O for silence padding
+    with patch("soundfile.read", return_value=(np.zeros(24000), 24000)), \
+         patch("soundfile.write"):
+        
+        profile = {"type": "clone", "value": "dummy.wav", "ref_text": "Reference transcript"}
+        
+        engine.generate_segment("Test", profile, model=mock_model)
+        
+        mock_model.create_voice_clone_prompt.assert_called_once()
+        call_kwargs = mock_model.create_voice_clone_prompt.call_args.kwargs
+        assert call_kwargs.get("ref_text") == "Reference transcript"
+        assert call_kwargs.get("x_vector_only_mode") is False
+
+def test_generate_segment_without_ref_text(monkeypatch):
+    """Test standard cloning when ref_text is missing."""
+    engine = PodcastEngine()
+    
+    mock_model = MagicMock()
+    mock_model.create_voice_clone_prompt.return_value = [MagicMock()]
+    mock_model.generate_voice_clone.return_value = ([np.zeros(24000)], 24000)
+    
+    monkeypatch.setattr(engine, "_resolve_paths", lambda x: [Path("dummy.wav")])
+    monkeypatch.setattr(engine, "_extract_audio_with_cache", lambda x: "dummy.wav")
+    monkeypatch.setattr(engine, "_validate_ref_audio", lambda x: None)
+    
+    profile = {"type": "clone", "value": "dummy.wav"}
+    
+    engine.generate_segment("Test", profile, model=mock_model)
+    
+    mock_model.create_voice_clone_prompt.assert_called_once()
+    call_kwargs = mock_model.create_voice_clone_prompt.call_args.kwargs
+    assert call_kwargs.get("ref_text") is None
+    assert call_kwargs.get("x_vector_only_mode") is True

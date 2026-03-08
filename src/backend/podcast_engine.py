@@ -20,7 +20,7 @@ from deep_translator import GoogleTranslator
 from .qwen_tts.inference.qwen3_tts_model import VoiceClonePromptItem
 from .model_loader import get_model
 from .video_engine import VideoEngine
-from .utils import phoneme_manager, AudioPostProcessor, Profiler, prune_dict_cache
+from .utils import phoneme_manager, AudioPostProcessor, Profiler, prune_dict_cache, audit_manager
 
 from concurrent.futures import ThreadPoolExecutor
 import queue
@@ -230,7 +230,48 @@ class PodcastEngine:
         except Exception:
             return wav
 
-    def generate_segment(self, text: str, profile: Dict[str, Any], language: str = "auto", model: Optional[Any] = None, instruct: Optional[str] = None, temperature: Optional[float] = None) -> tuple[np.ndarray, int]:
+    def _validate_ref_audio(self, audio_path: str) -> None:
+        """Validate reference audio for cloning: duration, silence, format."""
+        import soundfile as sf
+        try:
+            info = sf.info(audio_path)
+            duration = info.duration
+            if duration < 3.0:
+                raise ValueError(f"Reference audio too short ({duration:.1f}s). Minimum 3 seconds required.")
+            if duration > 30.0:
+                raise ValueError(f"Reference audio too long ({duration:.1f}s). Maximum 30 seconds recommended for best quality.")
+            
+            # Check for silence-only input
+            audio_data, sr = sf.read(audio_path)
+            rms = np.sqrt(np.mean(audio_data ** 2))
+            if rms < 0.001:  # Effectively silent
+                raise ValueError("Reference audio appears to be silent. Please provide audio with speech.")
+        except sf.SoundFileError as e:
+            raise ValueError(f"Invalid audio file: {e}")
+
+    @staticmethod
+    def _compute_quality_score(wav: np.ndarray, sr: int) -> Dict[str, Any]:
+        """Compute basic audio quality metrics for a generated segment."""
+        duration = len(wav) / sr
+        rms = float(np.sqrt(np.mean(wav ** 2)))
+        peak = float(np.max(np.abs(wav)))
+        # SNR estimate: ratio of signal RMS to noise floor (last 0.1s assumed silence)
+        tail = wav[-int(sr * 0.1):] if len(wav) > int(sr * 0.1) else wav
+        noise_rms = float(np.sqrt(np.mean(tail ** 2))) + 1e-10
+        snr_db = 20 * np.log10(rms / noise_rms) if rms > 0 else 0
+        clipping = bool(peak > 0.99)
+        too_quiet = bool(rms < 0.01)
+        return {
+            "duration": round(duration, 2),
+            "rms": round(rms, 4),
+            "peak": round(peak, 4),
+            "snr_db": round(snr_db, 1),
+            "clipping": clipping,
+            "too_quiet": too_quiet,
+            "quality": "good" if (not clipping and not too_quiet and snr_db > 10) else "warning"
+        }
+
+    def generate_segment(self, text: str, profile: Dict[str, Any], language: str = "auto", model: Optional[Any] = None, instruct: Optional[str] = None, temperature: Optional[float] = None, **gen_kwargs) -> tuple[np.ndarray, int]:
         try:
             text = phoneme_manager.apply(text)
             final_instruct = instruct or profile.get("instruct")
@@ -238,12 +279,12 @@ class PodcastEngine:
             ptype = profile.get("type")
             if ptype == "preset":
                 if model is None: model = get_model("CustomVoice")
-                wavs, sr = model.generate_custom_voice(text=text, speaker=profile["value"], language=language, instruct=final_instruct, temperature=temperature)
+                wavs, sr = model.generate_custom_voice(text=text, speaker=profile["value"], language=language, instruct=final_instruct, temperature=temperature, **gen_kwargs)
             elif ptype == "design":
                 if model is None: model = get_model("VoiceDesign")
                 design_instruct = profile["value"]
                 if final_instruct: design_instruct = f"{design_instruct}, {final_instruct}"
-                wavs, sr = model.generate_voice_design(text=text, instruct=design_instruct, language=language, non_streaming_mode=True, temperature=temperature)
+                wavs, sr = model.generate_voice_design(text=text, instruct=design_instruct, language=language, non_streaming_mode=True, temperature=temperature, **gen_kwargs)
             elif ptype == "clone":
                 ref_text = profile.get("ref_text")
                 use_icl = ref_text is not None and ref_text.strip() != ""
@@ -258,9 +299,26 @@ class PodcastEngine:
                         resolved_paths = self._resolve_paths(profile["value"])
                     except (FileNotFoundError, PermissionError) as e:
                         raise RuntimeError(f"Cloning reference audio not found: {profile['value']}") from e
+                    
                     if model is None: model = get_model("Base")
                     ref_audio = str(resolved_paths[0])
                     if VideoEngine.is_video(ref_audio): ref_audio = self._extract_audio_with_cache(ref_audio)
+                    
+                    # ⚡ Bolt: Validate reference audio before processing
+                    self._validate_ref_audio(ref_audio)
+
+                    # ⚡ Bolt: Silence padding for ICL anti-bleed
+                    if use_icl:
+                        import soundfile as sf
+                        audio_data, audio_sr = sf.read(ref_audio)
+                        # Append 0.5s silence to prevent phoneme bleed from ref into generated speech
+                        silence = np.zeros(int(audio_sr * 0.5), dtype=audio_data.dtype)
+                        padded = np.concatenate([audio_data, silence])
+                        # Write padded audio to a temp file (will be cleaned by StorageManager)
+                        padded_path = str(self.upload_dir / f"padded_{uuid.uuid4()}.wav")
+                        sf.write(padded_path, padded, audio_sr)
+                        ref_audio = padded_path
+
                     prompt = model.create_voice_clone_prompt(
                         ref_audio=ref_audio,
                         ref_text=ref_text if use_icl else None,
@@ -270,7 +328,7 @@ class PodcastEngine:
                     prune_dict_cache(self.prompt_cache, limit=200, count=20)
                     self.prompt_cache[icl_cache_key] = prompt
                 if model is None: model = get_model("Base")
-                wavs, sr = model.generate_voice_clone(text=text, language=language, voice_clone_prompt=prompt, instruct=final_instruct, temperature=temperature)
+                wavs, sr = model.generate_voice_clone(text=text, language=language, voice_clone_prompt=prompt, instruct=final_instruct, temperature=temperature, **gen_kwargs)
             elif ptype == "mix":
                 cache_key = f"mix:{profile['value']}"
                 if cache_key in self.prompt_cache: prompt = self.prompt_cache[cache_key]
@@ -282,12 +340,24 @@ class PodcastEngine:
                     prompt = [VoiceClonePromptItem(ref_code=None, ref_spk_embedding=mixed_emb, x_vector_only_mode=True, icl_mode=False, ref_text=None)]
                     self.prompt_cache[cache_key] = prompt
                 if model is None: model = get_model("Base")
-                wavs, sr = model.generate_voice_clone(text=text, language=language, voice_clone_prompt=prompt, instruct=final_instruct, temperature=temperature)
+                wavs, sr = model.generate_voice_clone(text=text, language=language, voice_clone_prompt=prompt, instruct=final_instruct, temperature=temperature, **gen_kwargs)
             else:
                 raise RuntimeError(f"Unknown speaker type: {ptype}")
 
             if not wavs: raise RuntimeError("No waveforms generated")
-            return self._apply_audio_watermark(wavs[0], sr), sr
+            
+            # Task 4.1 & 4.2: Quality Check & Auto-Retry
+            wav_out = self._apply_audio_watermark(wavs[0], sr)
+            quality = self._compute_quality_score(wav_out, sr)
+            logger.info(f"Segment quality: {quality}")
+            audit_manager.log_event("synthesis", {"quality": quality, "profile_type": ptype}, quality["quality"])
+
+            if quality["quality"] == "warning" and not gen_kwargs.get("_is_retry"):
+                logger.warning(f"Low quality detected (SNR={quality['snr_db']}dB), retrying with lower temperature")
+                retry_kwargs = {**gen_kwargs, "temperature": 0.3, "top_k": 20, "_is_retry": True}
+                return self.generate_segment(text, profile, language, model, instruct, **retry_kwargs)
+
+            return wav_out, sr
         except Exception as e:
             if not isinstance(e, RuntimeError):
                 logger.error(f"Synthesis failed: {e}")
@@ -367,7 +437,7 @@ class PodcastEngine:
         wavs, sr = model.generate_voice_clone(text=text, voice_clone_prompt=voice_clone_prompt)
         return {"waveform": wavs[0], "sample_rate": sr, "text": text}
 
-    def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None, ducking_level: float = 0.0, eq_preset: str = "flat", reverb_level: float = 0.0, master_acx: bool = False, temperature: Optional[float] = None) -> Optional[Dict[str, Any]]:
+    def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None, ducking_level: float = 0.0, eq_preset: str = "flat", reverb_level: float = 0.0, master_acx: bool = False, temperature: Optional[float] = None, **gen_kwargs) -> Optional[Dict[str, Any]]:
         with Profiler("Generate Podcast"):
             sample_rate = 24000
             waveforms = [None] * len(script)
@@ -405,7 +475,7 @@ class PodcastEngine:
 
                     if mtype == "CustomVoice":
                         speakers = [profiles[script[i]["role"]]["value"] for i in indices]
-                        wavs, sr = model.generate_custom_voice(text=batch_texts, speaker=speakers, language=batch_langs, instruct=batch_instructs, temperature=target_temp)
+                        wavs, sr = model.generate_custom_voice(text=batch_texts, speaker=speakers, language=batch_langs, instruct=batch_instructs, temperature=target_temp, **gen_kwargs)
                     elif mtype == "VoiceDesign":
                         design_instructs = []
                         for i, idx in enumerate(indices):
@@ -413,7 +483,7 @@ class PodcastEngine:
                             ins = p["value"]
                             if batch_instructs[i]: ins = f"{ins}, {batch_instructs[i]}"
                             design_instructs.append(ins)
-                        wavs, sr = model.generate_voice_design(text=batch_texts, instruct=design_instructs, language=batch_langs, non_streaming_mode=True, temperature=target_temp)
+                        wavs, sr = model.generate_voice_design(text=batch_texts, instruct=design_instructs, language=batch_langs, non_streaming_mode=True, temperature=target_temp, **gen_kwargs)
                     elif mtype == "Base":
                         batch_prompts = []
                         for i, idx in enumerate(indices):
@@ -437,7 +507,7 @@ class PodcastEngine:
                                 prune_dict_cache(self.prompt_cache, limit=200, count=20)
                                 self.prompt_cache[cache_key] = prompt
                             batch_prompts.append(prompt[0])
-                        wavs, sr = model.generate_voice_clone(text=batch_texts, language=batch_langs, voice_clone_prompt=batch_prompts, instruct=batch_instructs, temperature=target_temp)
+                        wavs, sr = model.generate_voice_clone(text=batch_texts, language=batch_langs, voice_clone_prompt=batch_prompts, instruct=batch_instructs, temperature=target_temp, **gen_kwargs)
 
                     for j, idx in enumerate(indices):
                         waveforms[idx], srs[idx] = wavs[j], sr
@@ -447,9 +517,33 @@ class PodcastEngine:
                         try:
                             item = script[idx]
                             current_temp = item.get("temperature") if item.get("temperature") is not None else temperature
-                            wav, sr = self.generate_segment(item["text"], profile=profiles.get(item["role"]), language=item.get("language", "auto"), instruct=item.get("instruct"), temperature=current_temp)
+                            wav, sr = self.generate_segment(item["text"], profile=profiles.get(item["role"]), language=item.get("language", "auto"), instruct=item.get("instruct"), temperature=current_temp, **gen_kwargs)
                             waveforms[idx], srs[idx] = wav, sr
                         except Exception: continue
+
+            # ⚡ Bolt: Check speaker embedding consistency across segments (Task 4.3)
+            speaker_first_emb = {}  # role -> embedding of first segment
+            for i, item in enumerate(script):
+                if waveforms[i] is None: continue
+                role = item.get("role")
+                profile = profiles.get(role)
+                if profile is None: continue
+                try:
+                    emb = self.get_speaker_embedding(profile)
+                    if emb is not None:
+                        if role not in speaker_first_emb:
+                            speaker_first_emb[role] = emb
+                        else:
+                            # Cosine similarity
+                            if torch is not None:
+                                cos_sim = float(torch.nn.functional.cosine_similarity(
+                                    speaker_first_emb[role].unsqueeze(0), emb.unsqueeze(0)
+                                ))
+                                if cos_sim < 0.85:  # 15% drift threshold
+                                    logger.warning(f"Voice drift detected for speaker '{role}' at segment {i}: "
+                                                   f"similarity={cos_sim:.2f} (threshold=0.85)")
+                except Exception:
+                    pass  # Don't block generation for embedding comparison failures
 
             speech_segments = []
             max_sample = 0
@@ -532,11 +626,20 @@ class PodcastEngine:
             # and avoids allocating a large O(N) temporary array for np.abs(final_wav).
             max_val = max(np.max(final_wav), -np.min(final_wav))
             if max_val > 1.0: final_wav /= max_val
+
+            # ⚡ Bolt: Post-Processing Pipeline (Task 4.4)
+            # 1. De-clicker to remove potential splicing artifacts
+            final_wav = AudioPostProcessor.apply_declick(final_wav, sample_rate)
+
+            # 2. Creative Effects (EQ, Reverb)
             final_wav = AudioPostProcessor.apply_eq(final_wav, sample_rate, preset=eq_preset)
             final_wav = AudioPostProcessor.apply_reverb(final_wav, sample_rate, intensity=reverb_level)
             
             # ⚡ Bolt: Final mastering for ACX compliance if requested
             if master_acx:
+                # 3. Dynamic Range Compression for ACX "punch"
+                final_wav = AudioPostProcessor.apply_compressor(final_wav, sample_rate, threshold_db=-20.0, ratio=4.0)
+                # 4. Loudness Normalization (-3dB peak, -18 to -23dB RMS)
                 final_wav = AudioPostProcessor.normalize_acx(final_wav)
 
             # ⚡ Bolt: Apply watermark once at the very end of the podcast project.

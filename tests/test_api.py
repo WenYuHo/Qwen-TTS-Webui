@@ -159,6 +159,31 @@ def test_voice_preview_returns_streaming_response():
     assert response.headers["content-type"] == "audio/wav"
     assert len(response.content) > 0
 
+def test_voice_preview_with_custom_text():
+    """Verify that /api/voice/preview accepts custom preview_text."""
+    dummy_wav = np.zeros(16000, dtype=np.float32)
+    mock_engine.generate_segment.return_value = (dummy_wav, 16000)
+
+    payload = {"role": "Test", "type": "preset", "value": "aiden", "preview_text": "Special text"}
+    response = client.post("/api/voice/preview", json=payload)
+
+    assert response.status_code == 200
+    # Verify engine was called with "Special text"
+    mock_engine.generate_segment.assert_called()
+    last_call = mock_engine.generate_segment.call_args
+    assert last_call[0][0] == "Special text"
+
+def test_generate_podcast_with_temperature_preset():
+    """Verify that /api/generate/podcast accepts temperature_preset."""
+    payload = {
+        "profiles": {"ryan": {"type": "preset", "value": "ryan"}},
+        "script": [{"role": "ryan", "text": "Hello"}],
+        "temperature_preset": "creative"
+    }
+    response = client.post("/api/generate/podcast", json=payload)
+    assert response.status_code == 200
+    assert "task_id" in response.json()
+
 def test_security_headers():
     """Verify that security headers are present in responses."""
     response = client.get("/api/health")

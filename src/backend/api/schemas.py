@@ -35,6 +35,7 @@ class PodcastRequest(BaseModel):
     stream: Optional[bool] = False
     master_acx: Optional[bool] = False
     temperature: Optional[float] = None
+    temperature_preset: Optional[str] = "balanced"
 
 class S2SRequest(BaseModel):
     source_audio: str
@@ -51,6 +52,12 @@ class StreamingSynthesisRequest(BaseModel):
     language: Optional[str] = "auto"
     instruct: Optional[str] = None
     temperature: Optional[float] = None
+
+TEMPERATURE_PRESETS = {
+    "consistent": {"temperature": 0.3, "top_k": 20, "top_p": 0.8, "repetition_penalty": 1.2},
+    "balanced":   {"temperature": 0.9, "top_k": 50, "top_p": 0.95, "repetition_penalty": 1.0},
+    "creative":   {"temperature": 1.2, "top_k": 80, "top_p": 0.98, "repetition_penalty": 0.9},
+}
 
 class ProjectBlock(BaseModel):
     id: str

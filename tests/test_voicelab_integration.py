@@ -99,3 +99,38 @@ def test_system_settings_persistence():
     response = client.post("/api/system/settings", json=payload)
     assert response.status_code == 200
     assert response.json()["settings"]["watermark_audio"] is False
+
+def test_clone_preview_with_ref_text():
+    """Verify the full clone workflow: upload -> preview with ref_text."""
+    # 1. Simulate upload
+    mock_file = io.BytesIO(b"FAKE_AUDIO_CONTENT")
+    # We need to mock the actual file writing in upload_voice
+    with patch("backend.api.voices.open", create=True) as mock_open:
+        response = client.post("/api/voice/upload", files={"file": ("test.wav", mock_file, "audio/wav")})
+    
+    assert response.status_code == 200
+    filename = response.json()["filename"]
+    assert filename.endswith(".wav")
+
+    # 2. Simulate preview with ref_text (ICL mode)
+    dummy_wav = np.zeros(1000, dtype=np.float32)
+    mock_engine.generate_segment.return_value = (dummy_wav, 24000)
+
+    payload = {
+        "type": "clone",
+        "value": filename,
+        "ref_text": "This is the reference transcript for ICL."
+    }
+    
+    response = client.post("/api/voice/preview", json=payload)
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "audio/wav"
+    
+    # Verify engine was called with ref_text
+    mock_engine.generate_segment.assert_called()
+    last_call = mock_engine.generate_segment.call_args
+    # signature: generate_segment(text, profile, ...)
+    # profile should have ref_text
+    profile_arg = last_call.kwargs.get("profile") or last_call[0][1]
+    assert profile_arg["ref_text"] == "This is the reference transcript for ICL."
+

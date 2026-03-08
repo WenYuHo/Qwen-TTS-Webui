@@ -21,11 +21,18 @@ A high-fidelity audio production suite for multi-speaker podcasts, audio dramas,
 *   **Dependencies**: Uses system binaries (`ffmpeg`, `sox`) localized to `/bin`.
 
 ### 🚨 Critical Project Rules & Context
-1.  **Do NOT use React/Vue/Tailwind:** The frontend is strictly Vanilla JS and custom CSS. Never introduce modern web frameworks.
-2.  **Technoid Brutalist UI:** Use high-contrast Volt (#ccff00) on Onyx (#080808). UI should feel like industrial studio hardware.
-3.  **Strict TDD:** Tests **must** be written (and fail) before application code is implemented. `pytest` is the runner. See `/conductor/workflow.md`.
-4.  **No `print()` debugging in production:** Use the configured `logging` module in `config.py`.
-5.  **Paths are Absolute:** The backend relies heavily on `pathlib.Path` relative to the project root. Never hardcode absolute disk paths or rely on `os.getcwd()` blindly.
+1.  **Do NOT use React/Vue/Tailwind:** The frontend is strictly Vanilla JS and custom CSS.
+2.  **Technoid Brutalist UI:** Onyx (#080808) + Volt (#ccff00).
+3.  **Strict TDD:** Tests **must** be written (and fail) before application code.
+4.  **No `print()` in production:** Use `logging`.
+5.  **Absolute Paths:** Always use `pathlib.Path` relative to root.
+6.  **Conflict Resolution Priority (PR-First):** 
+    - If local changes exist, **commit WIP** before pulling.
+    - Always work on a **feature branch** (`ralph/task-name`).
+    - After completion, open a PR and stay in the loop to poll for status.
+7.  **Environment Health (Wait & Verify):**
+    - Every session must start with `python verify_setup.py`. 
+    - If `torch` or other ML deps are broken, fix them before starting a task.
 
 ---
 
