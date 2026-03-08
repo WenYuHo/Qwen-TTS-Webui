@@ -85,7 +85,7 @@ def test_generate_segment_missing_clone_file(monkeypatch):
     engine = PodcastEngine()
     def mock_resolve(path):
         raise FileNotFoundError("Missing")
-    monkeypatch.setattr(engine, "_resolve_paths", mock_resolve)
+    monkeypatch.setattr(engine.synthesizer, "_resolve_paths", mock_resolve)
 
     profile = {"type": "clone", "value": "non_existent_voice.wav"}
 
@@ -156,9 +156,9 @@ def test_generate_segment_with_ref_text(monkeypatch):
     mock_model.generate_voice_clone.return_value = ([np.zeros(24000)], 24000)
     
     # Mock internal methods to avoid I/O
-    monkeypatch.setattr(engine, "_resolve_paths", lambda x: [Path("dummy.wav")])
-    monkeypatch.setattr(engine, "_extract_audio_with_cache", lambda x: "dummy.wav")
-    monkeypatch.setattr(engine, "_validate_ref_audio", lambda x: None)
+    monkeypatch.setattr(engine.synthesizer, "_resolve_paths", lambda x: [Path("dummy.wav")])
+    monkeypatch.setattr(engine.synthesizer, "_extract_audio_with_cache", lambda x: "dummy.wav")
+    monkeypatch.setattr(engine.synthesizer.__class__, "_validate_ref_audio", lambda *args: None)
     
     # Mock soundfile to avoid file I/O for silence padding
     with patch("soundfile.read", return_value=(np.zeros(24000), 24000)), \
@@ -181,9 +181,9 @@ def test_generate_segment_without_ref_text(monkeypatch):
     mock_model.create_voice_clone_prompt.return_value = [MagicMock()]
     mock_model.generate_voice_clone.return_value = ([np.zeros(24000)], 24000)
     
-    monkeypatch.setattr(engine, "_resolve_paths", lambda x: [Path("dummy.wav")])
-    monkeypatch.setattr(engine, "_extract_audio_with_cache", lambda x: "dummy.wav")
-    monkeypatch.setattr(engine, "_validate_ref_audio", lambda x: None)
+    monkeypatch.setattr(engine.synthesizer, "_resolve_paths", lambda x: [Path("dummy.wav")])
+    monkeypatch.setattr(engine.synthesizer, "_extract_audio_with_cache", lambda x: "dummy.wav")
+    monkeypatch.setattr(engine.synthesizer.__class__, "_validate_ref_audio", lambda *args: None)
     
     profile = {"type": "clone", "value": "dummy.wav"}
     

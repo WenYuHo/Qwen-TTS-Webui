@@ -32,8 +32,8 @@ def test_eq_filter_cache_pruning():
 
     original_scipy = utils.scipy_signal
     utils.scipy_signal = MagicMock()
-    utils.scipy_signal.butter.return_value = (np.array([1]), np.array([1]))
-    utils.scipy_signal.lfilter.return_value = np.array([1, 2, 3])
+    utils.scipy_signal.butter.return_value = (np.array([1.0], dtype=np.float32), np.array([1.0], dtype=np.float32))
+    utils.scipy_signal.lfilter.return_value = np.array([1.0, 2.0, 3.0], dtype=np.float32)
 
     _eq_filter_cache.clear()
 
@@ -45,7 +45,7 @@ def test_eq_filter_cache_pruning():
 
     # Adding one more should trigger pruning (limit 200, count 20)
     # So it should go 200 -> 180 -> 181
-    AudioPostProcessor.apply_eq(np.array([0, 0]), 24000, "broadcast")
+    AudioPostProcessor.apply_eq(np.array([0.0, 0.0], dtype=np.float32), 24000, "broadcast")
 
     assert len(_eq_filter_cache) == 181
 

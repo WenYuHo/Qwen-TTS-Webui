@@ -15,8 +15,8 @@ class TestSynthesisErrors(unittest.TestCase):
     def setUp(self):
         self.engine = PodcastEngine()
 
-    @patch("backend.podcast_engine.get_model")
-    @patch("backend.podcast_engine.logger")
+    @patch("backend.engine_modules.synthesizer.get_model")
+    @patch("backend.engine_modules.synthesizer.logger")
     def test_generate_segment_handles_model_error(self, mock_logger, mock_get_model):
         """Test that generate_segment logs and raises RuntimeError on model failure."""
         # Setup mock: get_model returns a model whose generate_custom_voice fails
@@ -31,7 +31,7 @@ class TestSynthesisErrors(unittest.TestCase):
         self.assertIn("Synthesis failed", str(cm.exception))
         mock_logger.error.assert_called()
 
-    @patch("backend.podcast_engine.get_model")
+    @patch("backend.engine_modules.synthesizer.get_model")
     def test_generate_segment_invalid_type(self, mock_get_model):
         """Test that unknown speaker types raise RuntimeError (wrapped from ValueError)."""
         with self.assertRaises(RuntimeError) as cm:

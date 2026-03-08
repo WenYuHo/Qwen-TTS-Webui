@@ -159,6 +159,12 @@ async def generate_s2s(request: S2SRequest, background_tasks: BackgroundTasks):
     background_tasks.add_task(run_s2s_task, task_id, request.source_audio, request.target_voice, server_state.engine, request.preserve_prosody, request.instruct)
     return {"task_id": task_id, "status": server_state.TaskStatus.PENDING}
 
+@router.post("/dub")
+async def generate_dub(request: DubRequest, background_tasks: BackgroundTasks):
+    task_id = server_state.task_manager.create_task("dub", {"source": request.source_audio})
+    background_tasks.add_task(run_dub_task, task_id, request.source_audio, request.target_lang, server_state.engine)
+    return {"task_id": task_id, "status": server_state.TaskStatus.PENDING}
+
 
 @router.post("/detect-language")
 async def detect_language(request: DetectLanguageRequest):

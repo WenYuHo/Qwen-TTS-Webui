@@ -6,7 +6,7 @@
 
 ## PRIORITIZED BACKLOG
 
-- [ ] **ENGINE_REFACTOR_MODULAR**
+- [x] **ENGINE_REFACTOR_MODULAR**
     - Task: Decompose `src/backend/podcast_engine.py` -> Segmenter, Synthesizer, Patcher modules.
     - Ref: `conductor/tech-stack.md` (Code Quality).
     - Promise: `ENGINE_REFACTOR_MODULAR`
@@ -23,6 +23,7 @@
     - Signals: `NONE`
 
 ## COMPLETED
+- [x] **ENGINE_REFACTOR_MODULAR** (2026-03-07)
 - [x] **DUBBING_PH1** (2026-03-07)
 - [x] **VIDEO_GEN_SETUP** (2026-03-07)
 - [x] **DUBBING_S2S_PH2** (2026-03-07)

@@ -11,7 +11,6 @@ from unittest.mock import MagicMock, patch
 
 @pytest.fixture
 def engine():
-    # Mock engine that doesn't load real models
     class MockEngine(PodcastEngine):
         def __init__(self):
             self.upload_dir = Path("uploads")
@@ -24,9 +23,15 @@ def engine():
             self.mix_embedding_cache = {}
             self.prompt_cache = {}
             self.clone_embedding_cache = {}
+            
+            from backend.engine_modules.patcher import PodcastPatcher
+            from backend.engine_modules.synthesizer import VoiceSynthesizer
+            self.patcher = PodcastPatcher(self.bgm_cache, self.bgm_dir, self.shared_assets_dir)
+            self.synthesizer = VoiceSynthesizer(
+                self.upload_dir, {}, {}, self.prompt_cache, self.clone_embedding_cache, {}, self.mix_embedding_cache, {}, lambda x: [Path(x)], lambda x: x
+            )
 
         def generate_segment(self, text, profile=None, language="auto", model=None, **kwargs):
-            # Return 1s of 0.1 amplitude (some dialogue)
             sr = 24000
             wav = 0.1 * np.ones(sr)
             return wav, sr

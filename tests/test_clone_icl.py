@@ -17,13 +17,13 @@ def engine():
 
 def test_clone_without_ref_text_uses_xvector_only(engine):
     """Clone without ref_text should set x_vector_only_mode=True."""
-    with patch.object(engine, '_resolve_paths', return_value=[Path('/fake/audio.wav')]):
+    with patch.object(engine.synthesizer, '_resolve_paths', return_value=[Path('/fake/audio.wav')]):
         mock_model = MagicMock()
         mock_model.create_voice_clone_prompt.return_value = [MagicMock()]
         mock_model.generate_voice_clone.return_value = ([np.zeros(24000)], 24000)
         
         # We need to mock _validate_ref_audio to avoid actual file system checks
-        with patch.object(engine, '_validate_ref_audio'):
+        with patch.object(engine.synthesizer.__class__, '_validate_ref_audio', lambda *args: None):
             engine.generate_segment("Hello", {"type": "clone", "value": "test.wav"}, model=mock_model)
             
             mock_model.create_voice_clone_prompt.assert_called_once()
@@ -32,13 +32,13 @@ def test_clone_without_ref_text_uses_xvector_only(engine):
 
 def test_clone_with_ref_text_uses_icl(engine):
     """Clone with ref_text should set x_vector_only_mode=False (ICL mode)."""
-    with patch.object(engine, '_resolve_paths', return_value=[Path('/fake/audio.wav')]):
+    with patch.object(engine.synthesizer, '_resolve_paths', return_value=[Path('/fake/audio.wav')]):
         mock_model = MagicMock()
         mock_model.create_voice_clone_prompt.return_value = [MagicMock()]
         mock_model.generate_voice_clone.return_value = ([np.zeros(24000)], 24000)
         
         # Mock _validate_ref_audio AND sf.read/write for padding logic
-        with patch.object(engine, '_validate_ref_audio'), \
+        with patch.object(engine.synthesizer.__class__, '_validate_ref_audio', lambda *args: None), \
              patch("soundfile.read", return_value=(np.zeros(24000), 24000)), \
              patch("soundfile.write"):
             engine.generate_segment("Hello", {"type": "clone", "value": "test.wav", "ref_text": "Test transcript"}, model=mock_model)

@@ -25,6 +25,10 @@ from .utils import phoneme_manager, AudioPostProcessor, Profiler, prune_dict_cac
 from concurrent.futures import ThreadPoolExecutor
 import queue
 
+from .engine_modules.segmenter import TextSegmenter
+from .engine_modules.synthesizer import VoiceSynthesizer
+from .engine_modules.patcher import PodcastPatcher
+
 # ⚡ Bolt: Global cache for audio watermark tone to avoid redundant math and allocations
 _watermark_tone_cache = {}
 # ⚡ Bolt: Reference to system settings to avoid redundant circular-import-safe lookups
@@ -50,6 +54,14 @@ class PodcastEngine:
         self.transcription_cache = {}
         self.translation_cache = {}
         self.video_audio_cache = {}
+
+        self.synthesizer = VoiceSynthesizer(
+            self.upload_dir, self.transcription_cache, self.translation_cache,
+            self.prompt_cache, self.clone_embedding_cache, self.preset_embeddings,
+            self.mix_embedding_cache, self.video_audio_cache,
+            self._resolve_paths, self._extract_audio_with_cache
+        )
+        self.patcher = PodcastPatcher(self.bgm_cache, self._bgm_dir, self._shared_assets_dir)
 
         self._whisper_model = None # Lazy load
 
@@ -161,39 +173,7 @@ class PodcastEngine:
         return output
 
     def get_speaker_embedding(self, profile: Dict[str, str], model: Optional[Any] = None) -> Optional[torch.Tensor]:
-        ptype = profile.get("type")
-        if ptype == "preset":
-            name = profile["value"].lower()
-            if name in self.preset_embeddings: return self.preset_embeddings[name]
-        elif ptype == "clone":
-            cache_key = profile["value"]
-            if cache_key in self.prompt_cache: return self.prompt_cache[cache_key][0].ref_spk_embedding
-            if cache_key in self.clone_embedding_cache: return self.clone_embedding_cache[cache_key]
-        if model is None:
-            mtype = "Base" if ptype == "clone" else "CustomVoice"
-            model = get_model(mtype)
-        if ptype == "preset":
-            # ⚡ Bolt: Prevent unbounded growth of preset embeddings cache
-            prune_dict_cache(self.preset_embeddings, limit=200, count=20)
-            emb = model.get_speaker_embedding(profile["value"])
-            self.preset_embeddings[profile["value"].lower()] = emb
-            return emb
-        elif ptype == "clone":
-            cache_key = profile["value"]
-            resolved = self._resolve_paths(cache_key)
-            clone_path = str(resolved[0])
-            if VideoEngine.is_video(clone_path): clone_path = self._extract_audio_with_cache(clone_path)
-            prompt = model.create_voice_clone_prompt(ref_audio=clone_path, x_vector_only_mode=True)
-            emb = prompt[0].ref_spk_embedding
-
-            # ⚡ Bolt: Prevent unbounded growth of prompt and embedding caches
-            prune_dict_cache(self.prompt_cache, limit=200, count=20)
-            prune_dict_cache(self.clone_embedding_cache, limit=200, count=20)
-
-            self.prompt_cache[cache_key] = prompt
-            self.clone_embedding_cache[cache_key] = emb
-            return emb
-        return None
+        return self.synthesizer.get_speaker_embedding(profile, model)
 
     def _apply_audio_watermark(self, wav: np.ndarray, sr: int) -> np.ndarray:
         try:
@@ -260,117 +240,10 @@ class PodcastEngine:
 
     @staticmethod
     def _compute_quality_score(wav: np.ndarray, sr: int) -> Dict[str, Any]:
-        """Compute basic audio quality metrics for a generated segment."""
-        duration = len(wav) / sr
-        rms = float(np.sqrt(np.mean(wav ** 2)))
-        peak = float(np.max(np.abs(wav)))
-        # SNR estimate: ratio of signal RMS to noise floor (last 0.1s assumed silence)
-        tail = wav[-int(sr * 0.1):] if len(wav) > int(sr * 0.1) else wav
-        noise_rms = float(np.sqrt(np.mean(tail ** 2))) + 1e-10
-        snr_db = 20 * np.log10(rms / noise_rms) if rms > 0 else 0
-        clipping = bool(peak > 0.99)
-        too_quiet = bool(rms < 0.01)
-        return {
-            "duration": round(duration, 2),
-            "rms": round(rms, 4),
-            "peak": round(peak, 4),
-            "snr_db": round(snr_db, 1),
-            "clipping": clipping,
-            "too_quiet": too_quiet,
-            "quality": "good" if (not clipping and not too_quiet and snr_db > 10) else "warning"
-        }
+        return VoiceSynthesizer._compute_quality_score(wav, sr)
 
     def generate_segment(self, text: str, profile: Dict[str, Any], language: str = "auto", model: Optional[Any] = None, instruct: Optional[str] = None, temperature: Optional[float] = None, **gen_kwargs) -> tuple[np.ndarray, int]:
-        try:
-            text = phoneme_manager.apply(text)
-            final_instruct = instruct or profile.get("instruct")
-            wavs = None
-            ptype = profile.get("type")
-            if ptype == "preset":
-                if model is None: model = get_model("CustomVoice")
-                wavs, sr = model.generate_custom_voice(text=text, speaker=profile["value"], language=language, instruct=final_instruct, temperature=temperature, **gen_kwargs)
-            elif ptype == "design":
-                if model is None: model = get_model("VoiceDesign")
-                design_instruct = profile["value"]
-                if final_instruct: design_instruct = f"{design_instruct}, {final_instruct}"
-                wavs, sr = model.generate_voice_design(text=text, instruct=design_instruct, language=language, non_streaming_mode=True, temperature=temperature, **gen_kwargs)
-            elif ptype == "clone":
-                ref_text = profile.get("ref_text")
-                use_icl = ref_text is not None and ref_text.strip() != ""
-                cache_key = profile["value"]
-                # When ref_text is provided, use ICL mode for higher quality cloning
-                # ICL captures expressive similarity, prosody, and emotional nuances
-                icl_cache_key = f"{cache_key}:icl:{ref_text}" if use_icl else cache_key
-                if icl_cache_key in self.prompt_cache:
-                    prompt = self.prompt_cache[icl_cache_key]
-                else:
-                    try:
-                        resolved_paths = self._resolve_paths(profile["value"])
-                    except (FileNotFoundError, PermissionError) as e:
-                        raise RuntimeError(f"Cloning reference audio not found: {profile['value']}") from e
-                    
-                    if model is None: model = get_model("Base")
-                    ref_audio = str(resolved_paths[0])
-                    if VideoEngine.is_video(ref_audio): ref_audio = self._extract_audio_with_cache(ref_audio)
-                    
-                    # ⚡ Bolt: Validate reference audio before processing
-                    self._validate_ref_audio(ref_audio)
-
-                    # ⚡ Bolt: Silence padding for ICL anti-bleed
-                    if use_icl:
-                        import soundfile as sf
-                        audio_data, audio_sr = sf.read(ref_audio)
-                        # Append 0.5s silence to prevent phoneme bleed from ref into generated speech
-                        silence = np.zeros(int(audio_sr * 0.5), dtype=audio_data.dtype)
-                        padded = np.concatenate([audio_data, silence])
-                        # Write padded audio to a temp file (will be cleaned by StorageManager)
-                        padded_path = str(self.upload_dir / f"padded_{uuid.uuid4()}.wav")
-                        sf.write(padded_path, padded, audio_sr)
-                        ref_audio = padded_path
-
-                    prompt = model.create_voice_clone_prompt(
-                        ref_audio=ref_audio,
-                        ref_text=ref_text if use_icl else None,
-                        x_vector_only_mode=not use_icl
-                    )
-                    # Prevent unbounded growth of prompt cache
-                    prune_dict_cache(self.prompt_cache, limit=200, count=20)
-                    self.prompt_cache[icl_cache_key] = prompt
-                if model is None: model = get_model("Base")
-                wavs, sr = model.generate_voice_clone(text=text, language=language, voice_clone_prompt=prompt, instruct=final_instruct, temperature=temperature, **gen_kwargs)
-            elif ptype == "mix":
-                cache_key = f"mix:{profile['value']}"
-                if cache_key in self.prompt_cache: prompt = self.prompt_cache[cache_key]
-                else:
-                    # ⚡ Bolt: Prevent unbounded growth of prompt cache
-                    prune_dict_cache(self.prompt_cache, limit=200, count=20)
-                    mix_configs = json.loads(profile["value"])
-                    mixed_emb = self._compute_mixed_embedding(mix_configs)
-                    prompt = [VoiceClonePromptItem(ref_code=None, ref_spk_embedding=mixed_emb, x_vector_only_mode=True, icl_mode=False, ref_text=None)]
-                    self.prompt_cache[cache_key] = prompt
-                if model is None: model = get_model("Base")
-                wavs, sr = model.generate_voice_clone(text=text, language=language, voice_clone_prompt=prompt, instruct=final_instruct, temperature=temperature, **gen_kwargs)
-            else:
-                raise RuntimeError(f"Unknown speaker type: {ptype}")
-
-            if not wavs: raise RuntimeError("No waveforms generated")
-            
-            # Task 4.1 & 4.2: Quality Check & Auto-Retry
-            wav_out = self._apply_audio_watermark(wavs[0], sr)
-            quality = self._compute_quality_score(wav_out, sr)
-            logger.info(f"Segment quality: {quality}")
-            audit_manager.log_event("synthesis", {"quality": quality, "profile_type": ptype}, quality["quality"])
-
-            if quality["quality"] == "warning" and not gen_kwargs.get("_is_retry"):
-                logger.warning(f"Low quality detected (SNR={quality['snr_db']}dB), retrying with lower temperature")
-                retry_kwargs = {**gen_kwargs, "temperature": 0.3, "top_k": 20, "_is_retry": True}
-                return self.generate_segment(text, profile, language, model, instruct, **retry_kwargs)
-
-            return wav_out, sr
-        except Exception as e:
-            if not isinstance(e, RuntimeError):
-                logger.error(f"Synthesis failed: {e}")
-            raise
+        return self.synthesizer.generate_segment(text, profile, language, model, instruct, temperature, watermark_func=self._apply_audio_watermark, **gen_kwargs)
 
     def _compute_mixed_embedding(self, mix_configs: List[Dict[str, Any]], model: Optional[Any] = None) -> Optional[torch.Tensor]:
         cache_key = json.dumps(sorted(mix_configs, key=lambda x: str(x["profile"])), sort_keys=True)
@@ -587,87 +460,20 @@ class PodcastEngine:
 
             # ⚡ Bolt: Multi-track mixing buffer (Mono by default, Stereo if panning/BGM)
             # ACX/Audible prefers mono for voice, but 2026 trends favor spatial 3D audio.
-            is_stereo = any(s.get("pan", 0) != 0 for s in script) or bgm_mood is not None
-            
-            if is_stereo:
-                final_wav = np.zeros((2, max_sample + int(2.0 * sample_rate)), dtype=np.float32)
-            else:
-                final_wav = np.zeros(max_sample + int(2.0 * sample_rate), dtype=np.float32)
-
-            for seg in speech_segments:
-                wav = seg["wav"]
-                pan = script[seg["index"]].get("pan", 0.0)
-                if is_stereo:
-                    segment_stereo = AudioPostProcessor.apply_panning(wav, pan)
-                    final_wav[:, seg["start"]:seg["end"]] = segment_stereo
-                else:
-                    final_wav[seg["start"]:seg["end"]] = wav
+            is_stereo_req = bgm_mood is not None
+            final_wav, max_sample, speech_segments = self.patcher.construct_timeline(script, waveforms, srs, sample_rate, is_stereo_req)
 
             if bgm_mood:
-                try:
-                    # ⚡ Bolt: Cache BGM samples to avoid redundant loading and resampling
-                    if bgm_mood in self.bgm_cache:
-                        bgm_samples = self.bgm_cache[bgm_mood]
-                        # ⚡ Bolt: Only copy if we need to modify the samples in-place (ducking)
-                        if ducking_level > 0:
-                            bgm_samples = bgm_samples.copy()
+                is_stereo = any(s.get("pan", 0) != 0 for s in script) or bgm_mood is not None
+                bgm_samples = self.patcher.load_bgm(bgm_mood, sample_rate, max_sample, ducking_level, is_stereo, speech_segments)
+                if bgm_samples is not None:
+                    if is_stereo:
+                        final_wav += bgm_samples[None, :]
                     else:
-                        bgm_full_path = (Path(BASE_DIR) / "bgm" / f"{bgm_mood}.mp3").resolve()
-                        if not bgm_full_path.exists():
-                            # Fallback to absolute or relative if mood.mp3 doesn't exist
-                            bgm_full_path = Path(bgm_mood).resolve()
-                            if not bgm_full_path.exists():
-                                # Try shared_assets
-                                bgm_full_path = (SHARED_ASSETS_DIR / bgm_mood).resolve()
-
-                        if bgm_full_path.exists() and bgm_full_path.is_file():
-                            # ⚡ Bolt: Prevent unbounded growth of BGM cache
-                            prune_dict_cache(self.bgm_cache, limit=50, count=5)
-                            bgm_audio = AudioSegment.from_file(bgm_full_path).set_frame_rate(sample_rate).set_channels(1)
-                            bgm_samples = np.array(bgm_audio.get_array_of_samples(), dtype=np.float32) / 32768.0 * 0.1
-                            self.bgm_cache[bgm_mood] = bgm_samples.copy()
-                        else:
-                            bgm_samples = None
-
-                    if bgm_samples is not None:
-                        if len(bgm_samples) < (max_sample + int(2.0 * sample_rate)):
-                            bgm_samples = np.tile(bgm_samples, int(np.ceil((max_sample + int(2.0 * sample_rate))/len(bgm_samples))))
-                        bgm_samples = bgm_samples[:(max_sample + int(2.0 * sample_rate))]
-                        
-                        if ducking_level > 0:
-                            duck_factor = 10 ** (-(ducking_level * 25) / 20.0)
-                            # ⚡ Bolt: Use vectorized ducking in-place for the BGM track
-                            for seg in speech_segments: 
-                                bgm_samples[seg["start"]:seg["end"]] *= duck_factor
-                        
-                        if is_stereo:
-                            # ⚡ Bolt: Use broadcasting for O(1) stereo expansion instead of O(N) np.stack
-                            # This avoids a redundant copy of the BGM samples.
-                            final_wav += bgm_samples[None, :]
-                        else:
-                            final_wav += bgm_samples
-                except Exception as e:
-                    logger.error(f"Failed to apply BGM: {e}")
-
-            # ⚡ Bolt: Use max(np.max, -np.min) for memory efficiency. It's ~2.4x faster
-            # and avoids allocating a large O(N) temporary array for np.abs(final_wav).
-            max_val = max(np.max(final_wav), -np.min(final_wav))
-            if max_val > 1.0: final_wav /= max_val
+                        final_wav += bgm_samples
 
             # ⚡ Bolt: Post-Processing Pipeline (Task 4.4)
-            # 1. De-clicker to remove potential splicing artifacts
-            final_wav = AudioPostProcessor.apply_declick(final_wav, sample_rate)
-
-            # 2. Creative Effects (EQ, Reverb)
-            final_wav = AudioPostProcessor.apply_eq(final_wav, sample_rate, preset=eq_preset)
-            final_wav = AudioPostProcessor.apply_reverb(final_wav, sample_rate, intensity=reverb_level)
-            
-            # ⚡ Bolt: Final mastering for ACX compliance if requested
-            if master_acx:
-                # 3. Dynamic Range Compression for ACX "punch"
-                final_wav = AudioPostProcessor.apply_compressor(final_wav, sample_rate, threshold_db=-20.0, ratio=4.0)
-                # 4. Loudness Normalization (-3dB peak, -18 to -23dB RMS)
-                final_wav = AudioPostProcessor.normalize_acx(final_wav)
+            final_wav = self.patcher.apply_mastering(final_wav, sample_rate, eq_preset, reverb_level, master_acx)
 
             # ⚡ Bolt: Apply watermark once at the very end of the podcast project.
             final_wav = self._apply_audio_watermark(final_wav, sample_rate)
