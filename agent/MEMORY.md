@@ -52,4 +52,6 @@ A high-fidelity audio production suite for multi-speaker podcasts, audio dramas,
 *   **LTX-Video Integrated**: Video generation is live via endpoints in `video.py`.
 *   **ACX Mastering Added**: `utils.AudioPostProcessor` now contains ACX audio compliance normalization.
 
+*   **Dubbing Phase 1 Started**: `PodcastEngine.transcribe_audio()` now returns full Whisper metadata (text, language, segments). Added `/api/generate/detect-language` endpoint and a "DETECT" button in the Dubbing UI to auto-fill target languages.
+
 *To update this file: When major architectural changes occur or new tracks open, summarize them here to maintain the agent's cross-session awareness.*

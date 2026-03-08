@@ -123,7 +123,8 @@ class PodcastEngine:
                 logger.error(f"Streaming podcast block failed: {e}")
                 continue
 
-    def transcribe_audio(self, audio_path: str) -> str:
+    def transcribe_audio(self, audio_path: str) -> Dict[str, Any]:
+        """Transcribe audio and return text, detected language, and segments."""
         resolved = self._resolve_paths(audio_path)
         actual_path = str(resolved[0])
         if VideoEngine.is_video(actual_path):
@@ -141,15 +142,23 @@ class PodcastEngine:
         if self._whisper_model is None:
             import whisper
             self._whisper_model = whisper.load_model("base")
+        
+        # Whisper returns {"text": ..., "language": ..., "segments": ...}
         result = self._whisper_model.transcribe(actual_path)
-        text = result["text"]
+        
+        output = {
+            "text": result.get("text", ""),
+            "language": result.get("language", "unknown"),
+            "segments": result.get("segments", [])
+        }
+        
         if cache_key:
             try:
                 # ⚡ Bolt: Gradual cache pruning instead of drastic clear()
                 prune_dict_cache(self.transcription_cache, limit=1000, count=100)
-                self.transcription_cache[cache_key] = text
+                self.transcription_cache[cache_key] = output
             except Exception: pass
-        return text
+        return output
 
     def get_speaker_embedding(self, profile: Dict[str, str], model: Optional[Any] = None) -> Optional[torch.Tensor]:
         ptype = profile.get("type")
@@ -425,16 +434,34 @@ class PodcastEngine:
                 logger.error(f"Chunk synthesis failed for '{chunk_text[:20]}...': {e}")
                 continue
 
-    def generate_voice_changer(self, source_audio: str, target_profile: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        text = self.transcribe_audio(source_audio)
+    def generate_voice_changer(self, source_audio: str, target_profile: Optional[Dict[str, Any]] = None, preserve_prosody: bool = True, instruct: Optional[str] = None) -> Dict[str, Any]:
+        result = self.transcribe_audio(source_audio)
+        text = result["text"]
         resolved = self._resolve_paths(source_audio)
         source_path = str(resolved[0])
         if VideoEngine.is_video(source_path): source_path = self._extract_audio_with_cache(source_path)
         model = get_model("Base")
-        prompt_items = model.create_voice_clone_prompt(ref_audio=source_path, ref_text=text, x_vector_only_mode=False)
+        
         target_emb = self.get_speaker_embedding(target_profile or {"type": "preset", "value": "Ryan"})
-        voice_clone_prompt = {"ref_code": [prompt_items[0].ref_code], "ref_spk_embedding": [target_emb], "x_vector_only_mode": [False], "icl_mode": [True]}
-        wavs, sr = model.generate_voice_clone(text=text, voice_clone_prompt=voice_clone_prompt)
+        
+        if preserve_prosody:
+            # ICL mode captures prosody via ref_code
+            prompt_items = model.create_voice_clone_prompt(ref_audio=source_path, ref_text=text, x_vector_only_mode=False)
+            voice_clone_prompt = {
+                "ref_code": [prompt_items[0].ref_code],
+                "ref_spk_embedding": [target_emb],
+                "x_vector_only_mode": [False],
+                "icl_mode": [True]
+            }
+        else:
+            # Standard cloning: just the voice embedding
+            voice_clone_prompt = {
+                "ref_spk_embedding": [target_emb],
+                "x_vector_only_mode": [True],
+                "icl_mode": [False]
+            }
+            
+        wavs, sr = model.generate_voice_clone(text=text, voice_clone_prompt=voice_clone_prompt, instruct=instruct)
         return {"waveform": wavs[0], "sample_rate": sr, "text": text}
 
     def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None, ducking_level: float = 0.0, eq_preset: str = "flat", reverb_level: float = 0.0, master_acx: bool = False, temperature: Optional[float] = None, **gen_kwargs) -> Optional[Dict[str, Any]]:
@@ -648,7 +675,8 @@ class PodcastEngine:
             return {"waveform": final_wav, "sample_rate": sample_rate}
 
     def dub_audio(self, audio_path: str, target_lang: str) -> Optional[Dict[str, Any]]:
-        text = self.transcribe_audio(audio_path)
+        result = self.transcribe_audio(audio_path)
+        text = result["text"]
         trans_lang = 'zh-CN' if target_lang == 'zh' else target_lang
 
         # ⚡ Bolt: Cache translation results with hashed keys to avoid redundant API calls and save memory

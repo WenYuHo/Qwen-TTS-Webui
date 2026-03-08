@@ -115,6 +115,10 @@ function performSwitch(view) {
 Object.assign(window, {
     switchView,
     startDubbing: DubbingManager.startDubbing.bind(DubbingManager),
+    detectLanguage: DubbingManager.detectLanguage.bind(DubbingManager),
+    syncPlayDub: DubbingManager.syncPlayDub.bind(DubbingManager),
+    previewS2STarget: DubbingManager.previewS2STarget.bind(DubbingManager),
+    uploadS2SFiles: DubbingManager.uploadS2SFiles.bind(DubbingManager),
     startVoiceChanger: DubbingManager.startVoiceChanger.bind(DubbingManager),
     loadAssets: AssetManager.loadAssets,
     uploadAsset: AssetManager.uploadAsset,
@@ -127,6 +131,7 @@ Object.assign(window, {
     generatePodcast: ProductionManager.generatePodcast,
     suggestVideoScene: ProductionManager.suggestVideoScene.bind(ProductionManager),
     triggerDownload: SystemManager.triggerDownload,
+    getAllProfiles: VoiceLabManager.getAllProfiles.bind(VoiceLabManager),
     testVoiceDesign: VoiceLabManager.testVoiceDesign.bind(VoiceLabManager),
     testVoiceClone: VoiceLabManager.testVoiceClone.bind(VoiceLabManager),
     testVoiceMix: VoiceLabManager.testVoiceMix.bind(VoiceLabManager),

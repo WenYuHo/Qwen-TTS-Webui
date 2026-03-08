@@ -3,8 +3,9 @@ from fastapi.responses import StreamingResponse
 from .. import server_state
 from ..utils import numpy_to_wav_bytes
 from ..dub_logic import run_dub_task
-from ..s2s_logic import run_s2s_task
-from .schemas import PodcastRequest, S2SRequest, DubRequest, StreamingSynthesisRequest, TEMPERATURE_PRESETS
+from ..s2s_logic import run_s2s_task, run_batch_s2s_task
+from ..utils.subtitles import generate_srt_from_segments, generate_vtt_from_segments
+from .schemas import PodcastRequest, S2SRequest, BatchS2SRequest, DubRequest, StreamingSynthesisRequest, DetectLanguageRequest, TEMPERATURE_PRESETS
 from ..config import logger
 import io
 
@@ -154,16 +155,44 @@ async def generate_podcast(request: PodcastRequest, background_tasks: Background
 
 @router.post("/s2s")
 async def generate_s2s(request: S2SRequest, background_tasks: BackgroundTasks):
-    if request.preserve_prosody:
-        task_id = server_state.task_manager.create_task("voice_changer", {"source": request.source_audio})
-        background_tasks.add_task(run_voice_changer_task, task_id, request.source_audio, request.target_voice)
-    else:
-        task_id = server_state.task_manager.create_task("s2s_generation", {"source": request.source_audio})
-        background_tasks.add_task(run_s2s_task, task_id, request.source_audio, request.target_voice, server_state.engine)
+    task_id = server_state.task_manager.create_task("s2s", {"source": request.source_audio})
+    background_tasks.add_task(run_s2s_task, task_id, request.source_audio, request.target_voice, server_state.engine, request.preserve_prosody, request.instruct)
     return {"task_id": task_id, "status": server_state.TaskStatus.PENDING}
 
-@router.post("/dub")
-async def generate_dub(request: DubRequest, background_tasks: BackgroundTasks):
-    task_id = server_state.task_manager.create_task("dubbing", {"source": request.source_audio})
-    background_tasks.add_task(run_dub_task, task_id, request.source_audio, request.target_lang, server_state.engine)
+
+@router.post("/detect-language")
+async def detect_language(request: DetectLanguageRequest):
+    """Detect language from an existing uploaded audio file."""
+    try:
+        result = server_state.engine.transcribe_audio(request.source_audio)
+        return {
+            "language": result["language"],
+            "text_preview": result["text"][:200]
+        }
+    except Exception as e:
+        logger.error(f"Language detection failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/dub/{task_id}/subtitles")
+async def download_subtitles(task_id: str, format: str = "srt"):
+    task = server_state.task_manager.get_task(task_id)
+    if not task or task["status"] != server_state.TaskStatus.COMPLETED:
+        raise HTTPException(status_code=404, detail="Task not found or not completed")
+    
+    result = task.get("result")
+    if not isinstance(result, dict) or "segments" not in result:
+        raise HTTPException(status_code=400, detail="Subtitles not available for this task")
+    
+    segments = result["segments"]
+    if format == "vtt":
+        content = generate_vtt_from_segments(segments)
+        return StreamingResponse(io.BytesIO(content.encode()), media_type="text/vtt", headers={"Content-Disposition": f"attachment; filename=subtitles_{task_id}.vtt"})
+    else:
+        content = generate_srt_from_segments(segments)
+        return StreamingResponse(io.BytesIO(content.encode()), media_type="text/plain", headers={"Content-Disposition": f"attachment; filename=subtitles_{task_id}.srt"})
+
+@router.post("/s2s/batch")
+async def generate_batch_s2s(request: BatchS2SRequest, background_tasks: BackgroundTasks):
+    task_id = server_state.task_manager.create_task("batch_s2s", {"count": len(request.source_audios)})
+    background_tasks.add_task(run_batch_s2s_task, task_id, request.source_audios, request.target_voice, server_state.engine, request.preserve_prosody, request.instruct)
     return {"task_id": task_id, "status": server_state.TaskStatus.PENDING}

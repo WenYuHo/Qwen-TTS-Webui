@@ -16,9 +16,19 @@ async def get_task_status(task_id: str):
         raise HTTPException(status_code=404, detail="Task not found")
 
     response = task.copy()
-    if response["result"] and isinstance(response["result"], bytes):
-        response["has_result"] = True
-        del response["result"]
+    result = response.get("result")
+    
+    # Hide large binary data in status response
+    if result:
+        if isinstance(result, bytes):
+            response["has_result"] = True
+            del response["result"]
+        elif isinstance(result, dict) and "audio" in result:
+            response["has_result"] = True
+            # Keep other metadata (like segments) but hide the audio bytes
+            response["result"] = {k: v for k, v in result.items() if k != "audio"}
+        else:
+            response["has_result"] = True
     else:
         response["has_result"] = False
 
@@ -33,7 +43,12 @@ async def get_task_result(task_id: str):
     if task["status"] != server_state.TaskStatus.COMPLETED:
         raise HTTPException(status_code=400, detail="Task not completed yet")
 
-    if not task["result"]:
+    result = task.get("result")
+    if not result:
         raise HTTPException(status_code=404, detail="No result found for this task")
 
-    return StreamingResponse(io.BytesIO(task["result"]), media_type="audio/wav")
+    audio_bytes = result if isinstance(result, bytes) else result.get("audio")
+    if not audio_bytes:
+         raise HTTPException(status_code=404, detail="No audio result found")
+
+    return StreamingResponse(io.BytesIO(audio_bytes), media_type="audio/wav")

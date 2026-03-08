@@ -78,8 +78,19 @@ try:
             print(f"[WARN] LTX-2 models NOT found in {LTX_MODELS_PATH}")
             print("   Go to System > Model Inventory in the WebUI to download them.")
     except ImportError:
-        print("[INFO] LTX Pipelines not installed. Video generation will be disabled.")
-        print("   To enable, install with: pip install ltx-pipelines diffusers opencv-python")
+        # Auto-Setup trigger:
+        from tools.setup_video_gen import check_nvidia_gpu
+        if check_nvidia_gpu():
+            print("[INFO] NVIDIA GPU detected but LTX Pipelines not installed.")
+            print("[ACTION] Triggering Video Gen Auto-Setup...")
+            try:
+                # Run as a separate process to avoid complex import reloads
+                subprocess.call([sys.executable, "tools/setup_video_gen.py"])
+            except Exception as e:
+                print(f"[ERROR] Auto-setup failed: {e}")
+        else:
+            print("[INFO] LTX Pipelines not installed. Video generation will be disabled.")
+            print("   To enable, install with: pip install ltx-pipelines diffusers opencv-python")
 
     if not BGM_PATH.exists() or not any(BGM_PATH.iterdir()):
 

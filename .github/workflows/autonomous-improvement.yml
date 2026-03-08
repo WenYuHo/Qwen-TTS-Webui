@@ -3,6 +3,9 @@ name: Autonomous Improvement
 on:
   schedule:
     - cron: '0 3 * * *'  # 3 AM UTC
+  push:
+    paths:
+      - 'agent/TASK_QUEUE.md'
   workflow_dispatch:      # Manual trigger for testing
 
 jobs:
@@ -18,9 +21,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run Improver Agent
-        # Note: This is a placeholder for the actual Jules invocation
-        # used in this environment.
+      - name: Run Autonomous Developer Swarm
+        # 2026 Strategy: Use a specialized agent orchestrator
+        # This agent reads the TASK_QUEUE and delegates to workers.
         run: |
-          echo "Triggering daily improvement loop..."
-          # jules --agent improver --task-queue agent/TASK_QUEUE.md
+          echo "Syncing state with cloud orchestrator..."
+          python tools/sync_state.py GLOBAL --status "CI_RUNNING"
+          
+          # In 2026, we'd use 'gemini-cli' directly in the runner
+          # For now, we simulate the 'ralph:loop' trigger
+          gemini /ralph:loop --non-interactive --task-queue agent/TASK_QUEUE.md
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
