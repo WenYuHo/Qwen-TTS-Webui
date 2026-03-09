@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qwen-TTS | System Monitor</title>
+    <style>
+        :root {
+            --bg: #050505;
+            --fg: #ccff00;
+            --surface: #111;
+            --border: #ccff00;
+            --accent: #ccff00;
+            --warn: #ffcc00;
+            --error: #ff3300;
+            --success: #33ff00;
+        }
+        body { 
+            background: var(--bg); 
+            color: var(--fg); 
+            font-family: 'Courier New', monospace; 
+            margin: 0;
+            padding: 20px;
+            text-transform: uppercase;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+        }
+        h1 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; }
+        .version { font-size: 0.7rem; opacity: 0.6; }
+        
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
+            gap: 20px; 
+        }
+        .card { 
+            background: var(--surface);
+            border: 1px solid #333;
+            padding: 20px;
+            position: relative;
+        }
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 10px; height: 10px;
+            border-top: 2px solid var(--border);
+            border-left: 2px solid var(--border);
+        }
+        h2 { 
+            font-size: 0.9rem; 
+            margin-top: 0; 
+            margin-bottom: 20px;
+            color: var(--accent);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .stat-group {
+            margin-bottom: 20px;
+        }
+        .stat-val { font-size: 2.5rem; font-weight: 900; line-height: 1; }
+        .stat-label { font-size: 0.7rem; opacity: 0.6; margin-top: 5px; }
+        
+        .bar-container {
+            width: 100%;
+            height: 4px;
+            background: #222;
+            margin-top: 8px;
+        }
+        .bar-fill {
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.5s ease;
+        }
+        
+        .task-list {
+            font-size: 0.7rem;
+        }
+        .task-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #222;
+        }
+        .task-status { font-weight: bold; }
+        .status-completed { color: var(--success); }
+        .status-failed { color: var(--error); }
+        .status-processing { color: var(--warn); }
+        
+        .footer {
+            margin-top: 40px;
+            font-size: 0.6rem;
+            opacity: 0.4;
+            text-align: center;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .live-indicator {
+            display: inline-block;
+            width: 8px; height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>QWEN-TTS // SYSTEM MONITOR</h1>
+        <div class="version"><span class="live-indicator"></span> LIVE_FEED // V2026.3.8</div>
+    </div>
+
+    <div class="grid">
+        <!-- Resource Card -->
+        <div class="card">
+            <h2>RESOURCES <i id="device-type">CPU_MODE</i></h2>
+            <div class="stat-group">
+                <div class="stat-val" id="cpu-val">--%</div>
+                <div class="stat-label">PROCESSOR_LOAD</div>
+                <div class="bar-container"><div class="bar-fill" id="cpu-bar" style="width: 0%"></div></div>
+            </div>
+            <div class="stat-group">
+                <div class="stat-val" id="ram-val">--%</div>
+                <div class="stat-label">SYSTEM_MEMORY</div>
+                <div class="bar-container"><div class="bar-fill" id="ram-bar" style="width: 0%"></div></div>
+            </div>
+            <div class="stat-group" id="gpu-group" style="display:none">
+                <div class="stat-val" id="vram-val">--%</div>
+                <div class="stat-label">VRAM_USAGE // <span id="gpu-name">GPU</span></div>
+                <div class="bar-container"><div class="bar-fill" id="vram-bar" style="width: 0%"></div></div>
+            </div>
+        </div>
+
+        <!-- Task Card -->
+        <div class="card">
+            <h2>ACTIVE_TASKS <span id="task-count">0</span></h2>
+            <div class="task-list" id="task-list">
+                <div class="task-row">INITIALIZING_DATA_STREAM...</div>
+            </div>
+        </div>
+
+        <!-- Storage Card -->
+        <div class="card">
+            <h2>STORAGE_SUBSYSTEM</h2>
+            <div class="stat-group">
+                <div class="stat-val" id="disk-val">--GB</div>
+                <div class="stat-label">AVAILABLE_CAPACITY</div>
+            </div>
+            <div class="stat-group">
+                <div class="stat-val" id="pruned-val">--</div>
+                <div class="stat-label">VOLATILE_FILES_PURGED</div>
+            </div>
+            <div class="stat-group">
+                <div class="stat-label">LAST_CLEANUP: <span id="cleanup-time">NEVER</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        © 2026 QWEN-TTS STUDIO // AUTONOMOUS_ENGINE_STABILITY_PROTOCOL_ENABLED
+    </div>
+
+    <script>
+        async function refresh() {
+            try {
+                // 1. Fetch Stats
+                const statsRes = await fetch('/api/system/stats');
+                if (!statsRes.ok) throw new Error("Stats unreachable");
+                const stats = await statsRes.json();
+                
+                document.getElementById('cpu-val').innerText = stats.cpu_percent + '%';
+                document.getElementById('cpu-bar').style.width = stats.cpu_percent + '%';
+                
+                document.getElementById('ram-val').innerText = stats.ram_percent + '%';
+                document.getElementById('ram-bar').style.width = stats.ram_percent + '%';
+                
+                if (stats.gpu) {
+                    document.getElementById('gpu-group').style.display = 'block';
+                    document.getElementById('vram-val').innerText = stats.gpu.vram_percent.toFixed(1) + '%';
+                    document.getElementById('vram-bar').style.width = stats.gpu.vram_percent + '%';
+                    document.getElementById('gpu-name').innerText = stats.gpu.name;
+                    document.getElementById('device-type').innerText = 'CUDA_ACCELERATED';
+                } else {
+                    document.getElementById('gpu-group').style.display = 'none';
+                    document.getElementById('device-type').innerText = 'CPU_ONLY';
+                }
+                
+                document.getElementById('disk-val').innerText = stats.storage.available_gb.toFixed(1) + 'GB';
+                document.getElementById('pruned-val').innerText = stats.storage.total_pruned;
+                document.getElementById('cleanup-time').innerText = stats.storage.last_cleanup ? 
+                    new Date(stats.storage.last_cleanup * 1000).toLocaleTimeString() : 'NEVER';
+
+                // 2. Fetch Tasks
+                const tasksRes = await fetch('/api/tasks');
+                if (!tasksRes.ok) throw new Error("Tasks unreachable");
+                const tasks = await tasksRes.json();
+                
+                const activeTasks = tasks.filter(t => t.status !== 'completed' && t.status !== 'failed');
+                document.getElementById('task-count').innerText = activeTasks.length;
+                
+                const list = document.getElementById('task-list');
+                const recentTasks = tasks.slice(0, 8); // Show 8 most recent
+                
+                if (recentTasks.length === 0) {
+                    list.innerHTML = '<div class="task-row" style="opacity:0.3">NO_RECENT_ACTIVITY</div>';
+                } else {
+                    list.innerHTML = recentTasks.map(t => {
+                        let statusClass = 'status-' + t.status;
+                        return `
+                            <div class="task-row">
+                                <span>${t.type} // ${t.id.substring(0,8)}</span>
+                                <span class="task-status ${statusClass}">${t.status}</span>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+            } catch (e) {
+                console.error("Monitor refresh failed:", e);
+                document.querySelectorAll('.stat-val').forEach(el => el.style.color = 'var(--error)');
+            }
+        }
+
+        setInterval(refresh, 2000);
+        refresh();
+    </script>
+</body>
+</html>

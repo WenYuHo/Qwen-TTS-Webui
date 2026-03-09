@@ -48,6 +48,10 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 async def serve_index():
     return FileResponse(static_dir / "index.html")
 
+@app.get("/api/status")
+async def serve_status():
+    return FileResponse(static_dir / "status.html")
+
 if __name__ == "__main__":
     # Ensure logs directory exists
     Path("logs").mkdir(exist_ok=True)
