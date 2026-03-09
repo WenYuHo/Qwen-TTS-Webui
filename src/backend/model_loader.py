@@ -81,7 +81,12 @@ class ModelManager:
             raise RuntimeError("qwen_tts package failed to import. Check installation.")
 
         with self.lock:
+            # ⚡ Bolt: Check for INT8 quantization setting
+            enable_int8 = os.getenv("QWEN_ENABLE_INT8", "false").lower() == "true"
+            
             key = f"{size}_{model_type}"
+            if enable_int8:
+                key += "_int8"
 
             # ⚡ Bolt: Check LRU cache for existing model
             if key in self.models:
@@ -123,6 +128,19 @@ class ModelManager:
                     torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
                     local_files_only=True
                 )
+
+                # ⚡ Bolt: Apply dynamic INT8 quantization if requested and on CPU
+                if enable_int8 and self.device == "cpu":
+                    logger.info("⚡ Bolt: Applying dynamic INT8 quantization to model linear layers...")
+                    # Note: We quantize the underlying torch model
+                    torch.ao.quantization.quantize_dynamic(
+                        model.model,
+                        {torch.nn.Linear},
+                        dtype=torch.qint8,
+                        inplace=True
+                    )
+                    logger.info("⚡ Bolt: Model quantized successfully.")
+
                 logger.info(f"Model {key} loaded successfully.")
 
                 # ⚡ Bolt: Store in LRU cache

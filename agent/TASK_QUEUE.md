@@ -1,33 +1,33 @@
 # TASK QUEUE: QWEN-TTS
-# LAST_GLOBAL_SYNC: 2026-03-08T23:48:44Z
+# LAST_GLOBAL_SYNC: 2026-03-09T00:25:50Z
 
 ## ACTIVE SIGNALS
 - **SYSTEM**: `BOOT_SEQUENCE_COMPLETE`
 
 ## PRIORITIZED BACKLOG
 
-- [x] **DUBBING_S2S_STREAMING**
-    - Task: Optimize S2S (Speech-to-Speech) dubbing for streaming input/output to reduce initial latency.
-    - Ref: `conductor/track-dubbing-pipeline.md`
-    - Promise: `DUBBING_S2S_STREAMING_READY`
-    - Reserved: gemini-cli-1 @ 2026-03-08T23:40:56Z
-    - Updated: 2026-03-08T23:48:29Z
-    - Signals: NONE
-
-- [ ] **MODEL_WEIGHTS_PRUNING**
-    - Task: Analyze and prune redundant weights in the Qwen-TTS adapter layers to optimize for smaller devices.
+- [ ] **MODEL_INT8_QUANTIZATION**
+    - Task: Implement dynamic INT8 quantization for the Qwen-TTS model to reduce memory footprint and improve CPU inference speed.
     - Ref: `agent/ARCHITECTURE.md`
-    - Promise: `MODEL_PRUNED`
-    - Reserved: gemini-cli-1 @ 2026-03-08T23:48:44Z
-    - Updated: 2026-03-08T23:50:00Z
+    - Promise: `MODEL_QUANTIZED_INT8`
+    - Reserved: gemini-cli-1 @ 2026-03-09T00:25:50Z
+    - Updated: 2026-03-09T00:30:00Z
     - Signals: NONE
 
-- [ ] **API_HEALTH_DASHBOARD**
-    - Task: Create a simple HTML/JS dashboard at `/api/status` to monitor server health, VRAM usage, and task queue metrics.
-    - Ref: `conductor/track-testing-reliability.md`
-    - Promise: `DASHBOARD_LIVE`
+- [ ] **UI_MOBILE_OPTIMIZATION**
+    - Task: Refactor the Studio CSS to be fully responsive for mobile viewports, focusing on the timeline and voice laboratory controls.
+    - Ref: `src/static/style.css`
+    - Promise: `UI_MOBILE_READY`
     - Reserved: NONE
-    - Updated: 2026-03-08T23:50:00Z
+    - Updated: 2026-03-09T00:30:00Z
+    - Signals: NONE
+
+- [ ] **DUBBING_LIP_SYNC_FEAT**
+    - Task: Add phoneme-level timestamp generation to the dubbing pipeline to support future lip-sync video generation.
+    - Ref: `conductor/track-dubbing-pipeline.md`
+    - Promise: `LIP_SYNC_METADATA_READY`
+    - Reserved: NONE
+    - Updated: 2026-03-09T00:30:00Z
     - Signals: NONE
 
 ## COMPLETED
@@ -44,3 +44,6 @@
 - [x] **TEST_POLLUTION_FIX** (2026-03-08)
 - [x] **TORCH_COMPAT_FIX** (2026-03-08)
 - [x] **AUDIO_QUALITY_CI** (2026-03-08)
+- [x] **DUBBING_S2S_STREAMING** (2026-03-08)
+- [x] **MODEL_WEIGHTS_PRUNING** (2026-03-08)
+- [x] **API_HEALTH_DASHBOARD** (2026-03-08)
