@@ -1,33 +1,33 @@
 # TASK QUEUE: QWEN-TTS
-# LAST_GLOBAL_SYNC: 2026-03-09T01:05:31Z
+# LAST_GLOBAL_SYNC: 2026-03-09T01:08:26Z
 
 ## ACTIVE SIGNALS
 - **SYSTEM**: `BOOT_SEQUENCE_COMPLETE`
 
 ## PRIORITIZED BACKLOG
 
-- [x] **DUBBING_SEGMENT_ORIGINAL_PREVIEW**
-    - Task: Implement playback for individual diarized segments in the Dubbing UI to verify diarization quality before synthesis.
-    - Ref: `src/static/dubbing.js`
-    - Promise: `DUBBING_SEGMENT_PREVIEW_READY`
-    - Reserved: gemini-cli-1 @ 2026-03-09T01:03:16Z
-    - Updated: 2026-03-09T01:04:41Z
+- [ ] **DUBBING_BATCH_RETRY_LOGIC**
+    - Task: Implement segment-level retry logic and partial success reporting for batch S2S dubbing.
+    - Ref: `src/backend/dub_logic.py`
+    - Promise: `DUBBING_BATCH_ROBUST`
+    - Reserved: gemini-cli-1 @ 2026-03-09T01:08:26Z
+    - Updated: 2026-03-09T01:10:00Z
     - Signals: NONE
 
-- [x] **STUDIO_TIMELINE_BLOCK_REORDER**
-    - Task: Implement drag-and-drop reordering for blocks in the Project Studio Production view.
-    - Ref: `src/static/timeline.js`
-    - Promise: `STUDIO_REORDER_READY`
+- [ ] **UI_ASSET_METADATA_VIEWER**
+    - Task: Add metadata display (duration, sample rate) and mini-waveform previews to the Asset Library.
+    - Ref: `src/static/assets.js`
+    - Promise: `ASSET_METADATA_READY`
     - Reserved: NONE
-    - Updated: 2026-03-09T01:05:31Z
+    - Updated: 2026-03-09T01:10:00Z
     - Signals: NONE
 
-- [ ] **UI_GLOBAL_ACCENT_PICKER**
-    - Task: Add a theme accent color picker to the System view to allow customizing the Studio's signature "Volt" color.
-    - Ref: `src/static/style.css`
-    - Promise: `UI_ACCENT_PICKER_LIVE`
+- [ ] **ENGINE_PROMPT_EMBEDDING_CACHE**
+    - Task: Pre-calculate and disk-cache embeddings for common style prompts to eliminate "Voice Design" latency.
+    - Ref: `src/backend/podcast_engine.py`
+    - Promise: `PROMPT_CACHE_READY`
     - Reserved: NONE
-    - Updated: 2026-03-09T01:05:00Z
+    - Updated: 2026-03-09T01:10:00Z
     - Signals: NONE
 
 ## COMPLETED
@@ -53,3 +53,6 @@
 - [x] **DUBBING_PH3_MULTI_SPEAKER** (2026-03-09)
 - [x] **ENGINE_DISK_CACHE** (2026-03-09)
 - [x] **UI_SYSTEM_METRICS_FOOTER** (2026-03-09)
+- [x] **DUBBING_SEGMENT_ORIGINAL_PREVIEW** (2026-03-09)
+- [x] **STUDIO_TIMELINE_BLOCK_REORDER** (2026-03-09)
+- [x] **UI_GLOBAL_ACCENT_PICKER** (2026-03-09)
