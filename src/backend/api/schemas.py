@@ -112,10 +112,27 @@ class VideoGenerationRequest(BaseModel):
     base_shift: Optional[float] = None
     terminal: Optional[float] = None
 
-class NarratedVideoRequest(BaseModel):
-    prompt: str
+class VideoScene(BaseModel):
+    video_prompt: str
     narration_text: str
-    voice_profile: Dict[str, Any]
+    voice_profile: Optional[Dict[str, Any]] = None  # Falls back to request-level profile
+    duration_seconds: Optional[float] = None         # Auto-calculated from TTS if None
+    transition: Optional[str] = "cut"                # "cut" | "fade" | "dissolve"
+    instruct: Optional[str] = None                   # Emotion for this scene's narration
+
+class NarratedVideoRequest(BaseModel):
+    # --- Keep existing single-scene fields for backward compat ---
+    prompt: Optional[str] = None
+    narration_text: Optional[str] = None
+    voice_profile: Optional[Dict[str, Any]] = {}
+    
+    # --- New multi-scene support ---
+    scenes: Optional[List[VideoScene]] = None
+    subtitle_enabled: Optional[bool] = False
+    subtitle_position: Optional[str] = "bottom"      # "top" | "bottom" | "center"
+    subtitle_font_size: Optional[int] = 24
+    
+    # --- Keep video params ---
     width: Optional[int] = 768
     height: Optional[int] = 512
     num_frames: Optional[int] = 65
