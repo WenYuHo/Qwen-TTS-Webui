@@ -77,13 +77,15 @@ export const TaskManager = {
         } catch (err) { console.error("Clear error", err); }
     },
 
-    pollTask(taskId, onComplete) {
+    pollTask(taskId, onComplete, onTick) {
         const statusText = document.getElementById('status-text') || document.getElementById('status-badge');
 
         const interval = setInterval(async () => {
             try {
                 const res = await fetch(`/api/tasks/${taskId}`);
                 const data = await res.json();
+
+                if (onTick) onTick(data);
 
                 if (data.status === 'completed') {
                     clearInterval(interval);

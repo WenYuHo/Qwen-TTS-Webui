@@ -713,6 +713,43 @@ input[type="range"]::-webkit-slider-thumb {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
+.segment-item {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-left: 3px solid transparent;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.segment-active {
+    background: rgba(204, 255, 0, 0.1) !important;
+    border-color: var(--accent) !important;
+    border-left-color: var(--accent) !important;
+    box-shadow: 0 0 15px var(--accent-glow);
+    transform: scale(1.02);
+    z-index: 1;
+}
+
+.segment-failed {
+    border-left-color: var(--danger) !important;
+    background: rgba(255, 0, 60, 0.05) !important;
+    opacity: 0.7;
+}
+
+@keyframes segmentPulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+.segment-active .volt-text {
+    animation: segmentPulse 1.5s infinite;
+}
+
 /* --- Responsive Design --- */
 
 @media (max-width: 1200px) {

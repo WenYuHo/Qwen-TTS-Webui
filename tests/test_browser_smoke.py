@@ -10,9 +10,10 @@ def test_homepage_loads(start_server):
         errors = []
         page.on("pageerror", lambda err: errors.append(str(err)))
         try:
-            page.goto("http://localhost:7860")
-            
+            page.goto("http://localhost:8080")
+
             # 1. Verify Voice Studio (default view)
+
             assert page.locator("#voice-library-grid").is_visible(timeout=5000)
             
             # 2. Navigate to Project Studio

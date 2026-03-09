@@ -21,7 +21,7 @@ except Exception:
 def start_server():
     """Start the uvicorn server in a subprocess for E2E tests."""
     process = subprocess.Popen(
-        [sys.executable, "-m", "uvicorn", "server:app", "--host", "127.0.0.1", "--port", "7860"],
+        [sys.executable, "-m", "uvicorn", "server:app", "--host", "127.0.0.1", "--port", "8080"],
         cwd=str(Path(__file__).parent.parent / "src"),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
@@ -31,7 +31,7 @@ def start_server():
     import httpx
     for _ in range(30):
         try:
-            response = httpx.get("http://127.0.0.1:7860/api/health", timeout=2)
+            response = httpx.get("http://127.0.0.1:8080/api/health", timeout=2)
             if response.status_code == 200:
                 break
         except (httpx.ConnectError, httpx.TimeoutException):

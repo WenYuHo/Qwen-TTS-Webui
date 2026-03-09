@@ -57,10 +57,27 @@ export const DubbingManager = {
             
             Notification.show("Dubbing task created", "success");
             
-            TaskManager.pollTask(dubData.task_id, (task) => {
-                Notification.show("Dubbing Complete!", "success");
-                this.showComparison(filename, task.id);
-            });
+            TaskManager.pollTask(dubData.task_id, 
+                (task) => {
+                    Notification.show("Dubbing Complete!", "success");
+                    this.showComparison(filename, task.id);
+                    // Clear final highlights
+                    document.querySelectorAll('.segment-active').forEach(el => {
+                        el.classList.remove('segment-active');
+                        const icon = el.querySelector('.segment-status-icon');
+                        if (icon) icon.style.display = 'none';
+                    });
+                },
+                (task) => {
+                    // onTick: Parse message for segment progress
+                    // Expected format: "Synthesizing segment X/Y" (1-based)
+                    const match = task.message?.match(/Synthesizing segment (\d+)\//);
+                    if (match) {
+                        const currentIndex = parseInt(match[1]) - 1; // 0-based index
+                        this.highlightSegment(currentIndex);
+                    }
+                }
+            );
             
         } catch (err) {
             ErrorDisplay.show("Dubbing Failed", err.message);
@@ -112,13 +129,17 @@ export const DubbingManager = {
     async renderSpeakerAssignment(speakers) {
         const container = document.getElementById('speaker-assignment-container');
         const list = document.getElementById('speaker-assignment-list');
+        const segmentContainer = document.getElementById('dub-segment-container');
+        const segmentList = document.getElementById('dub-segment-list');
         
         container.style.display = 'block';
-        window.state.dubbing.speakers = speakers; // Store segments for preview
+        segmentContainer.style.display = 'block';
+        window.state.dubbing.speakers = speakers; // Store for preview
         
         const allProfiles = await window.getAllProfiles();
         const profiles = Object.entries(allProfiles).map(([id, p]) => ({ id, ...p }));
         
+        // 1. Render Speaker Voice Selection
         list.innerHTML = Object.entries(speakers).map(([spk, segments]) => {
             const totalDuration = segments.reduce((sum, s) => sum + s.duration, 0).toFixed(1);
             return `
@@ -137,6 +158,36 @@ export const DubbingManager = {
                 </select>
             </div>`;
         }).join('');
+
+        // 2. Render Full Dialogue Segment List for visual feedback
+        const allSegments = Object.values(speakers).flat().sort((a, b) => a.start - b.start);
+        window.state.dubbing.allSegments = allSegments;
+
+        segmentList.innerHTML = allSegments.map((seg, i) => `
+            <div class="segment-item" id="dub-segment-${i}">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span class="volt-text" style="font-size:0.6rem; font-weight:700;">[${seg.speaker}] ${seg.start}s - ${seg.end}s</span>
+                    <i class="fas fa-circle-notch fa-spin segment-status-icon" style="display:none; font-size:0.6rem; color:var(--accent);"></i>
+                </div>
+                <div class="segment-text" style="opacity:0.7; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${seg.text || '...'}</div>
+            </div>
+        `).join('');
+    },
+
+    highlightSegment(index) {
+        document.querySelectorAll('.segment-active').forEach(el => {
+            el.classList.remove('segment-active');
+            const icon = el.querySelector('.segment-status-icon');
+            if (icon) icon.style.display = 'none';
+        });
+
+        const activeEl = document.getElementById(`dub-segment-${index}`);
+        if (activeEl) {
+            activeEl.classList.add('segment-active');
+            const icon = activeEl.querySelector('.segment-status-icon');
+            if (icon) icon.style.display = 'block';
+            activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     },
 
     async previewSpeakerSegment(speakerId, btn) {
