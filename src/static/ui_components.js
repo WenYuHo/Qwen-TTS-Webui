@@ -176,11 +176,26 @@ window.copyErrorTrace = (btn) => {
 
 export const HelpManager = {
     helpContent: {
-        speech: "### Voice Studio\n- **Design:** Describe a voice to generate a unique profile.\n- **Clone:** Upload audio to replicate a specific person.\n- **Mix:** Combine two existing voices with custom weights.",
-        projects: "### Project Studio\n- **Draft:** Write your script using 'Role: Text' format.\n- **Production:** Manage granular blocks and background music.\n- **Video:** Enable LTX-Video for AI-narrated segments.",
-        dubbing: "### Dubbing & S2S\n- **Dubbing:** Translate and re-voice videos/audio automatically.\n- **S2S:** Perform real-time expressive voice conversion.",
-        assets: "### Asset Library\n- Upload and manage background music (BGM) and sound effects (SFX).\n- Use supported formats: MP3, WAV.",
-        system: "### System Manager\n- **Inventory:** Download and verify model checkpoints.\n- **Performance:** Benchmark engine speed and identify bottlenecks.\n- **Audit:** Track all AI generation activity."
+        speech: `### 🎙️ Voice Studio (v2.1)
+1. **Design:** Use natural language (e.g. "A deep radio host voice") to create new AI voices.
+2. **Clone:** Upload a 3-10s clip to clone any speaker using zero-shot ICL.
+3. **Mix:** Slide between two voices to create a perfect hybrid.
+*Tip: Use the 'Preview Text' bar to test your creations before saving.*`,
+        
+        projects: `### 🎭 Project Studio
+1. **Draft:** Write your script using 'Speaker: Text' lines. Use the **SAMPLES** menu for quick demos!
+2. **Promote:** Click 'Promote' to turn your text into granular, editable blocks.
+3. **Produce:** Mix in BGM, apply EQ/Reverb, and hit 'Produce Final'.
+*Video: Toggle 'Enable Video' to generate AI visuals for your story.*`,
+        
+        dubbing: `### 🌍 Dubbing & S2S
+1. **Dubbing:** Upload a video, click 'Diarize' to find speakers, assign voices, and translate.
+2. **S2S:** Speak into your mic or upload a file to change the voice while keeping your emotion.
+*Tip: Use 'Low-Latency Streaming' for instant feedback.*`,
+        
+        assets: "### 📦 Asset Library\n- Upload and manage background music (BGM) and sound effects (SFX).\n- Use supported formats: MP3, WAV.\n- Metadata like duration and sample rate are auto-extracted.",
+        
+        system: "### ⚙️ System Manager\n- **Inventory:** Download and verify model checkpoints.\n- **Performance:** Benchmark engine speed.\n- **Theme:** Customize the Studio accent color (Volt)."
     },
 
     show(view) {
@@ -209,13 +224,13 @@ export const HelpManager = {
 
         modal.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid var(--accent); padding-bottom:12px;">
-                <h2 style="margin:0; font-size:1.2rem;" tabindex="-1">COMMAND REFERENCE</h2>
+                <h2 style="margin:0; font-size:1.2rem;" tabindex="-1">QUICK START GUIDE</h2>
                 <button class="btn btn-danger btn-sm" aria-label="Close help modal" title="Close help modal"><i class="fas fa-times"></i></button>
             </div>
             <div style="font-size:0.9rem; line-height:1.6; font-family:var(--font-mono); color:var(--text-secondary);">
                 ${content.replace(/\n/g, '<br>').replace(/### (.+)/g, '<strong style="color:var(--accent)">$1</strong>')}
             </div>
-            <button class="btn btn-secondary btn-sm" style="width:100%; margin-top:24px;">ACKNOWLEDGE</button>
+            <button class="btn btn-primary btn-sm" style="width:100%; margin-top:24px;">ACKNOWLEDGE</button>
         `;
 
         modal.querySelectorAll('button').forEach(btn => btn.onclick = closeHelp);
@@ -225,5 +240,14 @@ export const HelpManager = {
 
         const heading = modal.querySelector('h2');
         if (heading) heading.focus();
+    },
+
+    checkFirstRun() {
+        if (!localStorage.getItem('studio_tutorial_seen')) {
+            setTimeout(() => {
+                this.show('speech');
+                localStorage.setItem('studio_tutorial_seen', 'true');
+            }, 1000);
+        }
     }
 };

@@ -218,6 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
     UIHeartbeat.start();
     MetricsManager.start();
     CanvasManager.load();
+    HelpManager.checkFirstRun();
 
     const savedView = localStorage.getItem('studio_active_view');
     if (savedView && savedView !== 'speech') {

@@ -1,33 +1,33 @@
 # TASK QUEUE: QWEN-TTS
-# LAST_GLOBAL_SYNC: 2026-03-09T02:15:26Z
+# LAST_GLOBAL_SYNC: 2026-03-09T02:36:32Z
 
 ## ACTIVE SIGNALS
 - **SYSTEM**: `BOOT_SEQUENCE_COMPLETE`
 
 ## PRIORITIZED BACKLOG
 
-- [x] **DUBBING_VISUAL_FEEDBACK**
-    - Task: Add a visual overlay/indicator in the Studio UI to show which segment is currently being synthesized during dubbing tasks.
-    - Ref: `src/static/dubbing.js`
-    - Promise: `DUBBING_VISUALS_LIVE`
-    - Reserved: gemini-cli-1 @ 2026-03-09T01:42:00Z
-    - Updated: 2026-03-09T01:46:24Z
+- [x] **UI_SAMPLE_SCRIPTS**
+    - Task: Add a "Samples" dropdown to the Project Studio to load pre-defined multi-speaker script templates.
+    - Ref: User Testing
+    - Promise: `UI_SAMPLES_LIVE`
+    - Reserved: NONE
+    - Updated: 2026-03-09T02:36:32Z
     - Signals: NONE
 
-- [x] **ENGINE_AUDIO_NORMALIZATION**
-    - Task: Implement automatic LUFS normalization for the final podcast output to ensure consistent loudness across different voices and BGM.
-    - Ref: `src/backend/engine_modules/patcher.py`
-    - Promise: `LOUDNESS_NORMALIZED`
-    - Reserved: gemini-cli-1 @ 2026-03-09T01:46:34Z
-    - Updated: 2026-03-09T01:48:03Z
+- [x] **UI_VOICE_STUDIO_RESET**
+    - Task: Add "Reset" buttons to Design, Clone, and Mix modules to clear inputs and status.
+    - Ref: User Testing
+    - Promise: `UI_RESET_READY`
+    - Reserved: NONE
+    - Updated: 2026-03-09T02:36:32Z
     - Signals: NONE
 
-- [x] **PRODUCTION_EXPORT_FORMATS**
-    - Task: Add support for exporting projects in AAC and FLAC formats in addition to WAV in the Production view.
-    - Ref: `src/backend/api/projects.py`
-    - Promise: `MULTI_FORMAT_EXPORT_READY`
-    - Reserved: gemini-cli-1 @ 2026-03-09T01:48:13Z
-    - Updated: 2026-03-09T02:15:26Z
+- [x] **UI_GUIDED_HELP_OVERLAY**
+    - Task: Implement a simple "Quick Start" overlay that highlights the main Studio features for first-time testers.
+    - Ref: User Testing
+    - Promise: `UI_HELP_OVERLAY_LIVE`
+    - Reserved: NONE
+    - Updated: 2026-03-09T02:36:32Z
     - Signals: NONE
 
 ## COMPLETED
@@ -65,3 +65,4 @@
 - [x] **DUBBING_SYNC_REFINEMENT** (2026-03-09)
 - [x] **PRODUCTION_AUTO_SUBTITLES** (2026-03-09)
 - [x] **ENGINE_VRAM_OPTIMIZATION** (2026-03-09)
+- [x] **PRODUCTION_EXPORT_FORMATS** (2026-03-09)

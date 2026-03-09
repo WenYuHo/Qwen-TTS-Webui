@@ -371,6 +371,28 @@ export const VoiceLabManager = {
         }
     },
 
+    resetModule(module) {
+        if (module === 'design') {
+            document.getElementById('design-prompt').value = '';
+            document.getElementById('design-preview-container').style.display = 'none';
+            window.state.voicelab.lastDesignedPath = null;
+        } else if (module === 'clone') {
+            const fileInput = document.getElementById('clone-file');
+            if (fileInput) fileInput.value = '';
+            document.getElementById('clone-ref-text').value = '';
+            document.getElementById('clone-preview-container').style.display = 'none';
+            window.state.voicelab.lastClonedPath = null;
+        } else if (module === 'mix') {
+            document.getElementById('mix-weight-a').value = 50;
+            document.getElementById('mix-weight-b').value = 50;
+            document.getElementById('weight-a-val').innerText = '50%';
+            document.getElementById('weight-b-val').innerText = '50%';
+            document.getElementById('mix-preview-container').style.display = 'none';
+            window.state.voicelab.lastMixedPath = null;
+        }
+        Notification.show(`${module.charAt(0).toUpperCase() + module.slice(1)} module reset`, "info");
+    },
+
     filterVoiceLibrary() {
         const query = document.getElementById('voice-search').value.toLowerCase();
         const cards = document.querySelectorAll('#voice-library-grid .voice-card');

@@ -87,7 +87,10 @@
                 <div class="grid-3">
                     <!-- Voice Design -->
                     <div class="card-brutalist">
-                        <h2 style="margin-bottom:16px; font-size: 1.2rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;" tabindex="-1">Voice Design</h2>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom: 1px solid var(--accent); padding-bottom:8px;">
+                            <h2 style="margin:0; font-size: 1.2rem;" tabindex="-1">Voice Design</h2>
+                            <button class="btn btn-secondary btn-sm" style="font-size:0.5rem; padding:2px 6px;" onclick="VoiceLabManager.resetModule('design')" title="Reset module"><i class="fas fa-undo"></i></button>
+                        </div>
                         <div class="control-group">
                             <label for="design-prompt" class="label-industrial">Style Prompt</label>
                             <textarea id="design-prompt" placeholder="A calm, soothing female voice..." style="height: 80px; border-color:var(--accent);"></textarea>
@@ -117,7 +120,10 @@
 
                     <!-- Voice Cloning -->
                     <div class="card-brutalist">
-                        <h2 style="margin-bottom:16px; font-size: 1.2rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;" tabindex="-1">Voice Cloning</h2>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom: 1px solid var(--accent); padding-bottom:8px;">
+                            <h2 style="margin:0; font-size: 1.2rem;" tabindex="-1">Voice Cloning</h2>
+                            <button class="btn btn-secondary btn-sm" style="font-size:0.5rem; padding:2px 6px;" onclick="VoiceLabManager.resetModule('clone')" title="Reset module"><i class="fas fa-undo"></i></button>
+                        </div>
                         <div class="control-group">
                             <label for="clone-file" class="label-industrial">Reference Audio</label>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
@@ -142,7 +148,10 @@
 
                     <!-- Voice Mixing -->
                     <div class="card-brutalist">
-                        <h2 style="margin-bottom:16px; font-size: 1.2rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;" tabindex="-1">Voice Mixer</h2>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom: 1px solid var(--accent); padding-bottom:8px;">
+                            <h2 style="margin:0; font-size: 1.2rem;" tabindex="-1">Voice Mixer</h2>
+                            <button class="btn btn-secondary btn-sm" style="font-size:0.5rem; padding:2px 6px;" onclick="VoiceLabManager.resetModule('mix')" title="Reset module"><i class="fas fa-undo"></i></button>
+                        </div>
                         <div class="control-group">
                             <div style="display:flex; justify-content:space-between;"><label for="mix-voice-a" class="label-industrial">Base Voice A</label><span id="weight-a-val" class="volt-text">50%</span></div>
                             <select id="mix-voice-a" class="btn btn-secondary btn-sm" style="width:100%; margin-bottom:8px;"></select>
@@ -214,6 +223,12 @@
                             <select id="project-select" class="btn btn-secondary btn-sm" style="width:140px; border-color:var(--accent);" aria-label="Select project"><option value="">(New)</option></select>
                             <button class="btn btn-secondary btn-sm" onclick="loadProject()">LOAD</button>
                             <button class="btn btn-primary btn-sm" onclick="saveProject()">SAVE</button>
+                            <select class="btn btn-secondary btn-sm" style="width:120px; border-color:var(--accent);" onchange="ProductionManager.loadSampleScript(this.value); this.value=''">
+                                <option value="">SAMPLES...</option>
+                                <option value="interview">Tech Interview</option>
+                                <option value="scifi">Sci-Fi Drama</option>
+                                <option value="nature">Nature Doc</option>
+                            </select>
                             <div style="display:flex; border:2px solid var(--border); background:rgba(0,0,0,0.2);">
                                 <select id="export-format" class="btn btn-secondary btn-sm" style="border:none; width:80px; font-size:0.6rem; padding:0 8px;">
                                     <option value="wav">WAV</option>

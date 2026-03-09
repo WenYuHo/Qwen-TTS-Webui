@@ -420,5 +420,30 @@ export const ProductionManager = {
         const format = document.getElementById('export-format')?.value || 'wav';
         Notification.show(`Exporting ${name} as ${format.toUpperCase()}...`, "info");
         window.location.href = `/api/projects/${name}/export?format=${format}`;
+    },
+
+    loadSampleScript(key) {
+        const samples = {
+            'interview': `Narrator: Welcome to the future of hiring.
+Interviewer: Hello! Thank you for joining us today. Can you describe your experience with large language models?
+Candidate: I've worked extensively with transformer architectures and multi-modal synthesis.
+Interviewer: Impressive. What do you think about real-time voice cloning?
+Candidate: It's a game changer for accessibility and personalized content.`,
+            'scifi': `Captain: Status report on the warp drive.
+AI: Systems are stable, Captain. But I am detecting an unusual energy signature from the nearby nebula.
+Lieutenant: Should I raise shields?
+Captain: Yes. Steady as she goes. Let's see what it is.
+AI: Warning. Structural integrity at seventy percent.`,
+            'nature': `Narrator: Deep in the heart of the Amazon, a silent predator awaits.
+Narrator: The jaguar, master of the shadows, moves with lethal grace through the undergrowth.
+Narrator: Every movement is calculated. Every breath is silent.`
+        };
+
+        const script = samples[key];
+        if (script) {
+            document.getElementById('script-editor').value = script;
+            this.toggleCanvasView('draft');
+            Notification.show("Sample script loaded", "success");
+        }
     }
 };
