@@ -119,6 +119,8 @@ LTX_MODELS = {
 # Data paths
 PROJECTS_DIR = BASE_DIR / "projects"
 PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
+CACHE_DIR = PROJECTS_DIR / "cache"
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
 VOICE_LIBRARY_FILE = PROJECTS_DIR / "voices.json"
 
 VIDEO_DIR = PROJECTS_DIR / "videos"

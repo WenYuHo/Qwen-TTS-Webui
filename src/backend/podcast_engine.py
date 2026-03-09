@@ -44,15 +44,18 @@ class PodcastEngine:
         self._video_dir = Path(VIDEO_DIR).resolve()
         self._shared_assets_dir = Path(SHARED_ASSETS_DIR).resolve()
 
+        from .utils.cache import DiskCache, HybridCache
+        from .config import CACHE_DIR
+
         self.executor = ThreadPoolExecutor(max_workers=4)
         # Caches
-        self.preset_embeddings = {}
-        self.clone_embedding_cache = {}
-        self.mix_embedding_cache = {}
+        self.preset_embeddings = HybridCache(DiskCache(CACHE_DIR, "preset_embeddings"))
+        self.clone_embedding_cache = HybridCache(DiskCache(CACHE_DIR, "clone_embeddings"))
+        self.mix_embedding_cache = HybridCache(DiskCache(CACHE_DIR, "mix_embeddings"))
         self.bgm_cache = {}
         self.prompt_cache = {}
-        self.transcription_cache = {}
-        self.translation_cache = {}
+        self.transcription_cache = HybridCache(DiskCache(CACHE_DIR, "transcriptions"))
+        self.translation_cache = HybridCache(DiskCache(CACHE_DIR, "translations"))
         self.video_audio_cache = {}
 
         self.synthesizer = VoiceSynthesizer(

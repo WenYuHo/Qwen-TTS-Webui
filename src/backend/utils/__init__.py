@@ -26,6 +26,8 @@ try:
 except ImportError:
     torch = None
 
+from .cache import DiskCache, HybridCache
+
 # ⚡ Bolt: Cache for Butterworth filter coefficients to avoid redundant DSP math
 _eq_filter_cache = {}
 # ⚡ Bolt: Cache for static GPU properties to avoid redundant CUDA driver calls
