@@ -1,6 +1,7 @@
 from .task_manager import task_manager, TaskStatus
 from .podcast_engine import PodcastEngine
 from .utils import numpy_to_wav_bytes
+from .config import logger
 import hashlib
 import numpy as np
 import soundfile as sf
@@ -55,19 +56,36 @@ def run_dub_task(task_id, source_audio, target_lang, engine: PodcastEngine, spea
                         else:
                             seg_translated = GoogleTranslator(source='auto', target=trans_lang).translate(seg_text)
                             engine.translation_cache[seg_cache_key] = seg_translated
-                        
                         # Synthesize
                         wav, sr = engine.generate_segment(seg_translated, profile=voice_profile, language=target_lang)
-                        
-                        # Place in timeline
-                        start_sample = int(seg["start"] * sr_out)
-                        # Resample wav if needed (engine usually returns 24k)
+
+                        # ⚡ Bolt: Precise Timing Refinement
+                        # 1. Trim trailing/leading silence
+                        wav, _ = librosa.effects.trim(wav, top_db=20)
+
+                        # 2. Resample if needed
                         if sr != sr_out:
                             wav = librosa.resample(wav, orig_sr=sr, target_sr=sr_out)
-                        
+
+                        # 3. Time-stretch to fit if too long (max 1.2x speedup)
+                        orig_duration = seg["end"] - seg["start"]
+                        synth_duration = len(wav) / sr_out
+
+                        if synth_duration > orig_duration:
+                            rate = synth_duration / orig_duration
+                            if rate <= 1.2: # Only stretch if within reasonable bounds
+                                logger.info(f"⚡ Bolt: Time-stretching segment {i} by {rate:.2f}x to fit.")
+                                wav = librosa.effects.time_stretch(wav, rate=rate)
+                            else:
+                                # If way too long, just truncate to avoid bleeding into next segment
+                                wav = wav[:int(orig_duration * sr_out)]
+
+                        # Place in timeline
+                        start_sample = int(seg["start"] * sr_out)
                         end_sample = min(start_sample + len(wav), len(final_wav))
                         final_wav[start_sample:end_sample] = wav[:end_sample - start_sample]
                         success = True
+
                         break
                     except Exception as e:
                         if attempt < MAX_RETRIES:

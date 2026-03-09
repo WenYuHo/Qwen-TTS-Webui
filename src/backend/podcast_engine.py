@@ -72,6 +72,44 @@ class PodcastEngine:
         self._virtual_presets_dir = self._shared_assets_dir / "virtual_presets"
         self._virtual_presets_dir.mkdir(parents=True, exist_ok=True)
         self.executor.submit(self.precompute_virtual_presets)
+        
+        # ⚡ Bolt: Periodic auto-backup of projects
+        self.executor.submit(self._run_backup_loop)
+
+    def _run_backup_loop(self):
+        """Periodically creates a zip backup of all projects."""
+        import zipfile
+        from .config import PROJECTS_DIR, BACKUP_DIR
+        
+        interval = 600 # 10 minutes
+        while True:
+            try:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                backup_path = BACKUP_DIR / f"projects_backup_{timestamp}.zip"
+                
+                logger.info(f"⚡ Bolt: Creating auto-backup at {backup_path}")
+                
+                with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+                    for root, dirs, files in os.walk(PROJECTS_DIR):
+                        # Skip cache directory
+                        if "cache" in dirs:
+                            dirs.remove("cache")
+                            
+                        for file in files:
+                            full_path = Path(root) / file
+                            rel_path = full_path.relative_to(PROJECTS_DIR)
+                            zf.write(full_path, rel_path)
+                
+                # Cleanup old backups (keep last 5)
+                backups = sorted(list(BACKUP_DIR.glob("*.zip")), key=os.path.getmtime)
+                if len(backups) > 5:
+                    for old_b in backups[:-5]:
+                        old_b.unlink()
+                        
+            except Exception as e:
+                logger.warning(f"⚡ Bolt: Auto-backup failed: {e}")
+            
+            time.sleep(interval)
 
     def precompute_virtual_presets(self):
         """Generates and caches embeddings for common stylistic prompts in the background."""

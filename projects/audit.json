@@ -2891,5 +2891,73 @@
       },
       "profile_type": "design"
     }
+  },
+  {
+    "timestamp": 1773019217.6867433,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 0.04,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "design"
+    }
+  },
+  {
+    "timestamp": 1773019217.6955633,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 0.04,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "design"
+    }
+  },
+  {
+    "timestamp": 1773019217.7116373,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 0.04,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "design"
+    }
+  },
+  {
+    "timestamp": 1773019217.7169237,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 0.04,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "design"
+    }
   }
 ]

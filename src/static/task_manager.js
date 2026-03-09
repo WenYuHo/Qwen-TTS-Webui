@@ -101,5 +101,60 @@ export const TaskManager = {
                 console.error("Polling error", err);
             }
         }, 2000);
+    },
+
+    async showHistoryModal() {
+        const modal = document.getElementById('history-modal');
+        const list = document.getElementById('history-list');
+        if (!modal || !list) return;
+
+        modal.style.display = 'flex';
+        list.innerHTML = '<div class="volt-text" style="text-align:center; padding:20px;">FETCHING_HISTORY...</div>';
+
+        try {
+            const resp = await fetch('/api/tasks');
+            const tasks = await resp.json();
+            
+            // Only show completed/failed/cancelled
+            const history = tasks.filter(t => ['completed', 'failed', 'cancelled'].includes(t.status))
+                                 .sort((a,b) => b.created_at - a.created_at);
+
+            if (history.length === 0) {
+                list.innerHTML = '<div style="text-align:center; opacity:0.5; padding:40px;">NO_HISTORY_FOUND</div>';
+                return;
+            }
+
+            list.innerHTML = history.map(task => `
+                <div class="card" style="border-left: 4px solid ${this.getTaskColor(task.status)}; background:rgba(255,255,255,0.02); padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong style="color:var(--accent); font-size:0.85rem;">${task.type.toUpperCase()}</strong>
+                            <div style="font-size:0.65rem; opacity:0.6;">${new Date(task.created_at * 1000).toLocaleString()}</div>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            ${task.status === 'completed' ? `
+                                <a href="/api/tasks/${task.id}/result" download="${task.type}_${task.id.substring(0,8)}.wav" class="btn btn-primary btn-sm" style="font-size:0.6rem;">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <button class="btn btn-secondary btn-sm" onclick="playTaskResult('${task.id}')" style="font-size:0.6rem;">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-danger btn-sm" onclick="cancelTask('${task.id}')" title="Remove from history" style="font-size:0.6rem;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div style="font-size:0.75rem; margin-top:8px; opacity:0.8;">${task.message}</div>
+                </div>
+            `).join('');
+        } catch (err) {
+            list.innerHTML = `<div class="volt-text" style="color:var(--danger)">ERROR_LOADING_HISTORY: ${err.message}</div>`;
+        }
+    },
+
+    hideHistoryModal() {
+        const modal = document.getElementById('history-modal');
+        if (modal) modal.style.display = 'none';
     }
 };

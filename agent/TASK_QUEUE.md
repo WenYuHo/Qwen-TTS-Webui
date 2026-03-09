@@ -1,33 +1,33 @@
 # TASK QUEUE: QWEN-TTS
-# LAST_GLOBAL_SYNC: 2026-03-09T01:13:39Z
+# LAST_GLOBAL_SYNC: 2026-03-09T01:32:31Z
 
 ## ACTIVE SIGNALS
 - **SYSTEM**: `BOOT_SEQUENCE_COMPLETE`
 
 ## PRIORITIZED BACKLOG
 
-- [x] **DUBBING_BATCH_RETRY_LOGIC**
-    - Task: Implement segment-level retry logic and partial success reporting for batch S2S dubbing.
-    - Ref: `src/backend/dub_logic.py`
-    - Promise: `DUBBING_BATCH_ROBUST`
-    - Reserved: gemini-cli-1 @ 2026-03-09T01:08:26Z
-    - Updated: 2026-03-09T01:12:53Z
+- [ ] **DUBBING_SYNC_REFINEMENT**
+    - Task: Implement precise segment-level timing refinement for dubbed audio to match original video cadence using cross-correlation or silence padding.
+    - Ref: `conductor/track-dubbing-pipeline.md`
+    - Promise: `DUBBING_SYNC_REFINED`
+    - Reserved: gemini-cli-1 @ 2026-03-09T01:32:31Z
+    - Updated: 2026-03-09T02:35:00Z
     - Signals: NONE
 
-- [ ] **UI_ASSET_METADATA_VIEWER**
-    - Task: Add metadata display (duration, sample rate) and mini-waveform previews to the Asset Library.
-    - Ref: `src/static/assets.js`
-    - Promise: `ASSET_METADATA_READY`
-    - Reserved: gemini-cli-1 @ 2026-03-09T01:13:01Z
-    - Updated: 2026-03-09T01:10:00Z
+- [ ] **PRODUCTION_AUTO_SUBTITLES**
+    - Task: Automatically generate SRT/VTT sidecar files for every Produced Project and add an option to burn-in subtitles during MP4 export.
+    - Ref: `conductor/track-multilingual-accessibility.md`
+    - Promise: `AUTO_SUBTITLES_READY`
+    - Reserved: NONE
+    - Updated: 2026-03-09T02:35:00Z
     - Signals: NONE
 
-- [ ] **ENGINE_PROMPT_EMBEDDING_CACHE**
-    - Task: Pre-calculate and disk-cache embeddings for common style prompts to eliminate "Voice Design" latency.
-    - Ref: `src/backend/podcast_engine.py`
-    - Promise: `PROMPT_CACHE_READY`
-    - Reserved: gemini-cli-1 @ 2026-03-09T01:13:39Z
-    - Updated: 2026-03-09T01:10:00Z
+- [ ] **ENGINE_VRAM_OPTIMIZATION**
+    - Task: Implement a unified memory management strategy to handle the VRAM switch between Qwen-TTS and LTX-Video, minimizing "Out of Memory" errors during full production runs.
+    - Ref: `conductor/track-sound-generation.md`
+    - Promise: `VRAM_OPTIMIZED`
+    - Reserved: NONE
+    - Updated: 2026-03-09T02:35:00Z
     - Signals: NONE
 
 ## COMPLETED
@@ -56,3 +56,9 @@
 - [x] **DUBBING_SEGMENT_ORIGINAL_PREVIEW** (2026-03-09)
 - [x] **STUDIO_TIMELINE_BLOCK_REORDER** (2026-03-09)
 - [x] **UI_GLOBAL_ACCENT_PICKER** (2026-03-09)
+- [x] **DUBBING_BATCH_RETRY_LOGIC** (2026-03-09)
+- [x] **UI_ASSET_METADATA_VIEWER** (2026-03-09)
+- [x] **ENGINE_PROMPT_EMBEDDING_CACHE** (2026-03-09)
+- [x] **UI_TASK_HISTORY_VIEW** (2026-03-09)
+- [x] **ENGINE_AUTO_BACKUP** (2026-03-09)
+- [x] **UI_QUICK_SHARE_LINK** (2026-03-09)

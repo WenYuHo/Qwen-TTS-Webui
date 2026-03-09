@@ -187,7 +187,28 @@ Object.assign(window, {
     hideVideoModal: VideoModal.hide.bind(VideoModal),
     showHelp: () => HelpManager.show(state.currentView),
     setupDragAndDrop: AssetManager.setupDragAndDrop,
-    applyAccent: SystemManager.applyAccent.bind(SystemManager)
+    applyAccent: SystemManager.applyAccent.bind(SystemManager),
+    
+    playTaskResult: (taskId) => {
+        const player = document.getElementById('preview-player');
+        if (player) {
+            player.src = `/api/tasks/${taskId}/result`;
+            player.play();
+        }
+    },
+    
+    shareCurrentAudio: () => {
+        const player = document.getElementById('preview-player');
+        if (!player || !player.src || player.src === window.location.href) {
+            return Notification.show("Nothing playing to share", "warn");
+        }
+        
+        // In a real app, this would be a public cloud URL
+        const mockUrl = `https://studio.qwen-tts.ai/share/${Math.random().toString(36).substring(7)}`;
+        navigator.clipboard.writeText(mockUrl).then(() => {
+            Notification.show("Share link copied to clipboard!", "success");
+        });
+    }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
