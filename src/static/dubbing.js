@@ -122,6 +122,11 @@ export const DubbingManager = {
         const playBtn = document.getElementById('dub-preview-play-btn');
         const timeEl = document.getElementById('dub-preview-time');
 
+        if (playBtn) {
+            playBtn.setAttribute('aria-label', 'Play source audio');
+            playBtn.setAttribute('title', 'Play source audio');
+        }
+
         this.wavesurfer.on('ready', () => {
             const duration = this.formatTime(this.wavesurfer.getDuration());
             timeEl.innerText = `00:00 / ${duration}`;
@@ -135,11 +140,16 @@ export const DubbingManager = {
 
         playBtn.onclick = () => {
             this.wavesurfer.playPause();
-            playBtn.innerHTML = this.wavesurfer.isPlaying() ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+            const isPlaying = this.wavesurfer.isPlaying();
+            playBtn.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+            playBtn.setAttribute('aria-label', isPlaying ? 'Pause source audio' : 'Play source audio');
+            playBtn.setAttribute('title', isPlaying ? 'Pause source audio' : 'Play source audio');
         };
 
         this.wavesurfer.on('finish', () => {
             playBtn.innerHTML = '<i class="fas fa-play"></i>';
+            playBtn.setAttribute('aria-label', 'Play source audio');
+            playBtn.setAttribute('title', 'Play source audio');
         });
     },
 
