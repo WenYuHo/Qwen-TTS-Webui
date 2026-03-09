@@ -23,7 +23,7 @@
 <!-- DEPENDENCIES_START -->
 - **API:** fastapi, uvicorn, python-multipart
 - **Audio:** soundfile, numpy, pydub, librosa, scipy
-- **AI/ML:** transformers, accelerate, einops, onnxruntime, openai-whisper
+- **AI/ML:** transformers, accelerate, einops, onnxruntime, openai-whisper, pyannote.audio
 - **Video:** ltx-pipelines, diffusers, opencv-python, moviepy, Pillow
 - **Utils:** python-dotenv, psutil, huggingface_hub, deep-translator, beautifulsoup4, tqdm
 - **Testing:** pytest, pytest-asyncio, httpx

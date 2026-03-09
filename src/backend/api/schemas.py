@@ -54,6 +54,11 @@ class BatchS2SRequest(BaseModel):
 class DubRequest(BaseModel):
     source_audio: str
     target_lang: str
+    speaker_assignment: Optional[Dict[str, Dict[str, Any]]] = None
+
+class DiarizeRequest(BaseModel):
+    source_audio: str
+    hf_token: Optional[str] = None
 
 class DetectLanguageRequest(BaseModel):
     source_audio: str

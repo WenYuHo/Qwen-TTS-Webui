@@ -29,13 +29,26 @@ export const DubbingManager = {
                 window.state.dubbing = { lastUploadedPath: filename };
                 this.initDubPreview(filename);
             }
+
+            // Get speaker assignment if any
+            const speakerAssignment = {};
+            const selects = document.querySelectorAll('.speaker-voice-select');
+            if (selects.length > 0) {
+                const allProfiles = await window.getAllProfiles();
+                selects.forEach(sel => {
+                    const speakerId = sel.dataset.speaker;
+                    const voiceId = sel.value;
+                    speakerAssignment[speakerId] = allProfiles[voiceId];
+                });
+            }
             
             const dubRes = await fetch('/api/generate/dub', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     source_audio: filename,
-                    target_lang: targetLang
+                    target_lang: targetLang,
+                    speaker_assignment: Object.keys(speakerAssignment).length > 0 ? speakerAssignment : null
                 })
             });
             
@@ -55,6 +68,69 @@ export const DubbingManager = {
             btn.disabled = false;
             btn.innerHTML = originalHtml;
         }
+    },
+
+    async diarizeAudio(btn) {
+        const fileInput = document.getElementById('dub-file');
+        if (!fileInput.files.length && !window.state.dubbing?.lastUploadedPath) return Notification.show("Select a file first", "warn");
+
+        btn.disabled = true;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        try {
+            let filename = window.state.dubbing?.lastUploadedPath;
+            if (fileInput.files.length) {
+                Notification.show("Uploading for diarization...", "info");
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                const upRes = await fetch('/api/voice/upload', { method: 'POST', body: formData });
+                const upData = await upRes.json();
+                filename = upData.filename;
+                window.state.dubbing = { lastUploadedPath: filename };
+                this.initDubPreview(filename);
+            }
+
+            const res = await fetch('/api/generate/diarize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ source_audio: filename })
+            });
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+
+            this.renderSpeakerAssignment(data.speakers);
+            Notification.show(`${data.total_speakers} speakers identified`, "success");
+        } catch (err) {
+            Notification.show("Diarization Failed: " + err.message, "error");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    },
+
+    async renderSpeakerAssignment(speakers) {
+        const container = document.getElementById('speaker-assignment-container');
+        const list = document.getElementById('speaker-assignment-list');
+        
+        container.style.display = 'block';
+        
+        const allProfiles = await window.getAllProfiles();
+        const profiles = Object.entries(allProfiles).map(([id, p]) => ({ id, ...p }));
+        
+        list.innerHTML = Object.entries(speakers).map(([spk, segments]) => {
+            const totalDuration = segments.reduce((sum, s) => sum + s.duration, 0).toFixed(1);
+            return `
+            <div class="card" style="padding:12px; background:rgba(0,0,0,0.3); border:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <strong class="volt-text" style="font-size:0.75rem;">${spk}</strong>
+                    <div style="font-size:0.6rem; opacity:0.5;">${totalDuration}s total</div>
+                </div>
+                <select class="speaker-voice-select btn btn-secondary btn-sm" data-speaker="${spk}" style="width:180px;">
+                    ${profiles.map(p => `<option value="${p.id}">${p.name || p.value}</option>`).join('')}
+                </select>
+            </div>`;
+        }).join('');
     },
 
     showComparison(originalFile, taskId) {

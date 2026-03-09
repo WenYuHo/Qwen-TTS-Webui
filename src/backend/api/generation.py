@@ -5,9 +5,14 @@ from ..utils import numpy_to_wav_bytes
 from ..dub_logic import run_dub_task
 from ..s2s_logic import run_s2s_task, run_batch_s2s_task
 from ..utils.subtitles import generate_srt_from_segments, generate_vtt_from_segments
-from .schemas import PodcastRequest, S2SRequest, BatchS2SRequest, DubRequest, StreamingSynthesisRequest, DetectLanguageRequest, TEMPERATURE_PRESETS
+from .schemas import PodcastRequest, S2SRequest, BatchS2SRequest, DubRequest, DiarizeRequest, StreamingSynthesisRequest, DetectLanguageRequest, TEMPERATURE_PRESETS
 from ..config import logger
 import io
+
+try:
+    from ..diarization import diarize_audio
+except ImportError:
+    diarize_audio = None
 
 router = APIRouter(prefix="/api/generate", tags=["generation"])
 
@@ -181,7 +186,7 @@ async def generate_s2s(request: S2SRequest, background_tasks: BackgroundTasks):
 @router.post("/dub")
 async def generate_dub(request: DubRequest, background_tasks: BackgroundTasks):
     task_id = server_state.task_manager.create_task("dub", {"source": request.source_audio})
-    background_tasks.add_task(run_dub_task, task_id, request.source_audio, request.target_lang, server_state.engine)
+    background_tasks.add_task(run_dub_task, task_id, request.source_audio, request.target_lang, server_state.engine, request.speaker_assignment)
     return {"task_id": task_id, "status": server_state.TaskStatus.PENDING}
 
 
@@ -196,6 +201,33 @@ async def detect_language(request: DetectLanguageRequest):
         }
     except Exception as e:
         logger.error(f"Language detection failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/diarize")
+async def diarize_audio_endpoint(request: DiarizeRequest):
+    """Run speaker diarization on uploaded audio."""
+    try:
+        if diarize_audio is None:
+            raise ImportError("diarization module not available")
+            
+        # Resolve path
+        resolved = server_state.engine._resolve_paths(request.source_audio)
+        actual_path = str(resolved[0])
+        
+        segments = diarize_audio(actual_path, hf_token=request.hf_token)
+        
+        # Group segments by speaker for easier frontend rendering
+        speakers = {}
+        for seg in segments:
+            speakers.setdefault(seg["speaker"], []).append(seg)
+            
+        return {
+            "speakers": speakers,
+            "total_speakers": len(speakers),
+            "segments": segments
+        }
+    except Exception as e:
+        logger.error(f"Diarization failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/dub/{task_id}/subtitles")

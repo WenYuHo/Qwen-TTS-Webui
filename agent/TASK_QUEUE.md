@@ -1,33 +1,34 @@
 # TASK QUEUE: QWEN-TTS
-# LAST_GLOBAL_SYNC: 2026-03-09T00:37:03Z
+# LAST_GLOBAL_SYNC: 2026-03-09T00:47:40Z
 
 ## ACTIVE SIGNALS
 - **SYSTEM**: `BOOT_SEQUENCE_COMPLETE`
 
 ## PRIORITIZED BACKLOG
 
-- [x] **MODEL_INT8_QUANTIZATION**
-    - Task: Implement dynamic INT8 quantization for the Qwen-TTS model to reduce memory footprint and improve CPU inference speed.
-    - Ref: `agent/ARCHITECTURE.md`
-    - Promise: `MODEL_QUANTIZED_INT8`
-    - Reserved: gemini-cli-1 @ 2026-03-09T00:25:50Z
-    - Updated: 2026-03-09T00:35:21Z
-    - Signals: NONE
-
-- [x] **UI_MOBILE_OPTIMIZATION**
-    - Task: Refactor the Studio CSS to be fully responsive for mobile viewports, focusing on the timeline and voice laboratory controls.
-    - Ref: `src/static/style.css`
-    - Promise: `UI_MOBILE_READY`
-    - Reserved: gemini-cli-1 @ 2026-03-09T00:35:29Z
-    - Updated: 2026-03-09T00:36:56Z
-    - Signals: NONE
-
-- [ ] **DUBBING_LIP_SYNC_FEAT**
-    - Task: Add phoneme-level timestamp generation to the dubbing pipeline to support future lip-sync video generation.
+- [ ] **DUBBING_PH3_MULTI_SPEAKER**
+    - Task: Implement Speaker Diarization and Multi-Speaker Synthesis/Merge (Phase 3 from `conductor/track-dubbing-pipeline.md`).
     - Ref: `conductor/track-dubbing-pipeline.md`
-    - Promise: `LIP_SYNC_METADATA_READY`
-    - Reserved: gemini-cli-1 @ 2026-03-09T00:37:03Z
-    - Updated: 2026-03-09T00:30:00Z
+    - Promise: `DUBBING_MULTI_SPEAKER_READY`
+    - Reserved: gemini-cli-1 @ 2026-03-09T00:50:00Z
+    - Updated: 2026-03-09T01:00:00Z
+    - Signals: NONE
+
+
+- [ ] **ENGINE_DISK_CACHE**
+    - Task: Implement persistent disk caching for speaker embeddings and transcriptions to reduce redundant compute across server restarts.
+    - Ref: `agent/ARCHITECTURE.md`
+    - Promise: `ENGINE_DISK_CACHE_READY`
+    - Reserved: NONE
+    - Updated: 2026-03-09T00:50:00Z
+    - Signals: NONE
+
+- [ ] **UI_SYSTEM_METRICS_FOOTER**
+    - Task: Integrate real-time VRAM/CPU/Task metrics from `/api/system/stats` into the Studio UI footer.
+    - Ref: `src/static/index.html`
+    - Promise: `UI_METRICS_FOOTER_LIVE`
+    - Reserved: NONE
+    - Updated: 2026-03-09T00:50:00Z
     - Signals: NONE
 
 ## COMPLETED
@@ -47,3 +48,6 @@
 - [x] **DUBBING_S2S_STREAMING** (2026-03-08)
 - [x] **MODEL_WEIGHTS_PRUNING** (2026-03-08)
 - [x] **API_HEALTH_DASHBOARD** (2026-03-08)
+- [x] **MODEL_INT8_QUANTIZATION** (2026-03-09)
+- [x] **UI_MOBILE_OPTIMIZATION** (2026-03-09)
+- [x] **DUBBING_LIP_SYNC_FEAT** (2026-03-09)

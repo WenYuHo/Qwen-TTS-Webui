@@ -346,15 +346,22 @@
                         <h2 style="margin-bottom:16px; font-size: 1.1rem; border-bottom: 1px solid var(--accent); padding-bottom:8px;" tabindex="-1">Dubbing (Translation)</h2>
                         <div class="control-group">
                             <label for="dub-file" class="label-industrial">Source File</label>
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
                                 <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" onclick="document.getElementById('dub-file').click()" aria-label="Upload file for dubbing">
                                     <i class="fas fa-file-video" aria-hidden="true"></i> UPLOAD
                                 </button>
                                 <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" onclick="detectLanguage(this)" id="dub-detect-btn" aria-label="Detect language from uploaded file">
                                     <i class="fas fa-search" aria-hidden="true"></i> DETECT
                                 </button>
+                                <button class="btn btn-secondary" style="width:100%; border-color:var(--accent);" onclick="DubbingManager.diarizeAudio(this)" id="dub-diarize-btn" aria-label="Identify speakers in the audio">
+                                    <i class="fas fa-users" aria-hidden="true"></i> DIARIZE
+                                </button>
                             </div>
                             <input type="file" id="dub-file" accept="video/*,audio/*" style="display:none" aria-label="Source file for dubbing">
+                        </div>
+                        <div id="speaker-assignment-container" style="display:none; margin-top:16px;">
+                            <label class="label-industrial" style="font-size:0.6rem; margin-bottom:8px; display:block;">SPEAKER VOICE ASSIGNMENT</label>
+                            <div id="speaker-assignment-list" style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;"></div>
                         </div>
                         <div id="dub-source-preview" class="card" style="margin-top:16px; padding:12px; background:rgba(0,0,0,0.3); border:1px solid var(--accent); display:none;">
                             <label class="label-industrial" style="font-size:0.6rem; margin-bottom:8px; display:block;">SOURCE PREVIEW</label>
