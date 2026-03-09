@@ -87,15 +87,25 @@ class PodcastPatcher:
         return final_wav, max_sample, speech_segments
 
     def apply_mastering(self, final_wav: np.ndarray, sample_rate: int, eq_preset: str, reverb_level: float, master_acx: bool) -> np.ndarray:
+        # 1. Initial peak normalization if needed
         max_val = max(np.max(final_wav), -np.min(final_wav))
         if max_val > 1.0: final_wav /= max_val
 
+        # 2. Cleanup & Effects
         final_wav = AudioPostProcessor.apply_declick(final_wav, sample_rate)
         final_wav = AudioPostProcessor.apply_eq(final_wav, sample_rate, preset=eq_preset)
         final_wav = AudioPostProcessor.apply_reverb(final_wav, sample_rate, intensity=reverb_level)
         
+        # 3. Final Dynamics & Loudness
         if master_acx:
+            # ACX specific path (RMS focused)
             final_wav = AudioPostProcessor.apply_compressor(final_wav, sample_rate, threshold_db=-20.0, ratio=4.0)
             final_wav = AudioPostProcessor.normalize_acx(final_wav)
+        else:
+            # Modern standard path (LUFS focused)
+            # Normalize to podcast standard -16 LUFS
+            final_wav = AudioPostProcessor.normalize_lufs(final_wav, sample_rate, target_lufs=-16.0)
+            # Final limiter at -1dB
+            final_wav = AudioPostProcessor.apply_limiter(final_wav, threshold=0.89)
 
         return final_wav

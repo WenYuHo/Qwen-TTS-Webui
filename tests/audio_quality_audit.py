@@ -8,8 +8,18 @@ from pathlib import Path
 
 def analyze_audio(path, label):
     data, sr = sf.read(path)
+    
+    # ⚡ Bolt: Use pyloudnorm if available for rigorous measurement
+    try:
+        import pyloudnorm as pyln
+        input_data = data if data.ndim == 2 else data[:, None]
+        meter = pyln.Meter(sr)
+        loudness = meter.integrated_loudness(input_data)
+    except Exception:
+        loudness = None
+
     if len(data.shape) > 1:
-        data = data[:, 0] # Mono
+        data = data[:, 0] # Mono for simpler stats
         
     duration = len(data) / sr
     rms = np.sqrt(np.mean(data**2))
@@ -18,10 +28,16 @@ def analyze_audio(path, label):
     print(f"\n--- Analysis: {label} ---")
     print(f"Duration: {duration:.2f}s")
     print(f"RMS Energy: {rms:.4f} (Ideal: 0.05 - 0.2)")
-    print(f"Peak Level: {peak:.4f} (Ideal: < 1.0)")
+    if loudness is not None:
+        print(f"Loudness: {loudness:.2f} LUFS (Target: -16.0)")
+    print(f"Peak Level: {peak:.4f} (Target: < 0.9)")
     
     if rms < 0.01:
         print("❌ RESULT: Too quiet or silent.")
+    elif loudness is not None and abs(loudness - (-16.0)) > 3.0:
+        print(f"⚠️ RESULT: Loudness deviation too high ({abs(loudness - (-16.0)):.1f} LUFS)")
+    elif peak > 0.95:
+        print("❌ RESULT: Audio is clipping or too close to 0dB.")
     elif duration < 1.0:
         print("❌ RESULT: Audio too short, likely failed to generate.")
     else:

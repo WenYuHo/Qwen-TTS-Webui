@@ -184,6 +184,55 @@ class AudioPostProcessor:
             return wav
 
     @staticmethod
+    def normalize_lufs(wav: np.ndarray, sr: int, target_lufs: float = -16.0) -> np.ndarray:
+        """Applies LUFS normalization using pyloudnorm."""
+        try:
+            import pyloudnorm as pyln
+            
+            # ⚡ Bolt: pyloudnorm expects (N, C) format
+            is_stereo = len(wav.shape) == 2
+            if not is_stereo:
+                input_data = wav[:, None]
+            else:
+                input_data = wav.T # (C, N) -> (N, C)
+                
+            meter = pyln.Meter(sr)
+            loudness = meter.integrated_loudness(input_data)
+            
+            # Apply gain
+            normalized = pyln.normalize.loudness(input_data, loudness, target_lufs)
+            
+            if not is_stereo:
+                return normalized.flatten()
+            else:
+                return normalized.T
+        except Exception as e:
+            logger.warning(f"LUFS normalization failed, falling back to RMS: {e}")
+            return AudioPostProcessor.normalize_acx(wav)
+
+    @staticmethod
+    def apply_limiter(wav: np.ndarray, threshold: float = 0.9) -> np.ndarray:
+        """Simple hard limiter with soft knee."""
+        try:
+            # ⚡ Bolt: Fast return if no clipping possible
+            max_amp = max(np.max(wav), -np.min(wav))
+            if max_amp <= threshold:
+                return wav
+                
+            # Soft knee implementation
+            # For samples above threshold, apply a logarithmic compression
+            mask = np.abs(wav) > threshold
+            out = wav.copy()
+            
+            # Simple scaling for now
+            out[mask] = np.sign(wav[mask]) * (threshold + (np.abs(wav[mask]) - threshold) * 0.1)
+            
+            # Final hard clip to be safe
+            return np.clip(out, -0.99, 0.99)
+        except Exception:
+            return np.clip(wav, -0.99, 0.99)
+
+    @staticmethod
     def normalize_acx(wav: np.ndarray) -> np.ndarray:
         """Applies RMS normalization and peak limiting to meet ACX standards."""
         if len(wav) == 0:

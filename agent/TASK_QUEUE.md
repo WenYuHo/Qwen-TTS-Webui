@@ -1,24 +1,24 @@
 # TASK QUEUE: QWEN-TTS
-# LAST_GLOBAL_SYNC: 2026-03-09T01:42:00Z
+# LAST_GLOBAL_SYNC: 2026-03-09T01:46:34Z
 
 ## ACTIVE SIGNALS
 - **SYSTEM**: `BOOT_SEQUENCE_COMPLETE`
 
 ## PRIORITIZED BACKLOG
 
-- [ ] **DUBBING_VISUAL_FEEDBACK**
+- [x] **DUBBING_VISUAL_FEEDBACK**
     - Task: Add a visual overlay/indicator in the Studio UI to show which segment is currently being synthesized during dubbing tasks.
     - Ref: `src/static/dubbing.js`
     - Promise: `DUBBING_VISUALS_LIVE`
     - Reserved: gemini-cli-1 @ 2026-03-09T01:42:00Z
-    - Updated: 2026-03-09T02:45:00Z
+    - Updated: 2026-03-09T01:46:24Z
     - Signals: NONE
 
 - [ ] **ENGINE_AUDIO_NORMALIZATION**
     - Task: Implement automatic LUFS normalization for the final podcast output to ensure consistent loudness across different voices and BGM.
     - Ref: `src/backend/engine_modules/patcher.py`
     - Promise: `LOUDNESS_NORMALIZED`
-    - Reserved: NONE
+    - Reserved: gemini-cli-1 @ 2026-03-09T01:46:34Z
     - Updated: 2026-03-09T02:45:00Z
     - Signals: NONE
 
