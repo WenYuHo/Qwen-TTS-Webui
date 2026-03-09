@@ -133,6 +133,11 @@ export const TaskManager = {
                         </div>
                         <div style="display:flex; gap:8px;">
                             ${task.status === 'completed' ? `
+                                ${task.type === 'podcast_generation' ? `
+                                    <a href="/api/generate/podcast/${task.id}/subtitles?format=srt" download="subtitles.srt" class="btn btn-secondary btn-sm" style="font-size:0.6rem;" title="Download SRT">
+                                        <i class="fas fa-closed-captioning"></i> SRT
+                                    </a>
+                                ` : ''}
                                 <a href="/api/tasks/${task.id}/result" download="${task.type}_${task.id.substring(0,8)}.wav" class="btn btn-primary btn-sm" style="font-size:0.6rem;">
                                     <i class="fas fa-download"></i>
                                 </a>

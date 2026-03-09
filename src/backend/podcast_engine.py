@@ -499,148 +499,133 @@ class PodcastEngine:
         wavs, sr = model.generate_voice_clone(text=text, voice_clone_prompt=voice_clone_prompt, instruct=instruct)
         return {"waveform": wavs[0], "sample_rate": sr, "text": text}
 
+    def clear_vram(self):
+        """⚡ Bolt: Aggressive VRAM cleanup to allow switching between heavy models (TTS <-> Video)."""
+        import gc
+        import torch
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.ipc_collect()
+        logger.info("⚡ Bolt: Engine VRAM cleared.")
+
     def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None, ducking_level: float = 0.0, eq_preset: str = "flat", reverb_level: float = 0.0, master_acx: bool = False, temperature: Optional[float] = None, **gen_kwargs) -> Optional[Dict[str, Any]]:
         with Profiler("Generate Podcast"):
-            sample_rate = 24000
-            waveforms = [None] * len(script)
-            srs = [None] * len(script)
+            try:
+                sample_rate = 24000
+                waveforms = [None] * len(script)
+                srs = [None] * len(script)
 
-            # ⚡ Bolt: Group segments by model type and temperature for batched synthesis
-            # Note: Batching currently only works for identical generation parameters.
-            # If segments have different temperatures, we might need more complex grouping or fall back to serial.
-            groups = {"CustomVoice": [], "VoiceDesign": [], "Base": []}
-            for i, item in enumerate(script):
-                role = item.get("role")
-                profile = profiles.get(role)
-                if profile is None:
-                    continue
-                mtype = self._get_model_type_for_profile(profile)
-                if profile.get("type") == "preset":
-                    mtype = "CustomVoice"
-                groups[mtype].append(i)
+                # ⚡ Bolt: Group segments by model type and temperature for batched synthesis
+                groups = {"CustomVoice": [], "VoiceDesign": [], "Base": []}
+                for i, item in enumerate(script):
+                    role = item.get("role")
+                    profile = profiles.get(role)
+                    if profile is None: continue
+                    mtype = self._get_model_type_for_profile(profile)
+                    if profile.get("type") == "preset": mtype = "CustomVoice"
+                    groups[mtype].append(i)
 
-            for mtype, indices in groups.items():
-                if not indices:
-                    continue
-                try:
-                    # Check if all segments in this group share the same temperature
-                    # If not, we fall back to serial synthesis for safety
-                    group_temps = [script[idx].get("temperature") if script[idx].get("temperature") is not None else temperature for idx in indices]
-                    if len(set(group_temps)) > 1:
-                         raise ValueError("Heterogeneous temperatures in batch; falling back to serial.")
+                for mtype, indices in groups.items():
+                    if not indices: continue
+                    try:
+                        group_temps = [script[idx].get("temperature") if script[idx].get("temperature") is not None else temperature for idx in indices]
+                        if len(set(group_temps)) > 1: raise ValueError("Heterogeneous temperatures in batch; falling back to serial.")
 
-                    target_temp = group_temps[0]
-                    model = get_model(mtype)
-                    batch_texts = [phoneme_manager.apply(script[i]["text"]) for i in indices]
-                    batch_langs = [script[i].get("language", "auto") for i in indices]
-                    batch_instructs = [script[i].get("instruct") or profiles[script[i]["role"]].get("instruct") for i in indices]
+                        target_temp = group_temps[0]
+                        model = get_model(mtype)
+                        batch_texts = [phoneme_manager.apply(script[i]["text"]) for i in indices]
+                        batch_langs = [script[i].get("language", "auto") for i in indices]
+                        batch_instructs = [script[i].get("instruct") or profiles[script[i]["role"]].get("instruct") for i in indices]
 
-                    if mtype == "CustomVoice":
-                        speakers = [profiles[script[i]["role"]]["value"] for i in indices]
-                        wavs, sr = model.generate_custom_voice(text=batch_texts, speaker=speakers, language=batch_langs, instruct=batch_instructs, temperature=target_temp, **gen_kwargs)
-                    elif mtype == "VoiceDesign":
-                        design_instructs = []
-                        for i, idx in enumerate(indices):
-                            p = profiles[script[idx]["role"]]
-                            ins = p["value"]
-                            if batch_instructs[i]: ins = f"{ins}, {batch_instructs[i]}"
-                            design_instructs.append(ins)
-                        wavs, sr = model.generate_voice_design(text=batch_texts, instruct=design_instructs, language=batch_langs, non_streaming_mode=True, temperature=target_temp, **gen_kwargs)
-                    elif mtype == "Base":
-                        batch_prompts = []
-                        for i, idx in enumerate(indices):
-                            p = profiles[script[idx]["role"]]
-                            cache_key = p["value"] if p["type"] == "clone" else f"mix:{p['value']}"
-                            if cache_key in self.prompt_cache:
-                                prompt = self.prompt_cache[cache_key]
-                            else:
-                                if p["type"] == "clone":
-                                    resolved = self._resolve_paths(p["value"])
-                                    ref_audio = str(resolved[0])
-                                    if VideoEngine.is_video(ref_audio): ref_audio = self._extract_audio_with_cache(ref_audio)
-                                    prompt = model.create_voice_clone_prompt(ref_audio=ref_audio, x_vector_only_mode=True)
-                                elif p["type"] == "mix":
-                                    mix_configs = json.loads(p["value"])
-                                    mixed_emb = self._compute_mixed_embedding(mix_configs, model=model)
-                                    prompt = [VoiceClonePromptItem(ref_code=None, ref_spk_embedding=mixed_emb, x_vector_only_mode=True, icl_mode=False, ref_text=None)]
+                        if mtype == "CustomVoice":
+                            speakers = [profiles[script[i]["role"]]["value"] for i in indices]
+                            wavs, sr = model.generate_custom_voice(text=batch_texts, speaker=speakers, language=batch_langs, instruct=batch_instructs, temperature=target_temp, **gen_kwargs)
+                        elif mtype == "VoiceDesign":
+                            design_instructs = []
+                            for i, idx in enumerate(indices):
+                                p = profiles[script[idx]["role"]]
+                                ins = p["value"]
+                                if batch_instructs[i]: ins = f"{ins}, {batch_instructs[i]}"
+                                design_instructs.append(ins)
+                            wavs, sr = model.generate_voice_design(text=batch_texts, instruct=design_instructs, language=batch_langs, non_streaming_mode=True, temperature=target_temp, **gen_kwargs)
+                        elif mtype == "Base":
+                            batch_prompts = []
+                            for i, idx in enumerate(indices):
+                                p = profiles[script[idx]["role"]]
+                                cache_key = p["value"] if p["type"] == "clone" else f"mix:{p['value']}"
+                                if cache_key in self.prompt_cache:
+                                    prompt = self.prompt_cache[cache_key]
                                 else:
-                                    raise ValueError(f"Profile type {p['type']} not compatible with Base model batching")
-                                # ⚡ Bolt: Prevent unbounded growth of prompt cache
-                                prune_dict_cache(self.prompt_cache, limit=200, count=20)
-                                self.prompt_cache[cache_key] = prompt
-                            batch_prompts.append(prompt[0])
-                        wavs, sr = model.generate_voice_clone(text=batch_texts, language=batch_langs, voice_clone_prompt=batch_prompts, instruct=batch_instructs, temperature=target_temp, **gen_kwargs)
+                                    if p["type"] == "clone":
+                                        resolved = self._resolve_paths(p["value"])
+                                        ref_audio = str(resolved[0])
+                                        if VideoEngine.is_video(ref_audio): ref_audio = self._extract_audio_with_cache(ref_audio)
+                                        prompt = model.create_voice_clone_prompt(ref_audio=ref_audio, x_vector_only_mode=True)
+                                    elif p["type"] == "mix":
+                                        mix_configs = json.loads(p["value"])
+                                        mixed_emb = self._compute_mixed_embedding(mix_configs, model=model)
+                                        prompt = [VoiceClonePromptItem(ref_code=None, ref_spk_embedding=mixed_emb, x_vector_only_mode=True, icl_mode=False, ref_text=None)]
+                                    else: raise ValueError(f"Profile type {p['type']} not compatible with Base model batching")
+                                    prune_dict_cache(self.prompt_cache, limit=200, count=20)
+                                    self.prompt_cache[cache_key] = prompt
+                                batch_prompts.append(prompt[0])
+                            wavs, sr = model.generate_voice_clone(text=batch_texts, language=batch_langs, voice_clone_prompt=batch_prompts, instruct=batch_instructs, temperature=target_temp, **gen_kwargs)
 
-                    for j, idx in enumerate(indices):
-                        waveforms[idx], srs[idx] = wavs[j], sr
-                except Exception as e:
-                    logger.warning(f"⚡ Bolt: Batch synthesis failed for {mtype}, falling back to serial: {e}")
-                    for idx in indices:
-                        try:
-                            item = script[idx]
-                            current_temp = item.get("temperature") if item.get("temperature") is not None else temperature
-                            wav, sr = self.generate_segment(item["text"], profile=profiles.get(item["role"]), language=item.get("language", "auto"), instruct=item.get("instruct"), temperature=current_temp, **gen_kwargs)
-                            waveforms[idx], srs[idx] = wav, sr
-                        except Exception: continue
+                        for j, idx in enumerate(indices): waveforms[idx], srs[idx] = wavs[j], sr
+                    except Exception as e:
+                        logger.warning(f"⚡ Bolt: Batch synthesis failed for {mtype}, falling back to serial: {e}")
+                        for idx in indices:
+                            try:
+                                item = script[idx]
+                                current_temp = item.get("temperature") if item.get("temperature") is not None else temperature
+                                wav, sr = self.generate_segment(item["text"], profile=profiles.get(item["role"]), language=item.get("language", "auto"), instruct=item.get("instruct"), temperature=current_temp, **gen_kwargs)
+                                waveforms[idx], srs[idx] = wav, sr
+                            except Exception: continue
 
-            # ⚡ Bolt: Check speaker embedding consistency across segments (Task 4.3)
-            speaker_first_emb = {}  # role -> embedding of first segment
-            for i, item in enumerate(script):
-                if waveforms[i] is None: continue
-                role = item.get("role")
-                profile = profiles.get(role)
-                if profile is None: continue
-                try:
-                    emb = self.get_speaker_embedding(profile)
-                    if emb is not None:
-                        if role not in speaker_first_emb:
-                            speaker_first_emb[role] = emb
-                        else:
-                            # Cosine similarity
-                            if torch is not None:
-                                cos_sim = float(torch.nn.functional.cosine_similarity(
-                                    speaker_first_emb[role].unsqueeze(0), emb.unsqueeze(0)
-                                ))
-                                if cos_sim < 0.85:  # 15% drift threshold
-                                    logger.warning(f"Voice drift detected for speaker '{role}' at segment {i}: "
-                                                   f"similarity={cos_sim:.2f} (threshold=0.85)")
-                except Exception:
-                    pass  # Don't block generation for embedding comparison failures
+                speech_segments = []
+                max_sample = 0
+                current_sample_offset = 0
+                for i, item in enumerate(script):
+                    if waveforms[i] is None: continue
+                    wav, sr = waveforms[i], srs[i]
+                    start_sample = current_sample_offset
+                    end_sample = start_sample + len(wav)
+                    speech_segments.append({"wav": wav, "start": start_sample, "end": end_sample, "index": i})
+                    current_sample_offset = end_sample + int(item.get("pause_after", 0.5) * sr)
+                    if end_sample > max_sample: max_sample = end_sample
+                if not speech_segments: return None
 
-            speech_segments = []
-            max_sample = 0
-            current_sample_offset = 0
-            for i, item in enumerate(script):
-                if waveforms[i] is None: continue
-                wav, sr = waveforms[i], srs[i]
-                start_sample = current_sample_offset
-                end_sample = start_sample + len(wav)
-                speech_segments.append({"wav": wav, "start": start_sample, "end": end_sample, "index": i})
-                current_sample_offset = end_sample + int(item.get("pause_after", 0.5) * sr)
-                if end_sample > max_sample: max_sample = end_sample
-            if not speech_segments: return None
+                is_stereo_req = bgm_mood is not None
+                final_wav, max_sample, speech_segments_final = self.patcher.construct_timeline(script, waveforms, srs, sample_rate, is_stereo_req)
 
-            # ⚡ Bolt: Multi-track mixing buffer (Mono by default, Stereo if panning/BGM)
-            # ACX/Audible prefers mono for voice, but 2026 trends favor spatial 3D audio.
-            is_stereo_req = bgm_mood is not None
-            final_wav, max_sample, speech_segments = self.patcher.construct_timeline(script, waveforms, srs, sample_rate, is_stereo_req)
+                if bgm_mood:
+                    is_stereo = any(s.get("pan", 0) != 0 for s in script) or bgm_mood is not None
+                    bgm_samples = self.patcher.load_bgm(bgm_mood, sample_rate, max_sample, ducking_level, is_stereo, speech_segments_final)
+                    if bgm_samples is not None:
+                        if is_stereo: final_wav += bgm_samples[None, :]
+                        else: final_wav += bgm_samples
 
-            if bgm_mood:
-                is_stereo = any(s.get("pan", 0) != 0 for s in script) or bgm_mood is not None
-                bgm_samples = self.patcher.load_bgm(bgm_mood, sample_rate, max_sample, ducking_level, is_stereo, speech_segments)
-                if bgm_samples is not None:
-                    if is_stereo:
-                        final_wav += bgm_samples[None, :]
-                    else:
-                        final_wav += bgm_samples
+                final_wav = self.patcher.apply_mastering(final_wav, sample_rate, eq_preset, reverb_level, master_acx)
+                final_wav = self._apply_audio_watermark(final_wav, sample_rate)
 
-            # ⚡ Bolt: Post-Processing Pipeline (Task 4.4)
-            final_wav = self.patcher.apply_mastering(final_wav, sample_rate, eq_preset, reverb_level, master_acx)
+                # Map speech_segments to subtitle format using actual timeline positions
+                sub_segments = []
+                for s in speech_segments_final:
+                    idx = s["index"]
+                    sub_segments.append({
+                        "start": s["start"] / sample_rate,
+                        "end": s["end"] / sample_rate,
+                        "text": script[idx]["text"]
+                    })
 
-            # ⚡ Bolt: Apply watermark once at the very end of the podcast project.
-            final_wav = self._apply_audio_watermark(final_wav, sample_rate)
-
-            return {"waveform": final_wav, "sample_rate": sample_rate}
+                return {
+                    "waveform": final_wav, 
+                    "sample_rate": sample_rate,
+                    "segments": sub_segments
+                }
+            finally:
+                self.clear_vram()
 
     def dub_audio(self, audio_path: str, target_lang: str) -> Optional[Dict[str, Any]]:
         result = self.transcribe_audio(audio_path)

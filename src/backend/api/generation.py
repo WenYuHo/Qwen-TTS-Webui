@@ -86,7 +86,13 @@ def run_synthesis_task(task_id: str, is_podcast: bool, request_data: PodcastRequ
             raise Exception("Generation returned no audio")
 
         wav_bytes = numpy_to_wav_bytes(result["waveform"], result["sample_rate"]).read()
-        server_state.task_manager.update_task(task_id, status=server_state.TaskStatus.COMPLETED, progress=100, message="Ready", result=wav_bytes)
+        
+        result_data = {
+            "audio": wav_bytes,
+            "segments": result.get("segments", [])
+        }
+        
+        server_state.task_manager.update_task(task_id, status=server_state.TaskStatus.COMPLETED, progress=100, message="Ready", result=result_data)
 
     except Exception as e:
         logger.error(f"Task {task_id} failed: {e}", exc_info=True)
@@ -232,6 +238,25 @@ async def diarize_audio_endpoint(request: DiarizeRequest):
 
 @router.get("/dub/{task_id}/subtitles")
 async def download_subtitles(task_id: str, format: str = "srt"):
+    task = server_state.task_manager.get_task(task_id)
+    if not task or task["status"] != server_state.TaskStatus.COMPLETED:
+        raise HTTPException(status_code=404, detail="Task not found or not completed")
+    
+    result = task.get("result")
+    if not isinstance(result, dict) or "segments" not in result:
+        raise HTTPException(status_code=400, detail="Subtitles not available for this task")
+    
+    segments = result["segments"]
+    if format == "vtt":
+        content = generate_vtt_from_segments(segments)
+        return StreamingResponse(io.BytesIO(content.encode()), media_type="text/vtt", headers={"Content-Disposition": f"attachment; filename=subtitles_{task_id}.vtt"})
+    else:
+        content = generate_srt_from_segments(segments)
+        return StreamingResponse(io.BytesIO(content.encode()), media_type="text/plain", headers={"Content-Disposition": f"attachment; filename=subtitles_{task_id}.srt"})
+
+@router.get("/podcast/{task_id}/subtitles")
+async def download_podcast_subtitles(task_id: str, format: str = "srt"):
+    """Download subtitles for a produced podcast task."""
     task = server_state.task_manager.get_task(task_id)
     if not task or task["status"] != server_state.TaskStatus.COMPLETED:
         raise HTTPException(status_code=404, detail="Task not found or not completed")
