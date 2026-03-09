@@ -80,6 +80,7 @@ export const DubbingManager = {
         links.innerHTML = `
             <a href="/api/generate/dub/${taskId}/subtitles?format=srt" download="subtitles.srt" class="btn btn-secondary btn-sm" style="flex:1; font-size:0.6rem;">📥 SRT SUBS</a>
             <a href="/api/generate/dub/${taskId}/subtitles?format=vtt" download="subtitles.vtt" class="btn btn-secondary btn-sm" style="flex:1; font-size:0.6rem;">📥 VTT SUBS</a>
+            <a href="/api/generate/dub/${taskId}/lip-sync" download="lipsync.json" class="btn btn-primary btn-sm" style="flex:1; font-size:0.6rem;">👄 LIP SYNC</a>
         `;
     },
 

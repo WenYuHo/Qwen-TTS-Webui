@@ -35,10 +35,15 @@ def run_dub_task(task_id, source_audio, target_lang, engine: PodcastEngine):
         task_manager.update_task(task_id, progress=90, message="Encoding audio...")
 
         # 4. Finalize
+        from .utils.lip_sync import generate_viseme_timestamps
+        duration = len(wav) / sr
+        mouth_cues = generate_viseme_timestamps(translated_text, duration, language=target_lang)
+
         wav_bytes = numpy_to_wav_bytes(wav, sr).read()
         task_manager.update_task(task_id, status=TaskStatus.COMPLETED, progress=100, message="Ready", result={
             "audio": wav_bytes,
-            "segments": result.get("segments", [])
+            "segments": result.get("segments", []),
+            "mouth_cues": mouth_cues
         })
 
     except Exception as e:

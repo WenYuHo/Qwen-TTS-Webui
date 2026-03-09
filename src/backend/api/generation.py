@@ -216,6 +216,23 @@ async def download_subtitles(task_id: str, format: str = "srt"):
         content = generate_srt_from_segments(segments)
         return StreamingResponse(io.BytesIO(content.encode()), media_type="text/plain", headers={"Content-Disposition": f"attachment; filename=subtitles_{task_id}.srt"})
 
+@router.get("/dub/{task_id}/lip-sync")
+async def download_lip_sync(task_id: str):
+    task = server_state.task_manager.get_task(task_id)
+    if not task or task["status"] != server_state.TaskStatus.COMPLETED:
+        raise HTTPException(status_code=404, detail="Task not found or not completed")
+    
+    result = task.get("result")
+    if not isinstance(result, dict) or "mouth_cues" not in result:
+        raise HTTPException(status_code=400, detail="Lip-sync data not available for this task")
+    
+    content = json.dumps({
+        "metadata": {"task_id": task_id},
+        "mouthCues": result["mouth_cues"]
+    }, indent=2)
+    
+    return StreamingResponse(io.BytesIO(content.encode()), media_type="application/json", headers={"Content-Disposition": f"attachment; filename=lipsync_{task_id}.json"})
+
 @router.post("/s2s/batch")
 async def generate_batch_s2s(request: BatchS2SRequest, background_tasks: BackgroundTasks):
     task_id = server_state.task_manager.create_task("batch_s2s", {"count": len(request.source_audios)})
