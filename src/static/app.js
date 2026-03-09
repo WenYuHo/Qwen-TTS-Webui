@@ -5,6 +5,7 @@ import { SystemManager } from './system.js';
 import { ProductionManager } from './production.js';
 import { VoiceLabManager } from './voicelab.js';
 import { DubbingManager } from './dubbing.js';
+import { MetricsManager } from './metrics.js';
 import { VideoModal, HelpManager } from './ui_components.js';
 
 const state = {
@@ -192,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
     VoiceLabManager.loadVoiceLibrary();
     SystemManager.fetchInventory();
     UIHeartbeat.start();
+    MetricsManager.start();
     CanvasManager.load();
 
     const savedView = localStorage.getItem('studio_active_view');

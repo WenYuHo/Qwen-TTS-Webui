@@ -520,7 +520,12 @@
             <footer class="footer-status">
                 <div class="heartbeat-dot" id="heartbeat-dot"></div>
                 <span id="status-text">Engine Ready</span>
-                <div style="flex:1"></div>
+                <div style="flex:1; display:flex; justify-content:center; gap:24px; font-size:0.6rem; opacity:0.7;">
+                    <div class="footer-metric" title="CPU Usage">CPU: <span id="footer-cpu">--%</span></div>
+                    <div class="footer-metric" title="RAM Usage">RAM: <span id="footer-ram">--%</span></div>
+                    <div class="footer-metric" id="footer-gpu-container" style="display:none;" title="GPU VRAM Usage">VRAM: <span id="footer-vram">--%</span></div>
+                    <div class="footer-metric" title="Active Tasks">TASKS: <span id="footer-tasks">0</span></div>
+                </div>
                 <audio id="main-audio-player" controls style="height: 32px; width: 300px;"></audio>
             </footer>
         </main>
