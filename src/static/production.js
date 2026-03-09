@@ -325,10 +325,21 @@ export const ProductionManager = {
         const container = document.getElementById('blocks-container');
         if (!container) return;
 
-        container.innerHTML = window.CanvasManager.blocks.map(b => `
-            <div class="card" style="margin-bottom:12px; padding:16px; border-left:4px solid var(--accent); background:rgba(255,255,255,0.02);">
-                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                    <strong style="color:var(--accent); font-family:var(--font-mono);">${b.role.toUpperCase()}</strong>
+        container.innerHTML = window.CanvasManager.blocks.map((b, index) => `
+            <div class="card" 
+                 draggable="true"
+                 data-index="${index}"
+                 data-id="${b.id}"
+                 ondragstart="window.ProductionManager.handleDragStart(event)"
+                 ondragover="window.ProductionManager.handleDragOver(event)"
+                 ondragleave="window.ProductionManager.handleDragLeave(event)"
+                 ondrop="window.ProductionManager.handleDrop(event)"
+                 style="margin-bottom:12px; padding:16px; border-left:4px solid var(--accent); background:rgba(255,255,255,0.02); cursor:default;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
+                        <strong style="color:var(--accent); font-family:var(--font-mono);">${b.role.toUpperCase()}</strong>
+                    </div>
                     <div style="display:flex; gap:8px;">
                         <button class="btn btn-secondary btn-sm" onclick="window.CanvasManager.moveBlock('${b.id}', -1); window.ProductionManager.renderBlocks()" aria-label="Move block up" title="Move block up"><i class="fas fa-arrow-up" aria-hidden="true"></i></button>
                         <button class="btn btn-secondary btn-sm" onclick="window.CanvasManager.moveBlock('${b.id}', 1); window.ProductionManager.renderBlocks()" aria-label="Move block down" title="Move block down"><i class="fas fa-arrow-down" aria-hidden="true"></i></button>
@@ -355,6 +366,39 @@ export const ProductionManager = {
                 </div>
             </div>
         `).join('');
+    },
+
+    handleDragStart(e) {
+        e.dataTransfer.setData('text/plain', e.currentTarget.dataset.index);
+        e.currentTarget.classList.add('block-dragging');
+    },
+
+    handleDragOver(e) {
+        e.preventDefault();
+        const card = e.currentTarget.closest('.card');
+        if (card) card.classList.add('block-drag-over');
+    },
+
+    handleDragLeave(e) {
+        const card = e.currentTarget.closest('.card');
+        if (card) card.classList.remove('block-drag-over');
+    },
+
+    handleDrop(e) {
+        e.preventDefault();
+        const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+        const toIndex = parseInt(e.currentTarget.closest('.card').dataset.index);
+        
+        e.currentTarget.closest('.card').classList.remove('block-drag-over');
+        document.querySelectorAll('.block-dragging').forEach(el => el.classList.remove('block-dragging'));
+
+        if (fromIndex !== toIndex) {
+            const blocks = window.CanvasManager.blocks;
+            const movedBlock = blocks.splice(fromIndex, 1)[0];
+            blocks.splice(toIndex, 0, movedBlock);
+            this.renderBlocks();
+            window.CanvasManager.save();
+        }
     },
 
     filterProjects() {

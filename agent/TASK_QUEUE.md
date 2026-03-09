@@ -1,34 +1,33 @@
 # TASK QUEUE: QWEN-TTS
-# LAST_GLOBAL_SYNC: 2026-03-09T00:56:43Z
+# LAST_GLOBAL_SYNC: 2026-03-09T01:05:31Z
 
 ## ACTIVE SIGNALS
 - **SYSTEM**: `BOOT_SEQUENCE_COMPLETE`
 
 ## PRIORITIZED BACKLOG
 
-- [x] **DUBBING_PH3_MULTI_SPEAKER**
-    - Task: Implement Speaker Diarization and Multi-Speaker Synthesis/Merge (Phase 3 from `conductor/track-dubbing-pipeline.md`).
-    - Ref: `conductor/track-dubbing-pipeline.md`
-    - Promise: `DUBBING_MULTI_SPEAKER_READY`
-    - Reserved: gemini-cli-1 @ 2026-03-09T00:50:00Z
-    - Updated: 2026-03-09T00:54:16Z
+- [x] **DUBBING_SEGMENT_ORIGINAL_PREVIEW**
+    - Task: Implement playback for individual diarized segments in the Dubbing UI to verify diarization quality before synthesis.
+    - Ref: `src/static/dubbing.js`
+    - Promise: `DUBBING_SEGMENT_PREVIEW_READY`
+    - Reserved: gemini-cli-1 @ 2026-03-09T01:03:16Z
+    - Updated: 2026-03-09T01:04:41Z
     - Signals: NONE
 
-
-- [x] **ENGINE_DISK_CACHE**
-    - Task: Implement persistent disk caching for speaker embeddings and transcriptions to reduce redundant compute across server restarts.
-    - Ref: `agent/ARCHITECTURE.md`
-    - Promise: `ENGINE_DISK_CACHE_READY`
-    - Reserved: gemini-cli-1 @ 2026-03-09T00:54:51Z
-    - Updated: 2026-03-09T00:56:35Z
+- [x] **STUDIO_TIMELINE_BLOCK_REORDER**
+    - Task: Implement drag-and-drop reordering for blocks in the Project Studio Production view.
+    - Ref: `src/static/timeline.js`
+    - Promise: `STUDIO_REORDER_READY`
+    - Reserved: NONE
+    - Updated: 2026-03-09T01:05:31Z
     - Signals: NONE
 
-- [ ] **UI_SYSTEM_METRICS_FOOTER**
-    - Task: Integrate real-time VRAM/CPU/Task metrics from `/api/system/stats` into the Studio UI footer.
-    - Ref: `src/static/index.html`
-    - Promise: `UI_METRICS_FOOTER_LIVE`
-    - Reserved: gemini-cli-1 @ 2026-03-09T00:56:43Z
-    - Updated: 2026-03-09T00:50:00Z
+- [ ] **UI_GLOBAL_ACCENT_PICKER**
+    - Task: Add a theme accent color picker to the System view to allow customizing the Studio's signature "Volt" color.
+    - Ref: `src/static/style.css`
+    - Promise: `UI_ACCENT_PICKER_LIVE`
+    - Reserved: NONE
+    - Updated: 2026-03-09T01:05:00Z
     - Signals: NONE
 
 ## COMPLETED
@@ -51,3 +50,6 @@
 - [x] **MODEL_INT8_QUANTIZATION** (2026-03-09)
 - [x] **UI_MOBILE_OPTIMIZATION** (2026-03-09)
 - [x] **DUBBING_LIP_SYNC_FEAT** (2026-03-09)
+- [x] **DUBBING_PH3_MULTI_SPEAKER** (2026-03-09)
+- [x] **ENGINE_DISK_CACHE** (2026-03-09)
+- [x] **UI_SYSTEM_METRICS_FOOTER** (2026-03-09)

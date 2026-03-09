@@ -242,5 +242,33 @@ export const SystemManager = {
                 </div>
             </div>
         `).join('');
+    },
+
+    applyAccent(color) {
+        if (!color || !color.startsWith('#')) return;
+        
+        document.documentElement.style.setProperty('--accent', color);
+        
+        // Generate glow color (approx 30% opacity)
+        const r = parseInt(color.slice(1, 3), 16);
+        const g = parseInt(color.slice(3, 5), 16);
+        const b = parseInt(color.slice(5, 7), 16);
+        const glow = `rgba(${r}, ${g}, ${b}, 0.3)`;
+        document.documentElement.style.setProperty('--accent-glow', glow);
+        
+        localStorage.setItem('studio_accent_color', color);
+        Notification.show("Theme updated", "success");
+    },
+
+    loadTheme() {
+        const saved = localStorage.getItem('studio_accent_color');
+        if (saved) {
+            document.documentElement.style.setProperty('--accent', saved);
+            const r = parseInt(saved.slice(1, 3), 16);
+            const g = parseInt(saved.slice(3, 5), 16);
+            const b = parseInt(saved.slice(5, 7), 16);
+            document.documentElement.style.setProperty('--accent-glow', `rgba(${r}, ${g}, ${b}, 0.3)`);
+            if (document.getElementById('custom-accent')) document.getElementById('custom-accent').value = saved;
+        }
     }
 };

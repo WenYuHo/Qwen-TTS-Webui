@@ -6,7 +6,47 @@ from pathlib import Path
 from ..config import SHARED_ASSETS_DIR, logger
 from ..utils import validate_safe_path
 
+import soundfile as sf
+import numpy as np
+import io
+from .. import server_state
+from ..utils import numpy_to_wav_bytes
+from fastapi.responses import StreamingResponse
+
 router = APIRouter(prefix="/api/assets", tags=["assets"])
+
+@router.get("/clip")
+async def get_audio_clip(path: str, start: float, end: float):
+    """Extract and stream a segment of an audio/video file."""
+    try:
+        # Resolve path using engine's logic (handles uploads/shared/etc)
+        resolved = server_state.engine._resolve_paths(path)
+        actual_path = str(resolved[0])
+        
+        # If it's a video, extract audio first (engine has a cache for this)
+        from ..video_engine import VideoEngine
+        if VideoEngine.is_video(actual_path):
+            actual_path = server_state.engine._extract_audio_with_cache(actual_path)
+
+        # Read specific segment
+        with sf.SoundFile(actual_path) as f:
+            sr = f.samplerate
+            # Seek to start
+            f.seek(int(start * sr))
+            # Read until end
+            frames_to_read = int((end - start) * sr)
+            if frames_to_read <= 0:
+                raise HTTPException(status_code=400, detail="Invalid duration")
+            
+            data = f.read(frames_to_read)
+            
+        # Convert to WAV bytes
+        buf = numpy_to_wav_bytes(data, sr)
+        return StreamingResponse(buf, media_type="audio/wav")
+        
+    except Exception as e:
+        logger.error(f"Failed to extract clip from {path}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/")
 async def list_assets():

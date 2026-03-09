@@ -470,6 +470,7 @@
                     <button class="btn btn-secondary btn-sm" onclick="switchSystemSubTab('phonemes')">PHONEMES</button>
                     <button class="btn btn-secondary btn-sm" onclick="switchSystemSubTab('performance')">PERFORMANCE</button>
                     <button class="btn btn-secondary btn-sm" onclick="switchSystemSubTab('audit')">AUDIT</button>
+                    <button class="btn btn-secondary btn-sm" onclick="switchSystemSubTab('theme')">THEME</button>
                 </div>
                 <div id="system-inventory-tab" class="system-sub-tab">
                     <div class="grid-2">
@@ -513,6 +514,29 @@
                 </div>
                 <div id="system-audit-tab" class="system-sub-tab" style="display:none;">
                     <div class="card-brutalist"><h2 tabindex="-1">Audit Log</h2><div id="audit-log-list"></div></div>
+                </div>
+                <div id="system-theme-tab" class="system-sub-tab" style="display:none;">
+                    <div class="card-brutalist">
+                        <h2 tabindex="-1">Interface Theme</h2>
+                        <div class="control-group">
+                            <label class="label-industrial">Accent Color (Volt)</label>
+                            <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:12px;">
+                                <button class="btn btn-secondary" style="width:48px; height:48px; background:#ccff00; border:none;" onclick="applyAccent('#ccff00')" title="Original Volt"></button>
+                                <button class="btn btn-secondary" style="width:48px; height:48px; background:#00ffff; border:none;" onclick="applyAccent('#00ffff')" title="Cyan Pulse"></button>
+                                <button class="btn btn-secondary" style="width:48px; height:48px; background:#ff00ff; border:none;" onclick="applyAccent('#ff00ff')" title="Magenta Glitch"></button>
+                                <button class="btn btn-secondary" style="width:48px; height:48px; background:#ffcc00; border:none;" onclick="applyAccent('#ffcc00')" title="Amber Warning"></button>
+                                <button class="btn btn-secondary" style="width:48px; height:48px; background:#ff3300; border:none;" onclick="applyAccent('#ff3300')" title="Red Alert"></button>
+                                <button class="btn btn-secondary" style="width:48px; height:48px; background:#ffffff; border:none;" onclick="applyAccent('#ffffff')" title="Pure White"></button>
+                            </div>
+                        </div>
+                        <div class="control-group" style="margin-top:24px;">
+                            <label for="custom-accent" class="label-industrial">Custom Hex</label>
+                            <div style="display:flex; gap:12px;">
+                                <input type="text" id="custom-accent" placeholder="#RRGGBB" style="width:120px; font-size:0.8rem; padding:8px;">
+                                <button class="btn btn-primary btn-sm" onclick="applyAccent(document.getElementById('custom-accent').value)">APPLY</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

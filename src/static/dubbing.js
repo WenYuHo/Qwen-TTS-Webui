@@ -114,6 +114,7 @@ export const DubbingManager = {
         const list = document.getElementById('speaker-assignment-list');
         
         container.style.display = 'block';
+        window.state.dubbing.speakers = speakers; // Store segments for preview
         
         const allProfiles = await window.getAllProfiles();
         const profiles = Object.entries(allProfiles).map(([id, p]) => ({ id, ...p }));
@@ -122,15 +123,49 @@ export const DubbingManager = {
             const totalDuration = segments.reduce((sum, s) => sum + s.duration, 0).toFixed(1);
             return `
             <div class="card" style="padding:12px; background:rgba(0,0,0,0.3); border:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <strong class="volt-text" style="font-size:0.75rem;">${spk}</strong>
-                    <div style="font-size:0.6rem; opacity:0.5;">${totalDuration}s total</div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <button class="btn btn-secondary btn-sm" onclick="DubbingManager.previewSpeakerSegment('${spk}', this)" title="Preview speaker segment">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <div>
+                        <strong class="volt-text" style="font-size:0.75rem;">${spk}</strong>
+                        <div style="font-size:0.6rem; opacity:0.5;">${totalDuration}s total (${segments.length} segments)</div>
+                    </div>
                 </div>
                 <select class="speaker-voice-select btn btn-secondary btn-sm" data-speaker="${spk}" style="width:180px;">
                     ${profiles.map(p => `<option value="${p.id}">${p.name || p.value}</option>`).join('')}
                 </select>
             </div>`;
         }).join('');
+    },
+
+    async previewSpeakerSegment(speakerId, btn) {
+        const segments = window.state.dubbing.speakers[speakerId];
+        if (!segments || segments.length === 0) return;
+
+        // Play the longest segment for best identification
+        const bestSeg = [...segments].sort((a, b) => b.duration - a.duration)[0];
+        const filename = window.state.dubbing.lastUploadedPath;
+        
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+
+        try {
+            const url = `/api/assets/clip?path=${encodeURIComponent(filename)}&start=${bestSeg.start}&end=${bestSeg.end}`;
+            const player = document.getElementById('preview-player');
+            if (player) {
+                player.src = url;
+                player.play();
+            } else {
+                new Audio(url).play();
+            }
+        } catch (err) {
+            Notification.show("Preview failed", "error");
+        } finally {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        }
     },
 
     showComparison(originalFile, taskId) {

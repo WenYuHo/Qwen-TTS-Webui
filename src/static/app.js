@@ -186,10 +186,12 @@ Object.assign(window, {
     showVideoPreview: VideoModal.show.bind(VideoModal),
     hideVideoModal: VideoModal.hide.bind(VideoModal),
     showHelp: () => HelpManager.show(state.currentView),
-    setupDragAndDrop: AssetManager.setupDragAndDrop
+    setupDragAndDrop: AssetManager.setupDragAndDrop,
+    applyAccent: SystemManager.applyAccent.bind(SystemManager)
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    SystemManager.loadTheme();
     VoiceLabManager.loadVoiceLibrary();
     SystemManager.fetchInventory();
     UIHeartbeat.start();
