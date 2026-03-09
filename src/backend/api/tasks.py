@@ -35,7 +35,7 @@ async def get_task_status(task_id: str):
     return response
 
 @router.get("/{task_id}/result")
-async def get_task_result(task_id: str):
+async def get_task_result(task_id: str, format: str = "wav"):
     task = server_state.task_manager.get_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -51,4 +51,30 @@ async def get_task_result(task_id: str):
     if not audio_bytes:
          raise HTTPException(status_code=404, detail="No audio result found")
 
-    return StreamingResponse(io.BytesIO(audio_bytes), media_type="audio/wav")
+    if format.lower() == "wav":
+        return StreamingResponse(io.BytesIO(audio_bytes), media_type="audio/wav")
+    
+    # ⚡ Bolt: On-the-fly conversion for other formats using pydub
+    try:
+        from pydub import AudioSegment
+        audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format="wav")
+        
+        out_buf = io.BytesIO()
+        ext = format.lower()
+        if ext == "mp3":
+            audio.export(out_buf, format="mp3", bitrate="192k")
+            media_type = "audio/mpeg"
+        elif ext == "aac" or ext == "m4a":
+            audio.export(out_buf, format="adts") # ADTS is the container for raw AAC
+            media_type = "audio/aac"
+        elif ext == "flac":
+            audio.export(out_buf, format="flac")
+            media_type = "audio/flac"
+        else:
+            raise HTTPException(status_code=400, detail=f"Unsupported format: {format}")
+            
+        out_buf.seek(0)
+        return StreamingResponse(out_buf, media_type=media_type)
+    except Exception as e:
+        logger.error(f"Format conversion failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Conversion failed: {e}")

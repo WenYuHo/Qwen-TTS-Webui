@@ -214,6 +214,17 @@
                             <select id="project-select" class="btn btn-secondary btn-sm" style="width:140px; border-color:var(--accent);" aria-label="Select project"><option value="">(New)</option></select>
                             <button class="btn btn-secondary btn-sm" onclick="loadProject()">LOAD</button>
                             <button class="btn btn-primary btn-sm" onclick="saveProject()">SAVE</button>
+                            <div style="display:flex; border:2px solid var(--border); background:rgba(0,0,0,0.2);">
+                                <select id="export-format" class="btn btn-secondary btn-sm" style="border:none; width:80px; font-size:0.6rem; padding:0 8px;">
+                                    <option value="wav">WAV</option>
+                                    <option value="mp3">MP3</option>
+                                    <option value="aac">AAC</option>
+                                    <option value="flac">FLAC</option>
+                                </select>
+                                <button class="btn btn-secondary btn-sm" style="border:none; border-left:2px solid var(--border); box-shadow:none;" onclick="ProductionManager.exportProject()" title="Download project bundle (JSON + Audio + Video)">
+                                    <i class="fas fa-file-archive"></i> EXPORT
+                                </button>
+                            </div>
                             <button class="btn btn-secondary btn-sm" onclick="TaskManager.showHistoryModal()">HISTORY</button>
                             <button class="btn btn-secondary btn-sm" onclick="showHelp()">HELP</button>
                         </div>

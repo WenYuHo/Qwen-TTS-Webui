@@ -72,3 +72,23 @@ async def test_invalid_project_name(client):
 async def test_load_nonexistent(client):
     response = await client.get("/api/projects/nonexistent_project_xyz")
     assert response.status_code == 404
+
+@pytest.mark.asyncio
+async def test_export_project_bundle(client):
+    # 1. Save a project
+    project_name = "test_export_proj"
+    project_data = {
+        "name": project_name,
+        "blocks": [{"id": "b1", "role": "Narrator", "text": "Hello world", "status": "idle"}]
+    }
+    await client.post(f"/api/projects/{project_name}", json=project_data)
+    
+    # 2. Export as default (WAV)
+    response = await client.get(f"/api/projects/{project_name}/export")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/x-zip-compressed"
+    
+    # 3. Export as MP3
+    response = await client.get(f"/api/projects/{project_name}/export?format=mp3")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/x-zip-compressed"

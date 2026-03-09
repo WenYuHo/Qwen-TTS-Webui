@@ -1,5 +1,5 @@
 # TASK QUEUE: QWEN-TTS
-# LAST_GLOBAL_SYNC: 2026-03-09T01:46:34Z
+# LAST_GLOBAL_SYNC: 2026-03-09T02:15:26Z
 
 ## ACTIVE SIGNALS
 - **SYSTEM**: `BOOT_SEQUENCE_COMPLETE`
@@ -14,20 +14,20 @@
     - Updated: 2026-03-09T01:46:24Z
     - Signals: NONE
 
-- [ ] **ENGINE_AUDIO_NORMALIZATION**
+- [x] **ENGINE_AUDIO_NORMALIZATION**
     - Task: Implement automatic LUFS normalization for the final podcast output to ensure consistent loudness across different voices and BGM.
     - Ref: `src/backend/engine_modules/patcher.py`
     - Promise: `LOUDNESS_NORMALIZED`
     - Reserved: gemini-cli-1 @ 2026-03-09T01:46:34Z
-    - Updated: 2026-03-09T02:45:00Z
+    - Updated: 2026-03-09T01:48:03Z
     - Signals: NONE
 
-- [ ] **PRODUCTION_EXPORT_FORMATS**
+- [x] **PRODUCTION_EXPORT_FORMATS**
     - Task: Add support for exporting projects in AAC and FLAC formats in addition to WAV in the Production view.
     - Ref: `src/backend/api/projects.py`
     - Promise: `MULTI_FORMAT_EXPORT_READY`
-    - Reserved: NONE
-    - Updated: 2026-03-09T02:45:00Z
+    - Reserved: gemini-cli-1 @ 2026-03-09T01:48:13Z
+    - Updated: 2026-03-09T02:15:26Z
     - Signals: NONE
 
 ## COMPLETED

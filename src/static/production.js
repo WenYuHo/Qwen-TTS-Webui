@@ -410,5 +410,15 @@ export const ProductionManager = {
             const name = opt.innerText.toLowerCase();
             opt.style.display = name.includes(query) ? 'block' : 'none';
         });
+    },
+
+    async exportProject() {
+        const select = document.getElementById('project-select');
+        const name = select.value;
+        if (!name) return Notification.show("Select or save a project first", "warn");
+        
+        const format = document.getElementById('export-format')?.value || 'wav';
+        Notification.show(`Exporting ${name} as ${format.toUpperCase()}...`, "info");
+        window.location.href = `/api/projects/${name}/export?format=${format}`;
     }
 };

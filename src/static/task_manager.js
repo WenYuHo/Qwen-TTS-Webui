@@ -133,16 +133,22 @@ export const TaskManager = {
                             <strong style="color:var(--accent); font-size:0.85rem;">${task.type.toUpperCase()}</strong>
                             <div style="font-size:0.65rem; opacity:0.6;">${new Date(task.created_at * 1000).toLocaleString()}</div>
                         </div>
-                        <div style="display:flex; gap:8px;">
+                        <div style="display:flex; gap:8px; align-items:center;">
                             ${task.status === 'completed' ? `
+                                <select class="btn btn-secondary btn-sm" style="font-size:0.5rem; padding:2px 4px; height:24px;" onchange="this.nextElementSibling.href='/api/tasks/${task.id}/result?format=' + this.value">
+                                    <option value="wav">WAV</option>
+                                    <option value="mp3">MP3</option>
+                                    <option value="aac">AAC</option>
+                                    <option value="flac">FLAC</option>
+                                </select>
+                                <a href="/api/tasks/${task.id}/result?format=wav" download="${task.type}_${task.id.substring(0,8)}.wav" class="btn btn-primary btn-sm" style="font-size:0.6rem;">
+                                    <i class="fas fa-download"></i>
+                                </a>
                                 ${task.type === 'podcast_generation' ? `
                                     <a href="/api/generate/podcast/${task.id}/subtitles?format=srt" download="subtitles.srt" class="btn btn-secondary btn-sm" style="font-size:0.6rem;" title="Download SRT">
                                         <i class="fas fa-closed-captioning"></i> SRT
                                     </a>
                                 ` : ''}
-                                <a href="/api/tasks/${task.id}/result" download="${task.type}_${task.id.substring(0,8)}.wav" class="btn btn-primary btn-sm" style="font-size:0.6rem;">
-                                    <i class="fas fa-download"></i>
-                                </a>
                                 <button class="btn btn-secondary btn-sm" onclick="playTaskResult('${task.id}')" style="font-size:0.6rem;">
                                     <i class="fas fa-play"></i>
                                 </button>
