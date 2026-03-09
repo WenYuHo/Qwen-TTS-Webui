@@ -50,15 +50,33 @@ async def get_audio_clip(path: str, start: float, end: float):
 
 @router.get("/")
 async def list_assets():
-    """List all shared assets."""
+    """List all shared assets with metadata."""
     assets = []
     for f in SHARED_ASSETS_DIR.glob("*"):
         if f.is_file():
-            assets.append({
+            asset_info = {
                 "name": f.name,
                 "size": f.stat().st_size,
-                "updated_at": f.stat().st_mtime
-            })
+                "updated_at": f.stat().st_mtime,
+                "type": "other",
+                "metadata": {}
+            }
+            
+            # Extract audio metadata
+            if f.suffix.lower() in ['.wav', '.mp3', '.flac', '.ogg']:
+                try:
+                    asset_info["type"] = "audio"
+                    with sf.SoundFile(str(f)) as sf_file:
+                        asset_info["metadata"] = {
+                            "duration": sf_file.frames / sf_file.samplerate,
+                            "samplerate": sf_file.samplerate,
+                            "channels": sf_file.channels
+                        }
+                except Exception:
+                    pass # Ignore errors for individual files
+            
+            assets.append(asset_info)
+            
     return sorted(assets, key=lambda x: x["updated_at"], reverse=True)
 
 @router.post("/upload")

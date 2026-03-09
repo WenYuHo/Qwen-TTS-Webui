@@ -1,24 +1,24 @@
 # TASK QUEUE: QWEN-TTS
-# LAST_GLOBAL_SYNC: 2026-03-09T01:08:26Z
+# LAST_GLOBAL_SYNC: 2026-03-09T01:13:39Z
 
 ## ACTIVE SIGNALS
 - **SYSTEM**: `BOOT_SEQUENCE_COMPLETE`
 
 ## PRIORITIZED BACKLOG
 
-- [ ] **DUBBING_BATCH_RETRY_LOGIC**
+- [x] **DUBBING_BATCH_RETRY_LOGIC**
     - Task: Implement segment-level retry logic and partial success reporting for batch S2S dubbing.
     - Ref: `src/backend/dub_logic.py`
     - Promise: `DUBBING_BATCH_ROBUST`
     - Reserved: gemini-cli-1 @ 2026-03-09T01:08:26Z
-    - Updated: 2026-03-09T01:10:00Z
+    - Updated: 2026-03-09T01:12:53Z
     - Signals: NONE
 
 - [ ] **UI_ASSET_METADATA_VIEWER**
     - Task: Add metadata display (duration, sample rate) and mini-waveform previews to the Asset Library.
     - Ref: `src/static/assets.js`
     - Promise: `ASSET_METADATA_READY`
-    - Reserved: NONE
+    - Reserved: gemini-cli-1 @ 2026-03-09T01:13:01Z
     - Updated: 2026-03-09T01:10:00Z
     - Signals: NONE
 
@@ -26,7 +26,7 @@
     - Task: Pre-calculate and disk-cache embeddings for common style prompts to eliminate "Voice Design" latency.
     - Ref: `src/backend/podcast_engine.py`
     - Promise: `PROMPT_CACHE_READY`
-    - Reserved: NONE
+    - Reserved: gemini-cli-1 @ 2026-03-09T01:13:39Z
     - Updated: 2026-03-09T01:10:00Z
     - Signals: NONE
 

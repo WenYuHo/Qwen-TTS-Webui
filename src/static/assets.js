@@ -23,14 +23,31 @@ export const AssetManager = {
             }
 
             grid.innerHTML = assets.map(asset => {
-                const isAudio = asset.name.endsWith('.mp3') || asset.name.endsWith('.wav');
+                const isAudio = asset.type === 'audio';
                 const icon = isAudio ? 'fa-file-audio' : 'fa-file';
+                const meta = asset.metadata || {};
+                
+                let metaHtml = '';
+                if (isAudio && meta.duration) {
+                    const mins = Math.floor(meta.duration / 60);
+                    const secs = Math.floor(meta.duration % 60).toString().padStart(2, '0');
+                    metaHtml = `
+                        <div style="font-size:0.7rem; opacity:0.6; display:flex; gap:8px; margin-top:4px;">
+                            <span><i class="fas fa-clock"></i> ${mins}:${secs}</span>
+                            <span><i class="fas fa-wave-square"></i> ${meta.samplerate / 1000}kHz</span>
+                        </div>
+                    `;
+                }
+
                 return `
                     <div class="card asset-card" style="display:flex; align-items:center; gap:16px;">
-                        <div class="asset-icon" aria-hidden="true"><i class="fas ${icon}"></i></div>
+                        <div class="asset-icon" aria-hidden="true" style="font-size:1.5rem; color:var(--accent);"><i class="fas ${icon}"></i></div>
                         <div style="flex:1;">
                             <strong style="display:block; font-size:0.95rem;">${asset.name}</strong>
-                            <span style="font-size:0.8rem; color:var(--text-secondary);">${(asset.size / 1024 / 1024).toFixed(2)} MB</span>
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <span style="font-size:0.8rem; color:var(--text-secondary);">${(asset.size / 1024 / 1024).toFixed(2)} MB</span>
+                            </div>
+                            ${metaHtml}
                         </div>
                         <div style="display:flex; gap:8px;">
                             ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}')" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}

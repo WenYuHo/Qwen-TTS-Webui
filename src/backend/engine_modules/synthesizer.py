@@ -126,10 +126,21 @@ class VoiceSynthesizer:
                 if model is None: model = get_model("CustomVoice")
                 wavs, sr = model.generate_custom_voice(text=text, speaker=profile["value"], language=language, instruct=final_instruct, temperature=temperature, **gen_kwargs)
             elif ptype == "design":
-                if model is None: model = get_model("VoiceDesign")
                 design_instruct = profile["value"]
                 if final_instruct: design_instruct = f"{design_instruct}, {final_instruct}"
-                wavs, sr = model.generate_voice_design(text=text, instruct=design_instruct, language=language, non_streaming_mode=True, temperature=temperature, **gen_kwargs)
+                
+                # ⚡ Bolt: Check for precomputed style prompt to skip "VoiceDesign" model latency
+                cache_key = f"design:{design_instruct}"
+                if cache_key in self.prompt_cache:
+                    logger.info(f"⚡ Bolt: Using precomputed embedding for style '{design_instruct}'")
+                    prompt = self.prompt_cache[cache_key]
+                    if model is None or not hasattr(model, "generate_voice_clone"):
+                        model = get_model("Base")
+                    wavs, sr = model.generate_voice_clone(text=text, language=language, voice_clone_prompt=prompt, instruct=final_instruct, temperature=temperature, **gen_kwargs)
+                else:
+                    if model is None or not hasattr(model, "generate_voice_design"):
+                        model = get_model("VoiceDesign")
+                    wavs, sr = model.generate_voice_design(text=text, instruct=design_instruct, language=language, non_streaming_mode=True, temperature=temperature, **gen_kwargs)
             elif ptype == "clone":
                 ref_text = profile.get("ref_text")
                 use_icl = ref_text is not None and ref_text.strip() != ""

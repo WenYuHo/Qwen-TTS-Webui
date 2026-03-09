@@ -53,7 +53,7 @@ class PodcastEngine:
         self.clone_embedding_cache = HybridCache(DiskCache(CACHE_DIR, "clone_embeddings"))
         self.mix_embedding_cache = HybridCache(DiskCache(CACHE_DIR, "mix_embeddings"))
         self.bgm_cache = {}
-        self.prompt_cache = {}
+        self.prompt_cache = HybridCache(DiskCache(CACHE_DIR, "prompts"))
         self.transcription_cache = HybridCache(DiskCache(CACHE_DIR, "transcriptions"))
         self.translation_cache = HybridCache(DiskCache(CACHE_DIR, "translations"))
         self.video_audio_cache = {}
@@ -67,6 +67,53 @@ class PodcastEngine:
         self.patcher = PodcastPatcher(self.bgm_cache, self._bgm_dir, self._shared_assets_dir)
 
         self._whisper_model = None # Lazy load
+        
+        # ⚡ Bolt: Precompute common style prompts to eliminate "Voice Design" latency
+        self._virtual_presets_dir = self._shared_assets_dir / "virtual_presets"
+        self._virtual_presets_dir.mkdir(parents=True, exist_ok=True)
+        self.executor.submit(self.precompute_virtual_presets)
+
+    def precompute_virtual_presets(self):
+        """Generates and caches embeddings for common stylistic prompts in the background."""
+        common_styles = {
+            "calm_male": "A calm, professional male voice with clear articulation.",
+            "bright_female": "A bright, energetic female voice, friendly and engaging.",
+            "deep_male": "A deep, authoritative male voice, suitable for news or documentaries.",
+            "soft_female": "A soft, soothing female voice for storytelling or meditation."
+        }
+        
+        try:
+            base_model = get_model("Base")
+            design_model = None # Load only if needed
+            
+            for key, prompt_text in common_styles.items():
+                cache_key = f"virtual:{key}"
+                if cache_key in self.prompt_cache:
+                    continue
+                
+                logger.info(f"⚡ Bolt: Precomputing virtual preset '{key}'...")
+                ref_path = self._virtual_presets_dir / f"{key}.wav"
+                
+                if not ref_path.exists():
+                    if design_model is None:
+                        design_model = get_model("VoiceDesign")
+                    # Generate 5s sample for embedding extraction
+                    wavs, sr = design_model.generate_voice_design(
+                        text="This is a reference sample for a precomputed voice style.",
+                        instruct=prompt_text,
+                        local_files_only=True
+                    )
+                    sf.write(str(ref_path), wavs[0], sr)
+                
+                # Compute and cache the prompt using the Base model (for ICL speed)
+                prompt = base_model.create_voice_clone_prompt(ref_audio=str(ref_path), x_vector_only_mode=True)
+                self.prompt_cache[cache_key] = prompt
+                # Also cache under the full prompt text to catch direct "design" matches
+                self.prompt_cache[f"design:{prompt_text}"] = prompt
+                
+            logger.info("⚡ Bolt: Virtual presets precomputed and cached.")
+        except Exception as e:
+            logger.warning(f"⚡ Bolt: Failed to precompute virtual presets: {e}")
 
     def _resolve_paths(self, relative_path: str) -> List[Path]:
         """Resolve one or more relative paths against upload_dir and ensure safety."""

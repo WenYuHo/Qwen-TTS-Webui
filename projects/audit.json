@@ -2789,5 +2789,107 @@
     "metadata": {
       "source": "test.wav"
     }
+  },
+  {
+    "timestamp": 1773018968.4211886,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 0.04,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "design"
+    }
+  },
+  {
+    "timestamp": 1773018968.4279547,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 0.04,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "design"
+    }
+  },
+  {
+    "timestamp": 1773019001.6965055,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 0.04,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "design"
+    }
+  },
+  {
+    "timestamp": 1773019001.7011085,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 0.04,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "design"
+    }
+  },
+  {
+    "timestamp": 1773019001.7162485,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 0.04,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "design"
+    }
+  },
+  {
+    "timestamp": 1773019001.720612,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 0.04,
+        "rms": 0.0,
+        "peak": 0.0,
+        "snr_db": 0,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "design"
+    }
   }
 ]
