@@ -25,3 +25,7 @@
 ## 2026-03-20 - [Semantic Empty States for System Management]
 **Learning:** Extending the existing `.empty-state` CSS pattern to administrative views like the System Manager (Audit Log, Phoneme Editor) significantly improves visual consistency and provides clear guidance to the user. Using FontAwesome icons that match the semantic context (e.g., `fa-clipboard-list` for logs, `fa-language` for phonemes) helps with quick visual recognition and reinforces the "Technoid Brutalist" style.
 **Action:** Always check for unhandled empty states in data-heavy administrative views and implement icon-based guidance using existing UI patterns.
+
+## 2026-03-10 - [Dynamic Accessibility Feedback for Media Controls]
+**Learning:** In media-rich applications, static ARIA labels on toggle buttons (like Record or Play/Pause) are insufficient. Dynamically updating the `aria-label` and `title` attributes to reflect the *next* or *current* state (e.g., "Stop recording" while active) ensures screen reader users have immediate and accurate context of the action they are about to perform.
+**Action:** Always implement dynamic ARIA label and title updates for state-dependent toggle buttons, and ensure decorative icons within these buttons are hidden from screen readers using `aria-hidden="true"`.
