@@ -228,6 +228,8 @@ export const ProductionManager = {
                 return;
             }
 
+            const reverbRoom = document.getElementById('audio-reverb-room')?.value || 'medium';
+
             const res = await fetch('/api/generate/podcast', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -238,6 +240,7 @@ export const ProductionManager = {
                     ducking_level, 
                     eq_preset: eqPreset, 
                     reverb_level: reverbLevel,
+                    reverb_room: reverbRoom,
                     stream: streamEnabled,
                     master_acx: masterAcx,
                     temperature: globalTemperature

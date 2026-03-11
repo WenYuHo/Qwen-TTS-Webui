@@ -155,32 +155,67 @@ class AudioPostProcessor:
             return wav
 
     @staticmethod
-    def apply_reverb(wav: np.ndarray, sr: int, intensity: float = 0.0) -> np.ndarray:
+    def apply_reverb(wav: np.ndarray, sr: int, intensity: float = 0.0, room_type: str = "medium") -> np.ndarray:
         if intensity <= 0:
             return wav
         try:
-            delay_samples = int(0.05 * sr)
-            decay = intensity * 0.4
-            out = wav.copy()
-            # ⚡ Bolt: Handle both Mono and Stereo reverb
-            is_stereo = len(wav.shape) == 2
-            
-            for i in range(1, 4):
-                shift = delay_samples * i
-                if is_stereo:
-                    if shift < wav.shape[1]:
-                        out[:, shift:] += wav[:, :-shift] * (decay ** i)
-                else:
-                    if shift < len(wav):
-                        out[shift:] += wav[:-shift] * (decay ** i)
-            
-            # ⚡ Bolt: Use max(np.max, -np.min) to avoid allocating a large temporary array for np.abs(out)
-            max_amp = max(np.max(out), -np.min(out))
+            # Try to use pedalboard for high-quality reverb
+            try:
+                from pedalboard import Reverb
                 
-            if max_amp > 1.0:
-                out /= max_amp
-            return out
-        except Exception:
+                # Map room types to pedalboard Reverb parameters
+                # room_size: 0 to 1
+                # wet_level: 0 to 1
+                room_presets = {
+                    "small": {"room_size": 0.1, "damping": 0.5},
+                    "medium": {"room_size": 0.5, "damping": 0.5},
+                    "hall": {"room_size": 0.8, "damping": 0.3},
+                    "stadium": {"room_size": 0.95, "damping": 0.1},
+                }
+                
+                params = room_presets.get(room_type, room_presets["medium"])
+                reverb = Reverb(
+                    room_size=params["room_size"],
+                    damping=params["damping"],
+                    wet_level=intensity * 0.5,
+                    dry_level=1.0 - (intensity * 0.2)
+                )
+                
+                # pedalboard expects (channels, samples)
+                is_stereo = len(wav.shape) == 2
+                if not is_stereo:
+                    input_data = wav[None, :]
+                else:
+                    input_data = wav
+                    
+                processed = reverb(input_data, sr)
+                
+                if not is_stereo:
+                    return processed[0]
+                return processed
+                
+            except ImportError:
+                # Fallback to legacy delay-based reverb
+                delay_samples = int(0.05 * sr)
+                decay = intensity * 0.4
+                out = wav.copy()
+                is_stereo = len(wav.shape) == 2
+                
+                for i in range(1, 4):
+                    shift = delay_samples * i
+                    if is_stereo:
+                        if shift < wav.shape[1]:
+                            out[:, shift:] += wav[:, :-shift] * (decay ** i)
+                    else:
+                        if shift < len(wav):
+                            out[shift:] += wav[:-shift] * (decay ** i)
+                
+                max_amp = max(np.max(out), -np.min(out))
+                if max_amp > 1.0:
+                    out /= max_amp
+                return out
+        except Exception as e:
+            logger.error(f"⚡ Bolt: Reverb failed: {e}")
             return wav
 
     @staticmethod

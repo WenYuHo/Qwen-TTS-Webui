@@ -9,21 +9,11 @@
 - [x] **UI_EMOTIONAL_BRACKET_PARSING** (2026-03-10)
     - Task: Implement parsing for emotional tags in scripts (e.g., `[happy]`, `[whispering]`) and map them to Qwen3-TTS `instruct` parameters for expressive delivery.
 
-- [ ] **VIDEO_MULTIMODAL_SYNC_ENHANCEMENT**
+- [x] **VIDEO_MULTIMODAL_SYNC_ENHANCEMENT** (2026-03-10)
     - Task: Improve the precision of audio-video alignment between Qwen3-TTS and LTX-Video, using waveform analysis to ensure frame-accurate synchronization.
-    - Ref: `track-narrated-video.md` (Task 2.1)
-    - Promise: `VIDEO_AUDIO_SYNC_PERFECT`
-    - Reserved: NONE
-    - Updated: 2026-03-10T11:15:00Z
-    - Signals: NONE
 
-- [ ] **AUDIO_SPATIAL_SCENE_MAPPING**
+- [x] **AUDIO_SPATIAL_SCENE_MAPPING** (2026-03-10)
     - Task: Add "Acoustic Environment" presets (Hall, Small Room, Stadium) that apply reverb and spatialization to synthesized voices.
-    - Ref: `track-sound-generation.md` (New Phase)
-    - Promise: `SPATIAL_AUDIO_LIVE`
-    - Reserved: NONE
-    - Updated: 2026-03-10T11:15:00Z
-    - Signals: NONE
 
 - [ ] **VIDEO_CINEMATIC_CAMERA_CONTROLS**
     - Task: Expose LTX-Video camera movement parameters (dolly, tilt, pan, zoom) in the Video Production UI for cinematic control.

@@ -207,7 +207,7 @@ class PodcastEngine:
         self.video_audio_cache[video_path] = extracted_path
         return extracted_path
 
-    def stream_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], eq_preset: str = "flat", reverb_level: float = 0.0, temperature: Optional[float] = None):
+    def stream_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], eq_preset: str = "flat", reverb_level: float = 0.0, reverb_room: str = "medium", temperature: Optional[float] = None):
         """Yields synthesized audio blocks sequentially for low-latency podcast playback."""
         for item in script:
             try:
@@ -218,7 +218,7 @@ class PodcastEngine:
                 current_temp = item.get("temperature") if item.get("temperature") is not None else temperature
                 wav, sr = self.generate_segment(text, profile, language=item.get("language", "auto"), instruct=item.get("instruct"), temperature=current_temp)
                 wav = AudioPostProcessor.apply_eq(wav, sr, preset=eq_preset)
-                wav = AudioPostProcessor.apply_reverb(wav, sr, intensity=reverb_level)
+                wav = AudioPostProcessor.apply_reverb(wav, sr, intensity=reverb_level, room_type=reverb_room)
                 yield wav, sr, item
             except Exception as e:
                 logger.error(f"Streaming podcast block failed: {e}")
@@ -510,7 +510,7 @@ class PodcastEngine:
             torch.cuda.ipc_collect()
         logger.info("⚡ Bolt: Engine VRAM cleared.")
 
-    def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None, ducking_level: float = 0.0, eq_preset: str = "flat", reverb_level: float = 0.0, master_acx: bool = False, temperature: Optional[float] = None, **gen_kwargs) -> Optional[Dict[str, Any]]:
+    def generate_podcast(self, script: List[Dict[str, Any]], profiles: Dict[str, Dict[str, Any]], bgm_mood: Optional[str] = None, ducking_level: float = 0.0, eq_preset: str = "flat", reverb_level: float = 0.0, reverb_room: str = "medium", master_acx: bool = False, temperature: Optional[float] = None, **gen_kwargs) -> Optional[Dict[str, Any]]:
         with Profiler("Generate Podcast"):
             try:
                 sample_rate = 24000
@@ -607,7 +607,7 @@ class PodcastEngine:
                         if is_stereo: final_wav += bgm_samples[None, :]
                         else: final_wav += bgm_samples
 
-                final_wav = self.patcher.apply_mastering(final_wav, sample_rate, eq_preset, reverb_level, master_acx)
+                final_wav = self.patcher.apply_mastering(final_wav, sample_rate, eq_preset, reverb_level, reverb_room, master_acx)
                 final_wav = self._apply_audio_watermark(final_wav, sample_rate)
 
                 # Map speech_segments to subtitle format using actual timeline positions

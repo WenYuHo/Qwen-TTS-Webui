@@ -32,6 +32,7 @@ class PodcastRequest(BaseModel):
     ducking_level: Optional[float] = 0.0
     eq_preset: Optional[str] = "flat"
     reverb_level: Optional[float] = 0.0
+    reverb_room: Optional[str] = "medium" # small, medium, hall, stadium
     stream: Optional[bool] = False
     master_acx: Optional[bool] = False
     temperature: Optional[float] = None

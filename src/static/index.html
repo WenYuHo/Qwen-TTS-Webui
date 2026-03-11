@@ -288,8 +288,22 @@
                         
                         <h3 class="label-industrial">EFFECTS</h3>
                         <div class="card" style="padding:12px; margin-bottom:20px; background:rgba(0,0,0,0.3); border:1px solid var(--accent);">
-                            <select id="audio-eq" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);" aria-label="Equalizer Preset"><option value="flat">Flat</option><option value="broadcast">Radio</option></select>
-                            <div style="display:flex; justify-content:space-between; margin-top:12px;"><label for="audio-reverb" class="label-industrial">Reverb</label><span id="reverb-val" class="volt-text">0%</span></div>
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <label for="audio-eq" class="label-industrial" style="font-size:0.6rem;">Equalizer</label>
+                                <select id="audio-eq" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);" aria-label="Equalizer Preset"><option value="flat">Flat</option><option value="broadcast">Radio</option></select>
+                            </div>
+                            
+                            <div style="display:flex; flex-direction:column; gap:8px; margin-top:12px;">
+                                <label for="audio-reverb-room" class="label-industrial" style="font-size:0.6rem;">Acoustic Environment</label>
+                                <select id="audio-reverb-room" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);" aria-label="Reverb Room Preset">
+                                    <option value="small">Small Room</option>
+                                    <option value="medium" selected>Medium Studio</option>
+                                    <option value="hall">Large Hall</option>
+                                    <option value="stadium">Stadium</option>
+                                </select>
+                            </div>
+
+                            <div style="display:flex; justify-content:space-between; margin-top:12px;"><label for="audio-reverb" class="label-industrial">Reverb Mix</label><span id="reverb-val" class="volt-text">0%</span></div>
                             <input type="range" id="audio-reverb" min="0" max="100" value="0" style="width:100%" oninput="document.getElementById('reverb-val').innerText = this.value + '%' ">
                         </div>
 

@@ -24,6 +24,7 @@ openai-whisper
 deep-translator
 beautifulsoup4
 huggingface_hub
+pedalboard
 
 # Graphics & Video
 moviepy

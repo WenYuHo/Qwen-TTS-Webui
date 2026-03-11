@@ -86,7 +86,7 @@ class PodcastPatcher:
 
         return final_wav, max_sample, speech_segments
 
-    def apply_mastering(self, final_wav: np.ndarray, sample_rate: int, eq_preset: str, reverb_level: float, master_acx: bool) -> np.ndarray:
+    def apply_mastering(self, final_wav: np.ndarray, sample_rate: int, eq_preset: str, reverb_level: float, reverb_room: str, master_acx: bool) -> np.ndarray:
         # 1. Initial peak normalization if needed
         max_val = max(np.max(final_wav), -np.min(final_wav))
         if max_val > 1.0: final_wav /= max_val
@@ -94,7 +94,7 @@ class PodcastPatcher:
         # 2. Cleanup & Effects
         final_wav = AudioPostProcessor.apply_declick(final_wav, sample_rate)
         final_wav = AudioPostProcessor.apply_eq(final_wav, sample_rate, preset=eq_preset)
-        final_wav = AudioPostProcessor.apply_reverb(final_wav, sample_rate, intensity=reverb_level)
+        final_wav = AudioPostProcessor.apply_reverb(final_wav, sample_rate, intensity=reverb_level, room_type=reverb_room)
         
         # 3. Final Dynamics & Loudness
         if master_acx:

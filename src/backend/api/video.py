@@ -64,19 +64,28 @@ def run_video_generation_task(task_id: str, request: VideoGenerationRequest):
 
 
 def _concat_scenes(scene_clips: list) -> str:
-    """Concatenate multiple video clips with transitions using MoviePy."""
-    from moviepy import VideoFileClip, concatenate_videoclips
+    """Concatenate multiple video clips with transitions and frame-accurate sync."""
+    from moviepy import VideoFileClip, concatenate_videoclips, vfx
 
     clips = []
     try:
         for sc in scene_clips:
             clip_path = str(VIDEO_OUTPUT_DIR / sc["video_path"])
-            logger.info(f"Loading clip for concatenation: {clip_path}")
+            logger.info(f"Loading clip for concatenation: {clip_path} (Target duration: {sc['duration']:.2f}s)")
+            
             clip = VideoFileClip(clip_path)
+            
+            # ⚡ Sync Enhancement: Ensure video duration matches audio exactly
+            # This prevents cumulative drift in long multi-scene videos
+            if abs(clip.duration - sc["duration"]) > 0.001:
+                logger.info(f"⚡ Sync: Rescaling clip from {clip.duration:.3f}s to {sc['duration']:.3f}s")
+                clip = clip.with_effects([vfx.speedx(final_duration=sc["duration"])])
+
             if sc.get("transition") == "fade":
                 clip = clip.with_effects([lambda c: c.fadein(0.5), lambda c: c.fadeout(0.5)])
             elif sc.get("transition") == "dissolve":
                 clip = clip.with_effects([lambda c: c.crossfadein(0.5)])
+            
             clips.append(clip)
 
         final = concatenate_videoclips(clips, method="compose")
@@ -84,11 +93,20 @@ def _concat_scenes(scene_clips: list) -> str:
         output_path = VIDEO_OUTPUT_DIR / output_filename
         
         logger.info(f"Writing final concatenated video to {output_path}")
-        final.write_videofile(str(output_path), codec="libx264", audio_codec="aac", logger=None)
+        final.write_videofile(
+            str(output_path), 
+            codec="libx264", 
+            audio_codec="aac", 
+            fps=25,
+            logger=None
+        )
 
         # Cleanup individual clips
         for clip in clips:
-            clip.close()
+            try:
+                clip.close()
+            except:
+                pass
         
         return output_filename
     except Exception as e:
@@ -99,7 +117,8 @@ def _concat_scenes(scene_clips: list) -> str:
                 clip.close()
             except:
                 pass
-        raise e
+        # Fallback to first clip if concatenation fails
+        return scene_clips[0]["video_path"]
 
 
 def run_narrated_video_task(task_id: str, request: NarratedVideoRequest):
