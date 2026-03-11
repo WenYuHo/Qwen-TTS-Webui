@@ -19,16 +19,13 @@
 **Action:** Always prefer vectorized NumPy operations for audio mixing and concatenation over high-level library abstractions like pydub in performance-critical paths.
 
 ## 2026-03-01 - [In-Memory Caching for Audio and Embeddings]
-**Learning:** In "Studio" workflows where users repeatedly regenerate podcasts with similar settings, redundant I/O (BGM loading) and redundant tensor math (mix embedding calculation) account for ~15-20% of non-inference latency. Implementing per-instance caches in the  for these artifacts provides significant speedups.
-**Action:** Always check  and  before starting expensive audio processing or embedding mixing in synthesis pipelines. Use sorted JSON keys for mix configurations to ensure cache hits for identical settings.
-
-## 2026-03-01 - [In-Memory Caching for Audio and Embeddings]
 **Learning:** In "Studio" workflows where users repeatedly regenerate podcasts with similar settings, redundant I/O (BGM loading) and redundant tensor math (mix embedding calculation) account for ~15-20% of non-inference latency. Implementing per-instance caches in the `PodcastEngine` for these artifacts provides significant speedups.
 **Action:** Always check `bgm_cache` and `mix_embedding_cache` before starting expensive audio processing or embedding mixing in synthesis pipelines. Use sorted JSON keys for mix configurations to ensure cache hits for identical settings.
 
 ## 2026-03-01 - [LRU Model Cache in ModelManager]
 **Learning:** The previous single-slot model loading pattern caused "model thrashing" during multi-speaker or interactive sessions, adding 3-5 seconds of latency per speaker switch as 1.7B parameter models (~3.4GB FP16) were unloaded and reloaded. Implementing an LRU cache with a capacity of 2 models provides a significant speedup for the common "back-and-forth" interaction between two speaker types (e.g., Preset and Clone).
 **Action:** Always utilize the LRU-enabled `ModelManager` to load models. For multi-speaker generation, combine this with model-grouping to minimize even cache-hit lookups.
+
 ## 2026-03-01 - [Video Audio Extraction Caching]
 **Learning:** Audio extraction from video files using MoviePy is a slow, I/O-intensive process. In workflows like dubbing or voice cloning, the engine often needs the audio multiple times for transcription and embedding extraction. Implementing a simple in-memory cache for extracted audio paths reduces redundant processing, cutting video processing initialization time by ~50% in multi-stage pipelines.
 **Action:** Always check a video-to-audio cache before triggering a new extraction process for the same source video.
@@ -36,10 +33,6 @@
 ## 2026-03-01 - [Batched Synthesis for Throughput]
 **Learning:** While model grouping prevents thrashing, serial synthesis within a group still underutilizes the GPU and incurs high Python-to-CUDA overhead. Qwen-TTS models support batched generation (lists of texts/prompts). Implementing batched synthesis in `generate_podcast` provides a ~5x throughput improvement for multi-segment projects. A serial fallback is essential to ensure that a single segment's failure doesn't crash the entire batch.
 **Action:** Always prefer batched generation methods for multi-item synthesis tasks. Implement robust fallback to serial processing for failure isolation.
-
-## 2026-03-01 - [Transcription and Translation Caching]
-**Learning:** Redundant transcription (via Whisper) and translation (via GoogleTranslator API) in dubbing and S2S workflows add significant unnecessary latency and API cost. Using a cache key based on file metadata (path, size, mtime) for transcription and (text, target_lang) for translation provides a ~5-10x speedup for repeated operations on the same assets.
-**Action:** Always utilize the  and  in the `PodcastEngine` before performing these expensive operations.
 
 ## 2026-03-01 - [Transcription and Translation Caching]
 **Learning:** Redundant transcription (via Whisper) and translation (via GoogleTranslator API) in dubbing and S2S workflows add significant unnecessary latency and API cost. Using a cache key based on file metadata (path, size, mtime) for transcription and (text, target_lang) for translation provides a ~5-10x speedup for repeated operations on the same assets.
@@ -92,3 +85,7 @@
 ## 2026-03-07 - [Loop Fusion and Keyword Argument Optimization]
 **Learning:** Consolidating multiple transformation passes (e.g., loading, casting, and mono-conversion) into a single loop over audio assets reduces list indexing overhead and prevents potential tuple mutation bugs. Additionally, moving hardcoded generation defaults to a class-level constant and using a generic `**kwargs` loop in merging logic eliminates the overhead of recreating dictionaries and executing nested helper functions on every synthesis call.
 **Action:** Always prefer single-pass transformations for asset lists. Centralize fixed configuration defaults in class or module-level constants to minimize runtime object creation.
+
+## 2026-03-11 - [Vectorized Chunk-Based Heuristics]
+**Learning:** Vectorizing a chunk-based audio heuristic (like the `apply_declick` de-clicker) using NumPy `reshape` and `einsum` provides a massive speedup (32x to 150x depending on buffer size) by eliminating Python loop overhead. However, the '10x local RMS' heuristic itself is mathematically sensitive to window size (N); if sqrt(N) <= threshold, a single high-amplitude spike cannot be detected because its contribution to the RMS prevents it from exceeding the threshold. For a 24kHz sample rate and 2ms window (48 samples), sqrt(48) ≈ 6.9, making the 10x threshold extremely conservative for single-spike detection.
+**Action:** When optimizing audio processing loops, use `np.reshape` to create windows and `np.einsum` for memory-efficient RMS/dot-product calculations. Always verify that the heuristic's detection logic is mathematically sound for the chosen window size and sampling rate.
