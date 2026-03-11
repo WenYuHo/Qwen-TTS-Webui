@@ -132,7 +132,8 @@ def run_narrated_video_task(task_id: str, request: NarratedVideoRequest):
         scenes = request.scenes or [VideoScene(
             video_prompt=request.prompt,
             narration_text=request.narration_text,
-            voice_profile=request.voice_profile
+            voice_profile=request.voice_profile,
+            camera_motion=request.camera_motion
         )]
 
         total = len(scenes)
@@ -164,9 +165,17 @@ def run_narrated_video_task(task_id: str, request: NarratedVideoRequest):
                 message=f"Scene {i+1}/{total}: Generating video ({num_frames} frames)..."
             )
 
+            # ⚡ Cinematic Enhancement: Inject camera motion into prompt
+            final_prompt = scene.video_prompt
+            motion = scene.camera_motion or request.camera_motion
+            if motion and motion.strip():
+                # Prepend motion keyword to guide the model's lens
+                final_prompt = f"{motion.strip()}, {final_prompt}"
+                logger.info(f"⚡ Cinematic: Injecting motion '{motion}' into scene {i+1}")
+
             # 3. Generate video for this scene
             result = video_engine.generate_narrated_video(
-                prompt=scene.video_prompt,
+                prompt=final_prompt,
                 narration_wav=wav,
                 narration_sr=sr,
                 width=request.width,

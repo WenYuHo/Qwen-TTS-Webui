@@ -146,6 +146,7 @@ export const ProductionManager = {
 
         const numFrames = parseInt(document.getElementById('video-frames').value);
         const guidanceScale = parseFloat(document.getElementById('video-guidance').value);
+        const cameraMotion = document.getElementById('video-camera-motion')?.value || null;
         const inferenceSteps = parseInt(document.getElementById('video-steps').value);
         const seed = parseInt(document.getElementById('video-seed').value);
         const maxShift = parseFloat(document.getElementById('video-max-shift').value) || null;
@@ -210,6 +211,7 @@ export const ProductionManager = {
                         height: height,
                         num_frames: numFrames,
                         guidance_scale: guidanceScale,
+                        camera_motion: cameraMotion,
                         num_inference_steps: inferenceSteps,
                         seed: seed,
                         max_shift: maxShift,

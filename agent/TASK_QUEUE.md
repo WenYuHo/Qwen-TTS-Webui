@@ -15,13 +15,8 @@
 - [x] **AUDIO_SPATIAL_SCENE_MAPPING** (2026-03-10)
     - Task: Add "Acoustic Environment" presets (Hall, Small Room, Stadium) that apply reverb and spatialization to synthesized voices.
 
-- [ ] **VIDEO_CINEMATIC_CAMERA_CONTROLS**
+- [x] **VIDEO_CINEMATIC_CAMERA_CONTROLS** (2026-03-10)
     - Task: Expose LTX-Video camera movement parameters (dolly, tilt, pan, zoom) in the Video Production UI for cinematic control.
-    - Ref: `track-narrated-video.md` (Task 1.3)
-    - Promise: `CINEMATIC_CONTROLS_READY`
-    - Reserved: NONE
-    - Updated: 2026-03-10T11:15:00Z
-    - Signals: NONE
 
 - [ ] **TESTING_FIX_BROKEN_TESTS**
     - Task: Run the full test suite (`pytest tests/ -v`), identify failures/skips, and fix them (e.g., missing imports, hardware requirements, flaky async).

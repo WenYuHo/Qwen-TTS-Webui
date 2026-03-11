@@ -120,12 +120,14 @@ class VideoScene(BaseModel):
     duration_seconds: Optional[float] = None         # Auto-calculated from TTS if None
     transition: Optional[str] = "cut"                # "cut" | "fade" | "dissolve"
     instruct: Optional[str] = None                   # Emotion for this scene's narration
+    camera_motion: Optional[str] = None              # "dolly-in", "pan-left", etc.
 
 class NarratedVideoRequest(BaseModel):
     # --- Keep existing single-scene fields for backward compat ---
     prompt: Optional[str] = None
     narration_text: Optional[str] = None
     voice_profile: Optional[Dict[str, Any]] = {}
+    camera_motion: Optional[str] = None
     
     # --- New multi-scene support ---
     scenes: Optional[List[VideoScene]] = None
