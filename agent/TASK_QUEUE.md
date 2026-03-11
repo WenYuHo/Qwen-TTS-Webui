@@ -6,13 +6,8 @@
 
 ## PRIORITIZED BACKLOG
 
-- [ ] **UI_EMOTIONAL_BRACKET_PARSING**
+- [x] **UI_EMOTIONAL_BRACKET_PARSING** (2026-03-10)
     - Task: Implement parsing for emotional tags in scripts (e.g., `[happy]`, `[whispering]`) and map them to Qwen3-TTS `instruct` parameters for expressive delivery.
-    - Ref: `track-voice-library.md` (Task 2.4)
-    - Promise: `EMOTION_TAGS_SUPPORTED`
-    - Reserved: NONE
-    - Updated: 2026-03-10T11:15:00Z
-    - Signals: NONE
 
 - [ ] **VIDEO_MULTIMODAL_SYNC_ENHANCEMENT**
     - Task: Improve the precision of audio-video alignment between Qwen3-TTS and LTX-Video, using waveform analysis to ensure frame-accurate synchronization.

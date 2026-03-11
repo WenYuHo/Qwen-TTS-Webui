@@ -258,7 +258,8 @@
                         <div class="header" style="border-bottom: 2px solid var(--accent); padding: 12px 24px; display: flex; gap: 16px; background:rgba(255,255,255,0.02);">
                             <button class="btn btn-secondary btn-sm" onclick="toggleCanvasView('draft')" data-i18n="studio.draft">DRAFT</button>
                             <button class="btn btn-secondary btn-sm" onclick="toggleCanvasView('production')" data-i18n="studio.production">PRODUCTION</button>
-                            <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="promoteToProduction()" data-i18n="studio.promote">PROMOTE</button>
+                            <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="ProductionManager.parseEmotions()" title="Convert emotional tags [happy] into instructors">PARSE EMOTIONS</button>
+                            <button class="btn btn-primary btn-sm" onclick="promoteToProduction()" data-i18n="studio.promote">PROMOTE</button>
                         </div>
                         <div id="canvas-draft-view" style="flex:1; display:flex;">
                             <textarea id="script-editor" style="border:none; padding:24px; font-family:var(--font-mono); font-size:0.9rem;" placeholder="Alice: Hello!"></textarea>

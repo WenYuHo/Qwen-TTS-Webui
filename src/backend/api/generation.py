@@ -16,6 +16,101 @@ except ImportError:
 
 router = APIRouter(prefix="/api/generate", tags=["generation"])
 
+import re
+
+EMOTION_MAPPING = {
+    "happy": "speak in a cheerful and energetic tone",
+    "sad": "speak in a sorrowful and somber tone",
+    "angry": "speak in an angry and forceful tone",
+    "fear": "speak in a fearful and trembling tone",
+    "surprise": "speak in a surprised and excited tone",
+    "serious": "speak in a serious and authoritative tone",
+    "whispering": "speak in a very soft whispering voice",
+    "shouting": "speak in a very loud shouting voice",
+}
+
+def parse_script_with_emotions(script_text: str):
+    """
+    Parses a script string with [Speaker] and [emotion] tags into structured blocks.
+    Example:
+    [Alice]
+    [happy] Hello everyone!
+    """
+    blocks = []
+    current_role = "Default"
+    
+    # Split by speaker tags: [Name] at the start of a line or after double newline
+    # Using a simple line-by-line parser for robustness
+    lines = script_text.strip().split("\n")
+    
+    current_block_text = []
+    current_emotion = None
+    
+    for line in lines:
+        line = line.strip()
+        if not line: continue
+        
+        # Check for [Speaker] tag
+        speaker_match = re.match(r"^\[([^\]]+)\]$", line)
+        if speaker_match:
+            # If we have accumulated text, save it before switching speaker
+            if current_block_text:
+                blocks.append({
+                    "role": current_role,
+                    "text": " ".join(current_block_text),
+                    "instruct": EMOTION_MAPPING.get(current_emotion) if current_emotion else None
+                })
+                current_block_text = []
+            
+            current_role = speaker_match.group(1)
+            current_emotion = None # Reset emotion on speaker change
+            continue
+            
+        # Check for [emotion] tag at the start of a line
+        emotion_match = re.match(r"^\[([^\]]+)\]\s*(.*)", line)
+        if emotion_match:
+            tag = emotion_match.group(1).lower()
+            if tag in EMOTION_MAPPING:
+                # If we have text with a DIFFERENT emotion, save it
+                if current_block_text:
+                    blocks.append({
+                        "role": current_role,
+                        "text": " ".join(current_block_text),
+                        "instruct": EMOTION_MAPPING.get(current_emotion) if current_emotion else None
+                    })
+                    current_block_text = []
+                
+                current_emotion = tag
+                remaining_text = emotion_match.group(2)
+                if remaining_text:
+                    current_block_text.append(remaining_text)
+                continue
+        
+        # Regular text line
+        current_block_text.append(line)
+        
+    # Add the final block
+    if current_block_text:
+        blocks.append({
+            "role": current_role,
+            "text": " ".join(current_block_text),
+            "instruct": EMOTION_MAPPING.get(current_emotion) if current_emotion else None
+        })
+        
+    return blocks
+
+@router.post("/parse-script")
+async def parse_script_endpoint(request: Dict[str, str]):
+    """
+    Parses raw script text into structured segments with emotional instructors.
+    """
+    text = request.get("text", "")
+    if not text:
+        return {"segments": []}
+    
+    segments = parse_script_with_emotions(text)
+    return {"segments": segments}
+
 @router.post("/stream")
 async def stream_synthesis(request: StreamingSynthesisRequest):
     """

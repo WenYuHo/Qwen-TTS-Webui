@@ -592,6 +592,38 @@ export const ProductionManager = {
         window.location.href = `/api/projects/${name}/export?format=${format}`;
     },
 
+    async parseEmotions() {
+        const editor = document.getElementById('script-editor');
+        const text = editor.value;
+        if (!text.trim()) return;
+
+        try {
+            const resp = await fetch('/api/generate/parse-script', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text })
+            });
+            const data = await resp.json();
+            
+            if (data.segments) {
+                // Update the blocks and switch to production view
+                window.CanvasManager.blocks = data.segments.map(seg => ({
+                    id: Math.random().toString(36).substr(2, 9),
+                    role: seg.role,
+                    text: seg.text,
+                    status: 'pending',
+                    instruct: seg.instruct
+                }));
+                this.renderBlocks();
+                this.toggleCanvasView('production');
+                Notification.show(`Successfully parsed ${window.CanvasManager.blocks.length} emotional segments`, "success");
+            }
+        } catch (e) {
+            console.error("Parse emotions failed:", e);
+            Notification.show("Failed to parse emotional tags", "error");
+        }
+    },
+
     loadSampleScript(key) {
         const samples = {
             'interview': `Narrator: Welcome to the future of hiring.
