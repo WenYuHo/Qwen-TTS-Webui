@@ -6,4 +6,5 @@
 *   **ACX Mastering Added**: `utils.AudioPostProcessor` now contains ACX audio compliance normalization.
 *   **Dubbing Phase 1 Started**: `PodcastEngine.transcribe_audio()` now returns full Whisper metadata (text, language, segments). Added `/api/generate/detect-language` endpoint and a "DETECT" button in the Dubbing UI to auto-fill target languages.
 *   **Voice Clone E2E Hardened**: Fixed `temperature` keyword argument bug in `api/generation.py` and added `tests/test_voice_clone_e2e.py` covering the full API workflow.
-*   **E2E UI Flow Verified**: Added `tests/test_browser_smoke.py` and `tests/test_e2e_ui_flow.py` using Playwright to verify Voice Studio, Project Studio, and Video Generation flows.
+*   **Testing Coverage Baseline Established**: Static audit performed across all core modules; `tests/coverage_baseline.md` created to identify reliability gaps.
+*   **Subtitle UI Controls Live**: Added position and font size controls to the video production section; integrated with `VideoModal` overlay for dynamic previewing.

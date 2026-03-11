@@ -149,6 +149,11 @@ export const TaskManager = {
                                         <i class="fas fa-closed-captioning"></i> SRT
                                     </a>
                                 ` : ''}
+                                ${task.type === 'narrated_video' && task.result && task.result.video_path ? `
+                                    <button class="btn btn-primary btn-sm" onclick="showVideoPreview('${task.result.video_path}', '${task.result.srt_path || ''}')" style="font-size:0.6rem;">
+                                        <i class="fas fa-video"></i> PREVIEW
+                                    </button>
+                                ` : ''}
                                 <button class="btn btn-secondary btn-sm" onclick="playTaskResult('${task.id}')" style="font-size:0.6rem;">
                                     <i class="fas fa-play"></i>
                                 </button>

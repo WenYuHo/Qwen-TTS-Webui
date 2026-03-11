@@ -6,7 +6,9 @@ import os
 import soundfile as sf
 
 # Add src to path
-sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
+src_path = str(Path(__file__).resolve().parent.parent.parent / "src")
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
 
 from backend.model_loader import get_model
 from backend.config import logger

@@ -1,0 +1,54 @@
+{
+    "sidebar": {
+        "voice_studio": "语音实验室",
+        "project_studio": "项目工作室",
+        "dubbing": "配音与变声",
+        "assets": "资产库",
+        "system": "系统设置",
+        "active_tasks": "当前任务",
+        "global_monitor": "全局监控"
+    },
+    "voicelab": {
+        "title": "语音实验室",
+        "subtitle": "设计、克隆和混合独特的 AI 语音。",
+        "design": {
+            "title": "语音设计",
+            "prompt": "风格提示词"
+        },
+        "clone": {
+            "title": "语音克隆",
+            "ref_audio": "参考音频",
+            "transcript": "参考文本"
+        },
+        "mix": {
+            "title": "语音混音器",
+            "voice_a": "基础语音 A",
+            "voice_b": "基础语音 B"
+        },
+        "library": "我的语音库"
+    },
+    "studio": {
+        "title": "项目工作室",
+        "subtitle": "创作多角色音频剧。",
+        "draft": "草稿",
+        "production": "制作",
+        "promote": "生成模块",
+        "settings": "设置",
+        "video": {
+            "title": "视频引擎",
+            "enable": "启用视频生成",
+            "scene_editor": "场景编辑器",
+            "add_scene": "+ 添加场景",
+            "global_params": "全局参数",
+            "burn_subtitles": "内嵌字幕"
+        }
+    },
+    "common": {
+        "save": "保存",
+        "load": "加载",
+        "help": "帮助",
+        "delete": "删除",
+        "preview": "预览",
+        "produce": "最终生成"
+    }
+}

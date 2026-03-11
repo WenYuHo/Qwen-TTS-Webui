@@ -24,6 +24,7 @@ class LTXVideoEngine:
     def __init__(self):
         self._pipeline = None
         self._lock = threading.Lock()
+        self._processing_lock = threading.Lock()
         self._available = None  # lazy check
 
     @property
@@ -187,46 +188,47 @@ class LTXVideoEngine:
         Returns:
             dict with 'path' (str) to the generated MP4 file and 'filename' (str).
         """
-        self._ensure_pipeline()
+        with self._processing_lock:
+            self._ensure_pipeline()
 
-        filename = f"vid_{uuid.uuid4().hex[:12]}.mp4"
-        output_path = VIDEO_OUTPUT_DIR / filename
+            filename = f"vid_{uuid.uuid4().hex[:12]}.mp4"
+            output_path = VIDEO_OUTPUT_DIR / filename
 
-        logger.info(f"Generating video: prompt='{prompt[:80]}...', {width}x{height}, {num_frames} frames")
+            logger.info(f"Generating video: prompt='{prompt[:80]}...', {width}x{height}, {num_frames} frames")
 
-        pipeline_kwargs = {
-            "prompt": prompt,
-            "output_path": str(output_path),
-            "width": width,
-            "height": height,
-            "num_frames": num_frames,
-            "guidance_scale": guidance_scale,
-            "num_inference_steps": num_inference_steps,
-        }
+            pipeline_kwargs = {
+                "prompt": prompt,
+                "output_path": str(output_path),
+                "width": width,
+                "height": height,
+                "num_frames": num_frames,
+                "guidance_scale": guidance_scale,
+                "num_inference_steps": num_inference_steps,
+            }
 
-        if seed is not None and seed != -1:
-            pipeline_kwargs["seed"] = seed
+            if seed is not None and seed != -1:
+                pipeline_kwargs["seed"] = seed
+                
+            # ⚡ Bolt: Advanced LTX-2 Shift Parameters for motion control
+            if max_shift is not None: pipeline_kwargs["max_shift"] = max_shift
+            if base_shift is not None: pipeline_kwargs["base_shift"] = base_shift
+            if terminal is not None: pipeline_kwargs["terminal"] = terminal
+
+            self._pipeline(**pipeline_kwargs)
             
-        # ⚡ Bolt: Advanced LTX-2 Shift Parameters for motion control
-        if max_shift is not None: pipeline_kwargs["max_shift"] = max_shift
-        if base_shift is not None: pipeline_kwargs["base_shift"] = base_shift
-        if terminal is not None: pipeline_kwargs["terminal"] = terminal
+            # Apply watermark
+            self._apply_video_watermark(str(output_path))
 
-        self._pipeline(**pipeline_kwargs)
-        
-        # Apply watermark
-        self._apply_video_watermark(str(output_path))
-
-        # --- ⚡ Bolt: Aggressive VRAM Cleanup ---
-        import gc
-        import torch
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-            torch.cuda.ipc_collect()
-            
-        logger.info(f"Video generated: {output_path}. VRAM cleared.")
-        return {"path": str(output_path), "filename": filename}
+            # --- ⚡ Bolt: Aggressive VRAM Cleanup ---
+            import gc
+            import torch
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                torch.cuda.ipc_collect()
+                
+            logger.info(f"Video generated: {output_path}. VRAM cleared.")
+            return {"path": str(output_path), "filename": filename}
 
     def generate_narrated_video(
         self,

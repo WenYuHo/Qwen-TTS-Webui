@@ -2,6 +2,11 @@ import os
 import subprocess
 from pathlib import Path
 import re
+import sys
+
+# Ensure UTF-8 output on Windows
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding='utf-8')
 
 def get_git_status():
     try:

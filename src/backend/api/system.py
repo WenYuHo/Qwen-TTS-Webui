@@ -140,3 +140,51 @@ async def delete_phoneme(word: str):
         return {"status": "ok", "overrides": phoneme_manager.overrides}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/languages")
+async def get_supported_languages():
+    """Return all languages supported by the loaded model."""
+    from ..model_loader import get_model
+    try:
+        model = get_model("Base")
+        # Qwen3TTSModel usually has get_supported_languages()
+        # Fallback to hardcoded list if the model method fails or returns empty
+        languages = []
+        try:
+            languages = model.get_supported_languages()
+        except Exception:
+            # Fallback to standard 10
+            languages = ["zh", "en", "ja", "ko", "de", "fr", "ru", "pt", "es", "it"]
+            
+        if not languages:
+            languages = ["zh", "en", "ja", "ko", "de", "fr", "ru", "pt", "es", "it"]
+
+        # Map ISO codes to display names
+        LANG_NAMES = {
+            "zh": "Chinese (中文)", "en": "English", "ja": "Japanese (日本語)",
+            "ko": "Korean (한국어)", "de": "German (Deutsch)", "fr": "French (Français)",
+            "ru": "Russian (Русский)", "pt": "Portuguese (Português)",
+            "es": "Spanish (Español)", "it": "Italian (Italiano)"
+        }
+        return {
+            "languages": [
+                {"code": lang, "name": LANG_NAMES.get(lang, lang.upper())}
+                for lang in sorted(languages)
+            ],
+            "dialects": {
+                "zh": [
+                    {"code": "yue", "name": "Cantonese (粵語)"},
+                    {"code": "min", "name": "Hokkien (閩南語)"},
+                    {"code": "sc", "name": "Sichuanese (四川話)"},
+                    {"code": "sx", "name": "Shaanxi (陝西話)"},
+                    {"code": "wu", "name": "Wu (吳語)"},
+                    {"code": "bj", "name": "Beijing (北京話)"},
+                ]
+            }
+        }
+    except Exception as e:
+        logger.error(f"Failed to get languages: {e}")
+        return {
+            "languages": [{"code": "en", "name": "English"}], 
+            "dialects": {}
+        }

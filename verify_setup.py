@@ -2,6 +2,10 @@ import sys
 import os
 from pathlib import Path
 
+# Ensure UTF-8 output on Windows
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding='utf-8')
+
 import subprocess
 import shutil
 

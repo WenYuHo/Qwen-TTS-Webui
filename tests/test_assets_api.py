@@ -19,9 +19,13 @@ async def client():
 
 @pytest.mark.asyncio
 async def test_assets_lifecycle(client):
-    # Ensure clean start for test
-    for f in SHARED_ASSETS_DIR.glob("*"):
-        f.unlink()
+    # Ensure clean start for test - only remove files we might have created
+    for f in SHARED_ASSETS_DIR.iterdir():
+        if f.is_file():
+            try:
+                f.unlink()
+            except PermissionError:
+                pass
 
     # 1. List assets (should be empty initially)
     resp = await client.get("/api/assets/")

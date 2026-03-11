@@ -19,27 +19,34 @@
                 <i class="fas fa-microphone-lines fa-2x" style="color:var(--accent)" aria-hidden="true"></i>
                 <span id="app-logo-text">Qwen-TTS Studio</span>
             </div>
+            
+            <!-- Language Switcher -->
+            <div style="padding:0 16px 12px 16px; display:flex; gap:8px;">
+                <button class="btn btn-secondary btn-sm lang-btn" data-lang="en" onclick="window.I18n.switchTo('en')" style="padding:2px 8px; font-size:0.6rem;">EN</button>
+                <button class="btn btn-secondary btn-sm lang-btn" data-lang="zh" onclick="window.I18n.switchTo('zh')" style="padding:2px 8px; font-size:0.6rem;">中文</button>
+            </div>
+
             <nav class="sidebar-nav">
-                <button id="nav-speech" class="nav-item active" onclick="console.log('Voice Studio click'); switchView('speech')" aria-pressed="true">
+                <button id="nav-speech" class="nav-item active" onclick="console.log('Voice Studio click'); switchView('speech')" aria-pressed="true" data-i18n="sidebar.voice_studio">
                     <i class="fas fa-comment-dots" aria-hidden="true"></i> Voice Studio
                 </button>
-                <button id="nav-projects" class="nav-item" onclick="console.log('Project Studio click'); switchView('projects')" aria-pressed="false">
+                <button id="nav-projects" class="nav-item" onclick="console.log('Project Studio click'); switchView('projects')" aria-pressed="false" data-i18n="sidebar.project_studio">
                     <i class="fas fa-layer-group" aria-hidden="true"></i> Project Studio
                 </button>
-                <button id="nav-dubbing" class="nav-item" onclick="console.log('Dubbing click'); switchView('dubbing')" aria-pressed="false">
+                <button id="nav-dubbing" class="nav-item" onclick="console.log('Dubbing click'); switchView('dubbing')" aria-pressed="false" data-i18n="sidebar.dubbing">
                     <i class="fas fa-language" aria-hidden="true"></i> Dubbing & S2S
                 </button>
-                <button id="nav-assets" class="nav-item" onclick="console.log('Assets click'); switchView('assets')" aria-pressed="false">
+                <button id="nav-assets" class="nav-item" onclick="console.log('Assets click'); switchView('assets')" aria-pressed="false" data-i18n="sidebar.assets">
                     <i class="fas fa-folder-open" aria-hidden="true"></i> Asset Library
                 </button>
-                <button id="nav-system" class="nav-item" onclick="console.log('System click'); switchView('system')" aria-pressed="false">
+                <button id="nav-system" class="nav-item" onclick="console.log('System click'); switchView('system')" aria-pressed="false" data-i18n="sidebar.system">
                     <i class="fas fa-microchip" aria-hidden="true"></i> System
                 </button>
             </nav>
 
             <!-- ⚡ Bolt: Global Task Monitor -->
             <div style="padding:16px; margin-top:20px;">
-                <span class="label-industrial" style="font-size:0.6rem; margin-bottom:12px; display:block;">ACTIVE TASKS</span>
+                <span class="label-industrial" style="font-size:0.6rem; margin-bottom:12px; display:block;" data-i18n="sidebar.active_tasks">ACTIVE TASKS</span>
                 <div class="js-task-monitor-list" style="display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto;"></div>
             </div>
 
@@ -68,10 +75,10 @@
                 <div class="view-header">
                     <div class="view-title" style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
                         <div>
-                            <h1 tabindex="-1">Voice Studio</h1>
-                            <p>Design, clone, and mix unique AI voices.</p>
+                            <h1 tabindex="-1" data-i18n="voicelab.title">Voice Studio</h1>
+                            <p data-i18n="voicelab.subtitle">Design, clone, and mix unique AI voices.</p>
                         </div>
-                        <button class="btn btn-secondary btn-sm" onclick="showHelp()"><i class="fas fa-question-circle"></i> HELP</button>
+                        <button class="btn btn-secondary btn-sm" onclick="showHelp()"><i class="fas fa-question-circle"></i> <span data-i18n="common.help">HELP</span></button>
                     </div>
                 </div>
 
@@ -212,8 +219,8 @@
                 <div class="view-header">
                     <div class="view-title" style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
                         <div>
-                            <h1 tabindex="-1">PROJECT STUDIO</h1>
-                            <p>Create multi-character audio dramas.</p>
+                            <h1 tabindex="-1" data-i18n="studio.title">PROJECT STUDIO</h1>
+                            <p data-i18n="studio.subtitle">Create multi-character audio dramas.</p>
                         </div>
                         <div style="display:flex; gap:12px; align-items:center;">
                             <div style="width:180px; position:relative;">
@@ -221,8 +228,8 @@
                                 <input type="text" id="project-search" placeholder="Search..." style="padding: 6px 8px 6px 36px; font-size:0.75rem; border:2px solid var(--accent); background:rgba(0,0,0,0.3); color:white;" oninput="filterProjects()" aria-label="Search projects">
                             </div>
                             <select id="project-select" class="btn btn-secondary btn-sm" style="width:140px; border-color:var(--accent);" aria-label="Select project"><option value="">(New)</option></select>
-                            <button class="btn btn-secondary btn-sm" onclick="loadProject()">LOAD</button>
-                            <button class="btn btn-primary btn-sm" onclick="saveProject()">SAVE</button>
+                            <button class="btn btn-secondary btn-sm" onclick="loadProject()" data-i18n="common.load">LOAD</button>
+                            <button class="btn btn-primary btn-sm" onclick="saveProject()" data-i18n="common.save">SAVE</button>
                             <select class="btn btn-secondary btn-sm" style="width:120px; border-color:var(--accent);" onchange="ProductionManager.loadSampleScript(this.value); this.value=''">
                                 <option value="">SAMPLES...</option>
                                 <option value="interview">Tech Interview</option>
@@ -241,7 +248,7 @@
                                 </button>
                             </div>
                             <button class="btn btn-secondary btn-sm" onclick="TaskManager.showHistoryModal()">HISTORY</button>
-                            <button class="btn btn-secondary btn-sm" onclick="showHelp()">HELP</button>
+                            <button class="btn btn-secondary btn-sm" onclick="showHelp()" data-i18n="common.help">HELP</button>
                         </div>
                     </div>
                 </div>
@@ -249,9 +256,9 @@
                 <div class="canvas-layout">
                     <div class="card-brutalist canvas-editor-container" style="padding:0; overflow:hidden;">
                         <div class="header" style="border-bottom: 2px solid var(--accent); padding: 12px 24px; display: flex; gap: 16px; background:rgba(255,255,255,0.02);">
-                            <button class="btn btn-secondary btn-sm" onclick="toggleCanvasView('draft')">DRAFT</button>
-                            <button class="btn btn-secondary btn-sm" onclick="toggleCanvasView('production')">PRODUCTION</button>
-                            <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="promoteToProduction()">PROMOTE</button>
+                            <button class="btn btn-secondary btn-sm" onclick="toggleCanvasView('draft')" data-i18n="studio.draft">DRAFT</button>
+                            <button class="btn btn-secondary btn-sm" onclick="toggleCanvasView('production')" data-i18n="studio.production">PRODUCTION</button>
+                            <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="promoteToProduction()" data-i18n="studio.promote">PROMOTE</button>
                         </div>
                         <div id="canvas-draft-view" style="flex:1; display:flex;">
                             <textarea id="script-editor" style="border:none; padding:24px; font-family:var(--font-mono); font-size:0.9rem;" placeholder="Alice: Hello!"></textarea>
@@ -262,7 +269,7 @@
                     </div>
 
                     <div class="card-brutalist sidebar-controls">
-                        <h3 class="label-industrial">SETTINGS</h3>
+                        <h3 class="label-industrial" data-i18n="studio.settings">SETTINGS</h3>
                         <div class="control-group">
                             <label for="bgm-select" class="label-industrial">BGM</label>
                             <select id="bgm-select" style="border-color:var(--accent);" aria-label="Background Music Select"><option value="">None</option></select>
@@ -295,29 +302,43 @@
                             <p style="font-size:0.55rem; opacity:0.6; margin-top:8px; line-height:1.2;">Higher = more expressive/varied. Lower = more stable/literal.</p>
                         </div>
 
-                        <h3 class="label-industrial">VIDEO ENGINE</h3>
+                        <h3 class="label-industrial" data-i18n="studio.video.title">VIDEO ENGINE</h3>
                         <div class="card" style="padding:12px; background:rgba(204,255,0,0.05); border:1px solid var(--accent); margin-bottom:20px;">
-                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:8px;">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:12px;">
                                 <input type="checkbox" id="video-enabled" onchange="document.getElementById('video-options').style.display = this.checked ? 'block' : 'none'">
-                                <span class="volt-text" style="font-weight:700; font-size:0.7rem;">ENABLE VIDEO</span>
+                                <span class="volt-text" style="font-weight:700; font-size:0.7rem;" data-i18n="studio.video.enable">ENABLE NARRATED VIDEO</span>
                             </label>
+                            
                             <div id="video-options" style="display:none;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                    <label for="video-prompt" class="label-industrial">PROMPT</label>
-                                    <button class="btn btn-secondary btn-sm" style="padding:2px 6px; font-size:0.6rem;" onclick="suggestVideoScene()">SUGGEST</button>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                    <span class="label-industrial" style="font-size:0.7rem; border-bottom:1px solid var(--accent);" data-i18n="studio.video.scene_editor">SCENE EDITOR</span>
+                                    <button class="btn btn-secondary btn-sm" onclick="window.VideoSceneManager.addScene()" style="padding:2px 8px; font-size:0.6rem;" data-i18n="studio.video.add_scene">+ ADD SCENE</button>
                                 </div>
-                                <textarea id="video-prompt" placeholder="Scene..." style="height: 50px; font-size: 0.75rem; border-color: var(--accent); background: rgba(0,0,0,0.3); color: white;"></textarea>
-                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px;">
+                                
+                                <div id="video-scenes-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:16px; max-height:300px; overflow-y:auto; padding-right:4px;">
+                                    <!-- Scenes injected by VideoSceneManager -->
+                                </div>
+
+                                <h3 class="label-industrial" style="margin-top:16px; border-top:1px solid rgba(255,255,255,0.1); padding-top:12px; margin-bottom:8px;" data-i18n="studio.video.global_params">GLOBAL PARAMS</h3>
+                                
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
                                     <div class="control-group" style="margin-bottom:0;">
                                         <label for="video-res" class="label-industrial" style="font-size:0.6rem;">Res</label>
-                                        <select id="video-res" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
-                                            <option value="768x512">768x512</option>
-                                            <option value="512x512">512x512</option>
+                                        <select id="video-res" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;" onchange="if(this.value==='custom'){document.getElementById('custom-res-container').style.display='grid'}else{document.getElementById('custom-res-container').style.display='none'}">
+                                            <option value="768x512">16:10 (768x512)</option>
+                                            <option value="848x480">16:9 (848x480)</option>
+                                            <option value="480x848">9:16 (480x848)</option>
+                                            <option value="512x512">1:1 (512x512)</option>
+                                            <option value="custom">Custom...</option>
                                         </select>
+                                        <div id="custom-res-container" style="display:none; grid-template-columns: 1fr 1fr; gap:4px; margin-top:4px;">
+                                            <input type="number" id="video-custom-w" placeholder="W" class="btn btn-secondary btn-sm" style="width:100%; font-size:0.6rem;" value="768">
+                                            <input type="number" id="video-custom-h" placeholder="H" class="btn btn-secondary btn-sm" style="width:100%; font-size:0.6rem;" value="512">
+                                        </div>
                                     </div>
                                     <div class="control-group" style="margin-bottom:0;">
-                                        <label for="video-frames" class="label-industrial" style="font-size:0.6rem;">Frames</label>
-                                        <input type="number" id="video-frames" value="24" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
+                                        <label for="video-frames" class="label-industrial" style="font-size:0.6rem;">Frames (Max)</label>
+                                        <input type="number" id="video-frames" value="65" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
                                     </div>
                                 </div>
                                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px;">
@@ -334,6 +355,26 @@
                                     <label for="video-seed" class="label-industrial" style="font-size:0.6rem;">Seed</label>
                                     <input type="number" id="video-seed" value="-1" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
                                 </div>
+                                
+                                <div class="card" style="margin-top:12px; padding:8px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05);">
+                                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:8px;">
+                                        <input type="checkbox" id="video-subtitles" checked>
+                                        <span class="label-industrial" style="font-size:0.6rem;" data-i18n="studio.video.burn_subtitles">BURN SUBTITLES</span>
+                                    </label>
+                                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                                        <div class="control-group" style="margin-bottom:0;">
+                                            <select id="video-sub-pos" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
+                                                <option value="bottom" selected>Bottom</option>
+                                                <option value="center">Center</option>
+                                                <option value="top">Top</option>
+                                            </select>
+                                        </div>
+                                        <div class="control-group" style="margin-bottom:0;">
+                                            <input type="number" id="video-sub-size" value="24" class="btn btn-secondary btn-sm" style="width:100%; padding:2px; font-size:0.7rem;">
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-top:8px;">
                                     <div class="control-group" style="margin-bottom:0;">
                                         <span class="label-industrial" style="font-size:0.55rem;">Max Shft</span>
@@ -357,7 +398,7 @@
                                 <span class="volt-text" style="font-size:0.65rem;">STREAMING PLAYBACK</span>
                             </label>
                         </div>
-                        <button class="btn btn-primary" style="width:100%; padding:16px;" onclick="generatePodcast()">PRODUCE FINAL</button>
+                        <button class="btn btn-primary" style="width:100%; padding:16px;" onclick="generatePodcast()" data-i18n="common.produce">PRODUCE FINAL</button>
                     </div>
                 </div>
             </div>
@@ -633,6 +674,7 @@
     <script src="/static/libs/wavesurfer-regions.min.js"></script>
     <script src="/static/libs/wavesurfer-timeline.min.js"></script>
     <script src="/static/shared.js"></script>
+    <script type="module" src="/static/i18n.js"></script>
     <script src="/static/timeline.js"></script>
     <script type="module" src="/static/app.js"></script>
 </body>

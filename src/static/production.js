@@ -1,6 +1,120 @@
 // --- Production & Studio Module ---
 import { Notification, ErrorDisplay } from './ui_components.js';
 
+export const VideoSceneManager = {
+    scenes: [],
+    
+    addScene(data = {}) {
+        const id = Math.random().toString(36).substr(2, 9);
+        this.scenes.push({
+            id,
+            video_prompt: data.video_prompt || "",
+            narration_text: data.narration_text || "",
+            voice_profile: data.voice_profile || "",
+            transition: data.transition || "cut",
+            instruct: data.instruct || ""
+        });
+        this.render();
+    },
+    
+    removeScene(id) {
+        this.scenes = this.scenes.filter(s => s.id !== id);
+        this.render();
+    },
+    
+    updateScene(id, data) {
+        const scene = this.scenes.find(s => s.id === id);
+        if (scene) Object.assign(scene, data);
+    },
+    
+    async render() {
+        const container = document.getElementById('video-scenes-list');
+        if (!container) return;
+        
+        // Get profiles from global window function
+        let profileOptions = '';
+        try {
+            const profiles = await window.getAllProfiles();
+            profileOptions = Object.keys(profiles).map(role => 
+                `<option value="${role}">${role.toUpperCase()}</option>`
+            ).join('');
+        } catch (e) {
+            console.warn("Could not load profiles for scene editor:", e);
+        }
+
+        container.innerHTML = this.scenes.map((s, idx) => `
+            <div class="card" style="padding:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="badge" style="background:var(--accent); color:black; font-size:0.6rem; padding:2px 6px;">SCENE ${idx + 1}</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn btn-secondary btn-sm" onclick="window.VideoSceneManager.suggestScenePrompt('${s.id}')" style="font-size:0.55rem; padding:2px 6px;" title="Suggest prompt"><i class="fas fa-magic"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="window.VideoSceneManager.removeScene('${s.id}')" style="font-size:0.5rem; padding:2px 6px;">X</button>
+                    </div>
+                </div>
+                
+                <div class="control-group" style="margin-bottom:8px;">
+                    <textarea placeholder="Video Visual Prompt (e.g. A futuristic city...)" 
+                              onchange="window.VideoSceneManager.updateScene('${s.id}', {video_prompt: this.value})" 
+                              style="height:45px; font-size:0.75rem; border-color:rgba(255,255,255,0.1); background:rgba(0,0,0,0.2);">${s.video_prompt}</textarea>
+                </div>
+                
+                <div class="control-group" style="margin-bottom:8px;">
+                    <textarea placeholder="Narration Text (Spoken content)" 
+                              onchange="window.VideoSceneManager.updateScene('${s.id}', {narration_text: this.value})" 
+                              style="height:40px; font-size:0.75rem; border-color:rgba(255,255,255,0.1); background:rgba(0,0,0,0.2);">${s.narration_text}</textarea>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:8px;">
+                    <div class="control-group" style="margin-bottom:0;">
+                        <select onchange="window.VideoSceneManager.updateScene('${s.id}', {voice_profile: this.value})" 
+                                class="btn btn-secondary btn-sm" style="width:100%; font-size:0.65rem; text-align:left;">
+                            <option value="">(Default Project Voice)</option>
+                            ${profileOptions.replace(`value="${s.voice_profile}"`, `value="${s.voice_profile}" selected`)}
+                        </select>
+                    </div>
+                    <div class="control-group" style="margin-bottom:0;">
+                        <select onchange="window.VideoSceneManager.updateScene('${s.id}', {transition: this.value})" 
+                                class="btn btn-secondary btn-sm" style="width:100%; font-size:0.65rem;">
+                            <option value="cut" ${s.transition === 'cut' ? 'selected' : ''}>CUT</option>
+                            <option value="fade" ${s.transition === 'fade' ? 'selected' : ''}>FADE</option>
+                            <option value="dissolve" ${s.transition === 'dissolve' ? 'selected' : ''}>DISSOLVE</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        if (this.scenes.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding:20px; opacity:0.5; font-size:0.7rem; border:1px dashed var(--border);">No scenes added yet. Click + ADD SCENE to start.</div>`;
+        }
+    },
+
+    async suggestScenePrompt(id) {
+        const scene = this.scenes.find(s => s.id === id);
+        if (!scene || !scene.narration_text) {
+            return Notification.show("Enter narration text first for a suggestion", "warn");
+        }
+
+        try {
+            const res = await fetch('/api/video/suggest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: scene.narration_text })
+            });
+            const data = await res.json();
+            this.updateScene(id, { video_prompt: data.suggestion });
+            this.render();
+            Notification.show("Scene prompt suggested", "success");
+        } catch (err) {
+            console.error("Suggestion failed:", err);
+        }
+    }
+};
+
+window.VideoSceneManager = VideoSceneManager;
+
 export const ProductionManager = {
     async generatePodcast() {
         const statusText = document.getElementById('status-badge');
@@ -16,8 +130,20 @@ export const ProductionManager = {
 
         // Video Options
         const videoEnabled = document.getElementById('video-enabled').checked;
-        const videoPrompt = document.getElementById('video-prompt').value;
-        const [width, height] = document.getElementById('video-res').value.split('x').map(Number);
+        
+        let width, height;
+        const resValue = document.getElementById('video-res').value;
+        if (resValue === 'custom') {
+            width = parseInt(document.getElementById('video-custom-w').value);
+            height = parseInt(document.getElementById('video-custom-h').value);
+        } else {
+            [width, height] = resValue.split('x').map(Number);
+        }
+
+        // LTX requirement: Dimensions must be multiples of 32
+        width = Math.floor(width / 32) * 32;
+        height = Math.floor(height / 32) * 32;
+
         const numFrames = parseInt(document.getElementById('video-frames').value);
         const guidanceScale = parseFloat(document.getElementById('video-guidance').value);
         const inferenceSteps = parseInt(document.getElementById('video-steps').value);
@@ -25,6 +151,11 @@ export const ProductionManager = {
         const maxShift = parseFloat(document.getElementById('video-max-shift').value) || null;
         const baseShift = parseFloat(document.getElementById('video-base-shift').value) || null;
         const terminal = parseFloat(document.getElementById('video-terminal').value) || null;
+        
+        // Subtitle Options
+        const subtitleEnabled = document.getElementById('video-subtitles').checked;
+        const subtitlePosition = document.getElementById('video-sub-pos').value;
+        const subtitleFontSize = parseInt(document.getElementById('video-sub-size').value);
 
         const productionView = document.getElementById('canvas-production-view');
         const isProduction = productionView && productionView.style.display === 'flex';
@@ -49,16 +180,32 @@ export const ProductionManager = {
             if (statusText) statusText.innerText = videoEnabled ? "Generating Narrated Video..." : "Producing Podcast...";
             
             if (videoEnabled) {
-                const firstBlock = script[0];
-                const voiceProfile = profiles[firstBlock.role];
-                
+                // Determine scenes
+                let scenes = [];
+                if (VideoSceneManager.scenes.length > 0) {
+                    scenes = VideoSceneManager.scenes.map(s => ({
+                        video_prompt: s.video_prompt,
+                        narration_text: s.narration_text,
+                        voice_profile: s.voice_profile ? profiles[s.voice_profile] : null,
+                        transition: s.transition,
+                        instruct: s.instruct
+                    }));
+                } else {
+                    // Fallback to first block
+                    const firstBlock = script[0];
+                    scenes = [{
+                        video_prompt: firstBlock.text,
+                        narration_text: firstBlock.text,
+                        voice_profile: profiles[firstBlock.role],
+                        transition: "cut"
+                    }];
+                }
+
                 const res = await fetch('/api/video/narrated', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        prompt: videoPrompt || firstBlock.text,
-                        narration_text: firstBlock.text,
-                        voice_profile: voiceProfile,
+                        scenes: scenes,
                         width: width,
                         height: height,
                         num_frames: numFrames,
@@ -67,7 +214,10 @@ export const ProductionManager = {
                         seed: seed,
                         max_shift: maxShift,
                         base_shift: baseShift,
-                        terminal: terminal
+                        terminal: terminal,
+                        subtitle_enabled: subtitleEnabled,
+                        subtitle_position: subtitlePosition,
+                        subtitle_font_size: subtitleFontSize
                     })
                 });
                 const data = await res.json();
@@ -212,11 +362,19 @@ export const ProductionManager = {
                 reverb_level: parseFloat(document.getElementById('audio-reverb').value) / 100.0,
                 global_temperature: parseFloat(document.getElementById('global-temperature').value),
                 video_enabled: document.getElementById('video-enabled').checked,
-                video_prompt: document.getElementById('video-prompt').value,
+                video_scenes: window.VideoSceneManager.scenes,
                 master_acx: document.getElementById('master-acx').checked,
                 video_max_shift: parseFloat(document.getElementById('video-max-shift').value) || null,
                 video_base_shift: parseFloat(document.getElementById('video-base-shift').value) || null,
-                video_terminal: parseFloat(document.getElementById('video-terminal').value) || null
+                video_terminal: parseFloat(document.getElementById('video-terminal').value) || null,
+                video_subtitles: document.getElementById('video-subtitles').checked,
+                video_sub_pos: document.getElementById('video-sub-pos').value,
+                video_sub_size: document.getElementById('video-sub-size').value,
+                video_res: document.getElementById('video-res').value,
+                video_frames: document.getElementById('video-frames').value,
+                video_guidance: document.getElementById('video-guidance').value,
+                video_steps: document.getElementById('video-steps').value,
+                video_seed: document.getElementById('video-seed').value
             }
         };
 
@@ -254,12 +412,24 @@ export const ProductionManager = {
                 document.getElementById('reverb-val').innerText = `${Math.round((data.settings.reverb_level || 0) * 100)}%`;
                 document.getElementById('global-temperature').value = data.settings.global_temperature || '0.9';
                 document.getElementById('video-enabled').checked = data.settings.video_enabled || false;
-                document.getElementById('video-prompt').value = data.settings.video_prompt || '';
                 document.getElementById('video-options').style.display = data.settings.video_enabled ? 'block' : 'none';
                 document.getElementById('master-acx').checked = data.settings.master_acx || false;
                 document.getElementById('video-max-shift').value = data.settings.video_max_shift || '';
                 document.getElementById('video-base-shift').value = data.settings.video_base_shift || '';
                 document.getElementById('video-terminal').value = data.settings.video_terminal || '';
+                document.getElementById('video-subtitles').checked = data.settings.video_subtitles !== undefined ? data.settings.video_subtitles : true;
+                document.getElementById('video-sub-pos').value = data.settings.video_sub_pos || 'bottom';
+                document.getElementById('video-sub-size').value = data.settings.video_sub_size || 24;
+                
+                if (data.settings.video_res) document.getElementById('video-res').value = data.settings.video_res;
+                if (data.settings.video_frames) document.getElementById('video-frames').value = data.settings.video_frames;
+                if (data.settings.video_guidance) document.getElementById('video-guidance').value = data.settings.video_guidance;
+                if (data.settings.video_steps) document.getElementById('video-steps').value = data.settings.video_steps;
+                if (data.settings.video_seed) document.getElementById('video-seed').value = data.settings.video_seed;
+
+                // Load scenes
+                window.VideoSceneManager.scenes = data.settings.video_scenes || [];
+                window.VideoSceneManager.render();
             }
 
             this.renderBlocks();

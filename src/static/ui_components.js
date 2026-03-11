@@ -15,6 +15,28 @@ export const VideoModal = {
         download.href = `/api/video/download/${videoFilename}`;
         overlay.innerText = '';
 
+        // Apply current subtitle settings from UI
+        const subEnabled = document.getElementById('video-subtitles')?.checked ?? true;
+        const subPos = document.getElementById('video-sub-pos')?.value ?? 'bottom';
+        const subSize = document.getElementById('video-sub-size')?.value ?? '24';
+
+        overlay.style.display = subEnabled ? 'block' : 'none';
+        overlay.style.fontSize = `${subSize}px`;
+        
+        if (subPos === 'top') {
+            overlay.style.bottom = 'auto';
+            overlay.style.top = '10%';
+            overlay.style.transform = 'none';
+        } else if (subPos === 'middle' || subPos === 'center') {
+            overlay.style.bottom = 'auto';
+            overlay.style.top = '50%';
+            overlay.style.transform = 'translateY(-50%)';
+        } else {
+            overlay.style.bottom = '15%';
+            overlay.style.top = 'auto';
+            overlay.style.transform = 'none';
+        }
+
         // Load subtitles if available
         if (srtFilename) {
             try {

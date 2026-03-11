@@ -46,6 +46,9 @@ def engine():
 
 def test_ducking_mixing(engine):
     with patch("backend.podcast_engine.get_model", return_value=MagicMock()):
+        # Mock mastering to just return the input (bypass normalization)
+        engine.patcher.apply_mastering = MagicMock(side_effect=lambda w, *args, **kwargs: w)
+        
         # 1. Create a dummy BGM file in shared_assets (WAV)
         bgm_path = Path("shared_assets/test_mood.wav")
         sr = 24000
