@@ -33,7 +33,7 @@ export const AssetManager = {
                             <span style="font-size:0.8rem; color:var(--text-secondary);">${(asset.size / 1024 / 1024).toFixed(2)} MB</span>
                         </div>
                         <div style="display:flex; gap:8px;">
-                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}')" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
+                            ${isAudio ? `<button class="btn btn-secondary btn-sm js-play-asset" onclick="playAsset('${asset.name}', this)" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
                             <button class="btn btn-danger btn-sm" onclick="deleteAsset('${asset.name}')" title="Delete ${asset.name}" aria-label="Delete ${asset.name}"><i class="fas fa-trash" aria-hidden="true"></i></button>
                         </div>
                     </div>
@@ -106,17 +106,66 @@ export const AssetManager = {
         } catch (err) { console.error("Delete error", err); }
     },
 
-    playAsset(name) {
-        const audio = new Audio(`/api/assets/download/${name}`);
-        audio.play();
+    playAsset(name, btn) {
+        const player = document.getElementById('preview-player');
+        if (player) {
+            if (btn) {
+                btn.disabled = true;
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                const restoreBtn = () => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                    player.removeEventListener('canplay', restoreBtn);
+                    player.removeEventListener('error', restoreBtn);
+                };
+
+                player.addEventListener('canplay', restoreBtn);
+                player.addEventListener('error', restoreBtn);
+            }
+
+            player.src = `/api/assets/download/${name}`;
+            player.play().catch(err => {
+                console.error("Playback failed:", err);
+            });
+        }
     },
 
     filterAssets() {
         const query = document.getElementById('asset-search').value.toLowerCase();
-        const cards = document.querySelectorAll('#asset-library-grid .asset-card');
+        const grid = document.getElementById('asset-library-grid');
+        const cards = grid.querySelectorAll('.asset-card');
+
+        if (cards.length === 0) {
+            const existingSearchEmpty = grid.querySelector('.js-search-empty-state');
+            if (existingSearchEmpty) existingSearchEmpty.remove();
+            return;
+        }
+
+        let visibleCount = 0;
         cards.forEach(card => {
             const name = card.querySelector('strong')?.innerText.toLowerCase() || '';
-            card.style.display = name.includes(query) ? 'flex' : 'none';
+            const isVisible = name.includes(query);
+            card.style.display = isVisible ? 'flex' : 'none';
+            if (isVisible) visibleCount++;
         });
+
+        // Toggle search empty state
+        let emptyState = grid.querySelector('.js-search-empty-state');
+        if (visibleCount === 0 && query !== '') {
+            if (!emptyState) {
+                emptyState = document.createElement('div');
+                emptyState.className = 'empty-state empty-state-grid js-search-empty-state';
+                emptyState.innerHTML = `
+                    <i class="fas fa-search-minus"></i>
+                    <h3>No assets match your search</h3>
+                    <p>Try a different keyword or clear the filter.</p>
+                `;
+                grid.appendChild(emptyState);
+            }
+        } else if (emptyState) {
+            emptyState.remove();
+        }
     }
 };
