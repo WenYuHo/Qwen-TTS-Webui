@@ -43,7 +43,7 @@ def run_narrated_video_task(task_id, request: NarratedVideoRequest):
 
 ### Tasks
 
-- [ ] **1.1 — Multi-Scene Schema**
+- [x] **1.1 — Multi-Scene Schema**
 
   **Step 1: Add `VideoScene` model in `schemas.py` (after line 100):**
   ```python
@@ -83,7 +83,7 @@ def run_narrated_video_task(task_id, request: NarratedVideoRequest):
 
 ---
 
-- [ ] **1.2 — Sequential Scene Generation**
+- [x] **1.2 — Sequential Scene Generation**
 
   **File:** `src/backend/api/video.py`
 
@@ -249,7 +249,7 @@ def run_narrated_video_task(task_id, request: NarratedVideoRequest):
 
 ---
 
-- [ ] **2.2 — SRT/ASS Subtitle Overlay**
+- [x] **2.2 — SRT/ASS Subtitle Overlay**
 
   **Step 1: Create `src/backend/utils/subtitles.py`:**
   ```python

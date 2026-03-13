@@ -91,6 +91,29 @@
                     </div>
                 </div>
 
+                <!-- Global Controls -->
+                <div class="card" style="margin-bottom:24px; padding:16px 20px; background:rgba(204,255,0,0.05); border:1px solid var(--accent); display:grid; grid-template-columns: 1fr 1.5fr; gap:24px;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <label class="label-industrial" style="margin:0; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                            <input type="checkbox" id="global-whisper" onchange="window.state.whisper = this.checked">
+                            <span style="font-size:0.75rem; font-weight:700; color:var(--accent);">WHISPER MODE</span>
+                        </label>
+                        <i class="fas fa-wind" style="color:var(--accent); opacity:0.5;" title="Hushed, breathy delivery"></i>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <label for="global-rate" class="label-industrial" style="margin:0; font-size:0.6rem;">SPEAKING RATE</label>
+                        <div class="btn-group" style="display:flex; gap:4px; flex:1;">
+                            <button class="btn btn-secondary btn-sm rate-btn" onclick="window.setGlobalRate('slower')" data-rate="slower" style="flex:1; font-size:0.6rem;">SLOWER</button>
+                            <button class="btn btn-primary btn-sm rate-btn" onclick="window.setGlobalRate('normal')" data-rate="normal" style="flex:1; font-size:0.6rem;">NORMAL</button>
+                            <button class="btn btn-secondary btn-sm rate-btn" onclick="window.setGlobalRate('faster')" data-rate="faster" style="flex:1; font-size:0.6rem;">FASTER</button>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px; grid-column: span 2; border-top:1px solid rgba(255,255,255,0.05); padding-top:12px;">
+                        <label for="preview-language" class="label-industrial" style="margin:0; font-size:0.6rem;">TARGET LANGUAGE</label>
+                        <select id="preview-language" class="btn btn-secondary btn-sm" style="flex:1; border-color:var(--accent);" onchange="window.state.language = this.value"></select>
+                    </div>
+                </div>
+
                 <div class="grid-3">
                     <!-- Voice Design -->
                     <div class="card-brutalist">

@@ -49,7 +49,7 @@ renderBlocks() {
 
 ### Tasks
 
-- [ ] **1.1 — Undo/Redo System**
+- [x] **1.1 — Undo/Redo System**
 
   **Step 1: Add undo stack to `CanvasManager` in `shared.js`:**
   ```javascript
@@ -117,7 +117,7 @@ renderBlocks() {
 
 ---
 
-- [ ] **1.2 — Drag-and-Drop Block Reordering**
+- [x] **1.2 — Drag-and-Drop Block Reordering**
 
   **Step 1: Add `draggable` to block cards in `renderBlocks()` (L317):**
   ```javascript

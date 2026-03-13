@@ -54,7 +54,7 @@ def generate_voice_changer(self, source_audio, target_profile=None):
 
 ### Tasks
 
-- [ ] **1.1 — Auto Language Detection**
+- [x] **1.1 — Auto Language Detection**
 
   **Step 1: Extract language from `transcribe_audio()` return value.**
   
@@ -113,7 +113,7 @@ def generate_voice_changer(self, source_audio, target_profile=None):
 
 ---
 
-- [ ] **1.2 — Dubbing Progress Tracking**
+- [x] **1.2 — Dubbing Progress Tracking**
 
   **Step 1: Create a dubbing-specific background task in `generation.py`:**
   ```python
@@ -170,7 +170,7 @@ def generate_voice_changer(self, source_audio, target_profile=None):
 
 ---
 
-- [ ] **1.3 — Source Audio Preview**
+- [x] **1.3 — Source Audio Preview**
 
   **Step 1: After file upload in `dubbing.js`, create an audio element:**
   ```javascript
@@ -201,7 +201,7 @@ def generate_voice_changer(self, source_audio, target_profile=None):
 
 ---
 
-- [ ] **1.4 — Side-by-Side Comparison**
+- [x] **1.4 — Side-by-Side Comparison**
 
   **Step 1: Add dual player HTML in `index.html` (Dubbing section):**
   ```html
@@ -234,7 +234,7 @@ def generate_voice_changer(self, source_audio, target_profile=None):
 
 ---
 
-- [ ] **1.5 — Subtitle Export (SRT/VTT)**
+- [x] **1.5 — Subtitle Export (SRT/VTT)**
 
   **Step 1: Create `src/backend/utils/subtitles.py`** (shared with Narrated Video track):
   ```python

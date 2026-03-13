@@ -1,10 +1,50 @@
 # TASK QUEUE: QWEN-TTS
-# LAST_GLOBAL_SYNC: 2026-03-09T03:09:28Z
+# LAST_GLOBAL_SYNC: 2026-03-13T03:41:26Z
 
 ## ACTIVE SIGNALS
 - **SYSTEM**: `BOOT_SEQUENCE_COMPLETE`
 
 ## PRIORITIZED BACKLOG
+- [x] **MULTILINGUAL_FULL_SUPPORT**
+    - Task: Enumerate all 10 supported languages + 6 Chinese dialects in the backend (src/backend/api/system.py), and update all frontend dropdowns dynamically (src/static/shared.js).
+    - Ref: 	rack-multilingual-accessibility.md (Task 1.1, 1.2)
+    - Promise: MULTILINGUAL_LANGUAGES_READY
+
+- [x] **UI_INTERNATIONALIZATION_EN_ZH**
+    - Task: Implement the i18n system with English and Chinese translations, and add a language switcher in the UI (src/static/i18n.js, src/static/translations/).
+    - Ref: 	rack-multilingual-accessibility.md (Task 2.1, 2.2, 2.3, 2.4)
+    - Promise: UI_I18N_READY
+
+- [x] **ACCESSIBILITY_WCAG_COMPLIANCE**
+    - Task: Perform color contrast audit, implement keyboard navigation (focus-visible), and add ARIA labels/landmarks to the UI (src/static/style.css, src/static/index.html).
+    - Ref: 	rack-multilingual-accessibility.md (Task 3.1, 3.2, 3.3)
+    - Promise: ACCESSIBILITY_HARDENED
+
+- [x] **DUBBING_PIPELINE_HARDENING** (2026-03-12)
+    - Task: Implement Auto Language Detection, Task-based Progress Tracking, and Subtitle Export (SRT/VTT) for Dubbing.
+    - Ref: 	rack-dubbing-pipeline.md (Task 1.1, 1.2, 1.5)
+    - Promise: DUBBING_PIPELINE_HARDENED
+
+- [x] **DUBBING_UX_COMPARISON** (2026-03-12)
+    - Task: Implement Source Audio Preview and Side-by-Side Comparison UI for Dubbing.
+    - Ref: 	rack-dubbing-pipeline.md (Task 1.3, 1.4)
+    - Promise: DUBBING_UX_ENHANCED
+
+- [x] **PRODUCTION_UX_POWER_FEATURES** (2026-03-12)
+    - Task: Implement Undo/Redo system and Drag-and-Drop block reordering in the Production Workflow UI (src/static/production.js, src/static/shared.js).
+    - Ref: 	rack-production-workflow.md (Task 1.1, 1.2)
+    - Promise: PRODUCTION_UX_ENHANCED
+
+- [x] **VOICE_EXPRESSIVE_CONTROLS** (2026-03-12)
+    - Task: Implement Whisper mode, Speaking Rate control, and Pause tags (<pause:Xs>) in both UI and Backend (src/static/shared.js, src/backend/podcast_engine.py).
+    - Ref: 	rack-voice-library.md (Task 2.1, 2.2, 2.5)
+    - Promise: EXPRESSIVE_CONTROLS_READY
+
+- [x] **VIDEO_PROFESSIONAL_PRODUCTION** (2026-03-12)
+    - Task: Implement Multi-Scene schema, Sequential Scene generation, and Subtitle burning for Narrated Videos (src/backend/api/video.py, src/backend/api/schemas.py).
+    - Ref: 	rack-narrated-video.md (Task 1.1, 1.2, 2.2)
+    - Promise: VIDEO_PRODUCTION_UPGRADED
+
 
 - [x] **UI_EMOTIONAL_BRACKET_PARSING** (2026-03-10)
     - Task: Implement parsing for emotional tags in scripts (e.g., `[happy]`, `[whispering]`) and map them to Qwen3-TTS `instruct` parameters for expressive delivery.

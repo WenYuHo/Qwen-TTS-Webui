@@ -7,7 +7,7 @@
     --accent-glow: rgba(204, 255, 0, 0.3);
     --accent-hover: #dfff4f;
     --text-primary: #ffffff;
-    --text-secondary: #888888;
+    --text-secondary: #999999;
     --danger: #ff003c;
     --success: #00ffaa;
     --border: #222222;
@@ -838,3 +838,61 @@ input[type="range"]::-webkit-slider-thumb {
     .sidebar-header i { font-size: 1.5rem; }
     .view-title h1 { font-size: 1.75rem; }
 }
+
+/* --- Accessibility & WCAG Compliance --- */
+
+/* Focus ring for keyboard users */
+:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+}
+
+/* Remove default outline for mouse users to keep it clean */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Screen reader only utility */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .brutalist-overlay, .brutalist-overlay::before {
+        display: none !important;
+    }
+
+    .view-container, .modal-content {
+        animation: none !important;
+    }
+}
+
+/* High contrast mode overrides */
+[data-theme="high-contrast"] {
+    --bg-dark: #000000;
+    --bg-sidebar: #000000;
+    --bg-card: #000000;
+    --accent: #ffffff;
+    --text-primary: #ffffff;
+    --text-secondary: #ffffff;
+    --border: #ffffff;
+    --accent-glow: none;
+}
+

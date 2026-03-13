@@ -10,6 +10,42 @@ function escapeHTML(str) {
         .replace(/'/g, '&#39;');
 }
 
+async function loadLanguages() {
+    if (window._languages) return window._languages;
+    try {
+        const res = await fetch('/api/system/languages');
+        const data = await res.json();
+        window._languages = data;
+        return data;
+    } catch (e) {
+        console.error("Failed to load languages:", e);
+        return { languages: [{ code: 'en', name: 'English' }], dialects: {} };
+    }
+}
+
+function populateLanguageDropdown(selectId, includeAuto = true) {
+    const select = document.getElementById(selectId);
+    if (!select || !window._languages) return;
+    
+    const currentValue = select.value;
+    select.innerHTML = '';
+    if (includeAuto) {
+        const opt = document.createElement('option');
+        opt.value = 'auto';
+        opt.textContent = 'Auto Detect';
+        select.appendChild(opt);
+    }
+    
+    window._languages.languages.forEach(lang => {
+        const opt = document.createElement('option');
+        opt.value = lang.code;
+        opt.textContent = lang.name;
+        select.appendChild(opt);
+    });
+    
+    if (currentValue) select.value = currentValue;
+}
+
 const SpeakerStore = {
     getVoices() {
         return JSON.parse(localStorage.getItem('qwen_voices') || '[]');
@@ -27,7 +63,34 @@ const SpeakerStore = {
 
 const CanvasManager = {
     blocks: [],
+    _undoStack: [],
+    _redoStack: [],
+    _maxHistory: 50,
+
+    _saveSnapshot() {
+        this._undoStack.push(JSON.parse(JSON.stringify(this.blocks)));
+        if (this._undoStack.length > this._maxHistory) this._undoStack.shift();
+        this._redoStack = []; // Clear redo on new action
+    },
+
+    undo() {
+        if (this._undoStack.length === 0) return;
+        this._redoStack.push(JSON.parse(JSON.stringify(this.blocks)));
+        this.blocks = this._undoStack.pop();
+        window.ProductionManager?.renderBlocks();
+        this.save();
+    },
+
+    redo() {
+        if (this._redoStack.length === 0) return;
+        this._undoStack.push(JSON.parse(JSON.stringify(this.blocks)));
+        this.blocks = this._redoStack.pop();
+        window.ProductionManager?.renderBlocks();
+        this.save();
+    },
+
     addBlock(role, text) {
+        this._saveSnapshot();
         const id = Date.now().toString() + Math.random().toString(36).substr(2, 5);
         this.blocks.push({
             id,
@@ -40,8 +103,10 @@ const CanvasManager = {
             language: 'auto',
             pause_after: 0.5
         });
+        this.save();
     },
     moveBlock(id, direction) {
+        this._saveSnapshot();
         const index = this.blocks.findIndex(b => b.id === id);
         if (index < 0) return;
         const newIndex = index + direction;
@@ -50,31 +115,41 @@ const CanvasManager = {
         const temp = this.blocks[index];
         this.blocks[index] = this.blocks[newIndex];
         this.blocks[newIndex] = temp;
+        this.save();
     },
     deleteBlock(id) {
+        this._saveSnapshot();
         this.blocks = this.blocks.filter(b => b.id !== id);
+        this.save();
     },
     updateBlock(id, updates) {
+        this._saveSnapshot();
         const block = this.blocks.find(b => b.id === id);
         if (block) Object.assign(block, updates);
+        this.save();
     },
     clear() {
+        this._saveSnapshot();
         this.blocks = [];
+        this.save();
     },
     save() {
         const toSave = this.blocks.map(b => ({
+            id: b.id,
             role: b.role,
             text: b.text,
             status: b.status === 'ready' ? 'ready' : 'idle',
             language: b.language,
-            pause_after: b.pause_after
+            pause_after: b.pause_after,
+            pan: b.pan,
+            temperature: b.temperature
         }));
         localStorage.setItem('qwen_blocks', JSON.stringify(toSave));
     },
     load() {
         const saved = localStorage.getItem('qwen_blocks');
         if (saved) {
-            this.blocks = JSON.parse(saved).map(b => ({ ...b, id: Math.random().toString(36).substr(2, 9), audioUrl: null }));
+            this.blocks = JSON.parse(saved).map(b => ({ ...b, audioUrl: null }));
         }
     }
 };
@@ -183,9 +258,9 @@ function parseScript(text) {
         if (currentRole && currentText.length > 0) {
             const rawText = currentText.join('\n').trim();
 
-            // ⚡ Bolt: Split text by [instruct] or (non-verbal-tag)
-            // Allows mid-sentence emotional shifts or cues.
-            const splitRegex = /(\[.+?\]|\(.+?\))/g;
+            // ⚡ Bolt: Split text by [instruct] or (non-verbal-tag) or <pause:Xs>
+            // Allows mid-sentence emotional shifts, cues, or pauses.
+            const splitRegex = /(\[.+?\]|\(.+?\)|<pause:[\d.]+s?>)/gi;
             const parts = rawText.split(splitRegex);
 
             let activeInstruct = null;
@@ -194,14 +269,20 @@ function parseScript(text) {
                 if (!part) return;
 
                 const instructMatch = part.match(/^\[(.+?)\]$/) || part.match(/^\((.+?)\)$/);
+                const pauseMatch = part.match(/<pause:([\d.]+)s?>/i);
+
                 if (instructMatch) {
                     activeInstruct = instructMatch[1];
 
-                    // ⚡ Bolt: If tag is at the end or followed by another tag, synthesize it as text
+                    // ⚡ Bolt: If tag is at the end or followed by another tag/pause, synthesize it as text
                     const nextPart = parts[index + 1];
-                    const followedByInstruct = nextPart && (nextPart.match(/^\[(.+?)\]$/) || nextPart.match(/^\((.+?)\)$/));
+                    const followedBySpecial = nextPart && (
+                        nextPart.match(/^\[(.+?)\]$/) || 
+                        nextPart.match(/^\((.+?)\)$/) || 
+                        nextPart.match(/<pause:[\d.]+s?>/i)
+                    );
 
-                    if (!nextPart || followedByInstruct) {
+                    if (!nextPart || followedBySpecial) {
                         script.push({
                             role: currentRole,
                             text: `(${activeInstruct})`,
@@ -210,15 +291,46 @@ function parseScript(text) {
                             pause_after: 0.3
                         });
                     }
+                } else if (pauseMatch) {
+                    const duration = parseFloat(pauseMatch[1]);
+                    if (script.length > 0) {
+                        // Attach pause to the previous segment
+                        script[script.length - 1].pause_after = duration;
+                    } else {
+                        // If it's at the very beginning, add a tiny silent segment
+                        script.push({
+                            role: currentRole,
+                            text: " ",
+                            instruct: "silence",
+                            language: 'auto',
+                            pause_after: duration
+                        });
+                    }
                 } else {
-                    const cleanPart = part.trim();
+                    let cleanPart = part.trim();
                     if (cleanPart) {
+                        // Handle "..." as a 1.0s pause
+                        let pauseAfter = 0.2;
+                        if (cleanPart.endsWith('...')) {
+                            pauseAfter = 1.0;
+                        }
+
+                        // Extract emphasis markers *word* or **word**
+                        const emphasized = [];
+                        cleanPart = cleanPart.replace(/\*\*(.+?)\*\*/g, (_, word) => { emphasized.push(word); return word; });
+                        cleanPart = cleanPart.replace(/\*(.+?)\*/g, (_, word) => { emphasized.push(word); return word; });
+
+                        let lineInstruct = activeInstruct;
+                        if (emphasized.length > 0) {
+                            lineInstruct = (lineInstruct ? lineInstruct + ", " : "") + `emphasize the words: "${emphasized.join('", "')}"`;
+                        }
+
                         script.push({
                             role: currentRole,
                             text: cleanPart,
-                            instruct: activeInstruct,
+                            instruct: lineInstruct,
                             language: 'auto',
-                            pause_after: 0.2
+                            pause_after: pauseAfter
                         });
                     }
                 }

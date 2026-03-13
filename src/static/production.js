@@ -501,7 +501,7 @@ export const ProductionManager = {
         if (!container) return;
 
         container.innerHTML = window.CanvasManager.blocks.map((b, index) => `
-            <div class="card" 
+            <div class="card block-card"
                  draggable="true"
                  data-index="${index}"
                  data-id="${b.id}"
@@ -509,29 +509,30 @@ export const ProductionManager = {
                  ondragover="window.ProductionManager.handleDragOver(event)"
                  ondragleave="window.ProductionManager.handleDragLeave(event)"
                  ondrop="window.ProductionManager.handleDrop(event)"
-                 style="margin-bottom:12px; padding:16px; border-left:4px solid var(--accent); background:rgba(255,255,255,0.02); cursor:default;">
+                 style="margin-bottom:12px; padding:16px; border-left:4px solid var(--accent); background:rgba(255,255,255,0.02); cursor:grab; transition: transform 0.2s, background 0.2s;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
+                        <div class="drag-handle" style="cursor:grab;"><i class="fas fa-grip-vertical"></i></div>
                         <strong style="color:var(--accent); font-family:var(--font-mono);">${b.role.toUpperCase()}</strong>
                     </div>
                     <div style="display:flex; gap:8px;">
+                        <button class="btn btn-secondary btn-sm" onclick="window.ProductionManager.regenerateBlock('${b.id}')" title="Regenerate this block"><i class="fas fa-redo"></i></button>
                         <button class="btn btn-secondary btn-sm" onclick="window.CanvasManager.moveBlock('${b.id}', -1); window.ProductionManager.renderBlocks()" aria-label="Move block up" title="Move block up"><i class="fas fa-arrow-up" aria-hidden="true"></i></button>
                         <button class="btn btn-secondary btn-sm" onclick="window.CanvasManager.moveBlock('${b.id}', 1); window.ProductionManager.renderBlocks()" aria-label="Move block down" title="Move block down"><i class="fas fa-arrow-down" aria-hidden="true"></i></button>
                         <button class="btn btn-danger btn-sm" onclick="window.CanvasManager.deleteBlock('${b.id}'); window.ProductionManager.renderBlocks()" aria-label="Delete block" title="Delete block"><i class="fas fa-trash" aria-hidden="true"></i></button>
                     </div>
                 </div>
-                <div style="font-size:0.85rem; margin-bottom:12px; opacity:0.8; font-style:italic;">"${b.text.substring(0, 100)}${b.text.length > 100 ? '...' : ''}"</div>
-                
+                <div style="font-size:0.85rem; margin-bottom:12px; opacity:0.8; font-style:italic;">"${escapeHTML(b.text.substring(0, 100))}${b.text.length > 100 ? '...' : ''}"</div>
+
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:12px; border-top:1px solid rgba(255,255,255,0.05); padding-top:12px;">
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <span class="label-industrial" style="font-size:0.55rem; width:30px;">PAN</span>
+                        <span class="label-industrial" style="font-size:0.55rem; width:30px;">PAN</span>  
                         <input type="range" min="-100" max="100" value="${(b.pan || 0) * 100}" style="flex:1; height:4px;" onchange="window.CanvasManager.updateBlock('${b.id}', {pan: this.value/100.0})">
                         <span class="volt-text" style="font-size:0.6rem; width:20px;">${b.pan > 0 ? 'R' : b.pan < 0 ? 'L' : 'C'}</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <span class="label-industrial" style="font-size:0.55rem; width:30px;">TEMP</span>
-                        <select class="btn btn-secondary btn-sm" style="flex:1; font-size:0.6rem; padding:2px;" onchange="window.CanvasManager.updateBlock('${b.id}', {temperature: parseFloat(this.value)})">
+                        <span class="label-industrial" style="font-size:0.55rem; width:30px;">TEMP</span> 
+                        <select class="btn btn-secondary btn-sm" style="flex:1; font-size:0.6rem; padding:2px;" onchange="window.CanvasManager.updateBlock('${b.id}', {temperature: parseFloat(this.value)})">      
                             <option value="" ${b.temperature === undefined ? 'selected' : ''}>Auto</option>
                             <option value="0.9" ${b.temperature === 0.9 ? 'selected' : ''}>Creative</option>
                             <option value="0.5" ${b.temperature === 0.5 ? 'selected' : ''}>Balanced</option>
@@ -546,10 +547,12 @@ export const ProductionManager = {
     handleDragStart(e) {
         e.dataTransfer.setData('text/plain', e.currentTarget.dataset.index);
         e.currentTarget.classList.add('block-dragging');
+        e.dataTransfer.effectAllowed = 'move';
     },
 
     handleDragOver(e) {
         e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
         const card = e.currentTarget.closest('.card');
         if (card) card.classList.add('block-drag-over');
     },
@@ -562,20 +565,61 @@ export const ProductionManager = {
     handleDrop(e) {
         e.preventDefault();
         const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
-        const toIndex = parseInt(e.currentTarget.closest('.card').dataset.index);
-        
-        e.currentTarget.closest('.card').classList.remove('block-drag-over');
+        const targetCard = e.currentTarget.closest('.card');
+        const toIndex = parseInt(targetCard.dataset.index);
+
+        targetCard.classList.remove('block-drag-over');
         document.querySelectorAll('.block-dragging').forEach(el => el.classList.remove('block-dragging'));
 
-        if (fromIndex !== toIndex) {
+        if (fromIndex !== toIndex && !isNaN(fromIndex) && !isNaN(toIndex)) {
+            window.CanvasManager._saveSnapshot();
             const blocks = window.CanvasManager.blocks;
-            const movedBlock = blocks.splice(fromIndex, 1)[0];
+            const [movedBlock] = blocks.splice(fromIndex, 1);
             blocks.splice(toIndex, 0, movedBlock);
             this.renderBlocks();
             window.CanvasManager.save();
         }
     },
 
+    async regenerateBlock(blockId) {
+        const block = window.CanvasManager.blocks.find(b => b.id === blockId);
+        if (!block) return;
+
+        try {
+            const profiles = await window.getAllProfiles();
+            const profile = profiles[block.role];
+            if (!profile) return Notification.show("No voice profile for " + block.role, "warn");
+
+            Notification.show(`Regenerating block for ${block.role}...`, "info");
+
+            const res = await fetch('/api/generate/segment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    profile: { role: block.role, ...profile },
+                    text: block.text,
+                    language: block.language || 'auto',
+                    instruct: block.instruct
+                })
+            });
+
+            if (!res.ok) throw new Error("Regeneration failed");
+
+            const data = await res.json();
+            if (window.TaskPoller) {
+                const blob = await window.TaskPoller.poll(data.task_id, (task) => {
+                    console.log(`Regenerating: ${task.progress}%`);
+                });
+                const url = URL.createObjectURL(blob);
+                window.CanvasManager.updateBlock(blockId, { audioUrl: url, status: 'ready' });
+                this.renderBlocks();
+                Notification.show("Block regenerated", "success");
+            }
+        } catch (err) {
+            console.error("Regeneration error:", err);
+            Notification.show("Failed to regenerate block", "error");
+        }
+    },
     filterProjects() {
         const query = document.getElementById('project-search').value.toLowerCase();
         const select = document.getElementById('project-select');

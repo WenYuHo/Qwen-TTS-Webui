@@ -4353,5 +4353,305 @@
       },
       "profile_type": "preset"
     }
+  },
+  {
+    "timestamp": 1773206580.8453681,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "alice"
+    }
+  },
+  {
+    "timestamp": 1773206580.8665721,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "alice"
+    }
+  },
+  {
+    "timestamp": 1773206580.9340634,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
+  },
+  {
+    "timestamp": 1773206652.396419,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773206652.4684782,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773206652.5535743,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773206652.5707476,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773206690.0951133,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
+  },
+  {
+    "timestamp": 1773206698.7496724,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773206698.7570002,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773206698.783035,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773206698.7899966,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773206698.9245965,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "Alice"
+    }
+  },
+  {
+    "timestamp": 1773206698.9384723,
+    "type": "s2s",
+    "status": "failed",
+    "metadata": {
+      "source": "test.wav"
+    }
+  },
+  {
+    "timestamp": 1773206698.9527602,
+    "type": "dub",
+    "status": "failed",
+    "metadata": {
+      "source": "test.wav"
+    }
+  },
+  {
+    "timestamp": 1773206752.9174876,
+    "type": "s2s",
+    "status": "completed",
+    "metadata": {
+      "source": "test.wav"
+    }
+  },
+  {
+    "timestamp": 1773206809.5510774,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 0.14,
+        "rms": 0.0277,
+        "peak": 0.0433,
+        "snr_db": -1.5,
+        "clipping": false,
+        "too_quiet": false,
+        "quality": "warning"
+      },
+      "profile_type": "design"
+    }
+  },
+  {
+    "timestamp": 1773206809.5670524,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 0.14,
+        "rms": 0.0277,
+        "peak": 0.0433,
+        "snr_db": -1.5,
+        "clipping": false,
+        "too_quiet": false,
+        "quality": "warning"
+      },
+      "profile_type": "design"
+    }
+  },
+  {
+    "timestamp": 1773206809.6939454,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 0.14,
+        "rms": 0.0277,
+        "peak": 0.0433,
+        "snr_db": -1.5,
+        "clipping": false,
+        "too_quiet": false,
+        "quality": "warning"
+      },
+      "profile_type": "design"
+    }
+  },
+  {
+    "timestamp": 1773206809.71958,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 0.14,
+        "rms": 0.0277,
+        "peak": 0.0433,
+        "snr_db": -1.5,
+        "clipping": false,
+        "too_quiet": false,
+        "quality": "warning"
+      },
+      "profile_type": "design"
+    }
+  },
+  {
+    "timestamp": 1773206809.7741249,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "Speaker"
+    }
+  },
+  {
+    "timestamp": 1773206809.8283339,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "Speaker"
+    }
+  },
+  {
+    "timestamp": 1773206809.8926282,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "Speaker"
+    }
+  },
+  {
+    "timestamp": 1773206809.9320545,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "Speaker"
+    }
   }
 ]

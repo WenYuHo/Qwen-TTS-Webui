@@ -329,7 +329,7 @@ EMOTION_PRESETS = {
 
 ### Tasks
 
-- [ ] **2.1 — Emotion Presets**
+- [x] **2.1 — Emotion Presets**
 
   **Step 1: Define emotion presets in `voicelab.js`** (add at top of file):
   ```javascript
@@ -399,7 +399,7 @@ EMOTION_PRESETS = {
 
 ---
 
-- [ ] **2.2 — Speaking Rate Control**
+- [x] **2.2 — Speaking Rate Control**
 
   **Step 1: Add rate toggle in `index.html`:**
   ```html
@@ -505,7 +505,7 @@ EMOTION_PRESETS = {
 
 ---
 
-- [ ] **2.5 — Pause Control Tags**
+- [x] **2.5 — Pause Control Tags**
 
   **Step 1: Parse `<pause:Xs>` and `...` in `shared.js` `parseScript()`:**
   ```javascript

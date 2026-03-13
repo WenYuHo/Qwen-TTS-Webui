@@ -38,7 +38,7 @@
 
 ### Tasks
 
-- [ ] **1.1 — Enumerate All Supported Languages**
+- [x] **1.1 — Enumerate All Supported Languages**
 
   **Step 1: Add `/api/system/languages` endpoint in `system.py`:**
   ```python
@@ -88,7 +88,7 @@
 
 ---
 
-- [ ] **1.2 — Update All Language Dropdowns**
+- [x] **1.2 — Update All Language Dropdowns**
 
   **Step 1: Create shared language loader in `shared.js`:**
   ```javascript
@@ -243,7 +243,7 @@
 
 ### Tasks
 
-- [ ] **2.1 — Extract UI Strings**
+- [x] **2.1 — Extract UI Strings**
 
   **Step 1: Create `src/static/translations/en.json`:**
   ```json
@@ -306,7 +306,7 @@
 
 ---
 
-- [ ] **2.2 — i18n Loading System**
+- [x] **2.2 — i18n Loading System**
 
   **Create `src/static/i18n.js`:**
   ```javascript
@@ -370,7 +370,7 @@
 
 ---
 
-- [ ] **2.3 — Chinese Translation**
+- [x] **2.3 — Chinese Translation**
 
   **Create `src/static/translations/zh.json`:**
   ```json
@@ -414,7 +414,7 @@
 
 ---
 
-- [ ] **2.4 — Language Switcher**
+- [x] **2.4 — Language Switcher**
 
   **Add toggle in `index.html` header:**
   ```html
@@ -446,7 +446,7 @@
 
 ### Tasks
 
-- [ ] **3.1 — Color Contrast Audit**
+- [x] **3.1 — Color Contrast Audit**
 
   **Step 1: Identify all text/background combinations in `style.css`:**
   ```css
@@ -480,7 +480,7 @@
 
 ---
 
-- [ ] **3.2 — Keyboard Navigation**
+- [x] **3.2 — Keyboard Navigation**
 
   **Step 1: Add `tabindex` to all interactive elements that aren't natively focusable:**
   ```html
@@ -529,7 +529,7 @@
 
 ---
 
-- [ ] **3.3 — ARIA Labels & Landmarks**
+- [x] **3.3 — ARIA Labels & Landmarks**
 
   **Step 1: Add landmark regions to `index.html`:**
   ```html

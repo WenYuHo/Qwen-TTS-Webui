@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from fastapi.responses import StreamingResponse
+from typing import Dict, List, Any, Optional
 from .. import server_state
 from ..utils import numpy_to_wav_bytes
 from ..dub_logic import run_dub_task
@@ -8,6 +9,7 @@ from ..utils.subtitles import generate_srt_from_segments, generate_vtt_from_segm
 from .schemas import PodcastRequest, S2SRequest, BatchS2SRequest, DubRequest, DiarizeRequest, StreamingSynthesisRequest, DetectLanguageRequest, TEMPERATURE_PRESETS
 from ..config import logger
 import io
+import json
 
 try:
     from ..diarization import diarize_audio

@@ -10,6 +10,8 @@ import { VideoModal, HelpManager } from './ui_components.js';
 
 const state = {
     currentView: 'speech',
+    whisper: false,
+    rate: 'normal',
     voicelab: {
         lastDesignedPath: null,
         lastClonedPath: null,
@@ -26,6 +28,20 @@ const state = {
     }
 };
 window.state = state;
+
+function setGlobalRate(rate) {
+    state.rate = rate;
+    document.querySelectorAll('.rate-btn').forEach(btn => {
+        if (btn.dataset.rate === rate) {
+            btn.classList.add('btn-primary');
+            btn.classList.remove('btn-secondary');
+        } else {
+            btn.classList.add('btn-secondary');
+            btn.classList.remove('btn-primary');
+        }
+    });
+}
+window.setGlobalRate = setGlobalRate;
 
 // ⚡ Bolt: Global Background Services
 setInterval(() => {
@@ -211,7 +227,7 @@ Object.assign(window, {
     }
 });
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     SystemManager.loadTheme();
     VoiceLabManager.loadVoiceLibrary();
     SystemManager.fetchInventory();
@@ -220,8 +236,24 @@ document.addEventListener('DOMContentLoaded', () => {
     CanvasManager.load();
     HelpManager.checkFirstRun();
 
+    // Multilingual Initialization
+    await window.loadLanguages();
+    window.populateLanguageDropdown('preview-language', true);
+    window.populateLanguageDropdown('dub-lang', false);
+
     const savedView = localStorage.getItem('studio_active_view');
     if (savedView && savedView !== 'speech') {
         performSwitch(savedView);
     }
+
+    // Keyboard shortcuts for Undo/Redo
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+            e.preventDefault();
+            window.CanvasManager.undo();
+        } else if (e.ctrlKey && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+            e.preventDefault();
+            window.CanvasManager.redo();
+        }
+    });
 });

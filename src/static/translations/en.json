@@ -1,54 +1,20 @@
-{
-    "sidebar": {
-        "voice_studio": "Voice Studio",
-        "project_studio": "Project Studio",
-        "dubbing": "Dubbing & S2S",
-        "assets": "Asset Library",
-        "system": "System",
-        "active_tasks": "ACTIVE TASKS",
-        "global_monitor": "GLOBAL MONITOR"
-    },
-    "voicelab": {
-        "title": "Voice Studio",
-        "subtitle": "Design, clone, and mix unique AI voices.",
-        "design": {
-            "title": "Voice Design",
-            "prompt": "Style Prompt"
-        },
-        "clone": {
-            "title": "Voice Cloning",
-            "ref_audio": "Reference Audio",
-            "transcript": "Reference Transcript"
-        },
-        "mix": {
-            "title": "Voice Mixer",
-            "voice_a": "Base Voice A",
-            "voice_b": "Base Voice B"
-        },
-        "library": "MY VOICE LIBRARY"
-    },
-    "studio": {
-        "title": "PROJECT STUDIO",
-        "subtitle": "Create multi-character audio dramas.",
-        "draft": "DRAFT",
-        "production": "PRODUCTION",
-        "promote": "PROMOTE",
-        "settings": "SETTINGS",
-        "video": {
-            "title": "VIDEO ENGINE",
-            "enable": "ENABLE NARRATED VIDEO",
-            "scene_editor": "SCENE EDITOR",
-            "add_scene": "+ ADD SCENE",
-            "global_params": "GLOBAL PARAMS",
-            "burn_subtitles": "BURN SUBTITLES"
-        }
-    },
-    "common": {
-        "save": "SAVE",
-        "load": "LOAD",
-        "help": "HELP",
-        "delete": "DELETE",
-        "preview": "PREVIEW",
-        "produce": "PRODUCE FINAL"
-    }
+﻿{
+    "common":  {
+                   "load":  "LOAD",
+                   "produce":  "PRODUCE FINAL",
+                   "help":  "HELP",
+                   "save":  "SAVE"
+               },
+    "voicelab":  {
+                     "subtitle":  "Design, clone, and mix unique AI voices.",
+                     "title":  "Voice Studio"
+                 },
+    "sidebar":  {
+                    "voice_studio":  "Voice Studio",
+                    "assets":  "Asset Library",
+                    "active_tasks":  "ACTIVE TASKS",
+                    "dubbing":  "Dubbing \u0026 S2S",
+                    "project_studio":  "Project Studio",
+                    "system":  "System"
+                }
 }

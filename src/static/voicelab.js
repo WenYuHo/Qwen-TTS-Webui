@@ -3,6 +3,19 @@ import { TaskManager } from './task_manager.js';
 import { Notification, ErrorDisplay } from './ui_components.js';
 
 export const VoiceLabManager = {
+    _getGlobalInstruct() {
+        let globalInstruct = "";
+        if (window.state.whisper) {
+            globalInstruct += "speak in a hushed, breathy whisper with low volume and intimate tone. ";
+        }
+        if (window.state.rate === 'slower') {
+            globalInstruct += "speak slowly and deliberately with measured pacing and clear pauses between phrases. ";
+        } else if (window.state.rate === 'faster') {
+            globalInstruct += "speak quickly and energetically with brisk pacing and minimal pauses. ";
+        }
+        return globalInstruct.trim();
+    },
+
     async testVoiceDesign(btn) {
         const promptText = document.getElementById('design-prompt').value;
         const stabilityBoost = document.getElementById('stability-boost').checked;
@@ -19,13 +32,14 @@ export const VoiceLabManager = {
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> DESIGNING...';
 
         try {
-            const customText = document.getElementById('custom-preview-text')?.value?.trim() || '';
+            const customText = document.getElementById('custom-preview-text')?.value?.trim() || '';       
             let finalPrompt = promptText;
             if (stabilityBoost) {
                 finalPrompt = `${promptText}, stable delivery, clear speech, consistent tone, no distortion`;
             }
 
             const profile = { type: 'design', value: finalPrompt };
+            const globalInstruct = this._getGlobalInstruct();
 
             // ⚡ Bolt: Use Task-based generation for background processing
             const res = await fetch('/api/generate/segment', {
@@ -33,10 +47,9 @@ export const VoiceLabManager = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     profiles: [{ role: 'preview', ...profile }],
-                    script: [{ role: 'preview', text: customText || "Yesterday's weather was absolutely perfect — warm sunshine, cool breezes, and a beautiful golden sunset over the mountains." }]
+                    script: [{ role: 'preview', text: customText || "Yesterday's weather was absolutely perfect — warm sunshine, cool breezes, and a beautiful golden sunset over the mountains.", instruct: globalInstruct }]
                 })
             });
-
             if (!res.ok) throw new Error("Design task creation failed");
             const { task_id } = await res.json();
 
