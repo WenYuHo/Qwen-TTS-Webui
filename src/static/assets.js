@@ -113,10 +113,29 @@ export const AssetManager = {
 
     filterAssets() {
         const query = document.getElementById('asset-search').value.toLowerCase();
-        const cards = document.querySelectorAll('#asset-library-grid .asset-card');
+        const grid = document.getElementById('asset-library-grid');
+        const cards = grid.querySelectorAll('.asset-card');
+        let visibleCount = 0;
+
         cards.forEach(card => {
             const name = card.querySelector('strong')?.innerText.toLowerCase() || '';
-            card.style.display = name.includes(query) ? 'flex' : 'none';
+            const match = name.includes(query);
+            card.style.display = match ? 'flex' : 'none';
+            if (match) visibleCount++;
         });
+
+        // ⚡ Palette: Dynamic Empty State for Search Results
+        let emptyState = grid.querySelector('.search-empty-state');
+        if (visibleCount === 0 && cards.length > 0) {
+            if (!emptyState) {
+                emptyState = document.createElement('div');
+                emptyState.className = 'empty-state empty-state-grid search-empty-state';
+                emptyState.innerHTML = '<i class="fas fa-search" aria-hidden="true"></i><h3>No results found</h3><p>Try a different search term.</p>';
+                grid.appendChild(emptyState);
+            }
+            emptyState.style.display = 'block';
+        } else if (emptyState) {
+            emptyState.style.display = 'none';
+        }
     }
 };
