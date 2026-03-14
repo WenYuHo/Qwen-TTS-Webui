@@ -19,6 +19,10 @@
     - **Strict TDD:** Write failing test -> Write code -> Pass test.
     - **No `print()`:** Use `logging`.
     - **Atomic Commits:** `git commit -m "feat: ..."`
+- **UI Automation (agent-browser):**
+    - Use `agent-browser` for fast, token-efficient UI verification.
+    - Workflow: `open <url>` -> `snapshot -i` -> `click @eN` / `fill @eN`.
+    - Use named sessions: `agent-browser --session-name <task> ...`.
 4.  **Verify:** `pytest` && `python tools/pre_commit.py`
 
 ## 4. 🚀 COMPLETION

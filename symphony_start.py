@@ -12,59 +12,97 @@ def setup_junction(target_dir, folder_name):
     target_folder = os.path.join(target_dir, folder_name)
     
     if os.path.exists(root_folder) and not os.path.exists(target_folder):
-        print(f"🔗 Linking {folder_name} to {target_dir}...")
-        # /J creates a directory junction on Windows
-        subprocess.run(f'mklink /J "{target_folder}" "{root_folder}"', shell=True)
+        print(f"Linking {folder_name} to {target_dir}...")
+        subprocess.run(['cmd', '/c', 'mklink', '/J', target_folder, root_folder])
 
 def setup_worktree(name):
     if not os.path.exists(name):
-        print(f"📂 Creating worktree: {name}...")
-        subprocess.run(f"git worktree add {name} -b symphony-{name}", shell=True)
+        print(f"Creating worktree: {name}...")
+        subprocess.run(['git', 'worktree', 'add', name, '-b', f"symphony-{name}"])
     
-    # Share the environments to save RAM/Disk
     setup_junction(name, ".venv")
     setup_junction(name, "node_modules")
-    setup_junction(name, "models") # Crucial for 2070 Super: share the heavy model files
+    setup_junction(name, "models")
 
-def launch_agent(name, mission, color="0A"):
-    # We add a specific instruction about the GPU Lock to the prompt
-    gpu_instruction = (
-        "\\n\\n**GPU SAFETY**: Your 2070 Super has 8GB VRAM. "
-        "Before running ANY ML models or tests, check if 'agent/GPU.lock' exists. "
-        "If yes, WAIT. If no, create it with your name, run your task, then DELETE it immediately."
+def launch_agent(name, mission, color="0A", target_dir="."):
+    if name.lower() == "manager":
+        readable_name = "SYMPHONY MANAGER (Lead Orchestrator)"
+        warning_msg = "DO NOT CLOSE UNLESS STOPPING ENTIRE SWARM"
+    else:
+        readable_name = f"SYMPHONY {name.upper()} (Task Executor)"
+        warning_msg = "SAFE TO CLOSE IF NOT NEEDED"
+
+    skill_mandate = (
+        "\\n\\n**SKILL ACTIVATION**: You are AUTHORIZED and ENCOURAGED to use the project's internal skills. "
+        "Read `skills/skills.md` at the start of every task. "
+        "- For testing/TDD: Use `skills/tester/SKILL.md`. "
+        "- For architectural changes: Use `skills/architect/SKILL.md`. "
+        "- For context pruning/memory cleanup: Use `skills/dna-evolution/SKILL.md`. "
+        "Loading skills on-demand is MANDATORY to prevent context overloading."
     )
     
-    full_mission = mission + gpu_instruction
+    meta_mandate = (
+        "\\n\\n**META-REFLECTION**: You are part of an evolving swarm. "
+        "1. If you (the Manager) see Workers struggling, you MUST rewrite your own 'Manager Mode' instructions in `symphony_start.py` to be clearer. "
+        "2. If you (the Worker) are confused, write `[?] CLARIFICATION_NEEDED` in TASK_QUEUE.md immediately."
+    )
     
-    cmd = f'start cmd /k "title SYMPHONY-{name} && color {color} && cd {name} && gemini \\"/ralph:loop \\"{full_mission}\\" --max-iterations 20 --completion-promise MISSION_COMPLETE\\""'
-    subprocess.run(cmd, shell=True)
+    gpu_instruction = (
+        "\\n\\n**GPU SAFETY**: Your 2070 Super has 8GB VRAM. Use the GPU Token protocol in 'agent/GPU.lock'."
+    )
+
+    live_board_protocol = (
+        "\\n\\n**LIVE BOARD PROTOCOL**: You MUST update your status in `agent/SYMPHONY_LIVE.md` at the start and end of every task phase using: "
+        f"`python tools/sync_live.py \"{name}\" \"[STATUS]\" \"[TASK_NAME]\" \"[PROGRESS%]\"`."
+    )
+    
+    full_mission = mission + skill_mandate + meta_mandate + gpu_instruction + live_board_protocol
+    
+    title = f"{readable_name} -- [{warning_msg}]"
+    header_cmd = f"echo ===================================================== && echo {title} && echo ====================================================="
+    
+    mission_file = os.path.join(target_dir, "agent", f"{name}_mission.txt")
+    os.makedirs(os.path.dirname(mission_file), exist_ok=True)
+    with open(mission_file, "w", encoding="utf-8") as f:
+        f.write(full_mission)
+        
+    launcher_path = "symphony_launcher.py" if target_dir == "." else f"..\\symphony_launcher.py"
+    cmd_list = [
+        'cmd', '/c', 'start', title, 'cmd', '/k',
+        f"{header_cmd} && title {title} && color {color} && cd {target_dir} && python {launcher_path} {name}"
+    ]
+    subprocess.run(cmd_list)
 
 if __name__ == "__main__":
-    print("--- 🎼 SYMPHONY v2 (8GB VRAM OPTIMIZED) ---")
+    print("--- SYMPHONY v5 (LIVE-BOARD & SKILL-BASED) ---")
     
-    # 1. Clean up stale locks
     if os.path.exists("agent/GPU.lock"):
         os.remove("agent/GPU.lock")
-        print("🔓 Cleared stale GPU lock.")
+        print("Cleared stale GPU lock.")
 
-    # 2. Setup Worktrees & Junctions
     setup_worktree("worker-1")
     setup_worktree("worker-2")
     
-    # 3. Launch Manager (Orchestrator)
-    # Manager doesn't use the GPU, so it can run freely
-    print("🚀 Launching Manager (Blue)...")
-    launch_agent(".", "Manager Mode: You are the TPM. Assign tasks from agent/TASK_QUEUE.md to worker-1 or worker-2 by editing the file. Monitor their progress. Merge branches when done. Keep agent/SYMPHONY_LIVE.md updated with status.", "0B")
+    print("Launching Manager (Blue)...")
+    manager_mission = (
+        "Manager Mode: Lead Orchestrator & TPM. "
+        "1. Monitor `agent/TASK_QUEUE.md`. "
+        "2. **CRITICAL**: Check `agent/SYMPHONY_LIVE.md` for Heartbeat (HB) timestamps. "
+        "If a Worker's HB is >15 mins old, they are likely STUCK in an interactive shell or permission loop. "
+        "In this case, NOTIFY THE USER immediately so they can restart that worker. "
+        "3. Use `dna-evolution` skill to prune `MEMORY.md` if it exceeds 50 lines. "
+        "4. Review PRs for adherence to `skills/tester/` standards."
+    )
+    launch_agent("Manager", manager_mission, "0B", ".")
     
     time.sleep(3)
     
-    # 4. Launch Workers
-    print("🚀 Launching Worker 1 (Green)...")
-    launch_agent("worker-1", "Worker-1: Look for tasks assigned to you in agent/TASK_QUEUE.md. Execute them one by one. Use the GPU Token protocol.", "0A")
+    print("Launching Worker 1 (Green)...")
+    launch_agent("Worker-1", "Worker-1: Execute tasks. Always load the relevant SKILL.md before starting a task phase. Focus on TDD and clean architecture.", "0A", "worker-1")
     
     time.sleep(3)
     
-    print("🚀 Launching Worker 2 (Yellow)...")
-    launch_agent("worker-2", "Worker-2: Look for tasks assigned to you in agent/TASK_QUEUE.md. Execute them one by one. Use the GPU Token protocol.", "0E")
+    print("Launching Worker 2 (Yellow)...")
+    launch_agent("Worker-2", "Worker-2: Execute tasks. Always load the relevant SKILL.md before starting a task phase. Focus on TDD and clean architecture.", "0E", "worker-2")
 
-    print("\n✅ Symphony is running. Check 'agent/SYMPHONY_LIVE.md' for the dashboard.")
+    print("\nSymphony is running. Agents are now using modular skills to save tokens.")
