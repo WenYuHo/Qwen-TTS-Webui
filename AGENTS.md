@@ -2,9 +2,9 @@
 
 > **SOURCE OF TRUTH:** [conductor/index.md](conductor/index.md)
 
-## 1. ⚡ BOOT (every session)
+## 1. ⚡ BOOT (automated)
 1. `git pull --rebase --autostash`
-2. `python tools/session_start.py`
+2. `python tools/session_start.py` (now auto-run by agents)
 3. Read **[agent/MEMORY.md](agent/MEMORY.md)** — your only startup read.
 
 ## 2. 🧠 CONTEXT LAYERS (load only what you need)
@@ -33,7 +33,8 @@
 3. If a rule in MEMORY.md caused confusion → fix it *now*
 
 ## 5. 🤖 SYMPHONY (multi-agent only)
-- Read [tools/symphony/MANDATE.md](tools/symphony/MANDATE.md) for orchestration protocol.
-- Update status: `python tools/sync_live.py "<agent>" "<status>" "<task>" "<pct>"`
+- **Launch:** Run `symphony.bat` or `python symphony_start.py` from root.
+- **Protocol:** Read [tools/symphony/MANDATE.md](tools/symphony/MANDATE.md) for orchestration protocol.
+- **Sync:** Update status: `python tools/sync_live.py "<agent>" "<status>" "<task>" "<pct>"`
 
 *Boot loader only. All coding rules live in MEMORY.md. ≤45 lines.*

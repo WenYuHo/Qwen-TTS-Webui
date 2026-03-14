@@ -9,6 +9,7 @@
 - **Skills:** [../skills/skills.md](../skills/skills.md) *(L2 — load on-demand per task phase)*
 
 ## 🚨 Coding Standards (Single Source of Truth)
+0.  **BOOT**: Always run `python tools/session_start.py` as your first tool call in every new `TaskName`.
 1.  **Tech Stack:** Vanilla JS/CSS + Python FastAPI. No React/Vue/Tailwind. No Webpack/Vite.
 2.  **Design System:** Technoid Brutalist UI (Onyx `#080808` + Volt `#ccff00`).
 3.  **TDD:** Write failing tests → implement → pass tests → refactor. No exceptions.

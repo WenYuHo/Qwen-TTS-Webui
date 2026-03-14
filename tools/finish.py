@@ -56,13 +56,16 @@ def finish_task():
         )
         print("✅ EVOLUTION.md updated.")
 
+    # 4. AUTOMATED REFLECTION
+    print("\n🧐 4/4: Running Automated Reflection...")
+    subprocess.run(["python", "tools/reflect.py", f"Successfully completed {task_name} and verified system health."])
+
     print("-" * 40)
     print("🎉 TASK FINISHED!")
     print()
-    print("🔄 SELF-REFLECTION (do this now):")
-    print("  1. What cost extra tokens? (unnecessary file reads, wrong approach)")
-    print("  2. Was any MEMORY.md rule confusing or missing?")
-    print("  3. Append a 1-line lesson → agent/LESSONS.md")
+    print("🔄 SELF-IMPROVE (L0 DNA):")
+    print("  - Lessons auto-logged to agent/LESSONS.md")
+    print("  - Read LESSONS.md at start of next session")
     print()
     print("📦 Ready for: git commit && git push origin <branch>")
     return True
