@@ -35,14 +35,20 @@ def launch_agent(name, mission, color="0A", headless=False):
     # We use -p (non-interactive) in headless mode to force the CLI to run the command and exit
     if headless:
         print(f"🕵️  Launching {name} in background (headless)...")
+        import pathlib
+        log_name = "manager.log" if name == "." else f"{name}.log"
+        log_path = pathlib.Path.cwd() / "agent" / log_name
+        log_file = open(log_path, "w", encoding="utf-8")
         # CREATE_NO_WINDOW = 0x08000000
-        cmd = f'gemini --prompt "/ralph:loop \\"{full_mission}\\"" --yolo'
-        subprocess.Popen(cmd, shell=True, cwd=name, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=0x08000000)
+        cmd_list = ["gemini.cmd", "--prompt", f'/ralph:loop "{full_mission}"', "--yolo"]
+        subprocess.Popen(cmd_list, shell=False, cwd=name, stdout=log_file, stderr=subprocess.STDOUT, creationflags=0x08000000)
+        return log_path
     else:
         # Standard mode: Open interactive windows
         # Note: We must ensure the command is executed, so we prefix with /c if using cmd
         cmd = f'start "SYMPHONY-{name}" cmd /k "color {color} && cd {name} && gemini --prompt \\"/ralph:loop \\"{full_mission}\\"\\" --yolo"'
         subprocess.run(cmd, shell=True)
+        return None
 
 if __name__ == "__main__":
     print("--- 🎼 SYMPHONY v2 (8GB VRAM OPTIMIZED) ---")
@@ -63,17 +69,40 @@ if __name__ == "__main__":
     
     # 3. Launch Manager (Orchestrator)
     print(f"🚀 Launching Manager {'(Headless)' if headless else '(Blue)'}...")
-    launch_agent(".", "Manager Mode: You are the TPM. Assign tasks from agent/TASK_QUEUE.md to worker-1 or worker-2 by editing the file. Monitor their progress. Merge branches when done. Keep agent/SYMPHONY_LIVE.md updated with status.", "0B", headless=headless)
+    log_m = launch_agent(".", "Manager Mode: You are the TPM. Assign tasks from agent/TASK_QUEUE.md to worker-1 or worker-2 by editing the file. Monitor their progress. Merge branches when done. Keep agent/SYMPHONY_LIVE.md updated with status.", "0B", headless=headless)
     
     time.sleep(3)
     
     # 4. Launch Workers
     print(f"🚀 Launching Worker 1 {'(Headless)' if headless else '(Green)'}...")
-    launch_agent("worker-1", "Worker-1: Look for tasks assigned to you in agent/TASK_QUEUE.md. Execute them one by one. Use the GPU Token protocol.", "0A", headless=headless)
+    log_1 = launch_agent("worker-1", "Worker-1: Look for tasks assigned to you in agent/TASK_QUEUE.md. Execute them one by one. Use the GPU Token protocol.", "0A", headless=headless)
     
     time.sleep(3)
     
     print(f"🚀 Launching Worker 2 {'(Headless)' if headless else '(Yellow)'}...")
-    launch_agent("worker-2", "Worker-2: Look for tasks assigned to you in agent/TASK_QUEUE.md. Execute them one by one. Use the GPU Token protocol.", "0E", headless=headless)
+    log_2 = launch_agent("worker-2", "Worker-2: Look for tasks assigned to you in agent/TASK_QUEUE.md. Execute them one by one. Use the GPU Token protocol.", "0E", headless=headless)
 
-    print(f"\n✅ Symphony is running {'in headless mode' if headless else ''}. Check 'agent/SYMPHONY_LIVE.md' for the dashboard.")
+    if headless:
+        print(f"\n✅ Symphony is running in background. Streaming logs below... (Press Ctrl+C to exit monitor loop)")
+        print("--------------------------------------------------------------------------------")
+        
+        # Build file readers
+        readers = {
+            "MANAGER": open(str(log_m), "r", encoding="utf-8"),
+            "WORKER-1": open(str(log_1), "r", encoding="utf-8"),
+            "WORKER-2": open(str(log_2), "r", encoding="utf-8")
+        }
+        
+        try:
+            while True:
+                for agent_name, f in readers.items():
+                    line = f.readline()
+                    if line:
+                        stripped = line.strip()
+                        if stripped:
+                            print(f"[{agent_name}] {stripped}")
+                time.sleep(0.05)
+        except KeyboardInterrupt:
+            print("\n🛑 Exiting live monitor. Symphony agents are still running in the background!")
+    else:
+        print(f"\n✅ Symphony is running. Check 'agent/SYMPHONY_LIVE.md' for the dashboard.")
