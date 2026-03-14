@@ -277,6 +277,7 @@ class AudioPostProcessor:
         """Simple heuristic de-clicker: clamps spikes > 10x local RMS."""
         try:
             if len(wav.shape) > 1:
+                # ⚡ Bolt: Recursively handle multi-channel audio
                 out = np.zeros_like(wav)
                 for i in range(wav.shape[0]):
                     out[i] = AudioPostProcessor.apply_declick(wav[i], sr)
@@ -286,17 +287,37 @@ class AudioPostProcessor:
             window = int(sr * 0.002) # 2ms
             if window < 2: return wav
             
-            # Process in chunks
-            for i in range(0, len(wav), window):
-                chunk = wav[i:i+window]
-                if len(chunk) < 2: continue
-                local_rms = np.sqrt(np.mean(chunk**2)) + 1e-6
-                # Identify spikes
-                spikes = np.abs(chunk) > (local_rms * 10)
+            length = len(wav)
+            num_chunks = length // window
+            remainder = length % window
+
+            if num_chunks > 0:
+                # ⚡ Bolt: Vectorized chunk processing using reshape
+                main_part = out[:num_chunks * window].reshape(num_chunks, window)
+
+                # ⚡ Bolt: Use einsum for fast row-wise squared sum (avoiding large temporary array from **)
+                sq_sum = np.einsum('ij,ij->i', main_part, main_part)
+                rms = np.sqrt(sq_sum / window) + 1e-6
+
+                # Identify spikes (spikes is (num_chunks, window))
+                thresholds = rms * 10
+                spikes = np.abs(main_part) > thresholds[:, np.newaxis]
+
                 if np.any(spikes):
                     # Clamp spikes to local RMS * 3
+                    # ⚡ Bolt: Use indexing on rms to match spike positions without allocating a full-window temporary array.
+                    row_indices = np.where(spikes)[0]
+                    main_part[spikes] = np.sign(main_part[spikes]) * rms[row_indices] * 3
+
+            # Handle remainder
+            if remainder >= 2:
+                chunk = out[num_chunks * window:]
+                local_rms = np.sqrt(np.mean(chunk**2)) + 1e-6
+                spikes = np.abs(chunk) > (local_rms * 10)
+                if np.any(spikes):
                     sign = np.sign(chunk[spikes])
-                    out[i:i+window][spikes] = sign * local_rms * 3
+                    out[num_chunks * window:][spikes] = sign * local_rms * 3
+
             return out
         except Exception as e:
             logger.error(f"De-click failed: {e}")
