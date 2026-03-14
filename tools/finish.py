@@ -55,6 +55,9 @@ def finish_task():
 
     print("-" * 30)
     print("🎉 TASK FINISHED! Ready for git commit/push.")
+    print("")
+    print("🔄 SELF-IMPROVE: Before moving on, append a 1-line lesson to `agent/LESSONS.md`.")
+    print("   Ask yourself: What went wrong? What wasted tokens? What would I do differently?")
     return True
 
 if __name__ == "__main__":

@@ -2,6 +2,8 @@ import os
 import subprocess
 from pathlib import Path
 import re
+import csv
+import io
 import sys
 
 # Ensure UTF-8 output on Windows
@@ -42,6 +44,21 @@ def get_active_task():
         return f"{match.group(1).strip()}: {match.group(2).strip(' —')}"
     return "No active tasks."
 
+def get_recent_lessons(n=3):
+    lessons_file = Path("agent/LESSONS.md")
+    if not lessons_file.exists():
+        return "No lessons logged yet."
+    
+    content = lessons_file.read_text(encoding="utf-8")
+    # Find table rows (skip header row)
+    rows = [line.strip() for line in content.split('\n') if line.strip().startswith('|') and not line.strip().startswith('|:') and '---' not in line and 'Date' not in line]
+    
+    if not rows:
+        return "No lessons logged yet."
+    
+    recent = rows[-n:]
+    return "\n".join(recent)
+
 def main():
     print("🧬 SESSION RE-HYDRATION SNAPSHOT")
     print("-" * 30)
@@ -61,6 +78,10 @@ def main():
     print(f"🎯 ACTIVE TASK: {get_active_task()}")
     print("\n🧠 RECENT DECISIONS:")
     print(get_last_decisions())
+    print("-" * 30)
+    print("⚡ TOKEN RULE: Load skills on-demand only. Do NOT read track-*.md or workflow.md eagerly.")
+    print("\n📖 RECENT LESSONS:")
+    print(get_recent_lessons())
     print("-" * 30)
     print("🚀 Ready to proceed. Follow agent/MEMORY.md.")
 

@@ -88,21 +88,31 @@ if __name__ == "__main__":
         "Manager Mode: Lead Orchestrator & TPM. "
         "1. Monitor `agent/TASK_QUEUE.md`. "
         "2. **CRITICAL**: Check `agent/SYMPHONY_LIVE.md` for Heartbeat (HB) timestamps. "
-        "If a Worker's HB is >15 mins old, they are likely STUCK in an interactive shell or permission loop. "
-        "In this case, NOTIFY THE USER immediately so they can restart that worker. "
-        "3. Use `dna-evolution` skill to prune `MEMORY.md` if it exceeds 50 lines. "
-        "4. Review PRs for adherence to `skills/tester/` standards."
+        "If a Worker's HB is >15 mins old, they are likely STUCK. NOTIFY THE USER immediately. "
+        "3. Use `dna-evolution` skill to prune `MEMORY.md` if it exceeds 40 lines. "
+        "4. **REVIEW GATE**: Before approving ANY Worker task, `git diff` their branch and check against "
+        "`agent/MEMORY.md` coding standards and negative constraints. Reject with specific feedback if violations found. "
+        "5. After each task cycle, append a 1-line lesson to `agent/LESSONS.md`."
     )
     launch_agent("Manager", manager_mission, "0B", ".")
     
     time.sleep(3)
     
+    worker_mission = (
+        "Worker Mode: Execute tasks from `agent/TASK_QUEUE.md`. "
+        "1. Load the relevant SKILL.md before starting each task phase. "
+        "2. Follow `agent/MEMORY.md` coding standards and negative constraints strictly. "
+        "3. **CONTEXT COMPACTION**: If context feels >50%% full, write a SCRATCHPAD.md summary and drop raw files. "
+        "4. After each task, append a 1-line lesson to `agent/LESSONS.md`. "
+        "5. Focus on TDD and clean architecture."
+    )
+    
     print("Launching Worker 1 (Green)...")
-    launch_agent("Worker-1", "Worker-1: Execute tasks. Always load the relevant SKILL.md before starting a task phase. Focus on TDD and clean architecture.", "0A", "worker-1")
+    launch_agent("Worker-1", f"Worker-1: {worker_mission}", "0A", "worker-1")
     
     time.sleep(3)
     
     print("Launching Worker 2 (Yellow)...")
-    launch_agent("Worker-2", "Worker-2: Execute tasks. Always load the relevant SKILL.md before starting a task phase. Focus on TDD and clean architecture.", "0E", "worker-2")
+    launch_agent("Worker-2", f"Worker-2: {worker_mission}", "0E", "worker-2")
 
     print("\nSymphony is running. Agents are now using modular skills to save tokens.")
