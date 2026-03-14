@@ -7,7 +7,7 @@ from datetime import datetime
 
 def finish_task():
     print("🚀 FINISHING TASK...")
-    print("-" * 30)
+    print("-" * 40)
 
     # 1. RUN PRE-COMMIT
     print("📦 1/3: Running pre-commit checks...")
@@ -19,13 +19,13 @@ def finish_task():
         return False
 
     # 2. UPDATE TASK QUEUE
+    task_name = "Unknown"
     print("📂 2/3: Updating TASK_QUEUE.md...")
     task_file = Path("agent/TASK_QUEUE.md")
     if task_file.exists():
         content = task_file.read_text(encoding="utf-8")
         
         # Find the first in-progress task
-        # Pattern: - [ ] **TASK_NAME** followed by Reserved: IN_PROGRESS
         match = re.search(r"(- \[ \] \*\*(.*?)\*\*\n(?:    - .*?\n)*?    - Reserved: )IN_PROGRESS @ .*?\n", content)
         if match:
             full_match = match.group(0)
@@ -48,13 +48,23 @@ def finish_task():
     print("🧠 3/3: Updating agent/EVOLUTION.md...")
     evo_file = Path("agent/EVOLUTION.md")
     if evo_file.exists():
-        timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.utcnow().strftime("%Y-%m-%d")
         evo_content = evo_file.read_text(encoding="utf-8")
-        evo_file.write_text(evo_content + f"\n### {timestamp}: Completed Task {task_name if 'task_name' in locals() else 'Unknown'}\n", encoding="utf-8")
+        evo_file.write_text(
+            evo_content + f"| {timestamp} | {task_name} | — | COMPLETED | Finished via `tools/finish.py`. |\n",
+            encoding="utf-8"
+        )
         print("✅ EVOLUTION.md updated.")
 
-    print("-" * 30)
-    print("🎉 TASK FINISHED! Ready for git commit/push.")
+    print("-" * 40)
+    print("🎉 TASK FINISHED!")
+    print()
+    print("🔄 SELF-REFLECTION (do this now):")
+    print("  1. What cost extra tokens? (unnecessary file reads, wrong approach)")
+    print("  2. Was any MEMORY.md rule confusing or missing?")
+    print("  3. Append a 1-line lesson → agent/LESSONS.md")
+    print()
+    print("📦 Ready for: git commit && git push origin <branch>")
     return True
 
 if __name__ == "__main__":

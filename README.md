@@ -7,7 +7,7 @@ A professional, standalone web suite for high-fidelity audio and video productio
 This repository follows the **Conductor Framework**. Before starting any work, AI agents MUST read the following:
 - **Project Index:** [conductor/index.md](conductor/index.md)
 - **Workflow & Rules:** [conductor/workflow.md](conductor/workflow.md)
-- **Agent Style Guide:** [conductor/code_styleguides/agent-improvement.md](conductor/code_styleguides/agent-improvement.md)
+- **Context Engineering Guide:** [conductor/code_styleguides/context-engineering.md](conductor/code_styleguides/context-engineering.md)
 - **API Reference:** [API.md](API.md)
 
 ## ✨ Features

@@ -19,7 +19,7 @@
 ### Step 1: Understand the Rules
 1. **Read** `conductor/workflow.md` — TDD phases (Red/Green/Refactor)
 2. **Read** `conductor/code_styleguides/python.md` — Python conventions
-3. **Read** `conductor/code_styleguides/agent-improvement.md` — FastAPI routing, Pydantic V2, security
+3. **Read** `agent/MEMORY.md` — FastAPI routing, Pydantic V2, security (L0 rules)
 
 ### Step 2: Verify Before Coding
 - Run `python -m pytest tests/ -v --tb=short` for clean baseline

@@ -23,7 +23,7 @@ Every agent assigned to this track **MUST** follow these mandatory steps before 
 2. **Read** `conductor/code_styleguides/python.md` — Python conventions
 3. **Read** `conductor/code_styleguides/javascript.md` — JS conventions  
 4. **Read** `conductor/code_styleguides/html-css.md` — UI conventions (Technoid Brutalist)
-5. **Read** `conductor/code_styleguides/agent-improvement.md` — Security, FastAPI routing, Pydantic V2
+5. **Read** `agent/MEMORY.md` — Security, FastAPI routing, Pydantic V2 (L0 rules)
 
 ### Step 2: Verify Before Coding
 - **Run tests first** to confirm a clean baseline: `python -m pytest tests/ -v --tb=short`
