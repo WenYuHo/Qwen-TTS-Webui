@@ -1,0 +1,112 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "ENGINE_REFACTOR_MODULAR",
+      "description": "Decompose `src/backend/podcast_engine.py` -> Segmenter, Synthesizer, Patcher modules.",
+      "ref": "`conductor/tech-stack.md` (Code Quality).",
+      "status": "completed",
+      "assigned_to": null,
+      "updated_at": "2026-03-14T22:49:55.792751Z"
+    },
+    {
+      "id": 2,
+      "title": "VOICE_CLONE_E2E_API",
+      "description": "E2E API tests for voice cloning (upload, generate, status).",
+      "ref": "`conductor/track-testing-reliability.md` (3.2).",
+      "status": "completed",
+      "assigned_to": null,
+      "updated_at": "2026-03-14T22:49:55.792771Z"
+    },
+    {
+      "id": 3,
+      "title": "E2E_UI_FLOW_TESTED",
+      "description": "Playwright E2E tests for synthesis and video gen flows.",
+      "ref": "`conductor/track-testing-reliability.md` (Ph3).",
+      "status": "completed",
+      "assigned_to": null,
+      "updated_at": "2026-03-14T22:49:55.792778Z"
+    },
+    {
+      "id": 4,
+      "title": "TEST_LIBRARY_AUDIT",
+      "description": "",
+      "ref": "NONE",
+      "status": "completed",
+      "assigned_to": null,
+      "updated_at": "2026-03-14T22:49:55.792783Z"
+    },
+    {
+      "id": 5,
+      "title": "TEST_REFACTOR_PYTEST",
+      "description": "",
+      "ref": "NONE",
+      "status": "completed",
+      "assigned_to": null,
+      "updated_at": "2026-03-14T22:49:55.792785Z"
+    },
+    {
+      "id": 6,
+      "title": "TEST_CONSOLIDATE_ROOT",
+      "description": "",
+      "ref": "NONE",
+      "status": "completed",
+      "assigned_to": null,
+      "updated_at": "2026-03-14T22:49:55.792787Z"
+    },
+    {
+      "id": 7,
+      "title": "TEST_ASYNC_STANDARDIZATION",
+      "description": "Standardize on `httpx.AsyncClient` for all API tests for better async flow coverage.",
+      "ref": "`agent/TESTING_AUDIT_REPORT.md`",
+      "status": "in_progress",
+      "assigned_to": "gemini-cli-1",
+      "updated_at": "2026-03-14T22:49:55.792790Z"
+    },
+    {
+      "id": 8,
+      "title": "NEXT_TASK_PLACEHOLDER",
+      "description": "Playwright E2E tests for synthesis and video gen flows.",
+      "ref": "`conductor/track-testing-reliability.md` (Ph3).",
+      "status": "in_progress",
+      "assigned_to": "STATUS_CHECK",
+      "updated_at": "2026-03-14T22:49:55.792795Z"
+    },
+    {
+      "id": 9,
+      "title": "ENGINE_REFACTOR_MODULAR",
+      "description": "",
+      "ref": "NONE",
+      "status": "completed",
+      "assigned_to": null,
+      "updated_at": "2026-03-14T22:49:55.792800Z"
+    },
+    {
+      "id": 10,
+      "title": "DUBBING_PH1",
+      "description": "",
+      "ref": "NONE",
+      "status": "completed",
+      "assigned_to": null,
+      "updated_at": "2026-03-14T22:49:55.792802Z"
+    },
+    {
+      "id": 11,
+      "title": "VIDEO_GEN_SETUP",
+      "description": "",
+      "ref": "NONE",
+      "status": "completed",
+      "assigned_to": null,
+      "updated_at": "2026-03-14T22:49:55.792804Z"
+    },
+    {
+      "id": 12,
+      "title": "DUBBING_S2S_PH2",
+      "description": "",
+      "ref": "NONE",
+      "status": "completed",
+      "assigned_to": null,
+      "updated_at": "2026-03-14T22:49:55.792806Z"
+    }
+  ]
+}
