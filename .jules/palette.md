@@ -25,3 +25,7 @@
 ## 2026-03-20 - [Semantic Empty States for System Management]
 **Learning:** Extending the existing `.empty-state` CSS pattern to administrative views like the System Manager (Audit Log, Phoneme Editor) significantly improves visual consistency and provides clear guidance to the user. Using FontAwesome icons that match the semantic context (e.g., `fa-clipboard-list` for logs, `fa-language` for phonemes) helps with quick visual recognition and reinforces the "Technoid Brutalist" style.
 **Action:** Always check for unhandled empty states in data-heavy administrative views and implement icon-based guidance using existing UI patterns.
+
+## 2026-04-12 - [Safe Dynamic Text in Empty States]
+**Learning:** When displaying user-provided search queries in "No results found" messages, using `innerHTML` creates a critical XSS vulnerability. Switching to `textContent` ensures that any malicious scripts or HTML tags are rendered safely as literal text, protecting the user while still providing helpful feedback.
+**Action:** Always use `textContent` (or equivalent safe-text methods) when interpolating user-controlled strings into the DOM, especially in error or empty state messages.
