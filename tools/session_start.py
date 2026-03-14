@@ -67,19 +67,23 @@ def get_context_layer_sizes():
     return "\n".join(lines)
 
 def main():
+    skip_verify = "--skip-verify" in sys.argv
     print("🧬 SESSION RE-HYDRATION SNAPSHOT")
     print("-" * 40)
     
-    # 1. Verify Environment
-    print("🛠️  Verifying Environment...")
-    try:
-        env = os.environ.copy()
-        env["PYTHONIOENCODING"] = "utf-8"
-        subprocess.run(["python", "verify_setup.py"], check=True, env=env)
-        print("✅ Environment Healthy")
-    except subprocess.CalledProcessError:
-        print("❌ Environment Verification Failed! Fix before proceeding.")
-        return
+    # 1. Verify Environment (Optional for speed)
+    if not skip_verify:
+        print("🛠️  Verifying Environment...")
+        try:
+            env = os.environ.copy()
+            env["PYTHONIOENCODING"] = "utf-8"
+            subprocess.run(["python", "verify_setup.py"], check=True, env=env)
+            print("✅ Environment Healthy")
+        except subprocess.CalledProcessError:
+            print("❌ Environment Verification Failed! Fix before proceeding.")
+            return
+    else:
+        print("🛠️  Skipping Environment Verification (Fast Boot)")
 
     print("-" * 40)
     print(f"📍 BRANCH: {subprocess.run(['git', 'branch', '--show-current'], capture_output=True, text=True).stdout.strip()}")

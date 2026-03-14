@@ -57,17 +57,17 @@ def finish_task():
         print("✅ EVOLUTION.md updated.")
 
     # 4. AUTOMATED REFLECTION
-    print("\n🧐 4/4: Running Automated Reflection...")
+    print("\n🧐 4/5: Running Automated Reflection...")
     subprocess.run(["python", "tools/reflect.py", f"Successfully completed {task_name} and verified system health."])
 
+    # 5. AUTOMATED SYNC
+    print("\n☁️  5/5: Synchronizing to Repository...")
+    subprocess.run(["python", "tools/git_ops.py", task_name.lower().replace(" ", "-"), "commit", f"Task Completed: {task_name}"], check=False)
+
     print("-" * 40)
-    print("🎉 TASK FINISHED!")
+    print("🎉 TASK FINISHED & SYNCED!")
     print()
     print("🔄 SELF-IMPROVE (L0 DNA):")
-    print("  - Lessons auto-logged to agent/LESSONS.md")
-    print("  - Read LESSONS.md at start of next session")
-    print()
-    print("📦 Ready for: git commit && git push origin <branch>")
     return True
 
 if __name__ == "__main__":

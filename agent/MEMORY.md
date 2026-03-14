@@ -13,6 +13,7 @@
 1.  **Tech Stack:** Vanilla JS/CSS + Python FastAPI. No React/Vue/Tailwind. No Webpack/Vite.
 2.  **Design System:** Technoid Brutalist UI (Onyx `#080808` + Volt `#ccff00`).
 3.  **TDD:** Write failing tests → implement → pass tests → refactor. No exceptions.
+4.  **AUTOMATED SYNC:** Always run `tools/finish.py` to conclude a task; it now handles commit/push automatically to prevent state loss.
 4.  **Logging:** Use `logging` exclusively. No `print()` in production code.
 5.  **Pathing:** Always use `pathlib.Path` relative to project root.
 6.  **Git Flow:** Feature branches (`ralph/task-name`). Commit WIP before pulling. Never push directly to `main`.

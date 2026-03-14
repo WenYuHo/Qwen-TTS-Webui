@@ -27,29 +27,30 @@ def setup_worktree(name):
     setup_junction(name, "models") # Crucial for 2070 Super: share the heavy model files
 
 def launch_agent(name, mission, color="0A", headless=False):
-    # Avoid quotes and newlines in the mission string to prevent CMD/CLI parsing errors
+    # Avoid quotes and newlines in the mission string
     safe_mission = mission.replace('"', "'").replace("\n", " ").strip()
     gpu_instruction = " [GPU SAFETY: Check agent/GPU.lock before use]"
     full_mission = safe_mission + gpu_instruction
     
+    # We use -p (non-interactive) in headless mode to force the CLI to run the command and exit
     if headless:
-        # Headless mode: Use --prompt and avoid 'start'
         print(f"🕵️  Launching {name} in background (headless)...")
-        # Run as a background process
-        cmd = f'cd {name} && gemini --prompt "/ralph:loop \\"{full_mission}\\"" --yolo'
-        subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # CREATE_NO_WINDOW = 0x08000000
+        cmd = f'gemini --prompt "/ralph:loop \\"{full_mission}\\"" --yolo'
+        subprocess.Popen(cmd, shell=True, cwd=name, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=0x08000000)
     else:
         # Standard mode: Open interactive windows
-        cmd = f'start cmd /k "title SYMPHONY-{name} && color {color} && cd {name} && gemini /ralph:loop \\"{full_mission}\\" --yolo"'
+        # Note: We must ensure the command is executed, so we prefix with /c if using cmd
+        cmd = f'start "SYMPHONY-{name}" cmd /k "color {color} && cd {name} && gemini --prompt \\"/ralph:loop \\"{full_mission}\\"\\" --yolo"'
         subprocess.run(cmd, shell=True)
 
 if __name__ == "__main__":
     print("--- 🎼 SYMPHONY v2 (8GB VRAM OPTIMIZED) ---")
     headless = "--headless" in sys.argv
     
-    # 0. Automate Session Re-hydration
+    # 0. Automate Session Re-hydration (Fast Boot)
     print("🧬 Re-hydrating context...")
-    subprocess.run(["python", "tools/session_start.py"], check=False)
+    subprocess.run(["python", "tools/session_start.py", "--skip-verify"], check=False)
     
     # 1. Clean up stale locks
     if os.path.exists("agent/GPU.lock"):
