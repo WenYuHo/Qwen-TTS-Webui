@@ -48,11 +48,13 @@ async def test_api_upload_invalid_type(app_client):
 async def test_api_upload_valid_wav(app_client, tmp_path):
     async with app_client as client:
         import soundfile as sf
-        wav_path = tmp_path / "test.wav"
-        sf.write(str(wav_path), np.random.randn(1000), 24000)
+        # Create a real wav file in the temp directory
+        wav_path = tmp_path / "test_upload.wav"
+        # 1000 samples of noise
+        sf.write(str(wav_path), np.random.randn(1000).astype(np.float32), 24000)
         
-        with open(wav_path, "rb") as f:
-            files = {'file': ('test.wav', f, 'audio/wav')}
+        with open(str(wav_path), "rb") as f:
+            files = {'file': ('test_upload.wav', f, 'audio/wav')}
             response = await client.post("/api/voice/upload", files=files)
             assert response.status_code == 200
             assert "filename" in response.json()
@@ -170,7 +172,8 @@ async def test_voice_preview_with_custom_text(app_client, mock_engine):
         # Verify engine was called with the custom text
         mock_engine.generate_segment.assert_called()
         args, kwargs = mock_engine.generate_segment.call_args
-        assert kwargs["text"] == "Custom preview text"
+        # First positional argument is 'text'
+        assert args[0] == "Custom preview text"
 
 
 @pytest.mark.asyncio

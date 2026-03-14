@@ -48,7 +48,13 @@ def mock_engine(mock_model, tmp_path):
     # Patch get_model in podcast_engine to return our mock_model
     with patch("backend.podcast_engine.get_model", return_value=mock_model):
         from backend.podcast_engine import PodcastEngine
-        engine = PodcastEngine()
+        # ⚡ Bolt: Use test_mode to disable background threads/Bolt precomputations during tests
+        engine = PodcastEngine(test_mode=True)
+        # Explicitly mock methods to avoid 'method object has no attribute return_value'
+        engine.generate_segment = MagicMock(return_value=(np.zeros(1000), 24000))
+        engine.generate_podcast = MagicMock(return_value={"waveform": np.zeros(1000), "sample_rate": 24000})
+        engine.stream_synthesize = MagicMock()
+        
         # Mock get_system_status to avoid real hardware checks
         engine.get_system_status = MagicMock(return_value={
             "status": "ready",

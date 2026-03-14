@@ -18,7 +18,7 @@ def test_podcast_generation_flow(start_server):
 
         page.route("**/api/generate/podcast", handle_generate)
         
-        page.goto("http://localhost:7860")
+        page.goto("http://localhost:8080")
         
         # 1. Navigate to Project Studio
         page.click("#nav-projects")
@@ -62,7 +62,7 @@ def test_video_generation_flow(start_server):
 
         page.route("**/api/video/narrated", handle_video)
         
-        page.goto("http://localhost:7860")
+        page.goto("http://localhost:8080")
         page.click("#nav-projects")
         page.get_by_text("DRAFT", exact=True).click()
         

@@ -21,11 +21,21 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
+# ⚡ Bolt: Local decorator to avoid Mock issues (__mro__) with transformers.utils.auto_docstring
+def auto_docstring(obj=None, **kwargs):
+    if obj is not None: return obj
+    return lambda x: x
+
 import librosa
 import numpy as np
 import soundfile as sf
 import torch
 from transformers import AutoConfig, AutoModel, AutoProcessor
+
+# ⚡ Bolt: Local decorator to avoid Mock issues (__mro__) with transformers.utils.auto_docstring
+def auto_docstring(obj=None, **kwargs):
+    if obj is not None: return obj
+    return lambda x: x
 
 from ..core.models import Qwen3TTSConfig, Qwen3TTSForConditionalGeneration, Qwen3TTSProcessor
 

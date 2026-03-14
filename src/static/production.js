@@ -696,5 +696,56 @@ Narrator: Every movement is calculated. Every breath is silent.`
             this.toggleCanvasView('draft');
             Notification.show("Sample script loaded", "success");
         }
+    },
+
+    applyMoodPreset(mood) {
+        if (!mood) return;
+        
+        const presets = {
+            'news': {
+                temp: 0.1,
+                eq: 'broadcast',
+                reverb: 0,
+                room: 'medium'
+            },
+            'story': {
+                temp: 0.9,
+                eq: 'flat',
+                reverb: 15,
+                room: 'hall'
+            },
+            'asmr': {
+                temp: 0.5,
+                eq: 'flat',
+                reverb: 40,
+                room: 'small',
+                whisper: true
+            },
+            'reset': {
+                temp: 0.9,
+                eq: 'flat',
+                reverb: 0,
+                room: 'medium',
+                whisper: false
+            }
+        };
+
+        const p = presets[mood];
+        if (!p) return;
+
+        // Apply to UI
+        document.getElementById('global-temperature').value = p.temp;
+        document.getElementById('audio-eq').value = p.eq;
+        document.getElementById('audio-reverb').value = p.reverb;
+        document.getElementById('reverb-val').innerText = p.reverb + '%';
+        document.getElementById('audio-reverb-room').value = p.room;
+        
+        if (p.whisper !== undefined) {
+            const whisperEl = document.getElementById('global-whisper');
+            if (whisperEl) whisperEl.checked = p.whisper;
+            if (window.state) window.state.whisper = p.whisper;
+        }
+
+        Notification.show(`Applied ${mood.toUpperCase()} preset`, "success");
     }
 };

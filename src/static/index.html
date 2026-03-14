@@ -282,7 +282,7 @@
                             <button class="btn btn-secondary btn-sm" onclick="toggleCanvasView('draft')" data-i18n="studio.draft">DRAFT</button>
                             <button class="btn btn-secondary btn-sm" onclick="toggleCanvasView('production')" data-i18n="studio.production">PRODUCTION</button>
                             <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="ProductionManager.parseEmotions()" title="Convert emotional tags [happy] into instructors">PARSE EMOTIONS</button>
-                            <button class="btn btn-primary btn-sm" onclick="promoteToProduction()" data-i18n="studio.promote">PROMOTE</button>
+                            <button id="btn-promote" class="btn btn-primary btn-sm" onclick="promoteToProduction()" data-i18n="studio.promote">PROMOTE</button>
                         </div>
                         <div id="canvas-draft-view" style="flex:1; display:flex;">
                             <textarea id="script-editor" style="border:none; padding:24px; font-family:var(--font-mono); font-size:0.9rem;" placeholder="Alice: Hello!"></textarea>
@@ -294,6 +294,18 @@
 
                     <div class="card-brutalist sidebar-controls">
                         <h3 class="label-industrial" data-i18n="studio.settings">SETTINGS</h3>
+                        
+                        <h3 class="label-industrial">MOOD PRESETS</h3>
+                        <div class="card" style="padding:12px; margin-bottom:20px; background:rgba(204,255,0,0.05); border:1px solid var(--accent);">
+                            <select id="mood-preset-select" class="btn btn-secondary btn-sm" style="width:100%; border-color:var(--accent);" onchange="ProductionManager.applyMoodPreset(this.value); this.value=''">
+                                <option value="" selected>SELECT MOOD...</option>
+                                <option value="news">🎙️ News / Formal</option>
+                                <option value="story">🎭 Storytelling</option>
+                                <option value="asmr">🤫 ASMR / Intimate</option>
+                                <option value="reset">🔄 Reset to Default</option>
+                            </select>
+                        </div>
+
                         <div class="control-group">
                             <label for="bgm-select" class="label-industrial">BGM</label>
                             <select id="bgm-select" style="border-color:var(--accent);" aria-label="Background Music Select"><option value="">None</option></select>
@@ -453,7 +465,7 @@
                                 <span class="volt-text" style="font-size:0.65rem;">STREAMING PLAYBACK</span>
                             </label>
                         </div>
-                        <button class="btn btn-primary" style="width:100%; padding:16px;" onclick="generatePodcast()" data-i18n="common.produce">PRODUCE FINAL</button>
+                        <button id="btn-produce" class="btn btn-primary" style="width:100%; padding:16px;" onclick="generatePodcast()" data-i18n="common.produce">PRODUCE FINAL</button>
                     </div>
                 </div>
             </div>

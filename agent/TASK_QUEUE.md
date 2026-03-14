@@ -5,6 +5,27 @@
 - **SYSTEM**: `BOOT_SEQUENCE_COMPLETE`
 
 ## PRIORITIZED BACKLOG
+- [x] **SYSTEM_SELF_IMPROVEMENT_AND_UX_RESEARCH**
+    - Task: 
+        1. **System Evolution**: Analyze `symphony_start.py` and `agent/EVOLUTION.md`. Identify bottlenecks in the current Manager/Worker workflow and write code to fix them (e.g., improve prompts, add helper tools).
+        2. **Product UX Research**: Brainstorm and research methods to significantly improve the `Qwen-TTS-Webui` user experience (e.g., simplified workflows, better defaults, guided tutorials). Create concrete tasks for these improvements.
+    - Priority: Critical
+    - Promise: SYSTEM_AND_UX_OPTIMIZED
+    - Completed: 2026-03-13T04:45:00Z
+
+- [x] **UX_ONBOARDING_GUIDED_TOUR** (2026-03-13)
+    - Task: Implement `src/static/onboarding.js` to provide a step-by-step guided tour for new users in Voice Studio and Project Studio.
+    - Outcome: Created `OnboardingManager` with 9 steps across views. Integrated into `app.js`.
+- [x] **UX_MOOD_PRESETS_ENGINE** (2026-03-13)
+    - Task: Implement "Mood Presets" (News, Storytelling, ASMR) that automatically configure Temperature, EQ, and Reverb in the Project Studio.
+    - Outcome: Added Mood Presets dropdown and `applyMoodPreset` logic to `ProductionManager`.
+
+- [ ] **UX_ADVANCED_MODE_TOGGLE**
+    - Task: Add an "Advanced Mode" toggle to the UI to simplify the interface for casual users by hiding complex audio parameters.
+    - Priority: Low
+    - Promise: UX_EASY_MODE_LIVE
+
+
 - [x] **MULTILINGUAL_FULL_SUPPORT**
     - Task: Enumerate all 10 supported languages + 6 Chinese dialects in the backend (src/backend/api/system.py), and update all frontend dropdowns dynamically (src/static/shared.js).
     - Ref: 	rack-multilingual-accessibility.md (Task 1.1, 1.2)

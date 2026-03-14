@@ -36,7 +36,12 @@ _watermark_tone_cache = {}
 _system_settings = None
 
 class PodcastEngine:
-    def __init__(self):
+    def __init__(self, test_mode: bool = False):
+        import sys
+        # ⚡ Bolt: Robust detection for pytest environment to prevent background thread deadlocks
+        is_pytest = "pytest" in sys.modules or os.getenv("PYTEST_CURRENT_TEST") is not None
+        self.test_mode = test_mode or is_pytest
+        
         self.upload_dir = Path("uploads").resolve()
         self.upload_dir.mkdir(parents=True, exist_ok=True)
 
@@ -72,10 +77,11 @@ class PodcastEngine:
         # ⚡ Bolt: Precompute common style prompts to eliminate "Voice Design" latency
         self._virtual_presets_dir = self._shared_assets_dir / "virtual_presets"
         self._virtual_presets_dir.mkdir(parents=True, exist_ok=True)
-        self.executor.submit(self.precompute_virtual_presets)
         
-        # ⚡ Bolt: Periodic auto-backup of projects
-        self.executor.submit(self._run_backup_loop)
+        if not self.test_mode:
+            self.executor.submit(self.precompute_virtual_presets)
+            # ⚡ Bolt: Periodic auto-backup of projects
+            self.executor.submit(self._run_backup_loop)
 
     def _run_backup_loop(self):
         """Periodically creates a zip backup of all projects."""

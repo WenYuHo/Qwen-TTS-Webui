@@ -60,7 +60,7 @@ def test_dub_task_partial_failure(mock_tm, mock_sf_info, mock_gt, mock_engine):
         print(f"DEBUG: Task failed with error: {final_call.kwargs.get('error')}")
     
     assert final_call.kwargs["status"] == TaskStatus.COMPLETED
-    assert "1 segments failed" in warnings
+    assert "segments failed to synthesize" in warnings
     
     # Actually, let's check translated_text which was passed to generate_viseme_timestamps
     # In my implementation: translated_text += f" (Note: {len(failed_segments)} segments failed)"

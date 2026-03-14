@@ -262,14 +262,5 @@ export const HelpManager = {
 
         const heading = modal.querySelector('h2');
         if (heading) heading.focus();
-    },
-
-    checkFirstRun() {
-        if (!localStorage.getItem('studio_tutorial_seen')) {
-            setTimeout(() => {
-                this.show('speech');
-                localStorage.setItem('studio_tutorial_seen', 'true');
-            }, 1000);
-        }
     }
 };

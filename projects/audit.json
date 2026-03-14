@@ -4653,5 +4653,447 @@
     "metadata": {
       "role": "Speaker"
     }
+  },
+  {
+    "timestamp": 1773378926.4402215,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "alice"
+    }
+  },
+  {
+    "timestamp": 1773378926.4587312,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "alice"
+    }
+  },
+  {
+    "timestamp": 1773378926.5009296,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
+  },
+  {
+    "timestamp": 1773379116.7819831,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "alice"
+    }
+  },
+  {
+    "timestamp": 1773379116.7998877,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "alice"
+    }
+  },
+  {
+    "timestamp": 1773379116.839642,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
+  },
+  {
+    "timestamp": 1773379161.7723975,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773379161.7782104,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773379161.7903306,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773379161.7964063,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773379162.2895215,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
+  },
+  {
+    "timestamp": 1773379266.333495,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "alice"
+    }
+  },
+  {
+    "timestamp": 1773379266.3508625,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "alice"
+    }
+  },
+  {
+    "timestamp": 1773379266.388679,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
+  },
+  {
+    "timestamp": 1773379311.3177977,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773379311.3277457,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773379311.3425217,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773379311.3494332,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773379311.9583323,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
+  },
+  {
+    "timestamp": 1773379534.2800896,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "alice"
+    }
+  },
+  {
+    "timestamp": 1773379534.2994986,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "alice"
+    }
+  },
+  {
+    "timestamp": 1773379534.3391762,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
+  },
+  {
+    "timestamp": 1773379679.7484405,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 0.94,
+        "rms": 0.0953,
+        "peak": 0.5059,
+        "snr_db": 2.8,
+        "clipping": false,
+        "too_quiet": false,
+        "quality": "warning"
+      },
+      "profile_type": "preset"
+    }
+  },
+  {
+    "timestamp": 1773379869.3174348,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 26.91,
+        "rms": 0.0182,
+        "peak": 0.193,
+        "snr_db": 7.1,
+        "clipping": false,
+        "too_quiet": false,
+        "quality": "warning"
+      },
+      "profile_type": "preset"
+    }
+  },
+  {
+    "timestamp": 1773379940.7325459,
+    "type": "synthesis",
+    "status": "good",
+    "metadata": {
+      "quality": {
+        "duration": 10.22,
+        "rms": 0.1486,
+        "peak": 0.729,
+        "snr_db": 52.0,
+        "clipping": false,
+        "too_quiet": false,
+        "quality": "good"
+      },
+      "profile_type": "preset"
+    }
+  },
+  {
+    "timestamp": 1773379940.74155,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "alice"
+    }
+  },
+  {
+    "timestamp": 1773379948.9067757,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.18,
+        "rms": 0.1008,
+        "peak": 0.6147,
+        "snr_db": 8.3,
+        "clipping": false,
+        "too_quiet": false,
+        "quality": "warning"
+      },
+      "profile_type": "preset"
+    }
+  },
+  {
+    "timestamp": 1773380005.6533384,
+    "type": "synthesis",
+    "status": "good",
+    "metadata": {
+      "quality": {
+        "duration": 8.54,
+        "rms": 0.0795,
+        "peak": 0.5195,
+        "snr_db": 13.6,
+        "clipping": false,
+        "too_quiet": false,
+        "quality": "good"
+      },
+      "profile_type": "preset"
+    }
+  },
+  {
+    "timestamp": 1773380005.6601775,
+    "type": "segment_generation",
+    "status": "completed",
+    "metadata": {
+      "role": "alice"
+    }
+  },
+  {
+    "timestamp": 1773380105.6511388,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773380105.6662838,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773380105.6813955,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773380105.6881442,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.1,
+        "rms": 0.0099,
+        "peak": 0.0433,
+        "snr_db": -10.4,
+        "clipping": false,
+        "too_quiet": true,
+        "quality": "warning"
+      },
+      "profile_type": "clone"
+    }
+  },
+  {
+    "timestamp": 1773380145.8232703,
+    "type": "podcast_generation",
+    "status": "completed",
+    "metadata": {
+      "segments": 1
+    }
+  },
+  {
+    "timestamp": 1773380236.1316767,
+    "type": "synthesis",
+    "status": "warning",
+    "metadata": {
+      "quality": {
+        "duration": 1.34,
+        "rms": 0.0781,
+        "peak": 0.519,
+        "snr_db": 4.2,
+        "clipping": false,
+        "too_quiet": false,
+        "quality": "warning"
+      },
+      "profile_type": "preset"
+    }
   }
 ]

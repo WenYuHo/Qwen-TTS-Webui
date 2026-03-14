@@ -6,6 +6,7 @@ import { ProductionManager } from './production.js';
 import { VoiceLabManager } from './voicelab.js';
 import { DubbingManager } from './dubbing.js';
 import { MetricsManager } from './metrics.js';
+import { OnboardingManager } from './onboarding.js';
 import { VideoModal, HelpManager } from './ui_components.js';
 
 const state = {
@@ -202,6 +203,10 @@ Object.assign(window, {
     showVideoPreview: VideoModal.show.bind(VideoModal),
     hideVideoModal: VideoModal.hide.bind(VideoModal),
     showHelp: () => HelpManager.show(state.currentView),
+    startTour: () => {
+        OnboardingManager.init();
+        OnboardingManager.start();
+    },
     setupDragAndDrop: AssetManager.setupDragAndDrop,
     applyAccent: SystemManager.applyAccent.bind(SystemManager),
     
@@ -234,7 +239,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     UIHeartbeat.start();
     MetricsManager.start();
     CanvasManager.load();
-    HelpManager.checkFirstRun();
+    
+    // Guided Onboarding
+    if (!localStorage.getItem('studio_onboarding_complete')) {
+        setTimeout(() => {
+            OnboardingManager.init();
+            OnboardingManager.start();
+        }, 1000);
+    }
 
     // Multilingual Initialization
     await window.loadLanguages();
