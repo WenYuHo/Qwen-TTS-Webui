@@ -360,7 +360,7 @@
                             <label class="label-industrial" style="font-size:0.6rem; margin-bottom:8px; display:block;">SOURCE PREVIEW</label>
                             <div id="dub-ws-container" style="height:64px; margin-bottom:12px; background:rgba(0,0,0,0.2);"></div>
                             <div style="display:flex; align-items:center; gap:12px;">
-                                <button class="btn btn-secondary btn-sm" id="dub-preview-play-btn"><i class="fas fa-play"></i></button>
+                                <button class="btn btn-secondary btn-sm" id="dub-preview-play-btn" aria-label="Play source preview" title="Play source preview"><i class="fas fa-play" aria-hidden="true"></i></button>
                                 <span id="dub-preview-time" class="volt-text" style="font-size:0.7rem;">00:00 / 00:00</span>
                             </div>
                         </div>
@@ -517,7 +517,7 @@
     <div id="video-modal" class="modal-overlay" role="dialog" aria-labelledby="video-modal-title" aria-modal="true" style="display:none;" onclick="if(event.target === this) hideVideoModal()">
         <div class="card-brutalist modal-content" style="max-width:900px; width:95%; padding:0; overflow:hidden;">
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; border-bottom:2px solid var(--accent);">
-                <h2 id="video-modal-title" tabindex="-1">Video Preview</h2><button class="btn btn-danger btn-sm" onclick="hideVideoModal()" aria-label="Close modal" title="Close modal">X</button>
+                <h2 id="video-modal-title" tabindex="-1">Video Preview</h2><button class="btn btn-danger btn-sm" onclick="hideVideoModal()" aria-label="Close modal" title="Close modal"><i class="fas fa-times" aria-hidden="true"></i></button>
             </div>
             <div style="background:#000; position:relative; min-height:400px; display:flex; justify-content:center;">
                 <video id="video-modal-player" controls style="max-width:100%;"></video>
