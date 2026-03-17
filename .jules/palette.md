@@ -25,3 +25,7 @@
 ## 2026-03-20 - [Semantic Empty States for System Management]
 **Learning:** Extending the existing `.empty-state` CSS pattern to administrative views like the System Manager (Audit Log, Phoneme Editor) significantly improves visual consistency and provides clear guidance to the user. Using FontAwesome icons that match the semantic context (e.g., `fa-clipboard-list` for logs, `fa-language` for phonemes) helps with quick visual recognition and reinforces the "Technoid Brutalist" style.
 **Action:** Always check for unhandled empty states in data-heavy administrative views and implement icon-based guidance using existing UI patterns.
+
+## 2026-03-21 - [Cross-Module Utility Export and Global UI State]
+**Learning:** In a modular Vanilla JS project, utility functions like `escapeHTML` must be explicitly exported and imported to avoid runtime `ReferenceError`s. When implementing global UX improvements (like a persistent audio player), ensure that the target DOM elements are present in all relevant contexts to prevent functional regressions. Providing immediate visual feedback for search queries that yield no results significantly reduces user frustration.
+**Action:** Ensure all shared utility functions are properly exported/imported. Verify global DOM dependencies across all application views when modifying shared logic.

@@ -1,6 +1,7 @@
 // --- Voice Lab (Design, Clone, Mix) Module ---
 import { TaskManager } from './task_manager.js';
 import { Notification, ErrorDisplay } from './ui_components.js';
+import { escapeHTML } from './shared.js';
 
 export const VoiceLabManager = {
     async testVoiceDesign(btn) {
@@ -236,7 +237,7 @@ export const VoiceLabManager = {
                         <strong style="text-transform:uppercase;">${name}</strong>
                         <div style="font-size:0.7rem; opacity:0.7;">${meta}</div>
                     </div>
-                    <button class="btn btn-secondary btn-sm" onclick="previewVoice('preset', '${id}')" title="Preview ${name}" aria-label="Preview ${name}"><i class="fas fa-play" aria-hidden="true"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="previewVoice('preset', '${id}', this)" title="Preview ${name}" aria-label="Preview ${name}"><i class="fas fa-play" aria-hidden="true"></i></button>
                 </div>
             </div>`;
         }).join('');
@@ -249,7 +250,7 @@ export const VoiceLabManager = {
                         <div style="font-size:0.7rem; opacity:0.5;">${v.profile.type.toUpperCase()}</div>
                     </div>
                     <div style="display:flex; gap:8px;">
-                        <button class="btn btn-secondary btn-sm" onclick="previewVoice('${v.profile.type}', '${v.profile.value}')" title="Preview ${v.name}" aria-label="Preview ${v.name}"><i class="fas fa-play" aria-hidden="true"></i></button>
+                        <button class="btn btn-secondary btn-sm" onclick="previewVoice('${v.profile.type}', '${v.profile.value}', this)" title="Preview ${v.name}" aria-label="Preview ${v.name}"><i class="fas fa-play" aria-hidden="true"></i></button>
                         <button class="btn btn-danger btn-sm" onclick="deleteVoice('${v.name}')" style="padding:4px 8px;" title="Delete ${v.name}" aria-label="Delete ${v.name}"><i class="fas fa-trash" aria-hidden="true"></i></button>
                     </div>
                 </div>
@@ -257,6 +258,16 @@ export const VoiceLabManager = {
         `).join('');
 
         grid.innerHTML = html;
+        if (presets.length === 0 && savedVoices.length === 0) {
+            grid.innerHTML = `
+                <div class="empty-state empty-state-grid">
+                    <i class="fas fa-microphone-slash"></i>
+                    <h3>No voices in library</h3>
+                    <p>Design or clone a voice to get started.</p>
+                </div>
+            `;
+        }
+        this.filterVoiceLibrary();
     },
 
     updateMixDropdowns(savedVoices, presets) {
@@ -330,9 +341,16 @@ export const VoiceLabManager = {
         } catch (err) { console.error(err); }
     },
 
-    async previewVoice(type, value) {
+    async previewVoice(type, value, btn) {
         const player = document.getElementById('preview-player');
         const customText = document.getElementById('custom-preview-text')?.value?.trim() || '';
+
+        const originalHtml = btn ? btn.innerHTML : null;
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        }
+
         try {
             const body = { type, value, name: "Preview" };
             if (customText) body.preview_text = customText;
@@ -341,10 +359,19 @@ export const VoiceLabManager = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
+            if (!res.ok) throw new Error("Preview failed");
             const blob = await res.blob();
             player.src = URL.createObjectURL(blob);
             player.play();
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            Notification.show("Preview failed", "error");
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
     },
 
     playDesignPreview() {
@@ -373,11 +400,37 @@ export const VoiceLabManager = {
 
     filterVoiceLibrary() {
         const query = document.getElementById('voice-search').value.toLowerCase();
-        const cards = document.querySelectorAll('#voice-library-grid .voice-card');
+        const grid = document.getElementById('voice-library-grid');
+        if (!grid) return;
+        const cards = grid.querySelectorAll('.voice-card');
+        let visibleCount = 0;
+
         cards.forEach(card => {
             const name = card.querySelector('strong')?.innerText.toLowerCase() || '';
-            card.style.display = name.includes(query) ? 'flex' : 'none';
+            const isVisible = name.includes(query);
+            card.style.display = isVisible ? 'flex' : 'none';
+            if (isVisible) visibleCount++;
         });
+
+        // Handle empty search results
+        let emptySearch = grid.querySelector('.empty-search-state');
+        if (visibleCount === 0 && query !== '') {
+            if (!emptySearch) {
+                emptySearch = document.createElement('div');
+                emptySearch.className = 'empty-state empty-state-grid empty-search-state';
+                emptySearch.innerHTML = `
+                    <i class="fas fa-search"></i>
+                    <h3>No voices match "${escapeHTML(query)}"</h3>
+                    <p>Try a different search term.</p>
+                `;
+                grid.appendChild(emptySearch);
+            } else {
+                emptySearch.querySelector('h3').textContent = `No voices match "${query}"`;
+                emptySearch.style.display = 'block';
+            }
+        } else if (emptySearch) {
+            emptySearch.style.display = 'none';
+        }
     },
 
     setupCloningRecording() {
