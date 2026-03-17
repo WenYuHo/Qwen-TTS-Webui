@@ -1,5 +1,6 @@
 // --- Asset Management Module ---
 import { Notification } from './ui_components.js';
+import { escapeHTML } from './shared.js';
 
 export const AssetManager = {
     async loadAssets() {
@@ -33,7 +34,7 @@ export const AssetManager = {
                             <span style="font-size:0.8rem; color:var(--text-secondary);">${(asset.size / 1024 / 1024).toFixed(2)} MB</span>
                         </div>
                         <div style="display:flex; gap:8px;">
-                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}')" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
+                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}', this)" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
                             <button class="btn btn-danger btn-sm" onclick="deleteAsset('${asset.name}')" title="Delete ${asset.name}" aria-label="Delete ${asset.name}"><i class="fas fa-trash" aria-hidden="true"></i></button>
                         </div>
                     </div>
@@ -51,6 +52,7 @@ export const AssetManager = {
                         `<option value="${a.name}" ${currentVal === a.name ? 'selected' : ''}>${a.name} (Custom)</option>`
                     ).join('');
             }
+            this.filterAssets();
         } catch (err) {
             console.error("Failed to load assets", err);
             grid.innerHTML = '<div class="empty-state empty-state-grid"><h3>Error loading assets</h3></div>';
@@ -106,17 +108,63 @@ export const AssetManager = {
         } catch (err) { console.error("Delete error", err); }
     },
 
-    playAsset(name) {
-        const audio = new Audio(`/api/assets/download/${name}`);
-        audio.play();
+    async playAsset(name, btn) {
+        const player = document.getElementById('preview-player');
+        if (!player) return;
+
+        const originalHtml = btn ? btn.innerHTML : null;
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        }
+
+        try {
+            const url = `/api/assets/download/${name}`;
+            player.src = url;
+            await player.play();
+        } catch (err) {
+            console.error("Playback failed", err);
+            Notification.show("Playback failed", "error");
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
     },
 
     filterAssets() {
         const query = document.getElementById('asset-search').value.toLowerCase();
-        const cards = document.querySelectorAll('#asset-library-grid .asset-card');
+        const grid = document.getElementById('asset-library-grid');
+        if (!grid) return;
+        const cards = grid.querySelectorAll('.asset-card');
+        let visibleCount = 0;
+
         cards.forEach(card => {
             const name = card.querySelector('strong')?.innerText.toLowerCase() || '';
-            card.style.display = name.includes(query) ? 'flex' : 'none';
+            const isVisible = name.includes(query);
+            card.style.display = isVisible ? 'flex' : 'none';
+            if (isVisible) visibleCount++;
         });
+
+        // Handle empty search results
+        let emptySearch = grid.querySelector('.empty-search-state');
+        if (visibleCount === 0 && query !== '') {
+            if (!emptySearch) {
+                emptySearch = document.createElement('div');
+                emptySearch.className = 'empty-state empty-state-grid empty-search-state';
+                emptySearch.innerHTML = `
+                    <i class="fas fa-search"></i>
+                    <h3>No assets match "${escapeHTML(query)}"</h3>
+                    <p>Try a different search term.</p>
+                `;
+                grid.appendChild(emptySearch);
+            } else {
+                emptySearch.querySelector('h3').textContent = `No assets match "${query}"`;
+                emptySearch.style.display = 'block';
+            }
+        } else if (emptySearch) {
+            emptySearch.style.display = 'none';
+        }
     }
 };
