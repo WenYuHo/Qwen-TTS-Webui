@@ -38,7 +38,8 @@ class VoiceSynthesizer:
                 raise ValueError(f"Reference audio too long ({duration:.1f}s). Maximum 30 seconds recommended for best quality.")
             
             audio_data, sr = sf.read(audio_path)
-            rms = np.sqrt(np.mean(audio_data ** 2))
+            # ⚡ Bolt: Memory-efficient RMS calculation avoids a temporary O(N) array for audio_data**2
+            rms = np.sqrt(np.vdot(audio_data, audio_data) / audio_data.size)
             if rms < 0.001:
                 raise ValueError("Reference audio appears to be silent. Please provide audio with speech.")
         except sf.SoundFileError as e:
@@ -47,10 +48,11 @@ class VoiceSynthesizer:
     @staticmethod
     def _compute_quality_score(wav: np.ndarray, sr: int) -> Dict[str, Any]:
         duration = len(wav) / sr
-        rms = float(np.sqrt(np.mean(wav ** 2)))
-        peak = float(np.max(np.abs(wav)))
+        # ⚡ Bolt: Memory-efficient RMS and peak calculation avoids O(N) temporary arrays for wav**2 and abs(wav)
+        rms = float(np.sqrt(np.vdot(wav, wav) / wav.size))
+        peak = float(max(np.max(wav), -np.min(wav)))
         tail = wav[-int(sr * 0.1):] if len(wav) > int(sr * 0.1) else wav
-        noise_rms = float(np.sqrt(np.mean(tail ** 2))) + 1e-10
+        noise_rms = float(np.sqrt(np.vdot(tail, tail) / tail.size)) + 1e-10
         snr_db = 20 * np.log10(rms / noise_rms) if rms > 0 else 0
         clipping = bool(peak > 0.99)
         too_quiet = bool(rms < 0.01)
