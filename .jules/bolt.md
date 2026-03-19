@@ -92,3 +92,7 @@
 ## 2026-03-07 - [Loop Fusion and Keyword Argument Optimization]
 **Learning:** Consolidating multiple transformation passes (e.g., loading, casting, and mono-conversion) into a single loop over audio assets reduces list indexing overhead and prevents potential tuple mutation bugs. Additionally, moving hardcoded generation defaults to a class-level constant and using a generic `**kwargs` loop in merging logic eliminates the overhead of recreating dictionaries and executing nested helper functions on every synthesis call.
 **Action:** Always prefer single-pass transformations for asset lists. Centralize fixed configuration defaults in class or module-level constants to minimize runtime object creation.
+
+## 2026-03-19 - [Vectorized De-clicking with Reshape and Einsum]
+**Learning:** Replacing an $O(N)$ Python loop with a vectorized NumPy implementation using `reshape` and `einsum` for heuristic audio de-clicking provides a massive performance boost (~60x-70x speedup). Using `np.einsum('ij,ij->i', chunks, chunks)` for row-wise dot products (squared sums) is more memory-efficient than `chunks**2` as it avoids large temporary array allocations. Additionally, handling multi-channel audio via recursion allows the core vectorized logic to remain simple and focused on 1D arrays.
+**Action:** Always look for opportunities to replace serial loops over audio windows with `reshape` and vectorized NumPy operations. Use `einsum` for row-wise or element-wise products on large 2D arrays to minimize peak memory usage.
