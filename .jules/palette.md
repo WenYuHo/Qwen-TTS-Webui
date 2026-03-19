@@ -25,3 +25,7 @@
 ## 2026-03-20 - [Semantic Empty States for System Management]
 **Learning:** Extending the existing `.empty-state` CSS pattern to administrative views like the System Manager (Audit Log, Phoneme Editor) significantly improves visual consistency and provides clear guidance to the user. Using FontAwesome icons that match the semantic context (e.g., `fa-clipboard-list` for logs, `fa-language` for phonemes) helps with quick visual recognition and reinforces the "Technoid Brutalist" style.
 **Action:** Always check for unhandled empty states in data-heavy administrative views and implement icon-based guidance using existing UI patterns.
+
+## 2026-03-22 - [Global Player Consolidation and Dynamic ARIA Feedback]
+**Learning:** Consolidating all audio playback (including asset library previews) to a single global player simplifies state management and provides a consistent "Master Monitor" experience for the user. Additionally, updating `aria-label` and `title` attributes dynamically on state-toggle buttons (like Record/Stop) ensures that accessibility tools and sighted users (via tooltips) receive immediate, accurate context on the button's current function.
+**Action:** Use global UI components for shared media tasks. Always update accessibility metadata when an interactive element's state or function changes.
