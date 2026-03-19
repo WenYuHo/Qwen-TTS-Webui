@@ -274,33 +274,65 @@ class AudioPostProcessor:
 
     @staticmethod
     def apply_declick(wav: np.ndarray, sr: int) -> np.ndarray:
-        """Simple heuristic de-clicker: clamps spikes > 10x local RMS."""
+        """Simple heuristic de-clicker: clamps spikes > 10x local RMS using vectorized NumPy operations."""
         try:
             if len(wav.shape) > 1:
-                out = np.zeros_like(wav)
+                # Multi-channel handling
+                out = np.empty_like(wav)
                 for i in range(wav.shape[0]):
                     out[i] = AudioPostProcessor.apply_declick(wav[i], sr)
                 return out
 
-            out = wav.copy()
-            window = int(sr * 0.002) # 2ms
-            if window < 2: return wav
-            
-            # Process in chunks
-            for i in range(0, len(wav), window):
-                chunk = wav[i:i+window]
-                if len(chunk) < 2: continue
-                local_rms = np.sqrt(np.mean(chunk**2)) + 1e-6
-                # Identify spikes
-                spikes = np.abs(chunk) > (local_rms * 10)
+            window = int(sr * 0.002)  # 2ms window
+            if window < 2 or len(wav) < 2:
+                return wav.copy()
+
+            n_chunks = len(wav) // window
+            main_len = n_chunks * window
+
+            if n_chunks > 0:
+                # ⚡ Bolt: Vectorized chunking using reshape
+                main_part = wav[:main_len].reshape(n_chunks, window)
+
+                # ⚡ Bolt: Vectorized RMS calculation using einsum to avoid O(N) temporary squared array allocation
+                sq_sums = np.einsum('ij,ij->i', main_part, main_part)
+                rms = np.sqrt(sq_sums / window) + 1e-6
+
+                # Detection: identify samples > 10x local chunk RMS
+                # Using np.newaxis to broadcast (n_chunks,) to (n_chunks, window)
+                spikes = np.abs(main_part) > (rms[:, np.newaxis] * 10)
+
                 if np.any(spikes):
+                    out_main = main_part.copy()
+                    # Identify row indices for each detected spike for correct RMS/threshold indexing
+                    row_idx, _ = np.where(spikes)
                     # Clamp spikes to local RMS * 3
-                    sign = np.sign(chunk[spikes])
-                    out[i:i+window][spikes] = sign * local_rms * 3
-            return out
+                    out_main[spikes] = (np.sign(out_main[spikes]) * rms[row_idx] * 3).astype(out_main.dtype)
+                    out_main = out_main.ravel()
+                else:
+                    out_main = wav[:main_len].copy()
+            else:
+                out_main = np.array([], dtype=wav.dtype)
+
+            # ⚡ Bolt: Handle remaining samples that don't fit into a full window
+            remainder = wav[main_len:]
+            if len(remainder) >= 2:
+                # Use memory-efficient np.vdot for remainder RMS
+                rem_rms = np.sqrt(np.vdot(remainder, remainder) / len(remainder)) + 1e-6
+                rem_spikes = np.abs(remainder) > (rem_rms * 10)
+                if np.any(rem_spikes):
+                    out_rem = remainder.copy()
+                    out_rem[rem_spikes] = np.sign(remainder[rem_spikes]) * rem_rms * 3
+                else:
+                    out_rem = remainder.copy()
+            else:
+                out_rem = remainder.copy()
+
+            # Ensure behavior matches original (always returns a copy/new array)
+            return np.concatenate([out_main, out_rem])
         except Exception as e:
             logger.error(f"De-click failed: {e}")
-            return wav
+            return wav.copy()
 
 class AuditManager:
     """Logs system-wide AI generation events for transparency and tracking."""
