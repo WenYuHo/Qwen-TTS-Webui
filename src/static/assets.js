@@ -1,5 +1,6 @@
 // --- Asset Management Module ---
 import { Notification } from './ui_components.js';
+import { escapeHTML } from './shared.js';
 
 export const AssetManager = {
     async loadAssets() {
@@ -29,12 +30,12 @@ export const AssetManager = {
                     <div class="card asset-card" style="display:flex; align-items:center; gap:16px;">
                         <div class="asset-icon" aria-hidden="true"><i class="fas ${icon}"></i></div>
                         <div style="flex:1;">
-                            <strong style="display:block; font-size:0.95rem;">${asset.name}</strong>
+                            <strong style="display:block; font-size:0.95rem;">${escapeHTML(asset.name)}</strong>
                             <span style="font-size:0.8rem; color:var(--text-secondary);">${(asset.size / 1024 / 1024).toFixed(2)} MB</span>
                         </div>
                         <div style="display:flex; gap:8px;">
-                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}')" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
-                            <button class="btn btn-danger btn-sm" onclick="deleteAsset('${asset.name}')" title="Delete ${asset.name}" aria-label="Delete ${asset.name}"><i class="fas fa-trash" aria-hidden="true"></i></button>
+                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset(event, '${asset.name.replace(/'/g, "\\'")}')" title="Play ${escapeHTML(asset.name)}" aria-label="Play ${escapeHTML(asset.name)}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
+                            <button class="btn btn-danger btn-sm" onclick="deleteAsset('${asset.name.replace(/'/g, "\\'")}')" title="Delete ${escapeHTML(asset.name)}" aria-label="Delete ${escapeHTML(asset.name)}"><i class="fas fa-trash" aria-hidden="true"></i></button>
                         </div>
                     </div>
                 `;
@@ -106,9 +107,27 @@ export const AssetManager = {
         } catch (err) { console.error("Delete error", err); }
     },
 
-    playAsset(name) {
-        const audio = new Audio(`/api/assets/download/${name}`);
-        audio.play();
+    playAsset(event, name) {
+        const btn = event.currentTarget;
+        const icon = btn.querySelector('i');
+        const originalIconClass = icon.className;
+        const player = document.getElementById('preview-player');
+
+        btn.disabled = true;
+        icon.className = 'fas fa-spinner fa-spin';
+
+        player.src = `/api/assets/download/${name}`;
+
+        const cleanup = () => {
+            btn.disabled = false;
+            icon.className = originalIconClass;
+            player.removeEventListener('playing', cleanup);
+            player.removeEventListener('error', cleanup);
+        };
+
+        player.addEventListener('playing', cleanup);
+        player.addEventListener('error', cleanup);
+        player.play().catch(cleanup);
     },
 
     filterAssets() {

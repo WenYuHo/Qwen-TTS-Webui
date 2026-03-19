@@ -312,6 +312,8 @@ export const DubbingManager = {
                     window.state.s2s.mediaRecorder.start();
                     window.state.s2s.isRecording = true;
                     btn.innerHTML = '<i class="fas fa-stop"></i> STOP RECORDING';
+                    btn.setAttribute('aria-label', 'Stop recording');
+                    btn.setAttribute('title', 'Stop recording');
                     btn.classList.add('btn-danger');
                 } catch (err) {
                     Notification.show("Microphone access denied", "error");
@@ -320,6 +322,8 @@ export const DubbingManager = {
                 window.state.s2s.mediaRecorder.stop();
                 window.state.s2s.isRecording = false;
                 btn.innerHTML = '<i class="fas fa-circle"></i> RECORD AUDIO';
+                btn.setAttribute('aria-label', 'Record source audio');
+                btn.setAttribute('title', 'Record source audio');
                 btn.classList.remove('btn-danger');
             }
         };
