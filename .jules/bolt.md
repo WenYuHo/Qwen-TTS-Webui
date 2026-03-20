@@ -92,3 +92,7 @@
 ## 2026-03-07 - [Loop Fusion and Keyword Argument Optimization]
 **Learning:** Consolidating multiple transformation passes (e.g., loading, casting, and mono-conversion) into a single loop over audio assets reduces list indexing overhead and prevents potential tuple mutation bugs. Additionally, moving hardcoded generation defaults to a class-level constant and using a generic `**kwargs` loop in merging logic eliminates the overhead of recreating dictionaries and executing nested helper functions on every synthesis call.
 **Action:** Always prefer single-pass transformations for asset lists. Centralize fixed configuration defaults in class or module-level constants to minimize runtime object creation.
+
+## 2026-03-20 - [Heuristic De-clicker Mathematics]
+**Learning:** In '10x local RMS' heuristic de-clickers, a spike's detection is dependent on window size (N); for a single high-amplitude spike to trigger detection when it is part of the RMS calculation, sqrt(N) must be greater than the threshold factor (e.g., sqrt(N) > 10). For small windows like 48 samples (2ms @ 24kHz), a single spike cannot trigger the heuristic unless background noise is extremely low.
+**Action:** When testing or implementing RMS-based heuristics, ensure the window size is large enough relative to the detection threshold, or use a high sample rate during verification to increase N.
