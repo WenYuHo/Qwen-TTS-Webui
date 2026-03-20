@@ -220,23 +220,8 @@ class PodcastEngine:
             return wav
 
     def _validate_ref_audio(self, audio_path: str) -> None:
-        """Validate reference audio for cloning: duration, silence, format."""
-        import soundfile as sf
-        try:
-            info = sf.info(audio_path)
-            duration = info.duration
-            if duration < 3.0:
-                raise ValueError(f"Reference audio too short ({duration:.1f}s). Minimum 3 seconds required.")
-            if duration > 30.0:
-                raise ValueError(f"Reference audio too long ({duration:.1f}s). Maximum 30 seconds recommended for best quality.")
-            
-            # Check for silence-only input
-            audio_data, sr = sf.read(audio_path)
-            rms = np.sqrt(np.mean(audio_data ** 2))
-            if rms < 0.001:  # Effectively silent
-                raise ValueError("Reference audio appears to be silent. Please provide audio with speech.")
-        except sf.SoundFileError as e:
-            raise ValueError(f"Invalid audio file: {e}")
+        """⚡ Bolt: Use consolidated memory-efficient validation from VoiceSynthesizer."""
+        VoiceSynthesizer._validate_ref_audio(audio_path)
 
     @staticmethod
     def _compute_quality_score(wav: np.ndarray, sr: int) -> Dict[str, Any]:
