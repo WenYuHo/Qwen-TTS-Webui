@@ -5,9 +5,10 @@ import os
 
 # Add src to path for imports
 sys.path.append(os.path.abspath("src"))
+from backend.utils import AudioPostProcessor
 
 def original_declick(wav: np.ndarray, sr: int) -> np.ndarray:
-    """Original loop-based implementation."""
+    """Original loop-based implementation for parity checking."""
     out = wav.copy()
     window = int(sr * 0.002) # 2ms
     if window < 2: return wav
@@ -23,7 +24,7 @@ def original_declick(wav: np.ndarray, sr: int) -> np.ndarray:
     return out
 
 def vectorized_declick(wav: np.ndarray, sr: int) -> np.ndarray:
-    """Vectorized implementation."""
+    """Vectorized implementation to be tested."""
     if len(wav.shape) > 1:
         return np.stack([vectorized_declick(ch, sr) for ch in wav])
 
@@ -37,16 +38,24 @@ def vectorized_declick(wav: np.ndarray, sr: int) -> np.ndarray:
     chunks = wav[:full_len].reshape(n_full_chunks, window)
 
     # Use einsum for row-wise squared sum to avoid large temp arrays
+    # rms = sqrt(sum(x^2) / N)
     sq_sum = np.einsum('ij,ij->i', chunks, chunks)
     rms = np.sqrt(sq_sum / window) + 1e-6
 
     # Identify spikes: abs(x) > 10 * local_rms
+    # spikes is a boolean mask of shape (n_chunks, window)
     spikes = np.abs(chunks) > (rms[:, np.newaxis] * 10)
 
     if np.any(spikes):
+        # We need a copy because we'll modify it
         out_chunks = chunks.copy()
-        row_idx, _ = np.where(spikes)
+
+        # Get indices of spikes
+        row_idx, col_idx = np.where(spikes)
+
+        # Clamp: sign(x) * 3 * local_rms
         out_chunks[spikes] = np.sign(chunks[spikes]) * (rms[row_idx] * 3)
+
         out = out_chunks.flatten()
     else:
         out = wav[:full_len].copy()
@@ -68,31 +77,31 @@ def vectorized_declick(wav: np.ndarray, sr: int) -> np.ndarray:
 
     return out
 
-def benchmark(duration_sec=60, sr=24000):
-    print(f"Benchmarking de-click on {duration_sec}s of {sr}Hz audio...")
-
-    n_samples = duration_sec * sr
+def test_parity():
+    sr = 24000
+    duration = 5 # 5 seconds for parity test
+    n_samples = duration * sr
     wav = np.random.normal(0, 0.1, n_samples).astype(np.float32)
 
-    # Add 100 random spikes
+    # Add spikes
     spike_indices = np.random.choice(n_samples, 100, replace=False)
     wav[spike_indices] = np.random.choice([-1.0, 1.0], 100) * 0.9
 
-    # Measure original implementation
-    start_time = time.perf_counter()
-    _ = original_declick(wav, sr)
-    end_time = time.perf_counter()
-    orig_time = end_time - start_time
-    print(f"Original execution time: {orig_time*1000:.2f} ms")
+    orig_out = original_declick(wav, sr)
+    vec_out = vectorized_declick(wav, sr)
 
-    # Measure vectorized implementation
-    start_time = time.perf_counter()
-    _ = vectorized_declick(wav, sr)
-    end_time = time.perf_counter()
-    vec_time = end_time - start_time
-    print(f"Vectorized execution time: {vec_time*1000:.2f} ms")
+    # Check if they are identical
+    diff = np.abs(orig_out - vec_out)
+    max_diff = np.max(diff)
+    print(f"Max difference: {max_diff}")
 
-    print(f"Speedup: {orig_time / vec_time:.2f}x")
+    if max_diff < 1e-6:
+        print("✅ Parity test passed!")
+    else:
+        print("❌ Parity test failed!")
+        # Find where it fails
+        fail_idx = np.where(diff > 1e-6)[0]
+        print(f"Fails at indices: {fail_idx[:10]}")
 
 if __name__ == "__main__":
-    benchmark()
+    test_parity()
