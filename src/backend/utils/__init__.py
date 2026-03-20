@@ -274,32 +274,65 @@ class AudioPostProcessor:
 
     @staticmethod
     def apply_declick(wav: np.ndarray, sr: int) -> np.ndarray:
-        """Simple heuristic de-clicker: clamps spikes > 10x local RMS."""
+        """Simple heuristic de-clicker: clamps spikes > 10x local RMS using vectorized NumPy."""
         try:
+            # ⚡ Bolt: Handle multi-channel audio by recursive application
             if len(wav.shape) > 1:
-                out = np.zeros_like(wav)
-                for i in range(wav.shape[0]):
-                    out[i] = AudioPostProcessor.apply_declick(wav[i], sr)
-                return out
+                return np.stack([AudioPostProcessor.apply_declick(ch, sr) for ch in wav])
 
-            out = wav.copy()
-            window = int(sr * 0.002) # 2ms
-            if window < 2: return wav
+            # ⚡ Bolt: Vectorized spike detection and clamping
+            # 2ms window for local RMS calculation
+            window = int(sr * 0.002)
+            if window < 2 or len(wav) < window:
+                return wav
+
+            # 1. Prepare chunks (ignoring remainder for the main vectorized pass)
+            n_chunks = len(wav) // window
+            main_len = n_chunks * window
+            chunks = wav[:main_len].reshape(n_chunks, window)
+
+            # 2. Calculate local RMS for each chunk using np.einsum for efficiency
+            # O(N) memory allocation avoided by not using chunks**2
+            sq_sums = np.einsum('ij,ij->i', chunks, chunks)
+            rms = np.sqrt(sq_sums / window) + 1e-6
+
+            # 3. Detect spikes: amplitude > 10x local RMS
+            # Broadcast RMS to chunk shape: (n_chunks, 1) -> (n_chunks, window)
+            spikes = np.abs(chunks) > (rms[:, None] * 10)
+
+            # 4. If any spikes detected, clamp them
+            if np.any(spikes):
+                out_chunks = chunks.copy()
+                # Sign * local_rms * 3
+                # We use np.where to get indices for the flattened mask or just assignment
+                # Since chunks is a view of wav, we MUST copy if we want to return a copy.
+                # The original implementation returns out = wav.copy()
+                clamp_vals = rms * 3
+                # ⚡ Bolt: Use row-indexing for memory-efficient clamping without large array allocation
+                row_idx, _ = np.where(spikes)
+                out_chunks[spikes] = np.sign(chunks[spikes]) * clamp_vals[row_idx]
+                out = out_chunks.flatten()
+            else:
+                out = wav[:main_len].copy()
+
+            # 5. Handle remainder (tail of the audio)
+            if main_len < len(wav):
+                remainder = wav[main_len:]
+                if len(remainder) >= 2:
+                    rem_rms = np.sqrt(np.vdot(remainder, remainder) / len(remainder)) + 1e-6
+                    rem_spikes = np.abs(remainder) > (rem_rms * 10)
+                    if np.any(rem_spikes):
+                        rem_out = remainder.copy()
+                        rem_out[rem_spikes] = np.sign(remainder[rem_spikes]) * rem_rms * 3
+                        out = np.concatenate([out, rem_out])
+                    else:
+                        out = np.concatenate([out, remainder])
+                else:
+                    out = np.concatenate([out, remainder])
             
-            # Process in chunks
-            for i in range(0, len(wav), window):
-                chunk = wav[i:i+window]
-                if len(chunk) < 2: continue
-                local_rms = np.sqrt(np.mean(chunk**2)) + 1e-6
-                # Identify spikes
-                spikes = np.abs(chunk) > (local_rms * 10)
-                if np.any(spikes):
-                    # Clamp spikes to local RMS * 3
-                    sign = np.sign(chunk[spikes])
-                    out[i:i+window][spikes] = sign * local_rms * 3
             return out
         except Exception as e:
-            logger.error(f"De-click failed: {e}")
+            logger.error(f"⚡ Bolt: Vectorized de-click failed: {e}")
             return wav
 
 class AuditManager:
