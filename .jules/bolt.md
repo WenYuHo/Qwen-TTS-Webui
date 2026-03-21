@@ -92,3 +92,7 @@
 ## 2026-03-07 - [Loop Fusion and Keyword Argument Optimization]
 **Learning:** Consolidating multiple transformation passes (e.g., loading, casting, and mono-conversion) into a single loop over audio assets reduces list indexing overhead and prevents potential tuple mutation bugs. Additionally, moving hardcoded generation defaults to a class-level constant and using a generic `**kwargs` loop in merging logic eliminates the overhead of recreating dictionaries and executing nested helper functions on every synthesis call.
 **Action:** Always prefer single-pass transformations for asset lists. Centralize fixed configuration defaults in class or module-level constants to minimize runtime object creation.
+
+## 2026-03-21 - [Vectorized De-Clicker and Heuristic Constraints]
+**Learning:** Replacing a loop-based de-clicker with a vectorized implementation using `np.reshape` and `np.einsum` provides an ~8-20x speedup. However, the '10x local RMS' heuristic has a mathematical constraint: for a single high-amplitude spike to trigger detection, the window size $N$ must be large enough such that $\sqrt{N}$ exceeds the threshold factor (e.g., $\sqrt{N} > 10$). For small windows like 48 samples (2ms @ 24kHz), a single spike cannot trigger the heuristic unless background noise is extremely low.
+**Action:** Use high sample rates (e.g., 96kHz) or larger window sizes when testing de-clicking heuristics to ensure window-level stats allow for outlier detection.

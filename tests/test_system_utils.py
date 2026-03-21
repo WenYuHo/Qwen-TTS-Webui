@@ -96,3 +96,28 @@ def test_resource_monitor_metrics():
             assert stats["cpu_percent"] == 15.5
             assert stats["ram_percent"] == 45.0
             assert "gpu" in stats
+
+
+def test_audio_post_processor_declick():
+    # Use high sample rate so window size > 100, allowing 10x RMS detection of single spike
+    sr = 96000
+    # Generate 0.05s of audio
+    wav = np.zeros(4800).astype(np.float32)
+    # Very low background noise
+    wav += np.random.normal(0, 0.0001, 4800)
+
+    # Add a spike at index 1000
+    wav[1000] = 0.9
+
+    out = AudioPostProcessor.apply_declick(wav, sr)
+
+    # The spike should be clamped
+    assert out[1000] < 0.9
+    assert out[1000] > 0 # Should not be zeroed out
+
+    # Check multi-channel
+    wav_stereo = np.stack([wav, wav])
+    out_stereo = AudioPostProcessor.apply_declick(wav_stereo, sr)
+    assert out_stereo.shape == (2, 4800)
+    assert out_stereo[0, 1000] < 0.9
+    assert out_stereo[1, 1000] < 0.9
