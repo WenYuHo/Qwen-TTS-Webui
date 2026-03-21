@@ -107,8 +107,11 @@ export const AssetManager = {
     },
 
     playAsset(name) {
-        const audio = new Audio(`/api/assets/download/${name}`);
-        audio.play();
+        const player = document.getElementById('preview-player');
+        if (player) {
+            player.src = `/api/assets/download/${name}`;
+            player.play();
+        }
     },
 
     filterAssets() {
