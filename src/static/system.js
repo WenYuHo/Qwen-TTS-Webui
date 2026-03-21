@@ -184,12 +184,28 @@ export const SystemManager = {
 
     async runEngineBenchmark() {
         const out = document.getElementById('performance-output');
-        out.innerText = "Running profiling benchmark... please wait (takes ~10s)";
+        const btn = document.querySelector('#system-performance-tab .btn-primary');
+
+        if (out) out.innerText = "Running profiling benchmark... please wait (takes ~10s)";
+
+        if (btn) {
+            btn.disabled = true;
+            btn.dataset.original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> BENCHMARKING...';
+        }
+
         try {
             const res = await fetch('/api/system/benchmark', { method: 'POST' });
             const data = await res.json();
-            out.innerText = data.output;
-        } catch (err) { out.innerText = "Benchmark failed: " + err.message; }
+            if (out) out.innerText = data.output;
+        } catch (err) {
+            if (out) out.innerText = "Benchmark failed: " + err.message;
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = btn.dataset.original;
+            }
+        }
     },
 
     async clearCache() {
