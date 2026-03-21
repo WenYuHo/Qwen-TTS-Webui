@@ -96,3 +96,33 @@ def test_resource_monitor_metrics():
             assert stats["cpu_percent"] == 15.5
             assert stats["ram_percent"] == 45.0
             assert "gpu" in stats
+
+def test_audio_post_processor_declick():
+    sr = 96000 # High SR to ensure sqrt(N) > 10 for single spike detection
+    # window = 96000 * 0.002 = 192 samples. sqrt(192) = 13.8 > 10.
+    # At 24kHz, window is 48. sqrt(48) = 6.9 < 10.
+
+    # Generate silent buffer with one large spike
+    wav = np.zeros(sr, dtype=np.float32)
+    wav[500] = 0.9 # Large spike
+
+    # Heuristic: spike > 10 * local_rms.
+    # In a window of N samples where 1 is 0.9 and others 0,
+    # RMS = 0.9 / sqrt(N).
+    # Factor = 0.9 / (0.9 / sqrt(N)) = sqrt(N).
+    # So we need sqrt(N) > 10 to detect the spike.
+
+    out = AudioPostProcessor.apply_declick(wav, sr)
+
+    # Spike at index 500 should be clamped to 3 * RMS
+    # RMS of window = 0.9 / sqrt(192) = 0.0649
+    # Clamp value = 3 * 0.0649 = 0.1948
+    assert out[500] < 0.2
+    assert out[500] > 0
+
+    # Verify stereo
+    wav_stereo = np.stack([wav, wav])
+    out_stereo = AudioPostProcessor.apply_declick(wav_stereo, sr)
+    assert out_stereo.shape == (2, sr)
+    assert out_stereo[0, 500] < 0.2
+    assert out_stereo[1, 500] < 0.2
