@@ -274,33 +274,63 @@ class AudioPostProcessor:
 
     @staticmethod
     def apply_declick(wav: np.ndarray, sr: int) -> np.ndarray:
-        """Simple heuristic de-clicker: clamps spikes > 10x local RMS."""
+        """Simple heuristic de-clicker: clamps spikes > 10x local RMS using vectorized NumPy operations."""
         try:
+            # ⚡ Bolt: Recursively handle multi-channel audio
             if len(wav.shape) > 1:
-                out = np.zeros_like(wav)
-                for i in range(wav.shape[0]):
-                    out[i] = AudioPostProcessor.apply_declick(wav[i], sr)
-                return out
+                return np.stack([AudioPostProcessor.apply_declick(ch, sr) for ch in wav])
 
-            out = wav.copy()
-            window = int(sr * 0.002) # 2ms
-            if window < 2: return wav
+            window_size = int(sr * 0.002)  # 2ms window
+            if window_size < 2 or len(wav) < window_size:
+                return wav.copy()
+
+            # ⚡ Bolt: Vectorized implementation to avoid O(N) Python loop
+            # 1. Reshape into chunks and handle the remainder
+            num_chunks = len(wav) // window_size
+            main_len = num_chunks * window_size
+            chunks = wav[:main_len].reshape(num_chunks, window_size)
+            remainder = wav[main_len:]
+
+            # 2. Calculate RMS for each chunk using einsum for O(N) memory efficiency
+            # chunks**2 would allocate a new large array; einsum avoids this.
+            sq_sums = np.einsum('ij,ij->i', chunks, chunks)
+            rms = np.sqrt(sq_sums / window_size) + 1e-6
+
+            # 3. Identify and clamp spikes in chunks
+            # threshold = rms * 10; clamp = rms * 3
+            thresholds = rms * 10
+            clamp_vals = rms * 3
             
-            # Process in chunks
-            for i in range(0, len(wav), window):
-                chunk = wav[i:i+window]
-                if len(chunk) < 2: continue
-                local_rms = np.sqrt(np.mean(chunk**2)) + 1e-6
-                # Identify spikes
-                spikes = np.abs(chunk) > (local_rms * 10)
-                if np.any(spikes):
-                    # Clamp spikes to local RMS * 3
-                    sign = np.sign(chunk[spikes])
-                    out[i:i+window][spikes] = sign * local_rms * 3
-            return out
+            # Use broadcasting to identify spikes (num_chunks, window_size)
+            spikes = np.abs(chunks) > thresholds[:, np.newaxis]
+
+            if np.any(spikes):
+                # Create a copy for modification
+                out_chunks = chunks.copy()
+                # Apply clamping using advanced indexing and broadcasting
+                # We need to broadcast clamp_vals to match the shape of chunks[spikes]
+                # row_indices is where the spikes are in the (num_chunks, window_size) array
+                row_idx, col_idx = np.where(spikes)
+                out_chunks[row_idx, col_idx] = np.sign(chunks[row_idx, col_idx]) * clamp_vals[row_idx]
+                out_main = out_chunks.flatten()
+            else:
+                out_main = wav[:main_len].copy()
+
+            # 4. Handle the remainder chunk separately (usually very small)
+            if len(remainder) >= 2:
+                rem_rms = np.sqrt(np.vdot(remainder, remainder) / len(remainder)) + 1e-6
+                rem_spikes = np.abs(remainder) > (rem_rms * 10)
+                if np.any(rem_spikes):
+                    remainder_out = remainder.copy()
+                    remainder_out[rem_spikes] = np.sign(remainder[rem_spikes]) * rem_rms * 3
+                else:
+                    remainder_out = remainder.copy()
+                return np.concatenate([out_main, remainder_out])
+
+            return np.concatenate([out_main, remainder]) if len(remainder) > 0 else out_main
         except Exception as e:
-            logger.error(f"De-click failed: {e}")
-            return wav
+            logger.error(f"⚡ Bolt: Vectorized de-click failed: {e}")
+            return wav.copy()
 
 class AuditManager:
     """Logs system-wide AI generation events for transparency and tracking."""
