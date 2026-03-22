@@ -120,10 +120,10 @@ Object.assign(window, {
     previewS2STarget: DubbingManager.previewS2STarget.bind(DubbingManager),
     uploadS2SFiles: DubbingManager.uploadS2SFiles.bind(DubbingManager),
     startVoiceChanger: DubbingManager.startVoiceChanger.bind(DubbingManager),
-    loadAssets: AssetManager.loadAssets,
-    uploadAsset: AssetManager.uploadAsset,
-    deleteAsset: AssetManager.deleteAsset,
-    playAsset: AssetManager.playAsset,
+    loadAssets: AssetManager.loadAssets.bind(AssetManager),
+    uploadAsset: AssetManager.uploadAsset.bind(AssetManager),
+    deleteAsset: AssetManager.deleteAsset.bind(AssetManager),
+    playAsset: AssetManager.playAsset.bind(AssetManager),
     refreshTasks: TaskManager.refreshTasks,
     cancelTask: TaskManager.cancelTask,
     clearCompletedTasks: TaskManager.clearCompletedTasks,
@@ -185,7 +185,7 @@ Object.assign(window, {
     showVideoPreview: VideoModal.show.bind(VideoModal),
     hideVideoModal: VideoModal.hide.bind(VideoModal),
     showHelp: () => HelpManager.show(state.currentView),
-    setupDragAndDrop: AssetManager.setupDragAndDrop
+    setupDragAndDrop: AssetManager.setupDragAndDrop.bind(AssetManager)
 });
 
 document.addEventListener('DOMContentLoaded', () => {
