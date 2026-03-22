@@ -96,3 +96,30 @@ def test_resource_monitor_metrics():
             assert stats["cpu_percent"] == 15.5
             assert stats["ram_percent"] == 45.0
             assert "gpu" in stats
+
+def test_audio_post_processor_declick():
+    """Verify de-clicker spike detection and clamping."""
+    # Use high sample rate to ensure sqrt(N) > 10 for single-spike detection
+    sr = 96000
+    # Create 10ms of silence
+    n_samples = int(sr * 0.01)
+    wav = np.zeros(n_samples, dtype=np.float32)
+
+    # Add a massive spike in the middle of the first 2ms window
+    # Window size at 96kHz is 192 samples (96000 * 0.002)
+    wav[100] = 1.0
+
+    out = AudioPostProcessor.apply_declick(wav, sr)
+
+    # Spike at index 100 should be clamped
+    # Local RMS of 192 samples with one '1.0' spike is sqrt(1/192) ≈ 0.072
+    # Threshold is 10x RMS ≈ 0.72. 1.0 > 0.72, so it should trigger.
+    assert out[100] < 1.0
+    assert out[100] > 0 # Should still be positive
+
+    # Stereo test
+    wav_stereo = np.stack([wav, wav])
+    out_stereo = AudioPostProcessor.apply_declick(wav_stereo, sr)
+    assert out_stereo.shape == (2, n_samples)
+    assert out_stereo[0, 100] < 1.0
+    assert out_stereo[1, 100] < 1.0
