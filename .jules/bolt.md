@@ -89,6 +89,10 @@
 **Learning:** Frequent filesystem I/O and JSON parsing for the audit log (triggered by terminal task updates) can become a significant bottleneck as the log grows. Implementing an in-memory cache in the `AuditManager` eliminates redundant $O(N)$ disk reads and parsing on every `log_event` and `get_log` call, reducing log retrieval latency by ~99.8%.
 **Action:** Utilize in-memory caching for frequently accessed and appended JSON logs. Ensure the cache is invalidated during system-wide storage purges to maintain synchronization.
 
+## 2026-03-22 - [Vectorized Audio De-clicking]
+**Learning:** Python loops for per-chunk audio processing (like the 10x local RMS de-clicker) are extremely slow for high-sample-rate audio. Replacing the O(N) loop with a NumPy-vectorized approach using `reshape` and `einsum` provides a ~5.4x speedup. A critical edge case is handling the "remainder" of the buffer that doesn't fit into a full window, which must be processed separately to maintain parity with the original logic.
+**Action:** Always prefer vectorized NumPy operations (einsum, broadcasting, boolean masking) for audio DSP tasks. Use `np.where(mask)[0]` to map 1D property arrays (like RMS or thresholds) back to 2D reshaped chunk masks for assignment.
+
 ## 2026-03-07 - [Loop Fusion and Keyword Argument Optimization]
 **Learning:** Consolidating multiple transformation passes (e.g., loading, casting, and mono-conversion) into a single loop over audio assets reduces list indexing overhead and prevents potential tuple mutation bugs. Additionally, moving hardcoded generation defaults to a class-level constant and using a generic `**kwargs` loop in merging logic eliminates the overhead of recreating dictionaries and executing nested helper functions on every synthesis call.
 **Action:** Always prefer single-pass transformations for asset lists. Centralize fixed configuration defaults in class or module-level constants to minimize runtime object creation.

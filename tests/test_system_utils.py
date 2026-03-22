@@ -96,3 +96,27 @@ def test_resource_monitor_metrics():
             assert stats["cpu_percent"] == 15.5
             assert stats["ram_percent"] == 45.0
             assert "gpu" in stats
+
+def test_audio_post_processor_declick():
+    """Verify vectorized de-clicking logic identifies and clamps spikes."""
+    sr = 96000 # Use high SR to ensure spike is detectable by 10x RMS heuristic
+    # Generate 10ms of silence
+    wav = np.zeros(int(sr * 0.01), dtype=np.float32)
+    # Add a single spike
+    wav[100] = 0.9
+
+    out = AudioPostProcessor.apply_declick(wav, sr)
+
+    # Spike should be clamped
+    assert out[100] < 0.9
+    assert out[100] > 0
+    # Other values should remain zero
+    assert out[0] == 0
+    assert out[200] == 0
+
+    # Test stereo
+    wav_stereo = np.stack([wav, wav])
+    out_stereo = AudioPostProcessor.apply_declick(wav_stereo, sr)
+    assert out_stereo.shape == (2, len(wav))
+    assert out_stereo[0, 100] < 0.9
+    assert out_stereo[1, 100] < 0.9
