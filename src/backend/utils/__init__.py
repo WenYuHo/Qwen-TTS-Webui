@@ -274,33 +274,59 @@ class AudioPostProcessor:
 
     @staticmethod
     def apply_declick(wav: np.ndarray, sr: int) -> np.ndarray:
-        """Simple heuristic de-clicker: clamps spikes > 10x local RMS."""
+        """Simple heuristic de-clicker: clamps spikes > 10x local RMS using vectorized processing."""
         try:
             if len(wav.shape) > 1:
+                # ⚡ Bolt: Multi-channel vectorized processing recursively invokes mono optimization
                 out = np.zeros_like(wav)
                 for i in range(wav.shape[0]):
                     out[i] = AudioPostProcessor.apply_declick(wav[i], sr)
                 return out
 
-            out = wav.copy()
             window = int(sr * 0.002) # 2ms
-            if window < 2: return wav
+            if window < 2 or len(wav) < 2:
+                return wav.copy()
+
+            n_full_chunks = len(wav) // window
+            remainder_len = len(wav) % window
             
-            # Process in chunks
-            for i in range(0, len(wav), window):
-                chunk = wav[i:i+window]
-                if len(chunk) < 2: continue
-                local_rms = np.sqrt(np.mean(chunk**2)) + 1e-6
-                # Identify spikes
-                spikes = np.abs(chunk) > (local_rms * 10)
+            # ⚡ Bolt: Always return a copy for consistency with the original implementation's behavior.
+            out = wav.copy()
+
+            if n_full_chunks > 0:
+                # ⚡ Bolt: Vectorize processing by reshaping into (N, window) chunks
+                full_part = wav[:n_full_chunks * window]
+                chunks = full_part.reshape(n_full_chunks, window)
+
+                # ⚡ Bolt: Use einsum for memory-efficient row-wise squared sum (avoid chunks**2)
+                # This reduces O(N) memory allocations for large buffers.
+                # rms shape: (n_full_chunks,)
+                rms = np.sqrt(np.einsum('ij,ij->i', chunks, chunks) / window) + 1e-6
+
+                # ⚡ Bolt: Identify spikes across all chunks in a single boolean mask operation
+                # Threshold shape: (n_full_chunks, 1) broadcast to (n_full_chunks, window)
+                spikes = np.abs(chunks) > (rms[:, np.newaxis] * 10)
+
                 if np.any(spikes):
-                    # Clamp spikes to local RMS * 3
-                    sign = np.sign(chunk[spikes])
-                    out[i:i+window][spikes] = sign * local_rms * 3
+                    # ⚡ Bolt: Vectorized clamp value assignment using boolean indexing.
+                    # Mapping 1D RMS values back to 2D spike locations via np.where(spikes)[0].
+                    row_idx, _ = np.where(spikes)
+                    out_full = out[:n_full_chunks * window].reshape(n_full_chunks, window)
+                    out_full[spikes] = np.sign(chunks[spikes]) * (rms[row_idx] * 3)
+                    # out_full is a view, so the original 'out' array is updated.
+
+            # ⚡ Bolt: Handle the final partial chunk (remainder)
+            if remainder_len >= 2:
+                remainder = wav[-remainder_len:]
+                rem_rms = np.sqrt(np.vdot(remainder, remainder) / remainder_len) + 1e-6
+                rem_spikes = np.abs(remainder) > (rem_rms * 10)
+                if np.any(rem_spikes):
+                    out[-remainder_len:][rem_spikes] = np.sign(remainder[rem_spikes]) * (rem_rms * 3)
+
             return out
         except Exception as e:
-            logger.error(f"De-click failed: {e}")
-            return wav
+            logger.error(f"⚡ Bolt: Vectorized de-click failed: {e}")
+            return wav.copy()
 
 class AuditManager:
     """Logs system-wide AI generation events for transparency and tracking."""
