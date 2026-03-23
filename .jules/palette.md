@@ -25,3 +25,7 @@
 ## 2026-03-20 - [Semantic Empty States for System Management]
 **Learning:** Extending the existing `.empty-state` CSS pattern to administrative views like the System Manager (Audit Log, Phoneme Editor) significantly improves visual consistency and provides clear guidance to the user. Using FontAwesome icons that match the semantic context (e.g., `fa-clipboard-list` for logs, `fa-language` for phonemes) helps with quick visual recognition and reinforces the "Technoid Brutalist" style.
 **Action:** Always check for unhandled empty states in data-heavy administrative views and implement icon-based guidance using existing UI patterns.
+
+## 2026-03-25 - [Global Playback Unification]
+**Learning:** In a media-heavy "Technoid Brutalist" studio, routing audio playback from localized list items (like the Asset Library) to a persistent global player (like the Sidebar Monitor) significantly enhances UX by providing centralized control (play/pause/seek) and visual feedback. Using a single `aria-label`ed player for all previews also reduces ARIA clutter compared to many individual player instances.
+**Action:** Always route audio preview interactions to the global `#preview-player` instance rather than creating detached `Audio` objects. Ensure the global player is accessible and clearly labeled.
