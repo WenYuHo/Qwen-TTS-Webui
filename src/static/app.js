@@ -123,7 +123,7 @@ Object.assign(window, {
     loadAssets: AssetManager.loadAssets,
     uploadAsset: AssetManager.uploadAsset,
     deleteAsset: AssetManager.deleteAsset,
-    playAsset: AssetManager.playAsset,
+    playAsset: AssetManager.playAsset.bind(AssetManager),
     refreshTasks: TaskManager.refreshTasks,
     cancelTask: TaskManager.cancelTask,
     clearCompletedTasks: TaskManager.clearCompletedTasks,
