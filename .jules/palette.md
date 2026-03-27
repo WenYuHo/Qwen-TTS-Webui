@@ -25,3 +25,7 @@
 ## 2026-03-20 - [Semantic Empty States for System Management]
 **Learning:** Extending the existing `.empty-state` CSS pattern to administrative views like the System Manager (Audit Log, Phoneme Editor) significantly improves visual consistency and provides clear guidance to the user. Using FontAwesome icons that match the semantic context (e.g., `fa-clipboard-list` for logs, `fa-language` for phonemes) helps with quick visual recognition and reinforces the "Technoid Brutalist" style.
 **Action:** Always check for unhandled empty states in data-heavy administrative views and implement icon-based guidance using existing UI patterns.
+
+## 2026-03-22 - [Search Empty States and Global Playback Consolidation]
+**Learning:** Implementing search-specific empty states requires careful handling of the difference between an inherently empty collection and a "no results found" state to avoid visual overlap. Consolidating audio playback to a global monitor element provides a cleaner, professional "studio" feel and prevents audio overlaps, but necessitates explicit loading indicators on the source triggers to maintain responsiveness.
+**Action:** Use conditional logic in filtering functions to toggle search-specific empty states only when items exist but don't match. Always implement loading states when diverting local actions to global UI monitors.
