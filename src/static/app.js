@@ -120,17 +120,17 @@ Object.assign(window, {
     previewS2STarget: DubbingManager.previewS2STarget.bind(DubbingManager),
     uploadS2SFiles: DubbingManager.uploadS2SFiles.bind(DubbingManager),
     startVoiceChanger: DubbingManager.startVoiceChanger.bind(DubbingManager),
-    loadAssets: AssetManager.loadAssets,
-    uploadAsset: AssetManager.uploadAsset,
-    deleteAsset: AssetManager.deleteAsset,
-    playAsset: AssetManager.playAsset,
-    refreshTasks: TaskManager.refreshTasks,
-    cancelTask: TaskManager.cancelTask,
-    clearCompletedTasks: TaskManager.clearCompletedTasks,
-    exportStudioBundle: ProductionManager.exportStudioBundle,
-    generatePodcast: ProductionManager.generatePodcast,
+    loadAssets: AssetManager.loadAssets.bind(AssetManager),
+    uploadAsset: AssetManager.uploadAsset.bind(AssetManager),
+    deleteAsset: AssetManager.deleteAsset.bind(AssetManager),
+    playAsset: AssetManager.playAsset.bind(AssetManager),
+    refreshTasks: TaskManager.refreshTasks.bind(TaskManager),
+    cancelTask: TaskManager.cancelTask.bind(TaskManager),
+    clearCompletedTasks: TaskManager.clearCompletedTasks.bind(TaskManager),
+    exportStudioBundle: ProductionManager.exportStudioBundle.bind(ProductionManager),
+    generatePodcast: ProductionManager.generatePodcast.bind(ProductionManager),
     suggestVideoScene: ProductionManager.suggestVideoScene.bind(ProductionManager),
-    triggerDownload: SystemManager.triggerDownload,
+    triggerDownload: SystemManager.triggerDownload.bind(SystemManager),
     getAllProfiles: VoiceLabManager.getAllProfiles.bind(VoiceLabManager),
     testVoiceDesign: VoiceLabManager.testVoiceDesign.bind(VoiceLabManager),
     testVoiceClone: VoiceLabManager.testVoiceClone.bind(VoiceLabManager),
@@ -185,7 +185,7 @@ Object.assign(window, {
     showVideoPreview: VideoModal.show.bind(VideoModal),
     hideVideoModal: VideoModal.hide.bind(VideoModal),
     showHelp: () => HelpManager.show(state.currentView),
-    setupDragAndDrop: AssetManager.setupDragAndDrop
+    setupDragAndDrop: AssetManager.setupDragAndDrop.bind(AssetManager)
 });
 
 document.addEventListener('DOMContentLoaded', () => {
