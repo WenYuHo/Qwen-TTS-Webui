@@ -25,3 +25,7 @@
 ## 2026-03-20 - [Semantic Empty States for System Management]
 **Learning:** Extending the existing `.empty-state` CSS pattern to administrative views like the System Manager (Audit Log, Phoneme Editor) significantly improves visual consistency and provides clear guidance to the user. Using FontAwesome icons that match the semantic context (e.g., `fa-clipboard-list` for logs, `fa-language` for phonemes) helps with quick visual recognition and reinforces the "Technoid Brutalist" style.
 **Action:** Always check for unhandled empty states in data-heavy administrative views and implement icon-based guidance using existing UI patterns.
+
+## 2026-03-18 - [Unified Audio Interaction and Loading States]
+**Learning:** Consolidating ad-hoc audio playback (e.g., `new Audio()`) into a single global player instance (#preview-player) simplifies media state management and prevents overlapping audio. Pairing this with a consistent "spinner + disabled" loading state for interaction triggers provides essential visual feedback during asynchronous audio fetching or generation, making the UI feel more responsive and robust.
+**Action:** Always prefer global media player instances for shared preview functionality. Implement `try...finally` blocks to ensure loading states are correctly cleared even on network or playback failure.
