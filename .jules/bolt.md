@@ -92,3 +92,7 @@
 ## 2026-03-07 - [Loop Fusion and Keyword Argument Optimization]
 **Learning:** Consolidating multiple transformation passes (e.g., loading, casting, and mono-conversion) into a single loop over audio assets reduces list indexing overhead and prevents potential tuple mutation bugs. Additionally, moving hardcoded generation defaults to a class-level constant and using a generic `**kwargs` loop in merging logic eliminates the overhead of recreating dictionaries and executing nested helper functions on every synthesis call.
 **Action:** Always prefer single-pass transformations for asset lists. Centralize fixed configuration defaults in class or module-level constants to minimize runtime object creation.
+
+## 2026-03-08 - [Optimized Attentive Statistics Pooling]
+**Learning:** In the `AttentiveStatisticsPooling` layer, performing a 1x1 convolution (TDNN) on concatenated inputs [x, mean, std] where mean and std are constants across the time dimension is extremely inefficient. Splitting the projection into separate components (W_x * x + (W_m * m + W_s * s + b)) allows for constant-time broadcasting of the global stats, eliminating redundant O(N) memory allocations and expansions. Additionally, using the E[X^2] - (E[X])^2 variance formula and native PyTorch mean/std fast-paths for uniform sequences provides a massive performance boost.
+**Action:** Always refactor multi-input projections to leverage broadcasting for stationary features. Prefer native torch reduction ops over manual masked multiplications for full-length sequences in inference paths.
