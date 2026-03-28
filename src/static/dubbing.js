@@ -206,7 +206,7 @@ export const DubbingManager = {
         try {
             const allProfiles = await window.getAllProfiles();
             const profile = allProfiles[targetVoiceId];
-            await window.previewVoice(profile.type, profile.value);
+            await window.previewVoice(profile.type, profile.value, btn);
         } catch (err) {
             Notification.show("Preview failed: " + err.message, "error");
         } finally {
