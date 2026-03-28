@@ -5,6 +5,7 @@ export const SystemManager = {
     async fetchInventory() {
         const list = document.getElementById('model-inventory-list');
         if (!list) return;
+        list.innerHTML = '<div class="empty-state" style="padding:20px;"><h3><i class="fas fa-spinner fa-spin"></i> Loading inventory...</h3></div>';
         try {
             const res = await fetch('/api/models/inventory');
             const data = await res.json();
