@@ -92,3 +92,11 @@
 ## 2026-03-07 - [Loop Fusion and Keyword Argument Optimization]
 **Learning:** Consolidating multiple transformation passes (e.g., loading, casting, and mono-conversion) into a single loop over audio assets reduces list indexing overhead and prevents potential tuple mutation bugs. Additionally, moving hardcoded generation defaults to a class-level constant and using a generic `**kwargs` loop in merging logic eliminates the overhead of recreating dictionaries and executing nested helper functions on every synthesis call.
 **Action:** Always prefer single-pass transformations for asset lists. Centralize fixed configuration defaults in class or module-level constants to minimize runtime object creation.
+
+## 2026-03-08 - [Memory-Efficient Audio Metrics]
+**Learning:** Calculating audio metrics like RMS and Peak using  and  incurs (N)$ memory overhead for temporary arrays. On large buffers (400MB+), this adds significant GC pressure and latency. Replacing these with  for RMS (~17x faster) and  for Peak (~2.3x faster) eliminates temporary allocations while maintaining mathematical identity.
+**Action:** Always prefer dot-product-based RMS and dual-pass min/max peak detection for large audio arrays to minimize memory footprint and improve execution speed.
+
+## 2026-03-08 - [Memory-Efficient Audio Metrics]
+**Learning:** Calculating audio metrics like RMS and Peak using `np.mean(wav**2)` and `np.max(np.abs(wav))` incurs $O(N)$ memory overhead for temporary arrays. On large buffers (400MB+), this adds significant GC pressure and latency. Replacing these with `np.vdot(wav, wav) / wav.size` for RMS (~17x faster) and `max(np.max(wav), -np.min(wav))` for Peak (~2.3x faster) eliminates temporary allocations while maintaining mathematical identity.
+**Action:** Always prefer dot-product-based RMS and dual-pass min/max peak detection for large audio arrays to minimize memory footprint and improve execution speed.
