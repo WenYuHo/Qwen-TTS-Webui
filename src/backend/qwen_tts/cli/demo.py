@@ -203,7 +203,8 @@ def _normalize_audio(wav, eps=1e-12, clip=True):
 
     elif np.issubdtype(x.dtype, np.floating):
         y = x.astype(np.float32)
-        m = np.max(np.abs(y)) if y.size else 0.0
+        # ⚡ Bolt: Memory-efficient Peak (no O(N) temporary array for abs)
+        m = float(max(np.max(y), -np.min(y))) if y.size else 0.0
 
         if m <= 1.0 + 1e-6:
             pass
