@@ -1,31 +1,29 @@
 import numpy as np
 import time
 import sys
-import os
+from pathlib import Path
 
-# Add src to path for imports
-sys.path.append(os.path.abspath("src"))
+# Add src to path
+sys.path.append(str(Path(__file__).parent / "src"))
+
 from backend.utils import AudioPostProcessor
 
-def benchmark_declick(duration_sec=60, sr=24000):
-    print(f"Benchmarking de-click on {duration_sec}s of {sr}Hz audio...")
+def benchmark_declick(duration_sec=60, sr=44100):
+    print(f"Benchmarking apply_declick with {duration_sec}s audio at {sr}Hz...")
 
-    # Generate random audio with some spikes
+    # Generate some random noise with some spikes
     n_samples = duration_sec * sr
     wav = np.random.normal(0, 0.1, n_samples).astype(np.float32)
 
-    # Add 100 random spikes
-    spike_indices = np.random.choice(n_samples, 100, replace=False)
-    wav[spike_indices] = np.random.choice([-1.0, 1.0], 100) * 0.9
+    # Add some spikes
+    spike_indices = np.random.randint(0, n_samples, 100)
+    wav[spike_indices] = 1.0
 
-    # Measure original implementation
-    start_time = time.perf_counter()
+    start_time = time.time()
     _ = AudioPostProcessor.apply_declick(wav, sr)
-    end_time = time.perf_counter()
+    end_time = time.time()
 
-    elapsed = end_time - start_time
-    print(f"Execution time: {elapsed*1000:.2f} ms")
-    return elapsed
+    print(f"Time taken: {end_time - start_time:.4f} seconds")
 
 if __name__ == "__main__":
     benchmark_declick()
