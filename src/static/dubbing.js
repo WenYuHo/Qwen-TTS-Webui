@@ -135,11 +135,16 @@ export const DubbingManager = {
 
         playBtn.onclick = () => {
             this.wavesurfer.playPause();
-            playBtn.innerHTML = this.wavesurfer.isPlaying() ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+            const isPlaying = this.wavesurfer.isPlaying();
+            playBtn.innerHTML = isPlaying ? '<i class="fas fa-pause" aria-hidden="true"></i>' : '<i class="fas fa-play" aria-hidden="true"></i>';
+            playBtn.setAttribute('aria-label', isPlaying ? 'Pause source audio' : 'Play source audio');
+            playBtn.setAttribute('title', isPlaying ? 'Pause source audio' : 'Play source audio');
         };
 
         this.wavesurfer.on('finish', () => {
-            playBtn.innerHTML = '<i class="fas fa-play"></i>';
+            playBtn.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
+            playBtn.setAttribute('aria-label', 'Play source audio');
+            playBtn.setAttribute('title', 'Play source audio');
         });
     },
 
@@ -311,7 +316,9 @@ export const DubbingManager = {
 
                     window.state.s2s.mediaRecorder.start();
                     window.state.s2s.isRecording = true;
-                    btn.innerHTML = '<i class="fas fa-stop"></i> STOP RECORDING';
+                    btn.innerHTML = '<i class="fas fa-stop" aria-hidden="true"></i> STOP RECORDING';
+                    btn.setAttribute('aria-label', 'Stop recording');
+                    btn.setAttribute('title', 'Stop recording');
                     btn.classList.add('btn-danger');
                 } catch (err) {
                     Notification.show("Microphone access denied", "error");
@@ -319,7 +326,9 @@ export const DubbingManager = {
             } else {
                 window.state.s2s.mediaRecorder.stop();
                 window.state.s2s.isRecording = false;
-                btn.innerHTML = '<i class="fas fa-circle"></i> RECORD AUDIO';
+                btn.innerHTML = '<i class="fas fa-circle" aria-hidden="true"></i> RECORD AUDIO';
+                btn.setAttribute('aria-label', 'Record source audio');
+                btn.setAttribute('title', 'Record source audio');
                 btn.classList.remove('btn-danger');
             }
         };
