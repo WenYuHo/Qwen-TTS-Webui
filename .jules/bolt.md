@@ -92,3 +92,7 @@
 ## 2026-03-07 - [Loop Fusion and Keyword Argument Optimization]
 **Learning:** Consolidating multiple transformation passes (e.g., loading, casting, and mono-conversion) into a single loop over audio assets reduces list indexing overhead and prevents potential tuple mutation bugs. Additionally, moving hardcoded generation defaults to a class-level constant and using a generic `**kwargs` loop in merging logic eliminates the overhead of recreating dictionaries and executing nested helper functions on every synthesis call.
 **Action:** Always prefer single-pass transformations for asset lists. Centralize fixed configuration defaults in class or module-level constants to minimize runtime object creation.
+
+## 2026-03-31 - [Broadcasting for Multi-Dimensional Boolean Indexing]
+**Learning:** When using boolean indexing on a multi-dimensional NumPy array (e.g., a reshaped chunked audio buffer), the mask and the values being indexed must have compatible shapes. Specifically, if you attempt to use a boolean mask of shape `(N, W)` to index a gain array of shape `(N, 1)`, NumPy will raise an `IndexError`. Explicitly broadcasting the gain array to the full shape using `np.broadcast_to(rms_expanded, chunks.shape)` before indexing prevents this failure.
+**Action:** Always verify shape compatibility when performing boolean indexing on reshaped or multi-dimensional arrays. Use `np.broadcast_to` to align lower-dimensional arrays with the mask shape.
