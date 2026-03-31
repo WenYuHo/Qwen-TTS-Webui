@@ -25,3 +25,7 @@
 ## 2026-03-20 - [Semantic Empty States for System Management]
 **Learning:** Extending the existing `.empty-state` CSS pattern to administrative views like the System Manager (Audit Log, Phoneme Editor) significantly improves visual consistency and provides clear guidance to the user. Using FontAwesome icons that match the semantic context (e.g., `fa-clipboard-list` for logs, `fa-language` for phonemes) helps with quick visual recognition and reinforces the "Technoid Brutalist" style.
 **Action:** Always check for unhandled empty states in data-heavy administrative views and implement icon-based guidance using existing UI patterns.
+
+## 2026-03-16 - [Async Feedback and Dynamic Accessibility]
+**Learning:** For asynchronous modules (Voice Library, System Inventory), replacing the container's content with a loading spinner before fetching provides immediate feedback and prevents orientation loss. Additionally, dynamic `aria-label` and `title` updates on toggle buttons (like Record/Stop or Play/Pause) ensure that screen reader users are always aware of the button's current function in real-time.
+**Action:** Always implement a loading state for async data-driven components. Ensure interactive toggle buttons dynamically update their accessibility attributes to reflect state changes.

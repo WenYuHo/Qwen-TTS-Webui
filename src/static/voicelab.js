@@ -206,6 +206,8 @@ export const VoiceLabManager = {
     },
 
     async loadVoiceLibrary() {
+        const grid = document.getElementById('voice-library-grid');
+        if (grid) grid.innerHTML = '<div class="empty-state empty-state-grid"><h3><i class="fas fa-spinner fa-spin"></i> Loading voices...</h3></div>';
         try {
             const [libRes, speakerRes] = await Promise.all([
                 fetch('/api/voice/library'),
@@ -216,7 +218,10 @@ export const VoiceLabManager = {
 
             this.renderVoiceLibrary(libData.voices, speakerData.presets);
             this.updateMixDropdowns(libData.voices, speakerData.presets);
-        } catch (err) { console.error("Failed to load voices", err); }
+        } catch (err) {
+            console.error("Failed to load voices", err);
+            if (grid) grid.innerHTML = '<div class="empty-state empty-state-grid"><h3>Error loading voices</h3></div>';
+        }
     },
 
     renderVoiceLibrary(savedVoices, presets) {
@@ -410,6 +415,8 @@ export const VoiceLabManager = {
                     window.state.voicelab.mediaRecorder.start();
                     window.state.voicelab.isRecording = true;
                     btn.innerHTML = 'STOP';
+                    btn.setAttribute('aria-label', 'Stop recording');
+                    btn.setAttribute('title', 'Stop recording');
                     btn.classList.remove('btn-danger');
                     btn.classList.add('btn-secondary');
                 } catch (err) {
@@ -419,6 +426,8 @@ export const VoiceLabManager = {
                 window.state.voicelab.mediaRecorder.stop();
                 window.state.voicelab.isRecording = false;
                 btn.innerHTML = 'RECORD';
+                btn.setAttribute('aria-label', 'Record reference audio');
+                btn.setAttribute('title', 'Record reference audio');
                 btn.classList.remove('btn-secondary');
                 btn.classList.add('btn-danger');
             }
