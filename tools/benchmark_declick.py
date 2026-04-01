@@ -1,31 +1,38 @@
 import numpy as np
 import time
 import sys
-import os
+from pathlib import Path
 
-# Add src to path for imports
-sys.path.append(os.path.abspath("src"))
+# Add src to path
+ROOT_DIR = Path(__file__).resolve().parent.parent
+SRC_DIR = str(ROOT_DIR / "src")
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
+
 from backend.utils import AudioPostProcessor
 
 def benchmark_declick(duration_sec=60, sr=24000):
-    print(f"Benchmarking de-click on {duration_sec}s of {sr}Hz audio...")
-
+    print(f"Benchmarking de-click for {duration_sec}s of audio at {sr}Hz...")
     # Generate random audio with some spikes
-    n_samples = duration_sec * sr
-    wav = np.random.normal(0, 0.1, n_samples).astype(np.float32)
+    wav = np.random.uniform(-0.1, 0.1, duration_sec * sr).astype(np.float32)
+    # Add some spikes
+    num_spikes = 1000
+    spike_indices = np.random.randint(0, len(wav), num_spikes)
+    wav[spike_indices] = np.random.choice([-1.0, 1.0], num_spikes)
 
-    # Add 100 random spikes
-    spike_indices = np.random.choice(n_samples, 100, replace=False)
-    wav[spike_indices] = np.random.choice([-1.0, 1.0], 100) * 0.9
+    start_time = time.time()
+    out = AudioPostProcessor.apply_declick(wav, sr)
+    end_time = time.time()
 
-    # Measure original implementation
-    start_time = time.perf_counter()
-    _ = AudioPostProcessor.apply_declick(wav, sr)
-    end_time = time.perf_counter()
+    duration = end_time - start_time
+    print(f"De-click took: {duration:.4f} seconds")
 
-    elapsed = end_time - start_time
-    print(f"Execution time: {elapsed*1000:.2f} ms")
-    return elapsed
+    # Check if spikes were handled (heuristic check)
+    original_max = np.max(np.abs(wav))
+    processed_max = np.max(np.abs(out))
+    print(f"Original max: {original_max:.4f}, Processed max: {processed_max:.4f}")
+
+    return duration
 
 if __name__ == "__main__":
     benchmark_declick()
