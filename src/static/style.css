@@ -295,6 +295,11 @@ input:focus, textarea:focus, select:focus {
     background: #050505;
 }
 
+*:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+}
+
 /* Empty States */
 .empty-state {
     padding: 48px;
