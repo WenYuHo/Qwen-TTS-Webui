@@ -33,7 +33,7 @@ export const AssetManager = {
                             <span style="font-size:0.8rem; color:var(--text-secondary);">${(asset.size / 1024 / 1024).toFixed(2)} MB</span>
                         </div>
                         <div style="display:flex; gap:8px;">
-                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}')" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
+                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}', this)" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
                             <button class="btn btn-danger btn-sm" onclick="deleteAsset('${asset.name}')" title="Delete ${asset.name}" aria-label="Delete ${asset.name}"><i class="fas fa-trash" aria-hidden="true"></i></button>
                         </div>
                     </div>
@@ -106,9 +106,57 @@ export const AssetManager = {
         } catch (err) { console.error("Delete error", err); }
     },
 
-    playAsset(name) {
-        const audio = new Audio(`/api/assets/download/${name}`);
-        audio.play();
+    _lastPlayBtn: null,
+    playAsset(name, btn) {
+        const player = document.getElementById('preview-player');
+        if (!player) {
+            const audio = new Audio(`/api/assets/download/${name}`);
+            audio.play();
+            return;
+        }
+
+        // Restore previous button state if needed
+        if (this._lastPlayBtn && this._lastPlayBtn !== btn) {
+            this._lastPlayBtn.innerHTML = this._lastPlayBtn.dataset.originalHtml || '<i class="fas fa-play"></i>';
+            this._lastPlayBtn.disabled = false;
+        }
+
+        const url = `/api/assets/download/${name}`;
+        this._lastUrl = url;
+        this._lastPlayBtn = btn;
+
+        if (btn) {
+            btn.dataset.originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+        }
+
+        player.src = url;
+
+        const onPlay = () => {
+            if (btn) {
+                btn.innerHTML = btn.dataset.originalHtml || '<i class="fas fa-play"></i>';
+                btn.disabled = false;
+            }
+            player.removeEventListener('playing', onPlay);
+            player.removeEventListener('error', onError);
+        };
+
+        const onError = () => {
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                btn.disabled = false;
+                setTimeout(() => {
+                    btn.innerHTML = btn.dataset.originalHtml || '<i class="fas fa-play"></i>';
+                }, 2000);
+            }
+            player.removeEventListener('playing', onPlay);
+            player.removeEventListener('error', onError);
+        };
+
+        player.addEventListener('playing', onPlay);
+        player.addEventListener('error', onError);
+        player.play().catch(onError);
     },
 
     filterAssets() {
