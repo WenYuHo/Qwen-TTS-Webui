@@ -274,29 +274,54 @@ class AudioPostProcessor:
 
     @staticmethod
     def apply_declick(wav: np.ndarray, sr: int) -> np.ndarray:
-        """Simple heuristic de-clicker: clamps spikes > 10x local RMS."""
+        """Vectorized heuristic de-clicker: clamps spikes > 10x local RMS."""
         try:
             if len(wav.shape) > 1:
+                # Handle multi-channel by recursion
                 out = np.zeros_like(wav)
                 for i in range(wav.shape[0]):
                     out[i] = AudioPostProcessor.apply_declick(wav[i], sr)
                 return out
 
-            out = wav.copy()
             window = int(sr * 0.002) # 2ms
-            if window < 2: return wav
-            
-            # Process in chunks
-            for i in range(0, len(wav), window):
-                chunk = wav[i:i+window]
-                if len(chunk) < 2: continue
-                local_rms = np.sqrt(np.mean(chunk**2)) + 1e-6
-                # Identify spikes
-                spikes = np.abs(chunk) > (local_rms * 10)
+            if window < 2 or len(wav) < 2:
+                return wav
+
+            out = wav.copy()
+            n_samples = len(wav)
+            n_full_chunks = n_samples // window
+            main_len = n_full_chunks * window
+
+            # ⚡ Bolt: Vectorized chunk processing using reshape and einsum
+            # This avoids the O(N) Python loop and significantly reduces execution time.
+            if n_full_chunks > 0:
+                # We use a view to avoid unnecessary copies
+                chunks = out[:main_len].reshape(n_full_chunks, window)
+
+                # Compute RMS per chunk: sqrt(mean(chunk**2))
+                # ⚡ Bolt: einsum('ij,ij->i', chunks, chunks) is a memory-efficient row-wise squared sum
+                # that avoids allocating a temporary intermediate array for chunks**2.
+                rms = np.sqrt(np.einsum('ij,ij->i', chunks, chunks) / window) + 1e-6
+
+                # Identify spikes: abs(chunk) > rms * 10
+                rms_expanded = rms[:, np.newaxis]
+                spikes = np.abs(chunks) > (rms_expanded * 10)
+
                 if np.any(spikes):
                     # Clamp spikes to local RMS * 3
-                    sign = np.sign(chunk[spikes])
-                    out[i:i+window][spikes] = sign * local_rms * 3
+                    # ⚡ Bolt: Use np.broadcast_to to align shapes for boolean indexing
+                    rms_broadcast = np.broadcast_to(rms_expanded, chunks.shape)
+                    chunks[spikes] = np.sign(chunks[spikes]) * rms_broadcast[spikes] * 3
+
+            # ⚡ Bolt: Handle the tail of the audio signal (remainder chunk)
+            # Process independently of main spikes to ensure tail is never ignored.
+            if n_samples - main_len >= 2:
+                remainder = out[main_len:]
+                rem_rms = np.sqrt(np.vdot(remainder, remainder) / len(remainder)) + 1e-6
+                rem_spikes = np.abs(remainder) > (rem_rms * 10)
+                if np.any(rem_spikes):
+                    remainder[rem_spikes] = np.sign(remainder[rem_spikes]) * rem_rms * 3
+
             return out
         except Exception as e:
             logger.error(f"De-click failed: {e}")
