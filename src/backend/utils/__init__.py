@@ -241,35 +241,30 @@ class AudioPostProcessor:
 
     @staticmethod
     def apply_compressor(wav: np.ndarray, sr: int, threshold_db: float = -20.0, ratio: float = 4.0) -> np.ndarray:
-        """Applies dynamic range compression."""
+        """Vectorized dynamic range compressor."""
         try:
-            # Handle stereo
-            if len(wav.shape) > 1:
-                # Apply to each channel independently for simplicity, or linked (using max)
-                # Here we do independent to keep it simple and fast
-                out = np.zeros_like(wav)
-                for i in range(wav.shape[0]):
-                    out[i] = AudioPostProcessor.apply_compressor(wav[i], sr, threshold_db, ratio)
-                return out
-
-            # Convert to dB
-            # Avoid log(0)
+            # ⚡ Bolt: Vectorize the compression logic to operate in linear space.
+            # This avoids expensive O(N) log10 and 10** (power) operations on the full array.
+            threshold_linear = 10 ** (threshold_db / 20.0)
             abs_wav = np.abs(wav)
-            db_wav = 20 * np.log10(abs_wav + 1e-10)
+            mask = abs_wav > threshold_linear
             
-            # Gain reduction
-            mask = db_wav > threshold_db
             if not np.any(mask):
                 return wav
 
-            reduction = (db_wav - threshold_db) * (1 - 1/ratio)
-            gain_db = np.zeros_like(db_wav)
-            gain_db[mask] = -reduction[mask]
+            # ⚡ Bolt: Calculate gain reduction factor once in linear space.
+            # The formula (db - thresh) * (1 - 1/ratio) in log space
+            # converts to (thresh_lin / abs_val) ** (1 - 1/ratio) in linear space.
+            exponent = 1.0 - (1.0 / ratio)
             
-            gain_linear = 10 ** (gain_db / 20.0)
-            return wav * gain_linear
+            # ⚡ Bolt: Use in-place multiplication on a copy to reduce memory allocations.
+            # NumPy handles multi-channel arrays (2, N) automatically via broadcasting.
+            out = wav.copy()
+            gain_active = (threshold_linear / abs_wav[mask]) ** exponent
+            out[mask] *= gain_active
+            return out
         except Exception as e:
-            logger.error(f"Compression failed: {e}")
+            logger.error(f"⚡ Bolt: Vectorized compressor failed: {e}")
             return wav
 
     @staticmethod
