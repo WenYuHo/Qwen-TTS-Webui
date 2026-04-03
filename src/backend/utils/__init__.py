@@ -241,35 +241,26 @@ class AudioPostProcessor:
 
     @staticmethod
     def apply_compressor(wav: np.ndarray, sr: int, threshold_db: float = -20.0, ratio: float = 4.0) -> np.ndarray:
-        """Applies dynamic range compression."""
+        """Applies vectorized dynamic range compression."""
         try:
-            # Handle stereo
-            if len(wav.shape) > 1:
-                # Apply to each channel independently for simplicity, or linked (using max)
-                # Here we do independent to keep it simple and fast
-                out = np.zeros_like(wav)
-                for i in range(wav.shape[0]):
-                    out[i] = AudioPostProcessor.apply_compressor(wav[i], sr, threshold_db, ratio)
-                return out
-
-            # Convert to dB
-            # Avoid log(0)
+            # ⚡ Bolt: Vectorize multi-channel processing to avoid recursive Python calls.
+            # This handles Mono, Stereo, and multi-channel audio in a single NumPy pass.
             abs_wav = np.abs(wav)
-            db_wav = 20 * np.log10(abs_wav + 1e-10)
+            threshold_linear = 10 ** (threshold_db / 20.0)
+            mask = abs_wav > threshold_linear
             
-            # Gain reduction
-            mask = db_wav > threshold_db
             if not np.any(mask):
                 return wav
 
-            reduction = (db_wav - threshold_db) * (1 - 1/ratio)
-            gain_db = np.zeros_like(db_wav)
-            gain_db[mask] = -reduction[mask]
+            # ⚡ Bolt: Calculate gain in linear space to avoid O(N) log10 and 10** calls on the entire array.
+            # G = (envelope / threshold_linear) ** (1/ratio - 1). We use +1e-10 for bit-parity with original log-logic.
+            gain = np.ones_like(abs_wav)
+            exponent = (1.0 / ratio) - 1.0
+            gain[mask] = ((abs_wav[mask] + 1e-10) / threshold_linear) ** exponent
             
-            gain_linear = 10 ** (gain_db / 20.0)
-            return wav * gain_linear
+            return wav * gain
         except Exception as e:
-            logger.error(f"Compression failed: {e}")
+            logger.error(f"⚡ Bolt: Optimized compression failed: {e}")
             return wav
 
     @staticmethod
