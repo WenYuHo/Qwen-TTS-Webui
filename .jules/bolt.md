@@ -96,3 +96,7 @@
 ## 2026-04-02 - [Vectorized Audio De-clicking]
 **Learning:** Replacing O(N) Python loops with NumPy vectorization in audio processing utilities (like de-clicking) yields massive performance gains (~9x speedup). Using `np.reshape` combined with `np.einsum('ij,ij->i', ...)` provides a memory-efficient way to calculate block-wise RMS without large intermediate allocations. Crucially, when using boolean indexing on a multi-dimensional array (e.g., `chunks[spikes]`), the replacement array must be explicitly broadcasted to the full shape using `np.broadcast_to` to avoid IndexErrors.
 **Action:** Prioritize vectorization for all block-based audio processing. Use `einsum` for row-wise reductions and `broadcast_to` for safe mask-based assignments.
+
+## 2026-04-03 - [Linear-Space Vectorized Compression]
+**Learning:** Performing dynamic range compression in log-space (dB) requires `np.log10` and `10**` (exponentiation) across the entire audio array, which are expensive transcendental operations. Vectorizing the operation and shifting the math to linear space allows for a single-pass gain calculation using boolean masking. This avoids transcendental overhead on samples that don't exceed the threshold and eliminates recursive Python calls for multi-channel audio.
+**Action:** When applying gain-based effects (compressors, limiters), prefer linear-space masking over full-array log transformations to minimize CPU overhead.
