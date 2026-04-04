@@ -241,35 +241,30 @@ class AudioPostProcessor:
 
     @staticmethod
     def apply_compressor(wav: np.ndarray, sr: int, threshold_db: float = -20.0, ratio: float = 4.0) -> np.ndarray:
-        """Applies dynamic range compression."""
+        """Applies dynamic range compression (Vectorized Linear-Space)."""
         try:
-            # Handle stereo
-            if len(wav.shape) > 1:
-                # Apply to each channel independently for simplicity, or linked (using max)
-                # Here we do independent to keep it simple and fast
-                out = np.zeros_like(wav)
-                for i in range(wav.shape[0]):
-                    out[i] = AudioPostProcessor.apply_compressor(wav[i], sr, threshold_db, ratio)
-                return out
-
-            # Convert to dB
-            # Avoid log(0)
-            abs_wav = np.abs(wav)
-            db_wav = 20 * np.log10(abs_wav + 1e-10)
+            # ⚡ Bolt: Convert threshold to linear space once to avoid O(N) log10 on all samples.
+            threshold_linear = 10 ** (threshold_db / 20.0)
             
-            # Gain reduction
-            mask = db_wav > threshold_db
+            # ⚡ Bolt: Identity check for early exit
+            abs_wav = np.abs(wav)
+            mask = abs_wav > threshold_linear
             if not np.any(mask):
                 return wav
 
-            reduction = (db_wav - threshold_db) * (1 - 1/ratio)
-            gain_db = np.zeros_like(db_wav)
-            gain_db[mask] = -reduction[mask]
+            # ⚡ Bolt: Vectorized multi-channel compression using linear-space math.
+            # In linear space, compression is: gain = (threshold / amplitude) ^ (1 - 1/ratio)
+            # This avoids expensive log10 and 10** operations for the entire array.
+            gain_factor = (1.0 - 1.0 / ratio)
+            out = wav.copy()
             
-            gain_linear = 10 ** (gain_db / 20.0)
-            return wav * gain_linear
+            # ⚡ Bolt: Apply gain reduction only to samples above threshold.
+            # This works for both Mono (N,) and Stereo (C, N) via NumPy broadcasting.
+            out[mask] *= (threshold_linear / abs_wav[mask]) ** gain_factor
+
+            return out
         except Exception as e:
-            logger.error(f"Compression failed: {e}")
+            logger.error(f"⚡ Bolt: Vectorized compression failed: {e}")
             return wav
 
     @staticmethod
