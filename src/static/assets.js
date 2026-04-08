@@ -33,7 +33,7 @@ export const AssetManager = {
                             <span style="font-size:0.8rem; color:var(--text-secondary);">${(asset.size / 1024 / 1024).toFixed(2)} MB</span>
                         </div>
                         <div style="display:flex; gap:8px;">
-                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}')" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
+                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}', this)" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
                             <button class="btn btn-danger btn-sm" onclick="deleteAsset('${asset.name}')" title="Delete ${asset.name}" aria-label="Delete ${asset.name}"><i class="fas fa-trash" aria-hidden="true"></i></button>
                         </div>
                     </div>
@@ -106,9 +106,34 @@ export const AssetManager = {
         } catch (err) { console.error("Delete error", err); }
     },
 
-    playAsset(name) {
-        const audio = new Audio(`/api/assets/download/${name}`);
-        audio.play();
+    playAsset(name, btn) {
+        const player = document.getElementById('preview-player');
+        if (!player) return;
+
+        let originalHtml = '';
+        if (btn) {
+            btn.disabled = true;
+            originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        }
+
+        const cleanup = () => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+            player.removeEventListener('play', cleanup);
+            player.removeEventListener('error', cleanup);
+        };
+
+        player.addEventListener('play', cleanup);
+        player.addEventListener('error', cleanup);
+
+        player.src = `/api/assets/download/${name}`;
+        player.play().catch(err => {
+            console.error("Playback failed", err);
+            cleanup();
+        });
     },
 
     filterAssets() {
