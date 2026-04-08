@@ -25,3 +25,7 @@
 ## 2026-03-20 - [Semantic Empty States for System Management]
 **Learning:** Extending the existing `.empty-state` CSS pattern to administrative views like the System Manager (Audit Log, Phoneme Editor) significantly improves visual consistency and provides clear guidance to the user. Using FontAwesome icons that match the semantic context (e.g., `fa-clipboard-list` for logs, `fa-language` for phonemes) helps with quick visual recognition and reinforces the "Technoid Brutalist" style.
 **Action:** Always check for unhandled empty states in data-heavy administrative views and implement icon-based guidance using existing UI patterns.
+
+## 2026-04-10 - [Global Component State Synchronization]
+**Learning:** When routing multiple UI triggers (e.g., Asset Library play buttons) to a single shared global component (e.g., the Global Audio Monitor), implementing a "last active" reference (like `_lastPlayBtn`) is essential. This prevents "stuck" loading states if a user clicks a new trigger before the previous asynchronous action (like `onplay`) has fired.
+**Action:** Always maintain a reference to the active async UI trigger and implement restoration logic at the start of any new request to ensure UI consistency across shared resources.
