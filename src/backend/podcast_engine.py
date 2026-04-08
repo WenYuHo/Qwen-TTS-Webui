@@ -232,7 +232,8 @@ class PodcastEngine:
             
             # Check for silence-only input
             audio_data, sr = sf.read(audio_path)
-            rms = np.sqrt(np.mean(audio_data ** 2))
+            # ⚡ Bolt: Memory-efficient RMS (no O(N) temporary array for square)
+            rms = np.sqrt(np.vdot(audio_data, audio_data) / audio_data.size)
             if rms < 0.001:  # Effectively silent
                 raise ValueError("Reference audio appears to be silent. Please provide audio with speech.")
         except sf.SoundFileError as e:
