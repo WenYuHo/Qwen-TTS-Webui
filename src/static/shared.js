@@ -1,6 +1,6 @@
 // --- Shared State & Logic for Qwen-TTS Studio ---
 
-function escapeHTML(str) {
+export function escapeHTML(str) {
     if (!str) return '';
     return String(str)
         .replace(/&/g, '&amp;')
