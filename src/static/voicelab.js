@@ -410,6 +410,8 @@ export const VoiceLabManager = {
                     window.state.voicelab.mediaRecorder.start();
                     window.state.voicelab.isRecording = true;
                     btn.innerHTML = 'STOP';
+                    btn.setAttribute('aria-label', 'Stop recording');
+                    btn.setAttribute('title', 'Stop recording');
                     btn.classList.remove('btn-danger');
                     btn.classList.add('btn-secondary');
                 } catch (err) {
@@ -419,6 +421,8 @@ export const VoiceLabManager = {
                 window.state.voicelab.mediaRecorder.stop();
                 window.state.voicelab.isRecording = false;
                 btn.innerHTML = 'RECORD';
+                btn.setAttribute('aria-label', 'Record reference audio');
+                btn.setAttribute('title', 'Record reference audio');
                 btn.classList.remove('btn-secondary');
                 btn.classList.add('btn-danger');
             }
