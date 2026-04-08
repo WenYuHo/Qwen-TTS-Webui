@@ -33,7 +33,7 @@ export const AssetManager = {
                             <span style="font-size:0.8rem; color:var(--text-secondary);">${(asset.size / 1024 / 1024).toFixed(2)} MB</span>
                         </div>
                         <div style="display:flex; gap:8px;">
-                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}')" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
+                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset(this, '${asset.name}')" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
                             <button class="btn btn-danger btn-sm" onclick="deleteAsset('${asset.name}')" title="Delete ${asset.name}" aria-label="Delete ${asset.name}"><i class="fas fa-trash" aria-hidden="true"></i></button>
                         </div>
                     </div>
@@ -106,9 +106,24 @@ export const AssetManager = {
         } catch (err) { console.error("Delete error", err); }
     },
 
-    playAsset(name) {
-        const audio = new Audio(`/api/assets/download/${name}`);
-        audio.play();
+    playAsset(btn, name) {
+        const player = document.getElementById('preview-player');
+        if (!player) return;
+
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        player.src = `/api/assets/download/${name}`;
+        player.play().then(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }).catch(err => {
+            console.error("Playback failed", err);
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+            Notification.show("Playback failed", "error");
+        });
     },
 
     filterAssets() {

@@ -2553,5 +2553,13 @@
     "metadata": {
       "segments": 1
     }
+  },
+  {
+    "timestamp": 1773260149.2616732,
+    "type": "segment_generation",
+    "status": "failed",
+    "metadata": {
+      "role": "preview"
+    }
   }
 ]
