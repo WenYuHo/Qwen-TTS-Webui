@@ -33,7 +33,7 @@ export const AssetManager = {
                             <span style="font-size:0.8rem; color:var(--text-secondary);">${(asset.size / 1024 / 1024).toFixed(2)} MB</span>
                         </div>
                         <div style="display:flex; gap:8px;">
-                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}')" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
+                            ${isAudio ? `<button class="btn btn-secondary btn-sm js-play-asset" onclick="playAsset('${asset.name}', this)" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
                             <button class="btn btn-danger btn-sm" onclick="deleteAsset('${asset.name}')" title="Delete ${asset.name}" aria-label="Delete ${asset.name}"><i class="fas fa-trash" aria-hidden="true"></i></button>
                         </div>
                     </div>
@@ -106,9 +106,37 @@ export const AssetManager = {
         } catch (err) { console.error("Delete error", err); }
     },
 
-    playAsset(name) {
-        const audio = new Audio(`/api/assets/download/${name}`);
-        audio.play();
+    playAsset(name, btn) {
+        const player = document.getElementById('preview-player');
+        if (!player) return;
+
+        // Restore last button if a new one is clicked
+        if (this._lastPlayBtn && this._lastPlayBtn !== btn) {
+            this._lastPlayBtn.innerHTML = this._lastPlayBtn.dataset.originalHtml || '<i class="fas fa-play" aria-hidden="true"></i>';
+            this._lastPlayBtn.disabled = false;
+        }
+
+        if (btn) {
+            btn.dataset.originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i>';
+            btn.disabled = true;
+            this._lastPlayBtn = btn;
+        }
+
+        player.src = `/api/assets/download/${name}`;
+
+        const restore = () => {
+            if (btn) {
+                btn.innerHTML = btn.dataset.originalHtml;
+                btn.disabled = false;
+            }
+            player.removeEventListener('play', restore);
+            player.removeEventListener('error', restore);
+        };
+
+        player.addEventListener('play', restore);
+        player.addEventListener('error', restore);
+        player.play().catch(restore);
     },
 
     filterAssets() {
