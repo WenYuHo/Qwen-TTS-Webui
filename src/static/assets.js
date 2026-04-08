@@ -113,10 +113,31 @@ export const AssetManager = {
 
     filterAssets() {
         const query = document.getElementById('asset-search').value.toLowerCase();
-        const cards = document.querySelectorAll('#asset-library-grid .asset-card');
+        const grid = document.getElementById('asset-library-grid');
+        const cards = grid.querySelectorAll('.asset-card');
+        let visibleCount = 0;
+
         cards.forEach(card => {
             const name = card.querySelector('strong')?.innerText.toLowerCase() || '';
-            card.style.display = name.includes(query) ? 'flex' : 'none';
+            const isVisible = name.includes(query);
+            card.style.display = isVisible ? 'flex' : 'none';
+            if (isVisible) visibleCount++;
         });
+
+        let empty = grid.querySelector('.empty-state-search');
+        if (visibleCount === 0 && query !== '') {
+            if (!empty) {
+                empty = document.createElement('div');
+                empty.className = 'empty-state empty-state-grid empty-state-search';
+                empty.innerHTML = `<i class="fas fa-search"></i><h3></h3>`;
+                empty.querySelector('h3').textContent = `No assets match "${query}"`;
+                grid.appendChild(empty);
+            } else {
+                empty.querySelector('h3').textContent = `No assets match "${query}"`;
+                empty.style.display = 'block';
+            }
+        } else if (empty) {
+            empty.style.display = 'none';
+        }
     }
 };
