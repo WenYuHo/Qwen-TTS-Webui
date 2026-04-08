@@ -3,6 +3,7 @@ import { TaskManager } from './task_manager.js';
 import { Notification, ErrorDisplay } from './ui_components.js';
 
 export const VoiceLabManager = {
+    _lastUrl: null,
     async testVoiceDesign(btn) {
         const promptText = document.getElementById('design-prompt').value;
         const stabilityBoost = document.getElementById('stability-boost').checked;
@@ -46,6 +47,8 @@ export const VoiceLabManager = {
             TaskManager.pollTask(task_id, (data) => {
                 const blob = new Blob([new Uint8Array(data.result)], { type: 'audio/wav' });
                 const url = URL.createObjectURL(blob);
+                if (this._lastUrl) URL.revokeObjectURL(this._lastUrl);
+                this._lastUrl = url;
                 window.state.voicelab.lastDesignedPath = url;
 
                 const player = document.getElementById('preview-player');
@@ -118,6 +121,8 @@ export const VoiceLabManager = {
             TaskManager.pollTask(task_id, (data) => {
                 const blob = new Blob([new Uint8Array(data.result)], { type: 'audio/wav' });
                 const url = URL.createObjectURL(blob);
+                if (this._lastUrl) URL.revokeObjectURL(this._lastUrl);
+                this._lastUrl = url;
 
                 const player = document.getElementById('preview-player');
                 if (player) {
@@ -183,6 +188,8 @@ export const VoiceLabManager = {
             TaskManager.pollTask(task_id, (data) => {
                 const blob = new Blob([new Uint8Array(data.result)], { type: 'audio/wav' });
                 const url = URL.createObjectURL(blob);
+                if (this._lastUrl) URL.revokeObjectURL(this._lastUrl);
+                this._lastUrl = url;
                 window.state.voicelab.lastMixedPath = url;
 
                 const player = document.getElementById('preview-player');
@@ -236,7 +243,7 @@ export const VoiceLabManager = {
                         <strong style="text-transform:uppercase;">${name}</strong>
                         <div style="font-size:0.7rem; opacity:0.7;">${meta}</div>
                     </div>
-                    <button class="btn btn-secondary btn-sm" onclick="previewVoice('preset', '${id}')" title="Preview ${name}" aria-label="Preview ${name}"><i class="fas fa-play" aria-hidden="true"></i></button>
+                    <button class="btn btn-secondary btn-sm" onclick="previewVoice('preset', '${id}', this)" title="Preview ${name}" aria-label="Preview ${name}"><i class="fas fa-play" aria-hidden="true"></i></button>
                 </div>
             </div>`;
         }).join('');
@@ -249,7 +256,7 @@ export const VoiceLabManager = {
                         <div style="font-size:0.7rem; opacity:0.5;">${v.profile.type.toUpperCase()}</div>
                     </div>
                     <div style="display:flex; gap:8px;">
-                        <button class="btn btn-secondary btn-sm" onclick="previewVoice('${v.profile.type}', '${v.profile.value}')" title="Preview ${v.name}" aria-label="Preview ${v.name}"><i class="fas fa-play" aria-hidden="true"></i></button>
+                        <button class="btn btn-secondary btn-sm" onclick="previewVoice('${v.profile.type}', '${v.profile.value}', this)" title="Preview ${v.name}" aria-label="Preview ${v.name}"><i class="fas fa-play" aria-hidden="true"></i></button>
                         <button class="btn btn-danger btn-sm" onclick="deleteVoice('${v.name}')" style="padding:4px 8px;" title="Delete ${v.name}" aria-label="Delete ${v.name}"><i class="fas fa-trash" aria-hidden="true"></i></button>
                     </div>
                 </div>
@@ -330,9 +337,17 @@ export const VoiceLabManager = {
         } catch (err) { console.error(err); }
     },
 
-    async previewVoice(type, value) {
+    async previewVoice(type, value, btn) {
         const player = document.getElementById('preview-player');
         const customText = document.getElementById('custom-preview-text')?.value?.trim() || '';
+
+        let originalHtml = null;
+        if (btn) {
+            btn.disabled = true;
+            originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        }
+
         try {
             const body = { type, value, name: "Preview" };
             if (customText) body.preview_text = customText;
@@ -341,10 +356,22 @@ export const VoiceLabManager = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
+            if (!res.ok) throw new Error("Preview failed");
             const blob = await res.blob();
-            player.src = URL.createObjectURL(blob);
+            const url = URL.createObjectURL(blob);
+            if (this._lastUrl) URL.revokeObjectURL(this._lastUrl);
+            this._lastUrl = url;
+            player.src = url;
             player.play();
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            Notification.show("Preview failed", "error");
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
     },
 
     playDesignPreview() {
