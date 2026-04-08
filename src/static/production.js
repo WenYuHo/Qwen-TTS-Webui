@@ -325,6 +325,17 @@ export const ProductionManager = {
         const container = document.getElementById('blocks-container');
         if (!container) return;
 
+        if (window.CanvasManager.blocks.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-layer-group"></i>
+                    <h3>Production Canvas is Empty</h3>
+                    <p>Go to the <strong>DRAFT</strong> tab to write your script, then click <strong>PROMOTE</strong> to generate production blocks.</p>
+                </div>
+            `;
+            return;
+        }
+
         container.innerHTML = window.CanvasManager.blocks.map(b => `
             <div class="card" style="margin-bottom:12px; padding:16px; border-left:4px solid var(--accent); background:rgba(255,255,255,0.02);">
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
