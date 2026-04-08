@@ -1,5 +1,6 @@
 // --- Asset Management Module ---
 import { Notification } from './ui_components.js';
+import { escapeHTML } from './shared.js';
 
 export const AssetManager = {
     async loadAssets() {
@@ -25,16 +26,17 @@ export const AssetManager = {
             grid.innerHTML = assets.map(asset => {
                 const isAudio = asset.name.endsWith('.mp3') || asset.name.endsWith('.wav');
                 const icon = isAudio ? 'fa-file-audio' : 'fa-file';
+                const safeName = escapeHTML(asset.name);
                 return `
                     <div class="card asset-card" style="display:flex; align-items:center; gap:16px;">
                         <div class="asset-icon" aria-hidden="true"><i class="fas ${icon}"></i></div>
                         <div style="flex:1;">
-                            <strong style="display:block; font-size:0.95rem;">${asset.name}</strong>
+                            <strong style="display:block; font-size:0.95rem;">${safeName}</strong>
                             <span style="font-size:0.8rem; color:var(--text-secondary);">${(asset.size / 1024 / 1024).toFixed(2)} MB</span>
                         </div>
                         <div style="display:flex; gap:8px;">
-                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${asset.name}')" title="Play ${asset.name}" aria-label="Play ${asset.name}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
-                            <button class="btn btn-danger btn-sm" onclick="deleteAsset('${asset.name}')" title="Delete ${asset.name}" aria-label="Delete ${asset.name}"><i class="fas fa-trash" aria-hidden="true"></i></button>
+                            ${isAudio ? `<button class="btn btn-secondary btn-sm" onclick="playAsset('${safeName}')" title="Play ${safeName}" aria-label="Play ${safeName}"><i class="fas fa-play" aria-hidden="true"></i></button>` : ''}
+                            <button class="btn btn-danger btn-sm" onclick="deleteAsset('${safeName}')" title="Delete ${safeName}" aria-label="Delete ${safeName}"><i class="fas fa-trash" aria-hidden="true"></i></button>
                         </div>
                     </div>
                 `;
@@ -107,8 +109,11 @@ export const AssetManager = {
     },
 
     playAsset(name) {
-        const audio = new Audio(`/api/assets/download/${name}`);
-        audio.play();
+        const player = document.getElementById('preview-player');
+        if (player) {
+            player.src = `/api/assets/download/${name}`;
+            player.play();
+        }
     },
 
     filterAssets() {

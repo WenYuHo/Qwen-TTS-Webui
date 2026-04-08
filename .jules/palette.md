@@ -25,3 +25,7 @@
 ## 2026-03-20 - [Semantic Empty States for System Management]
 **Learning:** Extending the existing `.empty-state` CSS pattern to administrative views like the System Manager (Audit Log, Phoneme Editor) significantly improves visual consistency and provides clear guidance to the user. Using FontAwesome icons that match the semantic context (e.g., `fa-clipboard-list` for logs, `fa-language` for phonemes) helps with quick visual recognition and reinforces the "Technoid Brutalist" style.
 **Action:** Always check for unhandled empty states in data-heavy administrative views and implement icon-based guidance using existing UI patterns.
+
+## 2026-03-22 - [Centralized Media Monitoring and XSS Protection]
+**Learning:** Unifying media playback by routing all source URLs to a single, global player element (e.g., `#preview-player`) improves the user experience by providing a consistent set of controls and a centralized "Global Monitor" for all app audio. Furthermore, when generating UI lists from user-provided or external data, importing and applying a centralized `escapeHTML` utility is essential to prevent XSS and ensure visual integrity for names containing special characters.
+**Action:** Always route media playback to the designated global player instead of creating detached `Audio` objects. Ensure `escapeHTML` is applied to all dynamic data rendered via `innerHTML`.

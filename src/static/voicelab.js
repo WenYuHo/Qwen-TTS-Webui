@@ -1,6 +1,7 @@
 // --- Voice Lab (Design, Clone, Mix) Module ---
 import { TaskManager } from './task_manager.js';
 import { Notification, ErrorDisplay } from './ui_components.js';
+import { escapeHTML } from './shared.js';
 
 export const VoiceLabManager = {
     async testVoiceDesign(btn) {
@@ -241,20 +242,22 @@ export const VoiceLabManager = {
             </div>`;
         }).join('');
 
-        html += savedVoices.map(v => `
+        html += savedVoices.map(v => {
+            const safeName = escapeHTML(v.name);
+            return `
             <div class="card voice-card" style="padding:16px; border-left:4px solid var(--text-primary);">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <strong style="text-transform:uppercase;">${v.name}</strong>
+                        <strong style="text-transform:uppercase;">${safeName}</strong>
                         <div style="font-size:0.7rem; opacity:0.5;">${v.profile.type.toUpperCase()}</div>
                     </div>
                     <div style="display:flex; gap:8px;">
-                        <button class="btn btn-secondary btn-sm" onclick="previewVoice('${v.profile.type}', '${v.profile.value}')" title="Preview ${v.name}" aria-label="Preview ${v.name}"><i class="fas fa-play" aria-hidden="true"></i></button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteVoice('${v.name}')" style="padding:4px 8px;" title="Delete ${v.name}" aria-label="Delete ${v.name}"><i class="fas fa-trash" aria-hidden="true"></i></button>
+                        <button class="btn btn-secondary btn-sm" onclick="previewVoice('${v.profile.type}', '${v.profile.value}')" title="Preview ${safeName}" aria-label="Preview ${safeName}"><i class="fas fa-play" aria-hidden="true"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteVoice('${safeName}')" style="padding:4px 8px;" title="Delete ${safeName}" aria-label="Delete ${safeName}"><i class="fas fa-trash" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
-        `).join('');
+        `; }).join('');
 
         grid.innerHTML = html;
     },
